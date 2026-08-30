@@ -1,0 +1,121 @@
+/* お知らせ・施工事例の編集フォーム
+   項目を縦 1 列に並べ、ラベルと入力欄を左右に揃える。 */
+.exone-form__row {
+	display: flex;
+	align-items: flex-start;
+	gap: 16px;
+	padding: 12px 0;
+	border-top: 1px solid #f0f0f1;
+}
+
+.exone-form__row:first-child {
+	padding-top: 0;
+	border-top: 0;
+}
+
+.exone-form__label {
+	flex: 0 0 120px;
+	padding-top: 6px;
+	font-weight: 600;
+}
+
+.exone-form__field {
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+.exone-form__field .description {
+	margin-top: 6px;
+}
+
+/* 画像（1 枚） */
+.exone-image__preview img {
+	max-width: 320px;
+	height: auto;
+}
+
+.exone-image__preview:empty::before {
+	content: "未設定";
+	display: block;
+	padding: 24px;
+	background: #f6f7f7;
+	border: 1px dashed #c3c4c7;
+	color: #646970;
+	text-align: center;
+}
+
+.exone-image__remove {
+	margin-left: 8px;
+	color: #b32d2e;
+}
+
+/* 画像（複数枚） */
+.exone-gallery__list {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px;
+	margin: 12px 0;
+	padding: 0;
+	list-style: none;
+}
+
+.exone-gallery__item {
+	position: relative;
+	width: 150px;
+	height: 150px;
+	margin: 0;
+	background: #f0f0f1;
+	border: 1px solid #dcdcde;
+	cursor: move;
+}
+
+.exone-gallery__item img {
+	display: block;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+/* 1 枚目がカードに使われることを見て分かるようにする */
+.exone-gallery__item:first-child::before {
+	content: "1 枚目";
+	position: absolute;
+	top: 0;
+	left: 0;
+	z-index: 1;
+	padding: 2px 6px;
+	background: #2271b1;
+	color: #fff;
+	font-size: 11px;
+	line-height: 1.6;
+}
+
+.exone-gallery__remove {
+	position: absolute;
+	top: 0;
+	right: 0;
+	z-index: 1;
+	width: 24px;
+	height: 24px;
+	padding: 0;
+	background: rgba(0, 0, 0, 0.6);
+	border: 0;
+	color: #fff;
+	font-size: 16px;
+	line-height: 1;
+	cursor: pointer;
+}
+
+.exone-gallery__remove:hover {
+	background: #b32d2e;
+}
+
+.exone-gallery__item.ui-sortable-helper {
+	opacity: 0.8;
+}
+
+/* タクソノミーの枠は本文列に移してあるので、縦に伸びすぎないようにする */
+#exterior-exone-works_category .categorydiv,
+#exterior-exone-works_package .categorydiv {
+	max-height: 220px;
+}

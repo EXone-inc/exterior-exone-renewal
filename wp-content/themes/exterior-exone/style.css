@@ -1,0 +1,2966 @@
+/*
+Theme Name: exterior-exone
+Theme URI: https://exterior-exone.com
+Author: エクステリア工房 EXone
+Description: エクステリア工房 EXone コーポレートサイト リニューアル用の自作テーマ。
+Version: 0.2.0
+Requires at least: 6.0
+Requires PHP: 8.0
+License: GPL-2.0-or-later
+License URI: https://www.gnu.org/licenses/gpl-2.0.html
+Text Domain: exterior-exone
+*/
+
+/* ============================================================
+   1. デザイントークン
+   Figma「【作業用】コーポレートサイト」の変数・カンプ実測値を単一の出典とする。
+   カンプ: PC 1920px (917:31) / SP 375px (917:721)
+   ここに無い値をテンプレートや個別セレクタに直接書かないこと。
+   ============================================================ */
+:root {
+	/* --- 色（Figma 変数名を継承） --- */
+	--color-white2: #fefefe;
+	--color-white3: #f5f5f5;
+	--color-gray1: #dadada;
+	--color-gray2: #d9d9d9;
+	--color-gray3: #454545;
+	--color-black1: #4d4d4d;
+	--color-black2: #1a1a1a;
+	--color-orange1: #d2832f;
+	/* SP カンプで変数化されず直値で使われている淡色 */
+	--color-off-white: #e7e7e7;
+	/* フッター背景（I917:2595;917:41） */
+	--color-black3: #0b0b0d;
+
+	/* --- 役割色 --- */
+	--color-text: var(--color-black2);
+	--color-text-invert: var(--color-white3);
+	--color-bg: var(--color-white2);
+	--color-bg-dark: var(--color-black2);
+	--color-accent: var(--color-orange1);
+	--color-border-light: var(--color-gray2);
+	--color-border-dark: var(--color-black1);
+
+	/* --- フォントファミリ --- */
+	/* 英字ディスプレイ（見出し・数値）: Antonio */
+	--font-display: "Antonio", "Arial Narrow", sans-serif;
+	/* 和文・本文: Noto Sans JP */
+	--font-base: "Noto Sans JP", "Hiragino Sans", "Yu Gothic", sans-serif;
+	/* UI ラベル（カンプ上は SF Pro。OS 標準 UI フォントに寄せる） */
+	--font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans JP", sans-serif;
+
+	/* --- フォントウェイト --- */
+	--fw-light: 300;
+	--fw-regular: 400;
+	--fw-medium: 500;
+	--fw-semibold: 600;
+	--fw-bold: 700;
+
+	/* --- タイポグラフィ ---
+	   各 clamp は「SP 375px 時の実測値 → PC 1920px 時の実測値」を通る直線。
+	   コメントの数値がカンプ実測値（左: SP / 右: PC）と対応ノード。 */
+	--fs-display-hero: clamp(4rem, 3.1505rem + 3.6246vw, 7.5rem); /* 64 → 120 : FV EXTERIOR (917:832 / 917:239) */
+	--fs-display-hero-sub: clamp(1.5rem, 1.1663rem + 1.4239vw, 2.875rem); /* 24 → 46 : FV by EXone (917:833 / 917:240) */
+	--fs-display-hero-small: calc(var(--fs-display-hero) * 0.85); /* 68/80 : 2 枚組のコピーの縮小率（参照実装 test_cp） */
+	--fs-display-lg: clamp(3rem, 2.5752rem + 1.8123vw, 4.75rem); /* 48 → 76 : 英字大見出し (917:866 / 917:131) */
+	--fs-copy-lg: clamp(1.25rem, 0.9466rem + 1.2945vw, 2.5rem); /* 20 → 40 : 和文メインコピー (917:808 / 917:38) */
+	--fs-copy-md: clamp(0.875rem, 0.784rem + 0.3883vw, 1.25rem); /* 14 → 20 : 和文サブコピー (917:867 / 917:132) */
+	--fs-body: clamp(0.75rem, 0.659rem + 0.3883vw, 1.125rem); /* 12 → 18 : 本文 (917:868 / 917:133) */
+	--fs-section-title: clamp(1rem, 0.818rem + 0.7767vw, 1.75rem); /* 16 → 28 : セクションタイトル (917:880 / 917:112) */
+	--fs-button: clamp(0.75rem, 0.6286rem + 0.5178vw, 1.25rem); /* 12 → 20 : ボタンラベル (917:871 / 97:127) */
+	--fs-nav: clamp(12px, 6.667px + 0.6944vw, 20px); /* 20 @1920 : グローバルナビ（768px 以下は非表示） */
+	--fs-footer-heading: clamp(1.125rem, 0.9126rem + 0.9061vw, 2rem); /* 18 → 32 : MENU/STORE 見出し (917:773 / I917:2595;917:68) */
+	--fs-footer-link: clamp(0.75rem, 0.6286rem + 0.5178vw, 1.25rem); /* 12 → 20 : フッターリンク (917:760 / I917:2595;917:66) */
+	--fs-sns-label: clamp(0.625rem, 0.534rem + 0.3883vw, 1rem); /* 10 → 16 : SNS ラベル (917:785 / I917:2595;917:83) */
+	--fs-copyright: clamp(0.625rem, 0.5643rem + 0.2589vw, 0.875rem); /* 10 → 14 : コピーライト (917:755 / I917:2595;917:42) */
+
+	/* --- 行間 --- */
+	--lh-tight: 1;
+	--lh-heading: 1.2;
+	--lh-base: 1.6;
+	--lh-loose: 2.22; /* PC 本文 18px / 行高 40px。SP は --lh-base */
+
+	/* --- 字間（カンプ実測。px 固定のものは PC/SP で同値） --- */
+	--ls-display-hero: -3px; /* FV 見出し（64px/120px とも -3px） */
+	--ls-display-lg: clamp(-3px, -1.757px + -0.0647vw, -2px); /* -2 → -3 */
+	--ls-copy: 0.125em; /* 和文メインコピー 40px→5px */
+	--ls-wide: 2px;     /* 和文サブコピー（PC/SP とも 2px） */
+	--ls-base: 1px;     /* 本文（PC/SP とも 1px） */
+	--ls-title: clamp(2px, 1.272px + 0.1942vw, 5px); /* 2 → 5 */
+	--ls-button: clamp(1px, 0.757px + 0.0647vw, 2px); /* 1 → 2 */
+
+	/* --- レイアウト --- */
+	--container-max: 1920px;  /* PC カンプ幅 */
+	--content-width: 1600px;  /* PC の内容基準幅（左右 160px 余白） */
+	--content-narrow: 1240px; /* 中央寄せテキストブロック */
+	--gutter: clamp(1.7188rem, -0.2913rem + 8.5761vw, 10rem); /* 27.5 → 160 : 左右余白 */
+
+	/* --- ヘッダー（917:796 / 917:2733） --- */
+	--header-height: clamp(45px, 18.544px + 7.055vw, 154px); /* 45 → 154 */
+	--header-pad-x: clamp(15.64px, 0.019px + 4.1657vw, 80px); /* 15.64 → 80 : 左余白 */
+	--header-pad-right: clamp(19.18px, 4.418px + 3.9366vw, 80px); /* 19.18 → 80 : 右余白（左とは非対称） */
+	--header-logo-top: clamp(14.82px, 8.466px + 1.6945vw, 41px); /* 14.82 → 41 : ロゴ上端 */
+	/* PC のみ。ロゴの中心とナビの行ボックス中心を揃える位置に置く。
+	   固定値で持つと幅によってロゴとナビの高さがずれるため、ロゴ側から導出する。 */
+	--header-nav-top: calc(
+		var(--header-logo-top) + (var(--header-logo-height) - var(--fs-nav) * var(--lh-heading)) / 2
+	);
+	--nav-gap: clamp(16px, 2.0833vw, 40px); /* 40 @1920 : 項目間 */
+	--logo-width: clamp(99.426px, 83.753px + 4.1795vw, 164px); /* 99.426 → 164 : ヘッダーロゴ */
+	--header-logo-height: calc(var(--logo-width) * 25 / 164); /* ロゴ SVG の縦横比 164:25 */
+	--footer-logo-width: clamp(109.571px, 96.36px + 3.5229vw, 164px); /* 109.571 → 164 : フッターロゴ */
+	--header-overlay: linear-gradient(180deg, rgba(0, 0, 0, 0.49) 0%, rgba(0, 0, 0, 0) 100%); /* PC ヘッダー背景（黒 49% → 透明） */
+	--toggle-width: 25.6px;
+	--toggle-gap: 5px;
+
+	/* --- ハンバーガーメニュー（1036:395・375px のカンプ実測。SP 専用） --- */
+	--drawer-rule-gap: 5.84px;    /* 見出し下端 159.45 → 区切り線 165.29（1024:204） */
+	--drawer-list-gap: 16.31px;   /* 区切り線 → 1 件目の上端 181.6（1024:192） */
+	--drawer-row-gap: 5.1px;      /* 行送り 24.3 − 行高 19.2 */
+	--drawer-block-gap: 29.9px;   /* MENU 最終行 297.98 → STORE 見出し 327.88（1024:207） */
+	--drawer-btn-gap: 23px;       /* STORE 最終行 489.41 → ボタン 512.41（1024:238） */
+	--drawer-btn-width: 161px;    /* 1024:238 */
+	--drawer-btn-height: 38px;    /* 1024:238 */
+	--drawer-sns-height: 51.96px; /* 1024:220 */
+	--drawer-sns-icon: 17.78px;   /* 1024:208-218 */
+	--drawer-sns-icon-gap: 5.84px;/* アイコン下端 671.64 → ラベル 677.48 */
+	--drawer-bottom-gap: 24.44px; /* SNS 下端 698.37 → パネル下端 722.81 */
+
+	/* --- FV（917:213 / 917:795・917:831・917:809） --- */
+	--fv-height: clamp(677.81px, 580.191px + 26.0317vw, 1080px); /* 677.81 → 1080 */
+	/* ピン留め中の FV の高さ。SP はヘッダーが流れの中で写真の上に積まれるので
+	   そのぶん引く（PC はヘッダーが写真に重なるため引かない）。
+	   カンプもこの状態で SP 45+677.81 / PC 1080 と、ちょうど 1 画面に収まる */
+	--fv-pin-height: calc(100vh - var(--header-height));
+	--fv-pin-top: var(--header-height); /* SP は追従ヘッダーの下に留める */
+	/* FV は画面高いっぱいで表示するため、上端基準のコピー位置は px ではなく
+	   カンプ高さに対する比率で持つ。px 固定だと画面がカンプより低いほどコピーが下がる */
+	--fv-copy-top: 38.27%; /* SP: 259.41 / 677.81（16:94 / 16:64） */
+	--fv-sub-gap: 0px; /* カンプは行送りのみで密着（917:832→917:833 / 917:239→917:240） */
+	--fv-thumbs-bottom: clamp(33.74px, 25.119px + 2.299vw, 69.26px); /* 33.74 → 69.26 */
+	--fv-thumb-size: clamp(39.818px, 28.851px + 2.9244vw, 85px); /* 39.818 → 85 : サムネイル径 */
+	--fv-thumb-gap: clamp(9.37px, 6.79px + 0.688vw, 20px); /* 9.37 → 20 */
+	--fv-ring-size: clamp(46.845px, 33.943px + 3.4405vw, 100px); /* 46.845 → 100 : アクティブリング径 */
+	--fv-ring-track: rgba(255, 255, 255, 0.22); /* 外周リングの下地 */
+	--fv-ring-stroke: 2; /* viewBox 82 に対する線幅。リング径に比例して太くなる */
+	--fv-ring-length: 251.327412; /* 2πr（r=40）。js/fv-slider.js の RING_LENGTH と揃える */
+	--fv-scrim: rgba(0, 0, 0, 0.18); /* 動画の上に薄く敷いて白文字の可読性を確保する */
+	--fv-fade: 1.2s; /* 動画のクロスフェード。js/fv-slider.js の FADE_TIME と揃える */
+	/* --- コピーの字送り。参照実装（test_cp）の PC 側の値をそのまま使う --- */
+	--fv-char-shift: 70px; /* せり上がりの移動量 */
+	--fv-char-squash: 0.72; /* 出る前の縦つぶれ */
+	--fv-char-fade: 0.25s;
+	--fv-char-move: 1s;
+	--fv-char-ease: cubic-bezier(0.16, 1, 0.22, 1);
+	--fv-char-stagger: 0.08s; /* 1 文字ごとの遅れ */
+
+	/* --- 理念 / 実績数値（917:32-33・917:254・917:279・917:294-320 / SP 917:725 ほか） ---
+	   SP と PC でカンプの内容が異なるため、PC 側の値は 768→1920 で補間する
+	   （SP カンプが存在しないため 768 の値は 1920 の約半分を採用）。 */
+	--philo-overlay: rgba(9, 9, 8, 0.7); /* 917:33 */
+	--philo-body-width: 1462.63px; /* PC: テキスト列左端〜円環図右端 */
+	--philo-text-ratio: 23.1%;     /* 338 / 1462.63 */
+	--philo-gap-ratio: 4.6%;       /* 67 / 1462.63 */
+	/* SP 側のアンカーは 16:16 Frame 5（375幅）の実値、PC 側は 917:279 ほか（1920幅） */
+	--philo-pad-block: clamp(60px, 35.39px + 6.5638vw, 161.41px); /* 60 → 161.41 */
+	--philo-eng-size: clamp(32px, 24.233px + 2.0712vw, 64px); /* 32 → 64 (16:162 / 917:283) */
+	--philo-jp-size: clamp(14px, 11.573px + 0.6472vw, 24px); /* 14 → 24 (16:161 / 917:282) */
+	--philo-sub-size: clamp(12px, 11.029px + 0.2589vw, 16px); /* 12 → 16 (16:160 / 917:281) */
+	/* カンプでは ENG / 和文 / 本文が行ボックス直付け（SP は隙間 0） */
+	--philo-eng-gap: clamp(0px, -2.947px + 0.7858vw, 12.14px); /* 0 → 12.14 */
+	--philo-jp-gap: clamp(0px, -1.942px + 0.5178vw, 8px); /* 0 → 8 */
+	--philo-eng-ls: clamp(-3px, -0.515px + -0.1295vw, -1px); /* -1 → -3 */
+	--philo-jp-ls: 3px; /* SP 14px / PC 24px とも 3px */
+	--philo-sub-ls: clamp(1px, 0.757px + 0.0647vw, 2px); /* 1 → 2 */
+	/* --- SP（768px 以下）だけで使う縦積み用の値。SP の上限 768px で PC 側の値へ繋ぐ --- */
+	--philo-sp-item-gap: clamp(30px, 0.41px + 7.89vw, 61px); /* 30 @375 → 61 @768（PC の罫線余白へ繋ぐ） */
+	--philo-sp-text-indent: clamp(0px, 38.5px + -5.013vw, 19.71px); /* 19.71 @375 → 0 @768 */
+	--philo-sp-diagram-gap: clamp(54.19px, 0.72px + 14.26vw, 110px); /* 54.19 @375 → 110 @768 */
+	--philo-sp-diagram-bleed: clamp(0px, 21.21px + -2.761vw, 10.855px); /* 10.855 @375 → 0 @768 : 円環図は inner より広い */
+	--philo-sp-stats-gap: clamp(50.41px, 2.67px + 12.73vw, 100px); /* 50.41 @375 → 100 @768 */
+	/* --- 円環図。既定は SP（16:171）の実測値、PC は 16:535 に差し替える --- */
+	--diagram-ratio: 341.71 / 259.97;
+	--diagram-ring-x: 12.742%;
+	--diagram-ring-w: 74.513%;
+	--diagram-ring-color: #8b8b8b; /* SP 16:187 の弧の線色。PC は #e7e7e7 に差し替える */
+	--diagram-ring-stroke: 1;      /* viewBox 255.598 に対する線幅 */
+	--diagram-copy-size: 2.927cqw; /* SP 10px / 341.71 */
+	--diagram-copy-lh: 1.6;
+	--diagram-copy-ls: 0.1em;
+	--diagram-float: 2.4cqw;       /* 浮遊の振れ幅（上下それぞれ）*/
+	--diagram-float-ease: ease-in-out;
+	--philo-rule-gap-before: clamp(32px, 10.087px + 2.8533vw, 64.87px); /* 32 → 64.87 */
+	--philo-rule-gap-after: clamp(27px, 8.707px + 2.3819vw, 54.44px); /* 27 → 54.44 */
+	--stats-band-gap: clamp(61px, 20.273px + 5.3038vw, 122.18px); /* 61 → 122.18 : 円環図下端→数字で見る（PC） */
+	/* 「数字で見る」+ ロゴの見出し。PC / SP とも同じ作りなので 375→1920 で 1 本にする */
+	--stats-heading-size: clamp(16px, 12.12px + 1.0356vw, 32px); /* 16 → 32 (16:158 / 16:565) */
+	--stats-logo-width: clamp(97.276px, 77.19px + 5.3569vw, 180.04px); /* 97.276 → 180.04 (16:157 / 16:564) */
+	--stats-heading-gap: clamp(3.98px, 2.155px + 0.4867vw, 11.5px); /* 見出し文字→ロゴ */
+	--stats-heading-list-gap: clamp(23.71px, 16.87px + 1.8252vw, 51.91px); /* 見出し下端→数値列 */
+	--stats-value-gap: clamp(3.06px, 1.86px + 0.3197vw, 8px); /* 数値→単位 */
+	/* PC 専用（横 1 列） */
+	--stats-label-size: clamp(14px, 7.333px + 0.8681vw, 24px); /* 14 → 24 (16:567) */
+	--stats-number-size: clamp(48px, 16px + 4.1667vw, 96px); /* 48 → 96 (16:569) */
+	--stats-unit-size: clamp(14px, 7.333px + 0.8681vw, 24px); /* 14 → 24 (16:570) */
+	--stats-icon-height: clamp(46px, 14.873px + 4.053vw, 92.69px); /* 46 → 92.69 (16:571) */
+	--stats-note-size: 0.6667em; /* 項目名に対する補足の比率 16/24（16:576 / 16:575） */
+	--stats-note-gap: 0.366em; /* 補足自身に対する項目名との間隔 5.85/16 */
+	--stats-item-gap: clamp(30px, 9.8px + 2.6302vw, 60.3px); /* 30 → 60.3 */
+	/* SP 専用（2x2 の円バッジ。カンプ 16:194-222 の 375 実測）。
+	   上限は 768px 時点の値で、そこで切り替わる PC 側（数値 48px）と地続きになるよう決めてある */
+	--stats-badge-size: clamp(141.512px, 74.25px + 17.936vw, 212px); /* 141.512 @375 (16:196) */
+	--stats-badge-col-gap: clamp(18.9px, 9.93px + 2.392vw, 28.3px);
+	--stats-badge-row-gap: clamp(14.11px, 7.4px + 1.789vw, 21.14px);
+	--stats-badge-scrim: rgba(0, 0, 0, 0.5); /* 16:196 Ellipse 110 の塗り */
+	--stats-badge-icon-height: clamp(39.393px, 33.09px + 1.681vw, 46px); /* 39.393 @375 (16:201) */
+	--stats-badge-icon-gap: clamp(7.8px, 4.08px + 0.9924vw, 11.7px); /* アイコン下端→項目名 */
+	--stats-sp-number: clamp(32px, 16.73px + 4.071vw, 48px); /* 32 @375 (16:199) */
+	--stats-sp-unit: clamp(12px, 10.09px + 0.509vw, 14px); /* 12 @375 (16:200) */
+	--stats-sp-label: 14px; /* PC と同値 (16:198 / 16:567) */
+
+	/* --- DX EXPERIENCE（917:172-212 / SP 917:799-848） ---
+	   PC 側は 768→1920 で補間（SP カンプは別レイアウトのため）。 */
+	--dx-pad-top: clamp(60px, 30.38px + 3.8568vw, 104.43px); /* 60 → 104.43 */
+	--dx-pad-bottom: clamp(64px, 31.727px + 4.2023vw, 112.41px); /* 64 → 112.41 */
+	--dx-title-size: clamp(66px, 36.667px + 3.8194vw, 110px); /* 66 → 110 (917:212) */
+	--dx-copy-size: clamp(20px, 12px + 1.0417vw, 32px); /* 20 → 32 (917:211) */
+	--dx-copy-offset: clamp(20px, 10.667px + 1.2153vw, 34px); /* 20 → 34 */
+	--dx-head-gap: clamp(30px, 16.053px + 1.816vw, 50.92px); /* 30 → 50.92 */
+	--dx-steps-top: clamp(100px, 49.893px + 6.5243vw, 175.16px); /* 100 → 175.16 */
+	--dx-step-gap: clamp(30px, 17.667px + 1.6059vw, 48.5px); /* 30 → 48.5 */
+	--dx-step-height: clamp(120px, 81.333px + 5.0347vw, 178px); /* 120 → 178 : ステップ 1 件の高さ（タグは下端揃え） */
+	--dx-media-offset: clamp(5px, 2.333px + 0.3472vw, 9px); /* 5 → 9 : ステップ上端に対する画像の下げ幅 */
+	--dx-btn-offset: clamp(4px, 1.333px + 0.3472vw, 8px); /* 4 → 8 : バー上端に対するボタンの下げ幅 */
+	--dx-num-size: clamp(12px, 9.333px + 0.3472vw, 16px); /* 12 → 16 (917:198) */
+	--dx-step-title-size: clamp(16px, 12px + 0.5208vw, 22px); /* 16 → 22 (917:197) */
+	--dx-step-desc-size: clamp(12px, 10.667px + 0.1736vw, 14px); /* 12 → 14 (917:196) */
+	--dx-tag-size: clamp(12px, 10.667px + 0.1736vw, 14px); /* 12 → 14 (917:192) */
+	--dx-tag-height: clamp(28px, 24px + 0.5208vw, 34px); /* 28 → 34 */
+	--dx-indicator-w: clamp(26px, 18.667px + 0.9549vw, 37px); /* 26 → 37 (917:200) */
+	--dx-dot: clamp(18px, 12.667px + 0.6944vw, 26px); /* 18 → 26 */
+	--dx-dot-active: clamp(26px, 18.667px + 0.9549vw, 37px); /* 26 → 37 */
+	--dx-indicator-gap: clamp(22px, 15.993px + 0.7821vw, 31.01px); /* 22 → 31.01 */
+	--dx-bar-w: clamp(54px, 38.667px + 1.9965vw, 77px); /* 54 → 77 (917:207) */
+	--dx-bar-h: clamp(4px, 2.667px + 0.1736vw, 6px); /* 4 → 6 */
+	--dx-media-foot-gap: clamp(20px, 12px + 1.0417vw, 32px); /* 20 → 32 */
+	--dx-inner-width: 1573.01px; /* 917:173 */
+	--dx-media-ratio: 320 / 302.41; /* SP 917:840。PC は 917:199 の 1103/575 に上書き */
+	/* --- ステップ送り（参照実装 test.html の値をそのまま使う） --- */
+	--dx-panel-fade: 0.55s;
+	--dx-panel-move: 0.75s;
+	--dx-panel-ease: cubic-bezier(0.22, 1, 0.36, 1);
+	--dx-panel-shift: 28px; /* 入れ替わるビジュアルの横移動量 */
+	--dx-panel-scale: 0.985; /* 出る前の縮み */
+	--dx-scroll-screens: 4; /* ピン留め区間の長さ。3 ステップぶん + 1 画面 */
+	/* VR ショールーム（表示テスト用） */
+	--vr-height: clamp(420px, 56.25vw, 700px);
+	--vr-pad-block: clamp(48px, 24px + 2.5vw, 96px);
+	/* SP はヘッダーが追従するぶんだけ下げ、その下を埋めきる */
+	--dx-pin-top: var(--header-height);
+	--dx-pin-height: calc(100vh - var(--header-height));
+	--dx-media-width: 70.12%;     /* 1103 / 1573.01 */
+	/* SP 専用（カンプ 375 実測） */
+	--dx-sp-pad-top: 47.36px;
+	--dx-sp-pad-bottom: 78.86px;
+	--dx-sp-title-size: 48px;
+	--dx-sp-copy-size: 14px;
+	--dx-sp-copy-gap: 8.18px;
+	--dx-sp-media-gap: 28.6px;
+	--dx-sp-bars-gap: 23.93px;
+	--dx-sp-bar-w: 53.996px;
+	--dx-sp-bar-h: 4.207px;
+	--dx-sp-bar-gap: 4.9px;
+	--dx-sp-steps-gap: 19.72px;
+	--dx-sp-indicator-w: 20.12px;
+	--dx-sp-indicator-gap: 17.89px;
+	--dx-sp-dot: 15px;
+	--dx-sp-dot-active: 20.12px;
+	--dx-sp-dot-pitch: 56.25px;
+
+	/* --- コピー / PLANS（917:35-38・917:124-141 / SP 917:747 ほか） --- */
+	--copy-height: clamp(722.81px, 636.113px + 23.1191vw, 1080px); /* 722.81 → 1080 */
+	--copy-overlay: rgba(0, 0, 0, 0.3); /* 917:37。PC のみ */
+	--plans-cards-gap: clamp(23.4px, 8.531px + 3.965vw, 84.66px); /* 23.4 → 84.66 */
+	--plans-card-size: clamp(256px, 235.126px + 5.5663vw, 342px); /* 256 → 342 */
+	--plans-card-gap: clamp(14.5px, 10.167px + 1.1553vw, 32.35px); /* 14.5 → 32.35 */
+	--plans-card-name-size: clamp(14px, 12.544px + 0.3883vw, 20px); /* 14 → 20 */
+	--plans-card-eng-size: clamp(48px, 44.117px + 1.0356vw, 64px); /* 48 → 64 */
+	--plans-card-name-top: clamp(21.19px, 20.942px + 0.066vw, 22.21px); /* 21.19 → 22.21 */
+	--plans-card-eng-top: clamp(38.19px, 36.243px + 0.5191vw, 46.21px); /* 38.19 → 46.21 */
+	--plans-card-radius: 10px; /* 917:145 */
+	--plans-card-shadow: 0 6px 16px rgba(0, 0, 0, 0.12); /* 917:145 */
+	--plans-card-shadow-hover: 0 12px 28px rgba(0, 0, 0, 0.18);
+	--plans-card-lift: -6px; /* 選択中のカードの持ち上げ量 */
+	--plans-card-lift-hover: -12px; /* ホバー中の持ち上げ量（選択中より深くする） */
+	--plans-package-gap: clamp(37.27px, 32.268px + 1.334vw, 57.88px); /* 37.27 → 57.88 : SP はテキスト上端、PC は画像上端まで */
+	--plans-eng-size: clamp(48px, 41.204px + 1.8123vw, 76px); /* 48 → 76 */
+	--plans-jp-size: clamp(14px, 12.544px + 0.3883vw, 20px); /* 14 → 20 */
+	--plans-desc-size: clamp(12px, 10.544px + 0.3883vw, 18px); /* 12 → 18 */
+	--plans-desc-lh: 1.6; /* PC では 2.222（行高 40px）に上書き */
+	--plans-jp-to-eng: clamp(-8px, -4.769px + -0.1683vw, -5.4px); /* 和名 top から英名 top まで SP 17 / PC 24（行box が重なる） */
+	--plans-eng-to-desc: clamp(14.76px, 12.032px + 0.7275vw, 26px); /* 14.76 → 26 */
+	--plans-desc-to-btn: clamp(13.96px, 2.785px + 2.9799vw, 60px); /* 13.96 → 60 */
+	/* バナーの最低高さ（917:861-863 / 917:125-128）。
+	   余白は上下 padding が作るが、SP は文字量が少なく帯が潰れるため下限を置く。 */
+	--plans-highend-min-height: clamp(498.88px, 458.03px + 10.8932vw, 667.18px); /* 498.88 → 667.18 */
+	--plans-highend-indent: clamp(0px, -12.828px + 3.4207vw, 52.85px); /* 0 → 52.85 : 左余白からのテキスト字下げ（917:129） */
+	--plans-package-img-w: 56.25%; /* PC 900 / 1600 */
+	--plans-highend-img-w: 60.48%; /* PC 1161.19 / 1920 */
+
+	/* --- WORKS / NEWS / RECRUIT（917:85-123 / SP 917:788-884） --- */
+	--works-bg: linear-gradient(90deg, #1a1a1a 0.481%, #4d4d4d 50%, #1a1a1a 100%); /* 917:114 */
+	--works-cards-gap: clamp(16.8px, 4.46px + 3.2906vw, 67.64px); /* 16.8 → 67.64 : 見出し下→カード（見出しの行box差を補正） */
+	--works-card-w: clamp(262.39px, 246.97px + 4.112vw, 325.92px); /* 262.39 → 325.92 */
+	--works-card-h: clamp(317.96px, 299.273px + 4.9832vw, 394.95px); /* 317.96 → 394.95 */
+	--works-list-h: clamp(317.96px, 257.829px + 16.035vw, 565.7px); /* 317.96 → 565.7 : カード群の高さ（917:118） */
+	--works-text-gap: clamp(-110.75px, 58.508px + -8.8155vw, 25.45px); /* 25.45 → -110.75 : PC はカード群に説明文が重なる */
+	--works-btn-gap: clamp(25.46px, 15.715px + 2.5987vw, 65.61px); /* 25.46 → 65.61 : 説明文下→ボタン */
+	--works-desc-size: clamp(12px, 11.515px + 0.1294vw, 14px); /* 12 → 14 : 917:876 / 917:117 */
+	--works-desc-w: clamp(320px, 263.91px + 14.9572vw, 551.089px); /* 320 → 551.09 : 説明文の幅（917:876 / 917:117） */
+	--works-desc-lh: 1.583; /* SP 19/12。PC は 2.5（917:117）に上書き */
+	--news-cards-gap: clamp(23.4px, 14.468px + 2.3819vw, 60.2px); /* 23.4 → 60.2 */
+	--news-card-w: clamp(262.39px, 235.543px + 7.1592vw, 373px); /* 262.39 → 373 */
+	--news-card-img-h: clamp(167.41px, 153.189px + 3.7922vw, 226px); /* 167.41 → 226 */
+	--news-card-gap: clamp(19.09px, 14.925px + 1.1107vw, 36.25px); /* 19.09 → 36.25 */
+	--news-title-gap: clamp(7px, 11.089px + -0.2129vw, 10.29px); /* 10.29 → 7 */
+	--news-title-size: clamp(12px, 10.544px + 0.3883vw, 18px); /* 12 → 18 */
+	--news-title-lh: 1.833; /* SP 22/12。PC は 2.5（45/18）に上書き */
+	--news-btn-gap: clamp(0px, -15.842px + 4.2246vw, 65.27px); /* 0 → 65.27 */
+	--recruit-overlay: rgba(0, 0, 0, 0.5); /* 917:88 */
+	--recruit-copy-gap: clamp(22.41px, 13.689px + 2.3256vw, 58.34px); /* 22.41 → 58.34 */
+	--recruit-copy-size: clamp(18px, 13.631px + 1.165vw, 36px); /* 18 → 36 */
+	--recruit-sub-gap: clamp(18.4px, 17.252px + 0.3061vw, 23.13px); /* 18.4 → 23.13 */
+	--recruit-sub-size: clamp(12px, 10.544px + 0.3883vw, 18px); /* 12 → 18 */
+	--recruit-sub-lh: 1.583; /* SP 19/12。PC は 2（36/18）に上書き */
+	--recruit-btn-gap: clamp(30px, 22.769px + 1.9282vw, 59.79px); /* 30 → 59.79 */
+
+	/* --- フッター（917:2595 / 917:754-787） --- */
+	--footer-logo-gap: clamp(30px, 22.718px + 1.9417vw, 60px); /* 30 → 60 : ロゴ下端→SNS ブロック上端 */
+	--footer-sns-gap: clamp(30px, 24.903px + 1.3592vw, 51px); /* 30 → 51 : SNS 下端→見出し / ブロック間 */
+	--footer-menu-gap: clamp(59.8px, 45.188px + 3.8964vw, 120px); /* 59.8 → 120 : リスト→コピーライト */
+	--footer-menus-width: 1200px; /* PC カンプの MENU+STORE 全幅（553*2+94） */
+	--footer-block-width: clamp(320px, 263.447px + 15.0809vw, 553px); /* 320 → 553 : SP ブロック幅 */
+	--footer-block-gap: clamp(40px, 4.8958vw, 94px); /* 94 @1920 : MENU と STORE の間 */
+	--footer-col-ratio: 50.3%; /* SP 161/320。PC は 46.56%（553 基準）をメディアクエリで上書き */
+	--footer-row-gap: clamp(5.09px, 3.898px + 0.3178vw, 10px); /* 5.09 → 10 : 行間 */
+	--footer-list-indent: 0%; /* SP 0。PC は 3.44%（19/553）をメディアクエリで上書き */
+	--footer-rule-gap: clamp(7.2px, 4.433px + 0.7379vw, 18.6px); /* 7.2 → 18.6 : 見出し→区切り線 */
+	--footer-rule-list-gap: clamp(16.4px, 12.856px + 0.945vw, 31px); /* 16.4 → 31 : 区切り線→リスト */
+	--sns-width: clamp(321px, 189.932px + 34.9515vw, 861px); /* 321 → 861 */
+	--sns-icon-size: clamp(17.78px, 12.144px + 1.5029vw, 41px); /* 17.78 → 41 */
+	--sns-icon-gap: clamp(5.8px, 4.538px + 0.3366vw, 11px); /* 5.8 → 11 */
+	--sns-divider-height: clamp(51.96px, 45.64px + 1.6854vw, 78px); /* 51.96 → 78 */
+
+	/* --- 余白スケール --- */
+	--space-2xs: clamp(0.25rem, 0.214rem + 0.15vw, 0.5rem);
+	--space-xs: clamp(0.5rem, 0.429rem + 0.3vw, 1rem);
+	--space-sm: clamp(0.75rem, 0.536rem + 0.91vw, 1.5rem);
+	--space-md: clamp(1rem, 0.571rem + 1.83vw, 2rem);
+	--space-lg: clamp(1.5rem, 0.857rem + 2.74vw, 3rem);
+	--space-xl: clamp(2rem, 1.143rem + 3.66vw, 4rem);
+	--space-2xl: clamp(3rem, 1.714rem + 5.49vw, 6rem);
+	--space-3xl: clamp(4rem, 2.286rem + 7.31vw, 8rem);
+	/* セクション上下の標準パディング。
+	   PLANS / ハイエンド / WORKS / NEWS / フッターはカンプで 1920px 時 160px。
+	   実測は 159.73〜160.34 とばらつくが、いずれも 1px 未満の測定誤差なので
+	   デザイン指定どおり 160px に丸めて 1 本で共有する。 */
+	--section-padding-y: clamp(60px, 35.728px + 6.4725vw, 160px); /* 60 → 160 */
+
+	/* --- 角丸 --- */
+	--radius-pill: 32px;
+	--radius-md: 8px;
+	--radius-lg: 16px;
+
+	/* --- ボタン寸法（SP 136x32.85 → PC 265x64） --- */
+	--btn-width: clamp(8.5013rem, 6.5446rem + 8.3482vw, 16.5625rem);
+	--btn-height: clamp(2.0531rem, 1.5806rem + 2.0162vw, 4rem);
+
+	/* --- その他 --- */
+	--border-thin: 1px;
+	--transition-base: 0.3s ease;
+
+	/* --- スクロール連動アニメーション --- */
+	--reveal-duration: 0.9s;
+	--reveal-ease: cubic-bezier(0.16, 1, 0.3, 1);
+	--reveal-shift: 32px; /* 下からフェードインする移動量 */
+	--z-header: 100;
+	--z-overlay: 200;
+}
+
+/* PC はヘッダーが FV に重なり、カンプ高さも違う */
+@media (min-width: 769px) {
+	:root {
+		--fv-pin-height: 100vh;
+		--fv-pin-top: 0px; /* PC はヘッダーが写真に重なり追従もしない */
+		--dx-pin-top: 0px;
+		--dx-pin-height: 100vh;
+		--fv-copy-top: 40.54%; /* PC: 437.88 / 1080（1:306 / 1:280） */
+	}
+}
+
+/* ============================================================
+   2. リセット / ベース
+   ============================================================ */
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+html {
+	-webkit-text-size-adjust: 100%;
+	scroll-behavior: smooth;
+}
+
+body {
+	margin: 0;
+	background: var(--color-bg);
+	color: var(--color-text);
+	font-family: var(--font-base);
+	font-size: var(--fs-body);
+	font-weight: var(--fw-regular);
+	line-height: var(--lh-base);
+	letter-spacing: var(--ls-base);
+	-webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4,
+p,
+figure,
+blockquote,
+dl,
+dd {
+	margin: 0;
+}
+
+ul,
+ol {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+a {
+	color: inherit;
+	text-decoration: none;
+	transition: opacity var(--transition-base);
+}
+
+a:hover {
+	opacity: 0.7;
+}
+
+img,
+svg,
+video {
+	display: block;
+	max-width: 100%;
+	height: auto;
+}
+
+button {
+	appearance: none;
+	background: none;
+	border: none;
+	padding: 0;
+	color: inherit;
+	font: inherit;
+	cursor: pointer;
+}
+
+/* フォーカスはキーボード操作時のみ可視化 */
+:focus-visible {
+	outline: 2px solid var(--color-accent);
+	outline-offset: 2px;
+}
+
+/* 改行位置の出し分け（カンプは PC と SP で改行箇所が異なる） */
+.u-br-pc {
+	display: none;
+}
+
+@media (min-width: 769px) {
+	.u-br-pc {
+		display: inline;
+	}
+
+	.u-br-sp {
+		display: none;
+	}
+}
+
+/* ハンバーガーメニューを開いている間は背面をスクロールさせない */
+body.is-drawer-open {
+	overflow: hidden;
+}
+
+/* --- スクロール連動アニメーション（js/scroll-reveal.js） --- */
+[data-reveal] {
+	opacity: 0;
+	transform: translateY(var(--reveal-shift));
+	transition:
+		opacity var(--reveal-duration) var(--reveal-ease) var(--reveal-delay, 0s),
+		transform var(--reveal-duration) var(--reveal-ease) var(--reveal-delay, 0s);
+	will-change: opacity, transform;
+}
+
+[data-reveal="scale"] {
+	transform: scale(0.94);
+}
+
+[data-reveal].is-inview {
+	opacity: 1;
+	transform: none;
+}
+
+/* 動きを減らす設定では最初から最終状態にする */
+@media (prefers-reduced-motion: reduce) {
+	[data-reveal] {
+		opacity: 1;
+		transform: none;
+		transition: none;
+	}
+
+	/* 円環図は浮かせない */
+	.p-diagram__icon,
+	.p-diagram__copy {
+		animation: none;
+	}
+
+	/* FV の字送りは動かさない。出ているコピーだけそのまま置く */
+	.p-fv__char {
+		transform: none;
+		transition: none;
+		transition-delay: 0s;
+	}
+
+	.p-fv__text.is-active .p-fv__char {
+		transform: none;
+		transition-delay: 0s;
+	}
+}
+
+/* 文節をひとかたまりにして、カンプに無い位置で折り返させない */
+.u-nobr {
+	display: inline-block;
+}
+
+/* スクリーンリーダー専用テキスト */
+.screen-reader-text {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	margin: -1px;
+	padding: 0;
+	overflow: hidden;
+	clip-path: inset(50%);
+	white-space: nowrap;
+	border: 0;
+}
+
+/* ============================================================
+   3. レイアウト共通
+   ============================================================ */
+.l-container {
+	width: 100%;
+	max-width: var(--container-max);
+	margin-inline: auto;
+}
+
+.l-inner {
+	width: min(100% - var(--gutter) * 2, var(--content-width));
+	margin-inline: auto;
+}
+
+.l-inner--narrow {
+	width: min(100% - var(--gutter) * 2, var(--content-narrow));
+	margin-inline: auto;
+}
+
+.l-section {
+	padding-block: var(--section-padding-y);
+}
+
+/* 暗転背景のセクション */
+.l-section--dark {
+	background: var(--color-bg-dark);
+	color: var(--color-text-invert);
+}
+
+/* ============================================================
+   4. 共通コンポーネント
+   ============================================================ */
+
+/* --- セクションタイトル（PC 28px / SP 16px・中央寄せ） --- */
+.c-section-title {
+	font-family: var(--font-ui);
+	font-size: var(--fs-section-title);
+	font-weight: var(--fw-semibold);
+	line-height: var(--lh-base);
+	letter-spacing: var(--ls-title);
+	text-align: center;
+	/* letter-spacing で右にずれる分を相殺して光学中央に置く */
+	text-indent: var(--ls-title);
+}
+
+/* --- 英字ディスプレイ見出し（Antonio） --- */
+.c-display {
+	font-family: var(--font-display);
+	font-weight: var(--fw-semibold);
+	/* カンプは leading normal（Antonio 既定の約 1.29）。1.2 固定にすると全体が上にずれる */
+	line-height: normal;
+	letter-spacing: var(--ls-display-lg);
+}
+
+.c-display--hero {
+	font-size: var(--fs-display-hero);
+	letter-spacing: var(--ls-display-hero);
+}
+
+.c-display--hero-sub {
+	font-size: var(--fs-display-hero-sub);
+	font-weight: var(--fw-light);
+	letter-spacing: normal;
+}
+
+.c-display--lg {
+	font-size: var(--fs-display-lg);
+}
+
+/* --- 和文コピー --- */
+.c-copy {
+	font-size: var(--fs-copy-lg);
+	font-weight: var(--fw-bold);
+	line-height: var(--lh-base);
+	letter-spacing: var(--ls-copy);
+}
+
+.c-copy--sub {
+	font-size: var(--fs-copy-md);
+	font-weight: var(--fw-medium);
+	letter-spacing: var(--ls-wide);
+}
+
+/* --- ボタン（VIEW MORE。PC 265x64 / SP 136x33・角丸 32px） --- */
+.c-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: var(--btn-width);
+	height: var(--btn-height);
+	border: var(--border-thin) solid currentColor;
+	border-radius: var(--radius-pill);
+	font-family: var(--font-ui);
+	font-size: var(--fs-button);
+	font-weight: var(--fw-medium);
+	line-height: var(--lh-base);
+	letter-spacing: var(--ls-button);
+	text-indent: var(--ls-button);
+	transition: background-color var(--transition-base), color var(--transition-base), opacity var(--transition-base);
+}
+
+/* 暗背景の上に置く白ボタン */
+.c-btn--white {
+	border-color: var(--color-gray2);
+	color: var(--color-white3);
+}
+
+.c-btn--white:hover {
+	background-color: var(--color-white3);
+	color: var(--color-black2);
+	opacity: 1;
+}
+
+/* 明背景の上に置く黒ボタン */
+.c-btn--black {
+	border-color: var(--color-black1);
+	color: var(--color-black2);
+}
+
+.c-btn--black:hover {
+	background-color: var(--color-black2);
+	color: var(--color-white3);
+	opacity: 1;
+}
+
+/* --- 画像を敷き詰めるラッパ（比率固定・トリミング） --- */
+.c-media {
+	position: relative;
+	overflow: hidden;
+}
+
+.c-media > img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+/* ============================================================
+   5. セクション別スタイル
+   S1 以降、各スプリントでここに追記する。
+   ============================================================ */
+
+/* --- ヘッダー（917:796 / 917:2733） ---
+   PC: FV の上に重なる半透明グラデーション。SP: #1a1a1a のバー。
+   SP はスクロール中も画面上端に留める。fixed ではなく sticky にしてあるのは、
+   流れの中の高さを残したまま追従させたいため（fixed だと本文を押し下げる
+   padding が別途必要になり、カンプの「ヘッダーの下から FV が始まる」形が崩れる）。 */
+.p-header {
+	position: sticky;
+	top: 0;
+	z-index: var(--z-header);
+	height: var(--header-height);
+	background: var(--color-black2);
+	transition: background var(--transition-base);
+}
+
+.p-header__inner {
+	position: relative;
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	height: 100%;
+	padding-left: var(--header-pad-x);
+	padding-right: var(--header-pad-right);
+}
+
+.p-header__logo {
+	margin-top: var(--header-logo-top);
+	line-height: 0;
+}
+
+.p-header__logo img {
+	width: var(--logo-width);
+	height: auto;
+}
+
+/* SP: ハンバーガー（開閉はデザイン未支給のため S1 では見た目のみ） */
+.p-header__toggle {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	gap: var(--toggle-gap);
+	width: var(--toggle-width);
+	height: 100%;
+}
+
+.p-header__toggle-bar {
+	display: block;
+	width: 100%;
+	height: 1px;
+	background: var(--color-white2);
+}
+
+/* グローバルナビは PC のみ */
+.p-gnav {
+	display: none;
+}
+
+.p-gnav__list {
+	display: flex;
+	gap: var(--nav-gap);
+	font-family: var(--font-ui);
+	font-size: var(--fs-nav);
+	font-weight: var(--fw-regular);
+	line-height: var(--lh-heading);
+	letter-spacing: normal;
+	color: var(--color-white2);
+}
+
+@media (min-width: 769px) {
+	.p-header__toggle {
+		display: none;
+	}
+
+	.p-gnav {
+		display: block;
+		margin-top: var(--header-nav-top);
+	}
+
+	/* FV から始まるページはヘッダーを写真に重ねる
+	   （カンプ TOP 917:213 / 企業情報 393:546・393:740）。
+	   重ねたまま追従させるので sticky ではなく fixed。黒帯のページはベースの
+	   sticky がそのまま効くため、ここでの上書きは不要。 */
+	.has-fv-header .p-header {
+		position: fixed;
+		inset: 0 0 auto;
+		background: var(--header-overlay);
+	}
+
+	/* 写真の区間を抜けたら SP と同じ不透明な帯にする。
+	   グラデーションは写真に重ねる前提の色で、白背景のセクションの上では
+	   灰色の帯になって読みづらいため（js/header-scroll.js が .is-solid を付ける）。 */
+	.has-fv-header .p-header.is-solid {
+		background: var(--color-black2);
+	}
+}
+
+/* --- ハンバーガーメニュー（1036:395・SP のみ） ---
+   内容はフッターの MENU / STORE / SNS と同じで、
+   「お問い合わせ」だけがボタンとして独立する（1024:238）。 */
+.p-drawer {
+	position: fixed;
+	inset: 0;
+	z-index: var(--z-overlay);
+	display: flex;
+	flex-direction: column;
+	overflow-y: auto;
+	background: var(--color-black2);
+	color: var(--color-white2);
+	visibility: hidden;
+	opacity: 0;
+	/* visibility は遅延だけを切り替える。開いた瞬間から中身をフォーカス可能にし、
+	   閉じるときはフェードアウト後に隠す。 */
+	transition: opacity var(--transition-base), visibility 0s var(--transition-base);
+}
+
+.p-drawer.is-open {
+	visibility: visible;
+	opacity: 1;
+	transition: opacity var(--transition-base), visibility 0s;
+}
+
+/* 上部バーはサイトヘッダーと同じ位置・大きさに合わせる（1024:227-237） */
+.p-drawer__bar {
+	display: flex;
+	flex-shrink: 0;
+	align-items: flex-start;
+	justify-content: space-between;
+	height: var(--header-height);
+	padding-left: var(--header-pad-x);
+	padding-right: var(--header-pad-right);
+}
+
+.p-drawer__logo {
+	margin-top: var(--header-logo-top);
+	line-height: 0;
+}
+
+.p-drawer__logo img {
+	width: var(--logo-width);
+	height: auto;
+}
+
+/* × は三本線（.p-header__toggle）と同じ長さ・太さの線を ±45° で組む。
+   カンプ 1024:237 の 17.57x18.34 は 25.6px の線を 45° 回した外形と一致する。 */
+.p-drawer__close {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: var(--toggle-width);
+	height: 100%;
+}
+
+.p-drawer__close-icon {
+	position: relative;
+	width: 100%;
+	height: 1px;
+}
+
+.p-drawer__close-icon::before,
+.p-drawer__close-icon::after {
+	position: absolute;
+	inset: 0;
+	background: var(--color-white2);
+	content: "";
+}
+
+.p-drawer__close-icon::before {
+	transform: rotate(45deg);
+}
+
+.p-drawer__close-icon::after {
+	transform: rotate(-45deg);
+}
+
+/* バーの下の残り全部を占め、その中で中身を上下中央に置く。
+   カンプ（1024:205）は 722.81px の画面が前提で、実機はそれより縦が長いことが
+   多いため、上端から詰めると下に大きく余る。 */
+.p-drawer__body {
+	display: flex;
+	flex-grow: 1;
+	flex-direction: column;
+	width: min(100% - var(--gutter) * 2, var(--content-width));
+	margin-inline: auto;
+	/* 上下の最小の余白。中身が入りきらないときに端に貼り付かないようにする */
+	padding-block: var(--drawer-bottom-gap);
+}
+
+/* 中央寄せは justify-content ではなく auto マージンで行う。
+   入りきらないときは auto が 0 に潰れて上詰めになり、スクロールで先頭まで
+   戻れる（justify-content: center だと上が見切れて戻れなくなる）。 */
+.p-drawer__body > :first-child {
+	margin-top: auto;
+}
+
+.p-drawer__block + .p-drawer__block {
+	margin-top: var(--drawer-block-gap);
+}
+
+.p-drawer__heading {
+	font-family: var(--font-display);
+	font-size: var(--fs-footer-heading);
+	font-weight: var(--fw-bold);
+	line-height: var(--lh-heading);
+	letter-spacing: normal;
+	color: var(--color-off-white);
+}
+
+/* 先頭 5 件が 1 列目、残りが 2 列目。上境界が見出し下の区切り線を兼ねる。 */
+.p-drawer__list {
+	display: grid;
+	grid-auto-flow: column;
+	grid-template-rows: repeat(5, auto);
+	grid-template-columns: repeat(2, 1fr);
+	row-gap: var(--drawer-row-gap);
+	margin-top: var(--drawer-rule-gap);
+	padding-top: var(--drawer-list-gap);
+	border-top: var(--border-thin) solid var(--color-gray3);
+	font-family: var(--font-ui);
+	font-size: var(--fs-footer-link);
+	line-height: var(--lh-base);
+	letter-spacing: var(--ls-base);
+	color: var(--color-white2);
+}
+
+.p-drawer__contact {
+	width: var(--drawer-btn-width);
+	height: var(--drawer-btn-height);
+	margin: var(--drawer-btn-gap) auto 0;
+}
+
+/* SNS: 4 等分のセル。2 件目以降の左境界が区切り線（1024:211-213）。 */
+.p-drawer__sns {
+	display: grid;
+	grid-template-columns: repeat(4, 1fr);
+	width: 100%;
+	margin-top: auto;
+	padding-top: var(--drawer-block-gap);
+}
+
+.p-drawer__sns-item + .p-drawer__sns-item {
+	border-left: var(--border-thin) solid var(--color-gray3);
+}
+
+.p-drawer__sns-link {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: var(--drawer-sns-icon-gap);
+	min-height: var(--drawer-sns-height);
+}
+
+.p-drawer__sns-icon {
+	width: var(--drawer-sns-icon);
+	height: var(--drawer-sns-icon);
+	object-fit: contain;
+}
+
+.p-drawer__sns-label {
+	font-family: var(--font-ui);
+	font-size: var(--fs-sns-label);
+	font-weight: var(--fw-light);
+	line-height: var(--lh-base);
+	letter-spacing: var(--ls-base);
+	color: var(--color-white2);
+}
+
+/* ドロワーは SP カンプのみ */
+@media (min-width: 769px) {
+	.p-drawer {
+		display: none;
+	}
+}
+
+/* --- フッター（917:2595 / 917:754-787） --- */
+.p-footer {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding-block: var(--section-padding-y);
+	background: var(--color-black3);
+	color: var(--color-gray2);
+}
+
+.p-footer__logo {
+	line-height: 0;
+}
+
+.p-footer__logo img {
+	width: var(--footer-logo-width);
+	height: auto;
+}
+
+/* SNS: 4 等分のセル。2 件目以降の左境界が区切り線。 */
+.p-footer__sns {
+	display: grid;
+	grid-template-columns: repeat(4, 1fr);
+	width: var(--sns-width);
+	max-width: 100%;
+	margin-top: var(--footer-logo-gap);
+}
+
+.p-footer__sns-item + .p-footer__sns-item {
+	border-left: var(--border-thin) solid var(--color-gray3);
+}
+
+.p-footer__sns-link {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: var(--sns-icon-gap);
+	min-height: var(--sns-divider-height);
+}
+
+.p-footer__sns-icon {
+	width: var(--sns-icon-size);
+	height: var(--sns-icon-size);
+}
+
+.p-footer__sns-label {
+	font-family: var(--font-ui);
+	font-size: var(--fs-sns-label);
+	font-weight: var(--fw-light);
+	line-height: var(--lh-base);
+	letter-spacing: 0.1em;
+}
+
+.p-footer__menus {
+	display: flex;
+	flex-direction: column;
+	gap: var(--footer-sns-gap);
+	margin-top: var(--footer-sns-gap);
+}
+
+.p-footer__block {
+	width: var(--footer-block-width);
+	max-width: 100%;
+}
+
+.p-footer__heading {
+	font-family: var(--font-display);
+	font-size: var(--fs-footer-heading);
+	font-weight: var(--fw-bold);
+	line-height: var(--lh-heading);
+	letter-spacing: normal;
+	color: var(--color-white3);
+}
+
+/* 先頭 5 件が 1 列目、残りが 2 列目。上境界が見出し下の区切り線を兼ねる。 */
+.p-footer__list {
+	display: grid;
+	grid-auto-flow: column;
+	grid-template-rows: repeat(5, auto);
+	grid-template-columns: repeat(2, var(--footer-col-ratio));
+	row-gap: var(--footer-row-gap);
+	margin-top: var(--footer-rule-gap);
+	padding-top: var(--footer-rule-list-gap);
+	padding-left: var(--footer-list-indent);
+	border-top: var(--border-thin) solid var(--color-gray3);
+	font-family: var(--font-ui);
+	font-size: var(--fs-footer-link);
+	line-height: var(--lh-base);
+	letter-spacing: 0.1em;
+	color: var(--color-gray2);
+}
+
+.p-footer__copyright {
+	margin-top: var(--footer-menu-gap);
+	font-family: var(--font-ui);
+	font-size: var(--fs-copyright);
+	line-height: var(--lh-base);
+	letter-spacing: 0.1em;
+	color: var(--color-white2);
+	text-align: center;
+}
+
+@media (min-width: 769px) {
+	.p-footer__menus {
+		flex-direction: row;
+		gap: var(--footer-block-gap);
+		width: min(100% - var(--gutter) * 2, var(--footer-menus-width));
+	}
+
+	/* ブロック幅は親から按分（1920px で 553px ＝ カンプ一致） */
+	.p-footer__block {
+		flex: 1 1 0;
+		width: auto;
+	}
+
+	.p-footer__list {
+		/* 257.5 / (553 - 19) : % はコンテンツボックス基準のためインデント分を除く */
+		--footer-col-ratio: 48.22%;
+		/* 19 / 553 */
+		--footer-list-indent: 3.44%;
+	}
+}
+
+/* --- FV（1:280 / 16:64・16:71・16:93） ---
+   背景は動画 5 本のクロスフェード。動きの仕様は参照実装（test_cp）に合わせ、
+   配置・寸法はカンプに合わせてある。切り替えは js/fv-slider.js。 */
+.p-fv {
+	position: relative;
+	height: var(--fv-height);
+	overflow: hidden;
+	background: var(--color-black2);
+	color: var(--color-white2);
+}
+
+/* 5 本を重ねて置き、is-active の 1 本だけを見せる */
+.p-fv__video {
+	position: absolute;
+	inset: 0;
+	z-index: 0;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	opacity: 0;
+	/* 消えきってから visibility を落とす。先に落とすとフェードが飛ぶ */
+	visibility: hidden;
+	transition:
+		opacity var(--fv-fade) ease-in-out,
+		visibility 0s linear var(--fv-fade);
+}
+
+.p-fv__video.is-active {
+	z-index: 1;
+	opacity: 1;
+	visibility: visible;
+	transition: opacity var(--fv-fade) ease-in-out;
+}
+
+/* 動画は写真より明るい場面があるため、白文字が沈まないよう薄く敷く */
+.p-fv::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	z-index: 1;
+	background: var(--fv-scrim);
+	pointer-events: none;
+}
+
+/* コピーは FV 内の絶対配置（カンプの上端基準に合わせる） */
+.p-fv__copy {
+	position: absolute;
+	inset: 0;
+	z-index: 2;
+	pointer-events: none;
+}
+
+.p-fv__text {
+	position: absolute;
+	top: var(--fv-copy-top);
+	left: 50%;
+	width: max-content;
+	text-align: center;
+	transform: translateX(-50%);
+}
+
+/* 4 本目だけ 2 枚組。SP は横に並べきれないので上下に積み、PC で左右へ振り分ける */
+.p-fv__text--right {
+	top: calc(var(--fv-copy-top) + var(--fs-display-hero-small) * 1.4);
+}
+
+.p-fv__text--small .p-fv__title {
+	font-size: var(--fs-display-hero-small);
+}
+
+.p-fv__title {
+	margin: 0;
+	white-space: nowrap;
+}
+
+.p-fv__sub {
+	margin-top: var(--fv-sub-gap);
+}
+
+/* 添え字は字送りの対象外なので、出ていないコピーのぶんは畳んでおく */
+.p-fv__text:not(.is-active) .p-fv__sub {
+	display: none;
+}
+
+/* 1 文字ずつ下からせり上がる。--char-index は PHP 側が振る通し番号 */
+.p-fv__char {
+	display: inline-block;
+	opacity: 0;
+	transform: translateY(var(--fv-char-shift)) scaleY(var(--fv-char-squash));
+	transform-origin: bottom center;
+	transition:
+		opacity var(--fv-char-fade) ease,
+		transform var(--fv-char-move) var(--fv-char-ease);
+	/* 引っ込むときは全文字いっせいに。出るときだけ --char-index ぶん遅らせる */
+	transition-delay: 0s;
+	will-change: opacity, transform;
+}
+
+.p-fv__text.is-active .p-fv__char {
+	opacity: 1;
+	transform: translateY(0) scaleY(1);
+	transition-delay: calc(var(--char-index) * var(--fv-char-stagger));
+}
+
+/* サムネイル列 */
+.p-fv__thumbs {
+	position: absolute;
+	bottom: var(--fv-thumbs-bottom);
+	left: 50%;
+	z-index: 2;
+	display: flex;
+	gap: var(--fv-thumb-gap);
+	transform: translateX(-50%);
+}
+
+.p-fv__thumb {
+	position: relative;
+	display: grid;
+	place-items: center;
+	width: var(--fv-thumb-size);
+	height: var(--fv-thumb-size);
+	border-radius: 50%;
+}
+
+/* 外周リング。カンプ 1:304 の円と同径で、再生位置ぶんだけ描く帯にしてある */
+.p-fv__thumb-progress {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	z-index: 3;
+	width: var(--fv-ring-size);
+	/* リセットの max-width:100% はサムネイル径で頭打ちになる。リングは一回り大きい */
+	max-width: none;
+	height: var(--fv-ring-size);
+	overflow: visible;
+	pointer-events: none;
+	/* 12 時から時計回りに描き始める */
+	transform: translate(-50%, -50%) rotate(-90deg);
+}
+
+.p-fv__thumb-progress-track,
+.p-fv__thumb-progress-bar {
+	fill: none;
+	stroke-width: var(--fv-ring-stroke);
+}
+
+.p-fv__thumb-progress-track {
+	stroke: var(--fv-ring-track);
+}
+
+.p-fv__thumb-progress-bar {
+	stroke: var(--color-white2);
+	stroke-linecap: round;
+	stroke-dasharray: var(--fv-ring-length);
+	stroke-dashoffset: var(--fv-ring-length);
+	opacity: 0;
+}
+
+.p-fv__thumb.is-active .p-fv__thumb-progress-bar {
+	opacity: 1;
+}
+
+.p-fv__thumb-media {
+	display: block;
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+	border-radius: 50%;
+}
+
+.p-fv__thumb-media img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+@media (min-width: 769px) {
+	.p-fv__text--left {
+		left: 25%;
+	}
+
+	.p-fv__text--right {
+		top: var(--fv-copy-top);
+		left: 75%;
+	}
+}
+
+/* --- FV ピン留め（front-page.php の .l-pin） ---
+   スクロールしても FV がその場に留まり、スクロール量に応じて暗幕（--philo-overlay）が
+   徐々に濃くなって理念セクションへ移る。カンプも PC（16:520-521）/ SP（16:153-154）とも
+   理念セクションの背景が FV と同じ写真 + 暗幕なので、幅を問わず同じ演出にする。 */
+.l-pin {
+	position: relative;
+}
+
+.l-pin .p-fv {
+	position: sticky;
+	top: var(--fv-pin-top);
+	/* 留まっている間は画面を埋めきる必要がある。カンプ高さ（--fv-height）だと
+	   画面がそれより高いときに下端へ写真の無い帯が出てしまう。 */
+	height: var(--fv-pin-height);
+}
+
+/* --- スクロール連動の暗幕（js/fv-mask.js が --fv-mask-progress を 0→1 で書き込む） ---
+   ピン留め区間の全面に 1 枚だけ貼る。どこを切り取っても濃さが同じなので、
+   境界線の出ない均一な暗転になる。着地は --philo-overlay（#090908 / 70%）。 */
+.l-pin.is-scroll-mask::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	z-index: 1;
+	background: var(--philo-overlay);
+	opacity: var(--fv-mask-progress, 0);
+	pointer-events: none;
+}
+
+/* 暗転と同じ進捗で FV のコピーとサムネイルを消す */
+.l-pin.is-scroll-mask .p-fv__copy,
+.l-pin.is-scroll-mask .p-fv__thumbs {
+	opacity: calc(1 - var(--fv-mask-progress, 0));
+}
+
+/* 見えなくなったサムネイルを押せてしまわないようにする */
+.l-pin .p-fv.is-masked .p-fv__thumbs {
+	pointer-events: none;
+}
+
+/* 暗幕越しに、留まっている FV が透ける */
+.l-pin .p-philosophy {
+	z-index: 2;
+	background: transparent;
+}
+
+.l-pin .p-philosophy__bg img {
+	visibility: hidden;
+}
+
+/* 理念セクション側に貼っていた暗幕は、板ごとせり上がって境界線が出るため
+   JS が動いているときは使わない。JS 無効時のフォールバックとして残す。 */
+.l-pin.is-scroll-mask .p-philosophy__bg::after {
+	display: none;
+}
+
+/* --- 理念 / 実績数値（917:32-33・917:254・917:279 / SP 16:16 Frame 5） ---
+   FV 写真 + 70% 暗幕の上に MISSION / VISION / VALUE と円環図。
+   SP は同じ内容を縦積みにしたもので、内容の出し分けはしない。 */
+.p-philosophy {
+	position: relative;
+	background: var(--color-black2);
+	color: var(--color-gray1);
+}
+
+/* 背景写真 + 暗幕（917:33 / 16:153-154 とも rgba(9,9,8,0.7)） */
+.p-philosophy__bg {
+	position: absolute;
+	inset: 0;
+	overflow: hidden;
+}
+
+.p-philosophy__bg img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+.p-philosophy__bg::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	background: var(--philo-overlay);
+}
+
+.p-philosophy__inner {
+	position: relative;
+	z-index: 1;
+	width: min(100% - var(--gutter) * 2, var(--philo-body-width));
+	margin-inline: auto;
+	padding-block: var(--philo-pad-block);
+}
+
+/* SP は MVV → 円環図の縦積み。PC で横並びに切り替える */
+.p-philosophy__mvv {
+	display: flex;
+	flex-direction: column;
+	gap: var(--philo-sp-item-gap);
+	/* カンプの MVV は inner 左端よりさらに内側から始まる（16:159 は左 47.21） */
+	padding-left: var(--philo-sp-text-indent);
+}
+
+/* 区切り罫線は PC カンプのみ。SP は gap で離す */
+.p-philosophy__rule {
+	display: none;
+}
+
+.p-philosophy__eng {
+	font-size: var(--philo-eng-size);
+	letter-spacing: var(--philo-eng-ls);
+	color: var(--color-white3);
+}
+
+.p-philosophy__jp {
+	margin-top: var(--philo-eng-gap);
+	font-size: var(--philo-jp-size);
+	font-weight: var(--fw-medium);
+	line-height: var(--lh-base);
+	letter-spacing: var(--philo-jp-ls);
+	color: var(--color-white3);
+}
+
+.p-philosophy__sub {
+	margin-top: var(--philo-jp-gap);
+	font-size: var(--philo-sub-size);
+	line-height: var(--lh-base);
+	letter-spacing: var(--philo-sub-ls);
+	color: var(--color-gray2);
+}
+
+/* 円環図は inner より広い（16:171 は 341.71 幅 = 左右 16.645 の余白）ので左右にはみ出す */
+.p-philosophy__diagram {
+	width: calc(100% + var(--philo-sp-diagram-bleed) * 2);
+	margin: var(--philo-sp-diagram-gap) calc(var(--philo-sp-diagram-bleed) * -1) 0;
+}
+
+/* --- 円環図（16:171 SP / 16:535 PC） ---
+   リング・中央のロゴと文言・住宅のライン画・6 項目を個別に置く。
+   位置と大きさは Figma の実測値を枠に対する % に直したもの。
+   文字はコンテナ幅（cqw）基準なので、枠が伸び縮みしても比率が崩れない。 */
+.p-diagram {
+	position: relative;
+	container-type: inline-size;
+	aspect-ratio: var(--diagram-ratio);
+	font-family: var(--font-base);
+	color: var(--color-gray1);
+}
+
+/* 中央寄せは transform ではなく translate で行う。
+   transform は浮遊アニメーション側で使うため空けておく（両者は合成される）。 */
+.p-diagram > * {
+	position: absolute;
+	top: var(--y);
+	left: var(--x);
+	width: var(--w);
+	margin: 0;
+	translate: -50% 0;
+}
+
+.p-diagram__ring {
+	translate: none;
+}
+
+.p-diagram__ring {
+	top: 0;
+	left: var(--diagram-ring-x);
+	width: var(--diagram-ring-w);
+	height: 100%;
+	max-width: none;
+	fill: none;
+	stroke: var(--diagram-ring-color);
+	stroke-width: var(--diagram-ring-stroke);
+}
+
+/* SP は 6 本の弧、PC はマスクで抜いた 1 本の円。幅で出し分ける */
+.p-diagram__ring--pc {
+	display: none;
+}
+
+
+.p-diagram__logo {
+	--x: 47.656%;
+	--y: 29.98%;
+	--w: 20.482%;
+
+	line-height: 0;
+}
+
+/* 中央の文言は PC カンプのみ */
+.p-diagram__lead {
+	display: none;
+}
+
+.p-diagram__art {
+	--x: 46.781%;
+	--y: 36.92%;
+	--w: 46.803%;
+
+	height: auto;
+}
+
+.p-diagram__icon {
+	width: var(--w);
+	line-height: 0;
+	pointer-events: none;
+}
+
+.p-diagram__icon img {
+	width: 100%;
+	height: auto;
+}
+
+/* アイコンと、その下のコピーをひとまとまりで上下に漂わせる。
+   同じ周期・同じ開始位置を与えているので 2 つはずれずに動く。
+   6 組それぞれは周期も開始位置も変えてあり、互いに揃わない。 */
+.p-diagram__icon,
+.p-diagram__copy {
+	animation: p-diagram-float var(--diagram-float-duration) var(--diagram-float-ease) var(--diagram-float-delay) infinite alternate;
+	will-change: transform;
+}
+
+@keyframes p-diagram-float {
+	from {
+		transform: translateY(calc(var(--diagram-float) * -1));
+	}
+
+	to {
+		transform: translateY(var(--diagram-float));
+	}
+}
+
+.p-diagram__copy {
+	font-size: var(--diagram-copy-size);
+	line-height: var(--diagram-copy-lh);
+	letter-spacing: var(--diagram-copy-ls);
+	text-align: center;
+	white-space: nowrap;
+}
+
+.p-diagram__icon--1 {
+	--x: 25.819%;
+	--y: 0.435%;
+	--w: 6.312%;
+}
+
+.p-diagram__icon--1,
+.p-diagram__copy--1 {
+	--diagram-float-duration: 3.4s;
+	--diagram-float-delay: -0.1s;
+}
+
+.p-diagram__copy--1 {
+	--x: 24.892%;
+	--y: 8.978%;
+	--w: 19.022%;
+}
+
+.p-diagram__icon--2 {
+	--x: 71.597%;
+	--y: 0%;
+	--w: 5.885%;
+}
+
+.p-diagram__icon--2,
+.p-diagram__copy--2 {
+	--diagram-float-duration: 4.1s;
+	--diagram-float-delay: -1.2s;
+}
+
+.p-diagram__copy--2 {
+	--x: 71.482%;
+	--y: 8.978%;
+	--w: 25.46%;
+}
+
+.p-diagram__icon--3 {
+	--x: 10.822%;
+	--y: 35.758%;
+	--w: 9.072%;
+}
+
+.p-diagram__icon--3,
+.p-diagram__copy--3 {
+	--diagram-float-duration: 3.8s;
+	--diagram-float-delay: -0.5s;
+}
+
+.p-diagram__copy--3 {
+	--x: 10.974%;
+	--y: 45.201%;
+	--w: 21.948%;
+}
+
+.p-diagram__icon--4 {
+	--x: 85.697%;
+	--y: 36.116%;
+	--w: 7.688%;
+}
+
+.p-diagram__icon--4,
+.p-diagram__copy--4 {
+	--diagram-float-duration: 4.6s;
+	--diagram-float-delay: -2.1s;
+}
+
+.p-diagram__copy--4 {
+	--x: 85.804%;
+	--y: 45.14%;
+	--w: 28.387%;
+}
+
+.p-diagram__icon--5 {
+	--x: 25.472%;
+	--y: 74.797%;
+	--w: 6.69%;
+}
+
+.p-diagram__icon--5,
+.p-diagram__copy--5 {
+	--diagram-float-duration: 3.1s;
+	--diagram-float-delay: -0.8s;
+}
+
+.p-diagram__copy--5 {
+	--x: 24.892%;
+	--y: 85.521%;
+	--w: 35.117%;
+}
+
+.p-diagram__icon--6 {
+	--x: 71.553%;
+	--y: 75.339%;
+	--w: 5.99%;
+}
+
+.p-diagram__icon--6,
+.p-diagram__copy--6 {
+	--diagram-float-duration: 4.3s;
+	--diagram-float-delay: -1.7s;
+}
+
+.p-diagram__copy--6 {
+	--x: 71.61%;
+	--y: 85.521%;
+	--w: 31.898%;
+}
+
+/* --- 実績数値 --- */
+/* SP は円環図の下に続く（16:171 下端 → 16:156）。PC は --stats-band-gap で上書き */
+.p-stats {
+	margin-top: var(--philo-sp-stats-gap);
+}
+
+/* 「数字で見る」+ ロゴ（16:156 / 16:563）。PC / SP とも同じ */
+.p-stats__heading {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: var(--stats-heading-gap);
+	font-family: var(--font-ui);
+	font-size: var(--stats-heading-size);
+	font-weight: var(--fw-bold);
+	line-height: var(--lh-base);
+	letter-spacing: 3px; /* PC / SP とも 3px */
+	color: var(--color-white3);
+}
+
+.p-stats__heading-logo {
+	width: var(--stats-logo-width);
+	height: auto;
+}
+
+/* SP は 2x2（16:194）。PC で横 1 列に切り替える */
+.p-stats__list {
+	display: grid;
+	grid-template-columns: repeat(2, var(--stats-badge-size));
+	justify-content: center;
+	column-gap: var(--stats-badge-col-gap);
+	row-gap: var(--stats-badge-row-gap);
+	margin-top: var(--stats-heading-list-gap);
+}
+
+/* SP は円バッジそのもの。中身はアイコン → 項目名 → 数値の縦積み */
+.p-stats__item {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	aspect-ratio: 1;
+	background: var(--stats-badge-scrim);
+	border-radius: 50%;
+}
+
+/* SP では中身を円の直接の子として並べたいので箱を透かす（PC で箱に戻す） */
+.p-stats__body {
+	display: contents;
+}
+
+.p-stats__icon {
+	order: 1;
+	width: auto;
+	height: var(--stats-badge-icon-height);
+}
+
+.p-stats__label {
+	order: 2;
+	margin-top: var(--stats-badge-icon-gap);
+	font-size: var(--stats-sp-label);
+	font-weight: var(--fw-medium);
+	line-height: var(--lh-base);
+	letter-spacing: var(--ls-wide);
+	color: var(--color-gray1);
+}
+
+/* 補足（(昨対比率)）は PC カンプのみ */
+.p-stats__note {
+	display: none;
+}
+
+.p-stats__value {
+	order: 3;
+	display: flex;
+	align-items: baseline;
+	gap: var(--stats-value-gap);
+	font-family: var(--font-display);
+	color: var(--color-white3);
+}
+
+.p-stats__number {
+	/* カウントアップ中に数字の幅が揺れないようにする */
+	font-variant-numeric: tabular-nums;
+	font-size: var(--stats-sp-number);
+	font-weight: var(--fw-semibold);
+	line-height: normal;
+	letter-spacing: 1px; /* PC / SP とも 1px */
+}
+
+.p-stats__unit {
+	font-family: var(--font-base);
+	font-size: var(--stats-sp-unit);
+	font-weight: var(--fw-medium);
+	line-height: var(--lh-base);
+	letter-spacing: 0.05em; /* SP 0.6px / PC 1.2px = 同じ em */
+	color: var(--color-gray1);
+}
+
+@media (min-width: 769px) {
+	/* PC は MVV 列と円環図の横並び（917:279） */
+	.p-philosophy__body {
+		display: flex;
+		gap: var(--philo-gap-ratio);
+		align-items: flex-start;
+	}
+
+	/* カンプはテキスト非折り返し（917:281 は whitespace-nowrap）。列幅は内容で決める */
+	.p-philosophy__mvv {
+		display: block;
+		flex: 0 0 auto;
+		padding-left: 0;
+	}
+
+	.p-philosophy__eng {
+		letter-spacing: var(--ls-display-lg);
+		color: var(--color-gray1);
+	}
+
+	.p-philosophy__jp {
+		color: var(--color-white2);
+	}
+
+	.p-philosophy__sub {
+		white-space: nowrap;
+		line-height: 2;
+		letter-spacing: var(--ls-wide);
+		color: var(--color-gray1);
+	}
+
+	/* PC は項目間を罫線で区切る（917:279） */
+	.p-philosophy__rule {
+		display: block;
+		margin: var(--philo-rule-gap-before) 0 var(--philo-rule-gap-after);
+		border: 0;
+		border-top: var(--border-thin) solid var(--color-gray3);
+	}
+
+	.p-philosophy__diagram {
+		flex: 1 1 auto;
+		width: auto;
+		margin: 0;
+	}
+
+	/* --- 円環図は PC カンプ（16:535）の配置に差し替える --- */
+	.p-diagram {
+		--diagram-ratio: 1057.63 / 889.43;
+		--diagram-ring-x: 6.237%;
+		--diagram-ring-w: 84.097%;
+		--diagram-ring-color: #e7e7e7; /* 16:552 Ellipse 103 の線色 */
+		--diagram-ring-stroke: 2; /* viewBox 889.426 に対する線幅 */
+		--diagram-copy-size: 1.891cqw; /* PC 20px / 1057.63 */
+		--diagram-copy-ls: 0.05em; /* 1px / 20px */
+	}
+
+	.p-diagram__ring--sp {
+		display: none;
+	}
+
+	.p-diagram__ring--pc {
+		display: block;
+	}
+
+	.p-diagram__logo {
+		--x: 49.054%;
+		--y: 17.947%;
+		--w: 15.506%;
+	}
+
+	.p-diagram__lead {
+		--x: 49.054%;
+		--y: 24.008%;
+		--w: 31.769%;
+
+		display: block;
+		font-size: 2.269cqw; /* 24px / 1057.63 */
+		font-weight: var(--fw-medium);
+		line-height: 1.5;
+		letter-spacing: 0.0833em; /* 2px / 24px */
+		text-align: center;
+		white-space: nowrap;
+	}
+
+	.p-diagram__art {
+		--x: 43.649%;
+		--y: 34.065%;
+		--w: 69.608%;
+	}
+
+	.p-diagram__icon--1 {
+		--x: 23.692%;
+		--y: 3.453%;
+		--w: 7.106%;
+	}
+
+	.p-diagram__copy--1 {
+		--x: 23.348%;
+		--y: 12.157%;
+		--w: 11.819%;
+	}
+
+	.p-diagram__icon--2 {
+		--x: 72.96%;
+		--y: 3.012%;
+		--w: 6.627%;
+	}
+
+	.p-diagram__copy--2 {
+		--x: 72.959%;
+		--y: 12.157%;
+		--w: 15.79%;
+	}
+
+	.p-diagram__icon--3 {
+		--x: 6.807%;
+		--y: 38.525%;
+		--w: 10.212%;
+	}
+
+	.p-diagram__copy--3 {
+		--x: 6.808%;
+		--y: 48.078%;
+		--w: 13.615%;
+	}
+
+	.p-diagram__icon--4 {
+		--x: 91.103%;
+		--y: 38.889%;
+		--w: 8.655%;
+	}
+
+	.p-diagram__copy--4 {
+		--x: 91.207%;
+		--y: 48.078%;
+		--w: 17.586%;
+	}
+
+	.p-diagram__icon--5 {
+		--x: 23.302%;
+		--y: 79.19%;
+		--w: 7.533%;
+	}
+
+	.p-diagram__copy--5 {
+		--x: 23.301%;
+		--y: 90.115%;
+		--w: 21.747%;
+	}
+
+	.p-diagram__icon--6 {
+		--x: 72.912%;
+		--y: 79.745%;
+		--w: 6.745%;
+	}
+
+	.p-diagram__copy--6 {
+		--x: 72.959%;
+		--y: 90.115%;
+		--w: 19.761%;
+	}
+
+	/* --- PC の実績数値（16:563-592）--- */
+	.p-stats {
+		margin-top: var(--stats-band-gap);
+	}
+
+	/* 円バッジをやめて横 1 列に戻す */
+	.p-stats__list {
+		display: flex;
+		/* カンプは 4 項目とも横 1 列。折り返すと 3+1 になって崩れるため折り返さない。
+		   1180px 程度までは 1 行が inner の左右余白へ少しはみ出すが、
+		   画面幅は 769px でも 16px 余るので横スクロールは出ない。 */
+		flex-wrap: nowrap;
+		gap: var(--stats-item-gap);
+	}
+
+	.p-stats__item {
+		flex: 0 0 auto;
+		aspect-ratio: auto;
+		background: none;
+		border-radius: 0;
+	}
+
+	/* アイコンと数値は横並び。項目名だけが上に乗る */
+	.p-stats__body {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 8px;
+		/* カンプは項目名 top +29 に数値が来る（行box が一部重なる） */
+		margin-top: -9.4px;
+	}
+
+	.p-stats__icon {
+		height: var(--stats-icon-height);
+		max-width: none; /* リセットの max-width:100% で潰れないように */
+	}
+
+	.p-stats__label {
+		/* SP は円の中でアイコンの下に来るが、PC は先頭（アイコン+数値の上）に戻す */
+		order: 0;
+		margin-top: 0;
+		font-size: var(--stats-label-size);
+	}
+
+	.p-stats__note {
+		display: inline;
+		margin-left: var(--stats-note-gap);
+		font-size: var(--stats-note-size);
+		font-weight: var(--fw-regular);
+	}
+
+	.p-stats__number {
+		font-size: var(--stats-number-size);
+		color: var(--color-white2);
+	}
+
+	.p-stats__unit {
+		font-size: var(--stats-unit-size);
+	}
+}
+
+/* --- DX EXPERIENCE（917:172-212 / SP 917:799-848） --- */
+.p-dx {
+	background: var(--color-black2);
+	color: var(--color-white3);
+}
+
+.p-dx__inner {
+	width: min(100% - var(--gutter) * 2, var(--dx-inner-width));
+	margin-inline: auto;
+	padding-block: var(--dx-sp-pad-top) var(--dx-sp-pad-bottom);
+}
+
+.p-dx__title {
+	font-size: var(--dx-sp-title-size);
+	color: var(--color-gray3);
+}
+
+.p-dx__copy {
+	margin-top: var(--dx-sp-copy-gap);
+	font-family: var(--font-ui);
+	font-size: var(--dx-sp-copy-size);
+	font-weight: var(--fw-bold);
+	line-height: var(--lh-base);
+	letter-spacing: var(--ls-base);
+}
+
+/* 文言が PC / SP で異なる（917:211 / 917:802） */
+.p-dx__copy--pc {
+	display: none;
+}
+
+.p-dx__media {
+	margin-top: var(--dx-sp-media-gap);
+}
+
+/* ステップぶんのビジュアルを重ねて置く */
+.p-dx__visuals {
+	position: relative;
+	aspect-ratio: var(--dx-media-ratio);
+}
+
+.p-dx__visual {
+	position: absolute;
+	inset: 0;
+	opacity: 0;
+	transform: translateX(var(--dx-panel-shift)) scale(var(--dx-panel-scale));
+	transition:
+		opacity var(--dx-panel-fade) ease,
+		transform var(--dx-panel-move) var(--dx-panel-ease);
+	pointer-events: none;
+}
+
+.p-dx__visual.is-active {
+	opacity: 1;
+	transform: translateX(0) scale(1);
+	pointer-events: auto;
+}
+
+.p-dx__image {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+.p-dx__media-foot {
+	position: relative;
+	display: flex;
+	justify-content: flex-end;
+	margin-top: var(--dx-sp-bars-gap);
+}
+
+.p-dx__bars {
+	display: flex;
+	gap: var(--dx-sp-bar-gap);
+}
+
+.p-dx__bar {
+	width: var(--dx-sp-bar-w);
+	height: var(--dx-sp-bar-h);
+	background: var(--color-gray2);
+	border-radius: 999px;
+}
+
+.p-dx__bar.is-active {
+	background: var(--color-orange1);
+}
+
+/* ボタンは PC のみ（SP カンプには無い） */
+.p-dx__btn {
+	display: none;
+}
+
+/* --- ステップ --- */
+/* --- スクロールで 01 → 02 → 03 と送る（参照実装 test.html） ---
+   セクションを縦に伸ばして助走をつくり、中身をその場に留める。
+   ピン中は上下パディングをやめて中央寄せにする。カンプ（PC 1920x1080）では
+   中身 863.8px が 1080px の中央に来るので、上下 108px とカンプの
+   104.43 / 112.41 がほぼ一致する。画面が低いときも中身が縦に潰れない。 */
+.p-dx {
+	height: calc(100vh * var(--dx-scroll-screens));
+}
+
+.p-dx__inner {
+	position: sticky;
+	top: var(--dx-pin-top);
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	height: var(--dx-pin-height);
+	padding-block: 0;
+}
+
+/* 押したステップの位置までスクロールする */
+.p-dx__step {
+	cursor: pointer;
+}
+
+.p-dx__steps {
+	position: relative;
+	margin-top: var(--dx-sp-steps-gap);
+	padding-left: calc(var(--dx-sp-indicator-w) + var(--dx-sp-indicator-gap));
+}
+
+/* SP はカンプどおり 1 ステップずつ。3 つを同じマスに重ねて入れ替える。
+   grid なら一番高いステップに合わせて枠が決まるので、送っても高さが動かない。 */
+.p-dx__list {
+	display: grid;
+}
+
+.p-dx__step {
+	grid-area: 1 / 1;
+	opacity: 0;
+	transform: translateX(var(--dx-panel-shift)) scale(var(--dx-panel-scale));
+	transition:
+		opacity var(--dx-panel-fade) ease,
+		transform var(--dx-panel-move) var(--dx-panel-ease);
+	pointer-events: none;
+}
+
+.p-dx__step.is-active {
+	opacity: 1;
+	transform: translateX(0) scale(1);
+	pointer-events: auto;
+}
+
+.p-dx__step-number {
+	font-family: var(--font-ui);
+	font-size: 12px;
+	font-weight: var(--fw-light);
+	line-height: var(--lh-base);
+	letter-spacing: var(--ls-wide);
+}
+
+.p-dx__step-title {
+	margin-top: 3.2px;
+	font-family: var(--font-ui);
+	font-size: 16px;
+	font-weight: var(--fw-bold);
+	line-height: var(--lh-base);
+	letter-spacing: var(--ls-wide);
+}
+
+.p-dx__step-desc {
+	margin-top: 3.6px;
+	font-family: var(--font-ui);
+	font-size: 12px;
+	line-height: var(--lh-base);
+	letter-spacing: var(--ls-base);
+}
+
+.p-dx__tags {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8.6px;
+	margin-top: 14.6px;
+}
+
+.p-dx__tag {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 136.69px;
+	height: 28.175px;
+	padding-inline: 12px;
+	background: rgba(255, 255, 255, 0.2);
+	border: var(--border-thin) solid #929292;
+	border-radius: 17px;
+	font-family: var(--font-ui);
+	font-size: 11px;
+	line-height: var(--lh-base);
+	letter-spacing: var(--ls-base);
+}
+
+/* SP の縦インジケータ（917:885-889）。ステップ枠の高さいっぱいに 3 点を配置する */
+.p-dx__dots {
+	position: absolute;
+	top: 0;
+	left: 0;
+	z-index: 1;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: calc(var(--dx-sp-dot-pitch) - var(--dx-sp-dot));
+	width: var(--dx-sp-indicator-w);
+	padding-top: calc((var(--dx-sp-dot-active) - var(--dx-sp-dot)) / 2);
+}
+
+/* 点をつなぐ縦線 */
+.p-dx__dots::before {
+	content: "";
+	position: absolute;
+	top: 6px;
+	bottom: calc(var(--dx-sp-dot) * -1);
+	left: 50%;
+	width: var(--border-thin);
+	background: var(--color-white3);
+	transform: translateX(-50%);
+}
+
+.p-dx__dot {
+	position: relative;
+	z-index: 1;
+	width: var(--dx-sp-dot);
+	height: var(--dx-sp-dot);
+	border: var(--border-thin) solid var(--color-white3);
+	border-radius: 50%;
+	background: var(--color-black2);
+}
+
+/* アクティブ点はオレンジの塗り + 外周リング（917:200 の step1 active） */
+.p-dx__dot.is-active {
+	background: var(--color-orange1);
+	border-color: var(--color-orange1);
+}
+
+.p-dx__dot.is-active::after {
+	content: "";
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: var(--dx-sp-dot-active);
+	height: var(--dx-sp-dot-active);
+	border: var(--border-thin) solid var(--color-orange1);
+	border-radius: 50%;
+	transform: translate(-50%, -50%);
+}
+
+/* PC はステップごとに点を出すため、独立した点列は使わない */
+.p-dx__step::before,
+.p-dx__step::after {
+	content: none;
+}
+
+@media (min-width: 769px) {
+	.p-dx__inner {
+		/* 画面が低いときはここだけ詰める（1080px ではカンプ値のまま） */
+		--dx-steps-top: min(clamp(100px, 49.893px + 6.5243vw, 175.16px), 16.2vh);
+	}
+
+	.p-dx__head {
+		display: flex;
+		align-items: flex-start;
+		gap: var(--dx-head-gap);
+	}
+
+	.p-dx__title {
+		font-size: var(--dx-title-size);
+	}
+
+	.p-dx__copy {
+		margin-top: var(--dx-copy-offset);
+		font-size: var(--dx-copy-size);
+		letter-spacing: 0.09375em;
+		white-space: nowrap;
+	}
+
+	.p-dx__copy--pc {
+		display: block;
+	}
+
+	.p-dx__copy--sp {
+		display: none;
+	}
+
+	/* 左にステップ、右に画像 */
+	.p-dx__body {
+		display: flex;
+		align-items: flex-start;
+		justify-content: space-between;
+		margin-top: calc(var(--dx-steps-top) - var(--dx-title-size) * 1.29);
+	}
+
+	.p-dx__media {
+		order: 2;
+		flex: 0 0 var(--dx-media-width);
+		margin-top: var(--dx-media-offset);
+		/* PC の画像枠（917:199） */
+		--dx-media-ratio: 1103 / 575;
+	}
+
+	.p-dx__media-foot {
+		align-items: flex-start;
+		margin-top: var(--dx-media-foot-gap);
+	}
+
+	.p-dx__bars {
+		position: absolute;
+		right: 0;
+		gap: 7px;
+	}
+
+	.p-dx__bar {
+		width: var(--dx-bar-w);
+		height: var(--dx-bar-h);
+	}
+
+	.p-dx__btn {
+		display: inline-flex;
+		margin-top: var(--dx-btn-offset);
+		margin-inline: auto;
+	}
+
+	.p-dx__steps {
+		order: 1;
+		flex: 1 1 auto;
+		margin-top: 0;
+		padding-left: calc(var(--dx-indicator-w) + var(--dx-indicator-gap));
+	}
+
+	/* PC は 3 ステップを縦に並べて同時に見せる（SP のように重ねない） */
+	.p-dx__list {
+		display: flex;
+		flex-direction: column;
+		gap: var(--dx-step-gap);
+	}
+
+	.p-dx__step {
+		opacity: 1;
+		transform: none;
+		pointer-events: auto;
+	}
+
+	/* 点をつなぐ縦線。
+	   Swiper の .swiper-wrapper が position:relative になるため、
+	   基準は list ではなく steps 側に置く（list 基準だと padding 分ずれる）。 */
+	.p-dx__steps::before {
+		content: "";
+		position: absolute;
+		top: 6px;
+		bottom: 0;
+		left: calc(var(--dx-indicator-w) / 2);
+		width: var(--border-thin);
+		background: var(--color-white3);
+		transform: translateX(-50%);
+	}
+
+	/* ステップごとの点（1 行目の中央に合わせる） */
+	.p-dx__step {
+		position: relative;
+		display: flex;
+		flex-direction: column;
+		min-height: var(--dx-step-height);
+	}
+
+	/* カンプはタグが各ステップの下端に揃う（本文の行数で位置が変わらない） */
+	.p-dx__tags {
+		margin-top: auto;
+	}
+
+	.p-dx__step::before {
+		content: "";
+		position: absolute;
+		top: calc(var(--dx-num-size) * 1.6 / 2);
+		left: calc((var(--dx-indicator-w) + var(--dx-indicator-gap)) * -1 + var(--dx-indicator-w) / 2);
+		width: var(--dx-dot);
+		height: var(--dx-dot);
+		border: var(--border-thin) solid var(--color-white3);
+		border-radius: 50%;
+		background: var(--color-black2);
+		transform: translate(-50%, -50%);
+	}
+
+	.p-dx__step.is-active::before {
+		width: var(--dx-dot-active);
+		height: var(--dx-dot-active);
+		border-color: var(--color-orange1);
+		background: radial-gradient(
+			var(--color-orange1) 0 calc(var(--dx-dot-active) / 2 - 4.5px),
+			transparent calc(var(--dx-dot-active) / 2 - 4.5px)
+		);
+	}
+
+	.p-dx__dots {
+		display: none;
+	}
+
+	.p-dx__step-number {
+		font-size: var(--dx-num-size);
+		color: var(--color-gray2);
+	}
+
+	.p-dx__step-title {
+		margin-top: 6.4px;
+		font-size: var(--dx-step-title-size);
+		color: var(--color-white3);
+	}
+
+	.p-dx__step-desc {
+		margin-top: 10px;
+		font-size: var(--dx-step-desc-size);
+		color: var(--color-gray2);
+	}
+
+	.p-dx__tags {
+		gap: 10px;
+	}
+
+	.p-dx__tag {
+		min-width: 0;
+		height: var(--dx-tag-height);
+		padding-inline: 15px; /* カンプのタグ幅 153 / 110（917:191 / 917:194）に合わせる */
+		background: var(--color-gray3);
+		border: 0;
+		font-size: var(--dx-tag-size);
+		letter-spacing: 0.1em;
+		color: var(--color-white3);
+	}
+}
+
+/* --- VR ショールーム（表示テスト用・カンプ無し） ---
+   高さは PC でいただいた 700px。画面が狭いときはそのままだと縦に長すぎるため、
+   16:9 を目安に縮める（下限 420px は操作に必要な高さ）。 */
+.p-vr {
+	background: var(--color-black2);
+}
+
+.p-vr__inner {
+	width: min(100% - var(--gutter) * 2, var(--dx-inner-width));
+	margin-inline: auto;
+	padding-block: var(--vr-pad-block);
+}
+
+.p-vr__frame {
+	display: block;
+	width: 100%;
+	height: var(--vr-height);
+	border: 0;
+}
+
+/* --- コピーセクション（917:35-38 / SP 917:747・917:808） --- */
+.p-copy {
+	position: relative;
+	display: grid;
+	place-items: center;
+	height: var(--copy-height);
+	overflow: hidden;
+	background: var(--color-black2);
+}
+
+.p-copy__media,
+.p-copy__image {
+	position: absolute;
+	inset: 0;
+	display: block;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+.p-copy__text {
+	position: relative;
+	z-index: 1;
+	color: var(--color-white3);
+	text-align: center;
+}
+
+/* --- PLANS（917:124-141 / SP 917:722 ほか） --- */
+.p-plans__package {
+	padding-block: var(--section-padding-y);
+	background: var(--color-white2);
+}
+
+.p-plans__title {
+	color: var(--color-text);
+}
+
+/* カード列は横スクロール（カンプでも右端が画面外へ続く） */
+.p-plans__cards {
+	display: flex;
+	gap: var(--plans-card-gap);
+	margin-top: var(--plans-cards-gap);
+	/* カードの浮き上がりが切れないよう、上下に逃げを取る */
+	padding: 8px 0 20px;
+	padding-left: var(--gutter);
+	overflow-x: auto;
+	scrollbar-width: none;
+	cursor: grab;
+	overscroll-behavior-x: contain;
+}
+
+.p-plans__cards::-webkit-scrollbar {
+	display: none;
+}
+
+.p-plans__card {
+	position: relative;
+	flex: 0 0 var(--plans-card-size);
+	height: var(--plans-card-size);
+	overflow: hidden;
+	border-radius: var(--plans-card-radius);
+	box-shadow: var(--plans-card-shadow);
+	transition: transform var(--transition-base), box-shadow var(--transition-base);
+}
+
+/* 選択中はカードごと持ち上げる。
+   中身だけ動かすとカード下端に隙間ができてしまう。 */
+.p-plans__card.is-active {
+	transform: translateY(var(--plans-card-lift));
+}
+
+/* ホバーは選択中よりさらに持ち上げて影も濃くする。
+   選択中と同じ見た目にすると、初期選択のカードだけ無反応に見えてしまう。 */
+.p-plans__card:hover {
+	transform: translateY(var(--plans-card-lift-hover));
+	box-shadow: var(--plans-card-shadow-hover);
+}
+
+/* カード全体が「下の外観画像を切り替える」ボタン（js/plans-switch.js） */
+.p-plans__card-button {
+	position: absolute;
+	inset: 0;
+	display: block;
+	width: 100%;
+	height: 100%;
+	cursor: pointer;
+}
+
+/* ドラッグ中は掴んでいる見た目にし、選択の予告（浮き）は出さない */
+.p-plans__cards.is-dragging {
+	cursor: grabbing;
+}
+
+.p-plans__cards.is-dragging .p-plans__card {
+	transform: none;
+	box-shadow: var(--plans-card-shadow);
+	transition: none;
+}
+
+.p-plans__card-bg {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+.p-plans__card-name,
+.p-plans__card-eng {
+	position: absolute;
+	left: 0;
+	z-index: 1;
+	width: 100%;
+	color: var(--color-white2);
+	text-align: center;
+}
+
+.p-plans__card-name {
+	top: var(--plans-card-name-top);
+	font-size: var(--plans-card-name-size);
+	font-weight: var(--fw-medium);
+	line-height: var(--lh-base);
+	letter-spacing: var(--ls-wide);
+}
+
+.p-plans__card-eng {
+	top: var(--plans-card-eng-top);
+	font-size: var(--plans-card-eng-size);
+	letter-spacing: var(--ls-display-lg);
+}
+
+/* 商品画像は 5 プランとも 1800x909。カード幅いっぱい・下端揃えで敷く（917:143） */
+.p-plans__card-image {
+	position: absolute;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	width: 100%;
+	height: auto;
+}
+
+/* --- パッケージプラン --- */
+.p-plans__body {
+	margin-top: var(--plans-package-gap);
+}
+
+.p-plans__text {
+	width: min(100% - var(--gutter) * 2, var(--content-narrow));
+	margin-inline: auto;
+	text-align: center;
+}
+
+.p-plans__jp {
+	font-size: var(--plans-jp-size);
+	font-weight: var(--fw-medium);
+	line-height: var(--lh-base);
+	letter-spacing: var(--ls-wide);
+	color: var(--color-black1);
+}
+
+.p-plans__eng {
+	margin-top: var(--plans-jp-to-eng);
+	font-size: var(--plans-eng-size);
+	color: var(--color-black2);
+}
+
+.p-plans__desc {
+	margin-top: var(--plans-eng-to-desc);
+	font-size: var(--plans-desc-size);
+	line-height: var(--plans-desc-lh);
+	letter-spacing: var(--ls-base);
+	color: var(--color-black1);
+}
+
+.p-plans__btn {
+	margin-top: var(--plans-desc-to-btn);
+}
+
+/* SP はコピーの下に全幅の画像。カンプ SP（917:859）は PC と別トリミングのため
+   枠の比率をカンプに合わせ、画像は cover で収める。 */
+.p-plans__media {
+	margin-top: 43.55px;
+}
+
+.p-plans__media img {
+	width: 100%;
+	height: auto;
+	aspect-ratio: 375 / 224.5;
+	/* プランごとに縦横比が違うため、切り抜かずに収める */
+	object-fit: contain;
+	transition: opacity var(--transition-base);
+}
+
+.p-plans__media.is-switching img {
+	opacity: 0;
+}
+
+/* --- ハイエンドプラン ---
+   SP はテキストの背面に画像が入り、画像上端のグラデーションで文字を読ませる（917:861-864）。
+   PC は右半分に画像、左からのグラデーションでテキスト側を暗くする（917:125-128）。 */
+.p-plans__highend {
+	position: relative;
+	min-height: var(--plans-highend-min-height);
+	padding-block: var(--section-padding-y);
+	overflow: hidden;
+	background: var(--color-black2);
+}
+
+.p-plans__highend-media {
+	position: absolute;
+	/* 77 / 498.88、421.88 / 498.88（917:861-863）。帯の高さに追従させる */
+	top: 15.43%;
+	left: 0;
+	width: 100%;
+	height: 84.57%;
+}
+
+.p-plans__highend-media img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+/* 画像の上端を暗くしてテキストを読ませる（917:864 / 917:128） */
+.p-plans__highend-media::after {
+	content: "";
+	position: absolute;
+	inset: 0 0 auto;
+	height: 168.45px;
+	background: linear-gradient(180deg, var(--color-black2) 0%, rgba(26, 26, 26, 0) 100%);
+}
+
+.p-plans__text--highend {
+	position: relative;
+	z-index: 1;
+}
+
+.p-plans__text--highend .p-plans__jp {
+	color: var(--color-off-white);
+}
+
+.p-plans__text--highend .p-plans__eng {
+	color: var(--color-off-white);
+}
+
+.p-plans__text--highend .p-plans__desc {
+	color: var(--color-off-white);
+}
+
+@media (min-width: 769px) {
+	.p-copy__text {
+		white-space: nowrap;
+	}
+
+	/* PC のみ黒 30% の暗幕（917:37） */
+	.p-copy::after {
+		content: "";
+		position: absolute;
+		inset: 0;
+		background: var(--copy-overlay);
+	}
+
+	/* PC は画像が左・テキストが右 */
+	.p-plans__body {
+		display: flex;
+		flex-direction: row-reverse;
+		align-items: center;
+		justify-content: flex-end;
+		gap: 6.53%; /* 104.5 / 1600 */
+		width: min(100% - var(--gutter) * 2, var(--content-width));
+		margin-inline: auto;
+	}
+
+	.p-plans__text {
+		/* 568 / 1600 = 35.5%。letter-spacing は行末にも入り 0.4px 溢れて
+		   カンプの 2 行組が崩れるため、その分だけ広げる */
+		flex: 0 0 35.6%;
+		width: auto;
+	}
+
+	/* カンプ 917:139 / 917:133 は行高 40px */
+	.p-plans__desc {
+		--plans-desc-lh: 2.2222;
+	}
+
+	.p-plans__media {
+		flex: 0 0 var(--plans-package-img-w);
+		margin-top: 0;
+	}
+
+	/* PC は 917:136 の 900x454.41 をそのまま使う */
+	.p-plans__media img {
+		aspect-ratio: 900 / 454.41;
+	}
+
+	/* 帯が min-height で伸びたぶんは上下に均等に付ける（テキストは常に上下中央） */
+	.p-plans__highend {
+		display: flex;
+		align-items: center;
+	}
+
+	.p-plans__highend-media {
+		top: 0;
+		right: 0;
+		left: auto;
+		width: var(--plans-highend-img-w);
+		height: 100%;
+	}
+
+	/* PC は左から右へのグラデーション（917:128） */
+	.p-plans__highend-media::after {
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		background: linear-gradient(90deg, var(--color-black2) 0%, rgba(26, 26, 26, 0) 100%);
+	}
+
+	.p-plans__text--highend {
+		flex: 0 0 663px;
+		max-width: 50%;
+		/* 左余白基準。(100% - content-width)/2 だと 1600px 未満で負になり画面外へ出る */
+		margin-left: calc(var(--gutter) + var(--plans-highend-indent));
+	}
+}
+
+/* --- WORKS（917:113-123 / SP 917:872-882） --- */
+.p-works {
+	overflow: hidden; /* 扇状に配置したカードが左右にはみ出す（917:122 は x-25.23） */
+	background: var(--works-bg);
+	color: var(--color-white3);
+}
+
+.p-works__inner {
+	padding-block: var(--section-padding-y);
+}
+
+.p-works__title {
+	color: var(--color-white3);
+}
+
+.p-works__slider {
+	margin-top: var(--works-cards-gap);
+	padding-left: var(--gutter);
+}
+
+.p-works__list {
+	align-items: flex-start;
+	min-height: var(--works-list-h);
+}
+
+.p-works__card {
+	width: var(--works-card-w);
+	height: var(--works-card-h);
+	overflow: hidden;
+	border-radius: var(--plans-card-radius);
+}
+
+/* カード全体を施工事例の個別ページへのリンクにする（見た目は変えない） */
+.p-works__card > a {
+	display: block;
+	height: 100%;
+}
+
+.p-works__card img,
+.p-works__card-empty {
+	display: block;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+/* 画像未設定時のプレースホルダ（NEWS カードと同じグレー） */
+.p-works__card-empty {
+	background: var(--color-gray2);
+}
+
+.p-works__desc {
+	width: min(100% - var(--gutter) * 2, var(--works-desc-w));
+	margin-inline: auto;
+	margin-top: var(--works-text-gap);
+	font-size: var(--works-desc-size);
+	line-height: var(--works-desc-lh);
+	letter-spacing: var(--ls-base);
+	color: var(--color-gray2);
+}
+
+.p-works__btn {
+	display: flex;
+	margin-top: var(--works-btn-gap);
+	margin-inline: auto;
+}
+
+/* --- NEWS（917:93-112 / SP 917:877-884） --- */
+.p-news {
+	padding-block: var(--section-padding-y);
+	background: var(--color-white2);
+}
+
+.p-news__title {
+	color: var(--color-text);
+}
+
+.p-news__list {
+	display: flex;
+	gap: var(--news-card-gap);
+	margin-top: var(--news-cards-gap);
+	padding-left: var(--gutter);
+	overflow-x: auto;
+	scrollbar-width: none;
+}
+
+.p-news__list::-webkit-scrollbar {
+	display: none;
+}
+
+.p-news__card {
+	flex: 0 0 var(--news-card-w);
+}
+
+/* カード全体をお知らせの個別ページへのリンクにする。
+   見た目はリンク前と同じ（a のリセットで色と下線は継承・無しになる）。 */
+.p-news__card-link {
+	display: block;
+}
+
+.p-news__card-image {
+	display: block;
+	width: 100%;
+	height: var(--news-card-img-h);
+	object-fit: cover;
+	border-radius: var(--plans-card-radius);
+	box-shadow: var(--plans-card-shadow);
+}
+
+/* 画像未設定時のプレースホルダ（917:111 と同じグレー） */
+.p-news__card-image--empty {
+	background: var(--color-gray2);
+}
+
+.p-news__card-title {
+	margin-top: var(--news-title-gap);
+	font-size: var(--news-title-size);
+	font-weight: var(--fw-medium);
+	line-height: var(--news-title-lh);
+	letter-spacing: var(--ls-base);
+	color: var(--color-black1);
+}
+
+/* ボタンは PC のみ（SP カンプには無い） */
+.p-news__btn {
+	display: none;
+	margin-top: var(--news-btn-gap);
+	margin-inline: auto;
+}
+
+/* --- RECRUIT（917:85-92 / SP 917:788-794） --- */
+.p-recruit {
+	position: relative;
+	overflow: hidden;
+	background: var(--color-black2);
+	color: var(--color-white3);
+	text-align: center;
+}
+
+.p-recruit__bg {
+	position: absolute;
+	inset: 0;
+}
+
+.p-recruit__bg img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+/* 917:88 の暗幕 */
+.p-recruit__bg::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	background: var(--recruit-overlay);
+}
+
+.p-recruit__inner {
+	position: relative;
+	z-index: 1;
+	width: min(100% - var(--gutter) * 2, var(--content-narrow));
+	margin-inline: auto;
+	padding-block: var(--section-padding-y);
+}
+
+.p-recruit__title {
+	color: var(--color-white3);
+}
+
+.p-recruit__copy {
+	margin-top: var(--recruit-copy-gap);
+	font-size: var(--recruit-copy-size);
+	font-weight: var(--fw-bold);
+	line-height: var(--lh-base);
+	letter-spacing: 0.1em;
+}
+
+.p-recruit__sub {
+	margin-top: var(--recruit-sub-gap);
+	font-size: var(--recruit-sub-size);
+	line-height: var(--recruit-sub-lh);
+	letter-spacing: 0.1em;
+	color: var(--color-gray2);
+}
+
+.p-recruit__btn {
+	margin-top: var(--recruit-btn-gap);
+}
+
+@media (min-width: 769px) {
+	/* 扇状に重ねるため、はみ出しは隠さず中央に寄せる */
+	.p-works__slider {
+		padding-left: 0;
+		overflow: visible;
+	}
+
+	.p-works__card {
+		border-radius: var(--plans-card-radius);
+	}
+
+	.p-works__desc {
+		--works-desc-lh: 2.5; /* 917:117 は 14px・行高 2.5 で 3 行 105px */
+	}
+
+	/* アクティブ以外は半透明（917:119-122）。
+	   Swiper の creative エフェクトが inline で opacity を書くため !important で上書きする。 */
+	.p-works__card {
+		opacity: 0.5 !important;
+	}
+
+	.p-works__card.swiper-slide-active {
+		opacity: 1 !important;
+	}
+
+	.p-news__list {
+		padding-left: var(--gutter);
+	}
+
+	.p-news__btn {
+		display: flex;
+	}
+
+	/* PC のカンプは行高が広い（917:110 は 45/18、917:90 は 36/18） */
+	.p-news__card-title {
+		--news-title-lh: 2.5;
+	}
+
+	.p-recruit__sub {
+		--recruit-sub-lh: 2;
+	}
+}
+
+/* --- 総合調整（S8） --- */

@@ -1,0 +1,1402 @@
+/* ============================================================
+   企業情報ページ（固定ページ company）
+   カンプ: PC 917:1408 / SP 917:901
+   PC と SP でセクション構成・字送り・ウェイトが異なるため、
+   SP を基準に書き、769px 以上で PC カンプの値に上書きする。
+   数値・色はすべて Figma の実測値（コメントの node-id が出典）。
+   ============================================================ */
+:root {
+	/* --- 文字サイズ（左: SP 375px / 右: PC 1920px の実測値） --- */
+	--co-eng-size: clamp(12px, 3.262px + 2.3301vw, 48px); /* 12 → 48 (917:935 / 917:1537) */
+	--co-eng-ls: clamp(1px, 0.029px + 0.2589vw, 5px); /* 1 → 5 */
+	--co-jp-size: clamp(20px, 19.029px + 0.2589vw, 24px); /* 20 → 24 (917:936 / 917:1538) */
+	--co-lead-size: clamp(14px, 8.66px + 1.4239vw, 36px); /* 14 → 36 (917:938 / 917:1539) */
+	--co-text-size: clamp(12px, 11.029px + 0.2589vw, 16px); /* 12 → 16 (917:939 / 917:1540) */
+	--co-outro-size: clamp(12px, 10.06px + 0.5178vw, 20px); /* 12 → 20 (917:926 / 917:1541) */
+	--co-fv-sub: clamp(16px, 14.058px + 0.5178vw, 24px); /* 16 → 24 (917:940 / 917:1440) */
+	--co-card-eng: clamp(20px, 9.32px + 2.8479vw, 64px); /* 20 → 64 (917:948 / 917:1546) */
+	--co-story-eng: clamp(24px, 14.29px + 2.589vw, 64px); /* 24 → 64 : Brand Story (917:966 / 917:1556) */
+	--co-story-text: clamp(10px, 8.544px + 0.3883vw, 16px); /* 10 → 16 : 本文 (917:967 / 917:1557) */
+	--co-sign-size: clamp(10px, 9.515px + 0.1294vw, 12px); /* 10 → 12 : 署名 (917:1559) */
+	--co-mv-eng: clamp(20px, 2.7083vw, 52px); /* 1920 で 52px。PC のみ (917:1448) */
+	--co-value-eng: clamp(24px, 21.09px + 0.7767vw, 36px); /* 24 → 36 (917:961 / 917:1455) */
+	--co-value-desc: clamp(12px, 10.544px + 0.3883vw, 18px); /* 12 → 18 (917:963 / 917:1458) */
+	--co-quality-jp: clamp(18px, 16.544px + 0.3883vw, 24px); /* 18 → 24 (917:973 / 917:1442) */
+	--co-quality-item: clamp(12px, 9.573px + 0.6472vw, 22px); /* 12 → 22 (917:974 / 917:1443) */
+	--co-partner-title: clamp(40px, 21.8px + 4.854vw, 115px); /* 40 → 115 (917:913 / 917:1474) */
+	--co-partner-lead: clamp(16px, 12.117px + 1.0356vw, 32px); /* 16 → 32 (917:912 / 917:1417) */
+	--co-partner-label: clamp(12px, 10.06px + 0.5178vw, 20px); /* 12 → 20 (917:908 / 917:1528) */
+	--co-outro-title: clamp(16px, 11.146px + 1.2945vw, 36px); /* 16 → 36 (917:1016 / 917:1475) */
+	--co-profile-size: clamp(12px, 10.06px + 0.5178vw, 20px); /* 12 → 20 (917:1020 / 917:1561) */
+
+	/* --- レイアウト --- */
+	--co-pad: clamp(60px, 35.728px + 6.4725vw, 160px); /* 60 → 160 : セクション上下余白 */
+	--co-card-radius: clamp(8px, 7.515px + 0.1294vw, 10px); /* 8 → 10 */
+	--co-inner: 1600px; /* PC の内容幅（左右 160px） */
+	--co-mv-indent: clamp(12px, 3.262px + 2.3301vw, 48px); /* MISSION の字下げ */
+	--co-eco-pad-bottom: clamp(40px, 24.951px + 4.0129vw, 102px); /* Ecosystem の下余白 */
+	--co-profile-pad-bottom: clamp(40px, 25.437px + 3.8835vw, 100px); /* 会社概要の下余白 */
+	--co-partner-pad-bottom: clamp(40px, 26.408px + 3.6246vw, 96px); /* Partner の下余白 */
+
+	/* --- 色（このページ固有。共通トークンに無いもののみ） --- */
+	--co-bg-light: #f3f3f4; /* 917:1409・917:1418・917:1424 */
+	--co-watermark-dark: #2f2f2f; /* 917:1474 Partner Network */
+	--co-value-eng-color-sp: #b8b8b8; /* 917:961 */
+}
+
+/* --- セクション見出しの共通形 --- */
+.c-company-eng {
+	font-family: var(--font-ui);
+	font-size: var(--co-eng-size);
+	font-weight: var(--fw-regular);
+	line-height: var(--lh-base);
+	letter-spacing: var(--co-eng-ls);
+}
+
+.c-company-jp {
+	font-size: var(--co-jp-size);
+	font-weight: var(--fw-bold);
+	line-height: 2.5;
+	letter-spacing: var(--ls-wide);
+}
+
+.p-company-inner {
+	width: min(100% - var(--gutter) * 2, var(--co-inner));
+	margin-inline: auto;
+}
+
+/* ============================================================
+   FV（917:1426-1440 / 917:927-940）
+   ============================================================ */
+.p-cfv {
+	position: relative;
+	display: grid;
+	place-items: center;
+	height: var(--fv-height);
+	overflow: hidden;
+	background: var(--color-black2);
+	color: var(--color-white3);
+	text-align: center;
+}
+
+.p-cfv__bg {
+	position: absolute;
+	inset: 0;
+}
+
+.p-cfv__bg img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+/* 917:1427 / 917:928 の暗幕 */
+.p-cfv__bg::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	background: rgba(0, 0, 0, 0.3);
+}
+
+.p-cfv__copy {
+	position: relative;
+	z-index: 1;
+}
+
+.p-cfv__title {
+	margin: 0;
+	color: var(--color-white2);
+}
+
+.p-cfv__sub {
+	margin-top: 0;
+	font-size: var(--co-fv-sub);
+	font-weight: var(--fw-medium);
+	line-height: 2;
+	letter-spacing: var(--ls-base);
+	color: var(--color-gray2);
+}
+
+/* ============================================================
+   Why We Exist（917:1532-1553 / 917:924-952）
+   ============================================================ */
+.p-cwhy {
+	position: relative;
+	padding-block: var(--co-pad);
+	overflow: hidden;
+	background: var(--color-black2);
+	color: var(--color-white3);
+}
+
+.p-cwhy__bg {
+	position: absolute;
+	inset: 0;
+}
+
+.p-cwhy__bg img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+/* 917:1535 の暗幕 */
+.p-cwhy__bg::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	background: rgba(9, 9, 8, 0.7);
+}
+
+.p-cwhy__inner {
+	position: relative;
+	z-index: 1;
+	width: min(100% - var(--gutter) * 2, var(--co-inner));
+	margin-inline: auto;
+}
+
+.p-cwhy__eng {
+	color: var(--color-white3);
+}
+
+.p-cwhy__jp {
+	margin-top: 0;
+}
+
+.p-cwhy__lead {
+	margin-top: 1.8724vw; /* jp 下端 → lead 上端（917:1539） */
+	font-size: var(--co-lead-size);
+	font-weight: var(--fw-bold);
+	line-height: 1.8;
+	letter-spacing: var(--ls-wide);
+}
+
+.p-cwhy__text {
+	margin-top: 1.8719vw; /* lead 下端 → 本文（917:1540） */
+	font-size: var(--co-text-size);
+	line-height: 2;
+	letter-spacing: var(--ls-base);
+	color: var(--color-gray2);
+}
+
+/* 線画（917:1536 / 917:941） */
+.p-cwhy__feature {
+	width: 55%; /* 175.15 / 320（917:941） */
+	max-width: 480px;
+	height: auto;
+	margin-top: var(--space-lg);
+	margin-left: auto;
+}
+
+.p-cwhy__cards {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 1.9396vw; /* 917:1542 → 917:1548 */
+	margin-top: var(--space-2xl);
+}
+
+.p-cwhy__card {
+	position: relative;
+	overflow: hidden;
+	border-radius: var(--co-card-radius);
+}
+
+.p-cwhy__card-image {
+	display: block;
+	width: 100%;
+	height: auto;
+	aspect-ratio: 510.94 / 340.63;
+	object-fit: cover;
+}
+
+/* 下部のテキスト帯（917:1545 / 917:944） */
+.p-cwhy__card-body {
+	position: absolute;
+	inset: auto 0 0;
+	padding: var(--space-sm);
+	background: linear-gradient(180deg, rgba(26, 26, 26, 0) 0%, rgba(26, 26, 26, 0.85) 45%);
+	text-align: center;
+}
+
+.p-cwhy__card-eng {
+	font-size: var(--co-card-eng);
+	letter-spacing: 1px;
+	color: var(--color-white3);
+}
+
+/* 和文の添字は SP カンプには無い（917:948-952 は英字のみ） */
+.p-cwhy__card-jp {
+	display: none;
+	margin-top: 2px;
+	font-size: var(--co-jp-size);
+	font-weight: var(--fw-medium);
+	line-height: 2;
+	letter-spacing: var(--ls-wide);
+	color: var(--color-white3);
+}
+
+/* 3 行コピー（917:1047）。SP カンプのみに登場する */
+.p-cwhy__catch {
+	margin-top: var(--space-2xl);
+	font-size: var(--co-lead-size);
+	font-weight: var(--fw-bold);
+	line-height: 1.8;
+	letter-spacing: var(--ls-wide);
+	text-align: center;
+}
+
+.p-cwhy__outro {
+	margin-top: 6.8021vw; /* 917:1541 */
+	font-size: var(--co-outro-size);
+	line-height: 2.5;
+	letter-spacing: var(--ls-base);
+	text-align: center;
+	color: var(--color-gray2);
+}
+
+/* ============================================================
+   ブランドストーリー（917:1424・917:1554-1559 / 917:914-968）
+   PC は画像（左上）にパネル（右下）が重なり、署名は画像の右下に乗る。
+   ============================================================ */
+.p-cstory {
+	padding-block: var(--co-pad);
+	background: var(--co-bg-light);
+	color: var(--color-text);
+}
+
+.p-cstory__inner {
+	width: min(100% - var(--gutter) * 2, var(--co-inner));
+	margin-inline: auto;
+}
+
+.p-cstory__head {
+	text-align: center;
+}
+
+.p-cstory__eng--pc,
+.p-cstory__jp--pc {
+	display: none;
+}
+
+.p-cstory__body {
+	position: relative;
+	margin-top: var(--space-xl);
+}
+
+/* PC はパネル（DOM で後ろ）が写真の上に重なる（917:1555 が 917:1554 の手前） */
+.p-cstory__media {
+	position: relative;
+	margin: 0;
+}
+
+.p-cstory__image {
+	display: block;
+	width: 100%;
+	height: auto;
+	aspect-ratio: 849.09 / 566.06;
+	object-fit: cover;
+}
+
+/* SP は写真の下・左寄せ（917:968）、PC は写真の右下に乗る（917:1559） */
+.p-cstory__sign {
+	margin-top: var(--space-2xs);
+	font-size: var(--co-sign-size);
+	font-weight: var(--fw-medium);
+	line-height: 2;
+	letter-spacing: var(--ls-base);
+	color: var(--color-black1);
+}
+
+.p-cstory__panel {
+	position: relative;
+	margin-top: var(--space-md);
+	padding: var(--space-lg) var(--space-md);
+	background: var(--color-white2);
+}
+
+/* 薄いグレーの大きな英字（917:1556 / 917:966） */
+.p-cstory__panel-eng {
+	font-size: var(--co-story-eng);
+	line-height: 1.6;
+	letter-spacing: 1px;
+	text-align: center;
+	color: var(--color-off-white);
+}
+
+.p-cstory__panel-jp {
+	margin-top: calc(var(--co-story-eng) * -0.55);
+	font-size: var(--co-jp-size);
+	font-weight: var(--fw-bold);
+	line-height: 2.5;
+	letter-spacing: var(--ls-wide);
+	text-align: center;
+	color: var(--color-black2);
+}
+
+.p-cstory__text {
+	margin-top: var(--space-md);
+	font-size: var(--co-story-text);
+	line-height: 2;
+	letter-spacing: var(--ls-wide);
+	color: var(--color-black1);
+}
+
+.p-cstory__text p + p {
+	margin-top: 0;
+}
+
+/* VISION / MISSION（917:1445-1448）。PC カンプのみ */
+.p-cstory__mv {
+	display: none;
+	margin-top: var(--space-lg);
+}
+
+.p-cstory__mv-item {
+	display: grid;
+	grid-template-columns: auto 1fr;
+	align-items: start;
+	gap: var(--space-sm);
+}
+
+.p-cstory__mv-item + .p-cstory__mv-item {
+	margin-top: var(--space-sm);
+	padding-left: var(--co-mv-indent);
+}
+
+.p-cstory__mv-eng {
+	font-size: var(--co-mv-eng);
+	line-height: 1.6;
+	letter-spacing: 1px;
+	text-align: right;
+	color: var(--color-off-white);
+}
+
+.p-cstory__mv-desc {
+	margin: 0;
+	font-size: var(--co-text-size);
+	font-weight: var(--fw-medium);
+	line-height: 1.8;
+	letter-spacing: var(--ls-wide);
+	color: var(--color-black1);
+}
+
+/* ============================================================
+   私たちが作る体験（4 カード。PC カンプのみ）
+   ============================================================ */
+.p-cvisible {
+	display: none;
+}
+
+/* ============================================================
+   私たちを支える価値観（917:1418-1466 / 917:916-970）
+   SP は画像・アイコン・テキストが横に並ぶ帯（左右交互）。
+   ============================================================ */
+.p-cvalue {
+	padding-block: var(--co-pad);
+	background: var(--co-bg-light);
+	color: var(--color-text);
+}
+
+.p-cvalue__inner {
+	width: min(100% - var(--gutter) * 2, var(--co-inner));
+	margin-inline: auto;
+	text-align: center;
+}
+
+/* SP は左右にはみ出す帯のため、内側の余白を打ち消して全幅に置く（917:919-922） */
+.p-cvalue__cards {
+	display: grid;
+	gap: 30.56px; /* 917:919 → 917:920 のピッチ 117.28 − 帯高 86.72 */
+	margin-top: var(--space-xl);
+	margin-inline: calc(var(--gutter) * -1);
+	text-align: left;
+}
+
+.p-cvalue__card {
+	display: grid;
+	grid-template-columns: 35.13% 11.77% 1fr; /* 122.09 / 40.88 / 残り（帯幅 347.5） */
+	align-items: center;
+	width: 92.67%; /* 347.5 / 375 */
+	justify-self: end;
+	overflow: hidden;
+	background: var(--color-white2);
+	border-radius: var(--co-card-radius);
+	box-shadow: var(--plans-card-shadow);
+}
+
+/* 2 番目の帯は左寄せ・画像が右（917:920-921） */
+.p-cvalue__card:nth-child(even) {
+	grid-template-columns: 1fr 11.77% 35.13%;
+	justify-self: start;
+}
+
+.p-cvalue__card:nth-child(even) .p-cvalue__card-body {
+	order: 1;
+	padding-inline: var(--space-sm) 0;
+}
+
+.p-cvalue__card:nth-child(even) .p-cvalue__card-head {
+	order: 2;
+}
+
+.p-cvalue__card:nth-child(even) .p-cvalue__card-media {
+	order: 3;
+}
+
+.p-cvalue__number {
+	display: none;
+	font-family: var(--font-ui);
+	font-weight: var(--fw-semibold);
+	font-size: 36px;
+	line-height: 1.6;
+	letter-spacing: 3px;
+	color: var(--color-orange1);
+}
+
+.p-cvalue__card-head {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 0;
+}
+
+.p-cvalue__icon {
+	width: 100%;
+	min-width: 0;
+	height: auto;
+}
+
+.p-cvalue__card-body {
+	min-width: 0;
+	padding-inline: 0 var(--space-sm);
+}
+
+.p-cvalue__card-eng {
+	font-size: var(--co-value-eng);
+	line-height: 1.6;
+	color: var(--co-value-eng-color-sp);
+}
+
+.p-cvalue__card-desc {
+	font-size: var(--co-value-desc);
+	line-height: 1.6;
+	letter-spacing: var(--ls-base);
+	color: var(--color-black1);
+}
+
+.p-cvalue__card-media img {
+	display: block;
+	width: 100%;
+	height: 100%;
+	aspect-ratio: 122.09 / 86.72;
+	object-fit: cover;
+}
+
+/* カード内の配置はカンプ実測（917:1419-1466、カード 510.26x656.94）。
+   1920 基準の vw で指定し、狭い幅でも比率を保つ。
+   01 +26.93 / アイコン下端 +188.74 / Challenge +218.39 / 説明 +293.35 / 画像 +380.38 */
+@media (min-width: 769px) {
+	.p-cvalue__cards {
+		grid-template-columns: repeat(3, 1fr);
+		gap: var(--space-md);
+		margin-inline: 0;
+	}
+
+	.p-cvalue__card {
+		display: flex;
+		flex-direction: column;
+		align-items: stretch; /* SP の grid 用 align-items: center を打ち消す */
+		width: auto;
+		text-align: center;
+	}
+
+	.p-cvalue__card-head {
+		position: relative;
+		order: 1;
+		align-items: flex-start;
+		min-height: 9.8302vw;
+		padding: 1.4026vw 2.149vw 0;
+	}
+
+	/* 説明の行数が違っても写真の上端が揃うよう、本文側で余りを吸収する（917:1422-1466） */
+	.p-cvalue__card-body {
+		order: 2;
+		flex-grow: 1;
+		padding-inline: 0;
+	}
+
+	.p-cvalue__card-media {
+		order: 3;
+		margin-top: 1.1995vw;
+	}
+
+	.p-cvalue__card:nth-child(even) .p-cvalue__card-body {
+		order: 2;
+		padding-inline: 0;
+	}
+
+	.p-cvalue__number {
+		display: block;
+		position: absolute;
+		top: 1.4026vw;
+		left: 2.149vw;
+	}
+
+	.p-cvalue__icon {
+		width: auto;
+		height: 5.5109vw;
+		margin-top: 1.5141vw;
+	}
+
+	.p-cvalue__card-eng {
+		margin-top: 1.5443vw;
+		padding-inline: 2.149vw;
+		letter-spacing: 1px;
+		color: var(--color-black2);
+	}
+
+	.p-cvalue__card-desc {
+		margin-top: 0.8833vw;
+		padding: 0 2.149vw;
+		line-height: 1.8;
+		letter-spacing: var(--ls-wide);
+	}
+
+	.p-cvalue__card-media img {
+		height: auto;
+		aspect-ratio: 510.26 / 276.56;
+	}
+}
+
+/* ============================================================
+   EXone Quality（917:1425-1471 / 917:918-975）
+   背景は白（917:1425）。PC は左テキスト・右写真。
+   ============================================================ */
+.p-cquality {
+	position: relative;
+	background: var(--co-bg-light);
+	color: var(--color-text);
+}
+
+.p-cquality__media img {
+	display: block;
+	width: 100%;
+	height: auto;
+	aspect-ratio: 1129 / 641;
+	object-fit: cover;
+}
+
+.p-cquality__body {
+	width: min(100% - var(--gutter) * 2, var(--co-inner));
+	margin-inline: auto;
+	padding-block: var(--space-xl) var(--co-pad);
+}
+
+.p-cquality__eng {
+	color: var(--color-black2);
+}
+
+.p-cquality__jp {
+	margin-top: 0;
+	font-size: var(--co-quality-jp);
+	font-weight: var(--fw-bold);
+	line-height: 1.6;
+	letter-spacing: var(--ls-wide);
+	color: var(--color-black2);
+}
+
+.p-cquality__list {
+	margin-top: var(--space-md);
+}
+
+.p-cquality__item {
+	position: relative;
+	padding-left: 1em;
+	font-size: var(--co-quality-item);
+	font-weight: var(--fw-medium);
+	line-height: 2.5;
+	letter-spacing: var(--ls-wide);
+	color: var(--color-black1);
+}
+
+/* 917:1470 / 917:1471 の縦棒マーカー */
+.p-cquality__item::before {
+	content: "";
+	position: absolute;
+	top: 0.9em;
+	left: 0;
+	width: 3.58px;
+	height: 1em;
+	background: var(--color-orange1);
+}
+
+/* ============================================================
+   EXone Ecosystem（917:1411-1523 / 917:976-1013）
+   ============================================================ */
+.p-ceco {
+	position: relative;
+	padding-block: var(--co-pad) var(--co-eco-pad-bottom);
+	background: var(--color-black2);
+	color: var(--color-white3);
+	overflow: hidden;
+}
+
+.p-ceco__bg {
+	position: absolute;
+	inset: 0;
+}
+
+.p-ceco__bg img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+/* 917:1415 / 917:984 : セクション下端を Partner Network の黒へなじませる */
+.p-ceco::after {
+	content: "";
+	position: absolute;
+	inset: auto 0 0;
+	height: clamp(40px, 21.45px + 4.9482vw, 116.57px);
+	background: linear-gradient(180deg, rgba(26, 26, 26, 0) 0%, var(--color-black2) 100%);
+}
+
+/* 917:1412 / 917:977 の暗幕 */
+.p-ceco__bg::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	background: rgba(0, 0, 0, 0.6);
+}
+
+.p-ceco__inner {
+	position: relative;
+	z-index: 1;
+	width: min(100% - var(--gutter) * 2, var(--co-inner));
+	margin-inline: auto;
+}
+
+.p-ceco__head {
+	text-align: center;
+}
+
+.p-ceco__eng {
+	color: var(--color-white3);
+}
+
+.p-ceco__purpose {
+	margin-top: var(--space-xl);
+}
+
+.p-ceco__purpose-head {
+	display: flex;
+	align-items: center;
+	gap: var(--space-sm);
+}
+
+.p-ceco__purpose-icon {
+	width: auto;
+	height: clamp(47px, 41.951px + 1.3463vw, 82px);
+}
+
+.p-ceco__purpose-eng {
+	font-family: var(--font-ui);
+	font-size: clamp(12px, 9.088px + 0.7767vw, 24px);
+	font-weight: var(--fw-semibold);
+	line-height: 1.6;
+	letter-spacing: 3px;
+	color: var(--color-gray2);
+}
+
+.p-ceco__purpose-jp {
+	font-size: clamp(16px, 12.845px + 0.8414vw, 29px);
+	font-weight: var(--fw-bold);
+	line-height: 1.6;
+	letter-spacing: clamp(2px, 1.272px + 0.1942vw, 5px);
+	color: var(--color-white2);
+}
+
+.p-ceco__purpose-text {
+	margin-top: var(--space-sm);
+	font-size: var(--co-text-size);
+	font-weight: var(--fw-medium);
+	line-height: 2.5;
+	letter-spacing: var(--ls-wide);
+	color: var(--color-gray2);
+}
+
+/* PC の円形図は SP では出さない */
+.p-ceco__figure {
+	display: none;
+	margin: 0;
+}
+
+.p-ceco__list {
+	margin-top: var(--space-lg);
+	padding-left: var(--space-md);
+	border-left: var(--border-thin) solid var(--color-gray3);
+}
+
+.p-ceco__item + .p-ceco__item {
+	margin-top: var(--space-md);
+	padding-top: var(--space-md);
+	border-top: var(--border-thin) solid var(--color-gray3);
+}
+
+.p-ceco__item-head {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: var(--space-xs);
+}
+
+/* 見出しはオレンジ（917:990） */
+.p-ceco__item-jp {
+	font-size: clamp(14px, 12.544px + 0.3883vw, 20px);
+	font-weight: var(--fw-medium);
+	line-height: 2.5;
+	letter-spacing: var(--ls-wide);
+	color: var(--color-orange1);
+}
+
+.p-ceco__item-eng {
+	font-family: var(--font-ui);
+	font-size: clamp(11px, 10.515px + 0.1294vw, 13px);
+	line-height: 1.6;
+	letter-spacing: var(--ls-base);
+	color: var(--color-gray2);
+}
+
+.p-ceco__item-desc {
+	margin-top: 2px;
+	font-size: var(--co-text-size);
+	line-height: 1.6;
+	letter-spacing: var(--ls-base);
+	color: var(--color-gray2);
+}
+
+/* ============================================================
+   Partner Network（917:1413-1531 / 917:905-1017）
+   ============================================================ */
+.p-cpartner {
+	padding-block: var(--co-pad) var(--co-partner-pad-bottom);
+	background: var(--color-black2);
+	color: var(--color-white3);
+}
+
+.p-cpartner__inner {
+	width: min(100% - var(--gutter) * 2, var(--co-inner));
+	margin-inline: auto;
+}
+
+/* PC カンプのみのリード */
+.p-cpartner__intro {
+	display: none;
+}
+
+/* 背景と同系色で敷く大きな英字（917:1474 / 917:913） */
+.p-cpartner__title {
+	font-size: var(--co-partner-title);
+	line-height: 1.6;
+	letter-spacing: -1px;
+	color: var(--co-watermark-dark);
+}
+
+.p-cpartner__lead {
+	margin-top: var(--space-xs);
+	font-size: var(--co-partner-lead);
+	font-weight: var(--fw-bold);
+	line-height: 1.8;
+	letter-spacing: var(--ls-wide);
+}
+
+.p-cpartner__cards {
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	gap: var(--space-sm);
+	margin-top: var(--space-xl);
+}
+
+.p-cpartner__card img {
+	display: block;
+	width: 100%;
+	height: auto;
+	aspect-ratio: 375 / 211;
+	object-fit: cover;
+	border-radius: var(--co-card-radius);
+}
+
+.p-cpartner__card-label {
+	margin-top: var(--space-2xs);
+	font-size: var(--co-partner-label);
+	font-weight: var(--fw-bold);
+	line-height: 2.5;
+	letter-spacing: var(--ls-wide);
+	color: var(--color-white2);
+}
+
+.p-cpartner__outro {
+	margin-top: var(--space-2xl);
+}
+
+.p-cpartner__outro-title {
+	font-size: var(--co-outro-title);
+	font-weight: var(--fw-bold);
+	line-height: 1.6;
+	letter-spacing: var(--ls-wide);
+}
+
+.p-cpartner__outro-desc {
+	margin-top: var(--space-sm);
+	font-size: var(--co-text-size);
+	font-weight: var(--fw-medium);
+	line-height: 2.5;
+	letter-spacing: var(--ls-wide);
+	color: var(--color-gray2);
+}
+
+.p-cpartner__map {
+	width: 100%;
+	height: auto;
+	margin-top: var(--space-lg);
+	opacity: 0.8; /* 502:4 */
+}
+
+/* ============================================================
+   会社概要（PC 455:104 の 975:91-949:72 / SP 494:511 の 917:902-1046）
+   SP は 見出し → 写真 → 表。PC は全幅写真の上に見出し・コピー・ロゴを重ね、
+   その下端に白カードの表を重ねる。
+   ============================================================ */
+.p-cprofile {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	padding-block: var(--co-pad) var(--co-profile-pad-bottom);
+	background: var(--co-bg-light);
+	color: var(--color-text);
+}
+
+.p-cprofile__head,
+.p-cprofile__card {
+	width: min(100% - var(--gutter) * 2, var(--co-inner));
+	margin-inline: auto;
+}
+
+.p-cprofile__head {
+	order: 1;
+	text-align: center;
+}
+
+/* SP カンプには無い（PC 949:81 / 949:72） */
+.p-cprofile__lead,
+.p-cprofile__logo {
+	display: none;
+}
+
+/* SP は見出しの下に全幅で敷く（917:903-904） */
+.p-cprofile__media {
+	order: 2;
+	margin-top: var(--space-lg);
+}
+
+.p-cprofile__media img {
+	width: 100%;
+	height: auto;
+	aspect-ratio: 375 / 177;
+	object-fit: cover;
+}
+
+.p-cprofile__card {
+	order: 3;
+	margin-top: var(--space-xl);
+}
+
+.p-cprofile__row {
+	display: grid;
+	grid-template-columns: 30% 1fr;
+	gap: var(--space-sm);
+	padding-block: var(--space-2xs);
+}
+
+/* 罫線は行間のみ（917:1024-1032 は 10 行に対して 9 本） */
+.p-cprofile__row + .p-cprofile__row {
+	border-top: var(--border-thin) solid var(--color-gray1);
+}
+
+.p-cprofile__label,
+.p-cprofile__value {
+	font-size: var(--co-profile-size);
+	line-height: 2.5;
+	letter-spacing: var(--ls-base);
+	color: var(--color-black1);
+}
+
+.p-cprofile__label {
+	font-weight: var(--fw-bold);
+}
+
+.p-cprofile__value {
+	font-weight: var(--fw-regular);
+}
+
+/* ============================================================
+   PC（769px 以上）
+   ============================================================ */
+@media (min-width: 769px) {
+	.c-company-eng {
+		font-weight: var(--fw-semibold);
+	}
+
+	.c-company-jp {
+		font-weight: var(--fw-medium);
+	}
+
+	/* --- FV --- */
+	.p-cfv__sub {
+		line-height: 2.5;
+		letter-spacing: var(--ls-wide);
+		color: var(--color-white3);
+	}
+
+	/* --- Why We Exist --- */
+	.p-cwhy__inner {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		column-gap: var(--space-xl);
+	}
+
+	.p-cwhy__head {
+		grid-column: 1 / 2;
+	}
+
+	/* 線画 x817.83 y153.03 915.3x431.6（917:1536） */
+	.p-cwhy__feature {
+		position: absolute;
+		top: -0.363vw;
+		right: 0;
+		width: 47.66%;
+		max-width: none;
+		margin: 0;
+	}
+
+	.p-cwhy__lead {
+		font-weight: var(--fw-medium);
+	}
+
+	.p-cwhy__text {
+		font-weight: var(--fw-medium);
+		line-height: 2.5;
+		letter-spacing: var(--ls-wide);
+	}
+
+	/* カード列 y705.33（本文下端 551.77 から 153.56） */
+	.p-cwhy__cards {
+		grid-column: 1 / -1;
+		margin-top: 7.9979vw;
+	}
+
+	.p-cwhy__card-jp {
+		display: block;
+	}
+
+	.p-cwhy__catch {
+		display: none;
+	}
+
+	/* アウトロ y1296.56（カード下端 1045.96 から 250.6） */
+	.p-cwhy__outro {
+		grid-column: 1 / -1;
+		margin-top: 13.0521vw;
+		font-weight: var(--fw-medium);
+		letter-spacing: var(--ls-wide);
+	}
+
+	/* --- ブランドストーリー ---
+	   カンプ実測（セクション上端 2686.06 基準・1920 幅）:
+	   画像 x163.73 y365.88 849.09x566.06 / パネル x921.32 y481.03 849.81x681.97
+	   Brand Story x1202.73 y425.41 / ブランドストーリー y519.54 / 本文 x1014.56 y616.05
+	   署名 x755.91 y861.05 / VISION y968.05 / MISSION y1051.05 */
+	.p-cstory__eng--pc,
+	.p-cstory__jp--pc {
+		display: block;
+	}
+
+	.p-cstory__eng--sp,
+	.p-cstory__jp--sp {
+		display: none;
+	}
+
+	/* 写真列（.p-cstory__col）とパネルを同じセルに重ねる。
+	   パネルを絶対配置にすると本文量でセクション高さが足りなくなり、
+	   次セクションへはみ出すため、両方を通常フローのグリッドアイテムにして
+	   行の高さが「写真列」「パネル」の高いほうに追従するようにしている。 */
+	.p-cstory__body {
+		position: relative;
+		display: grid;
+		grid-template-columns: 1fr;
+		margin-top: 3.5937vw; /* 見出し下端 → 画像上端 */
+	}
+
+	.p-cstory__col {
+		grid-area: 1 / 1;
+		width: 53.07%; /* 849.09 / 1600 */
+	}
+
+	/* 署名 x755.91 y861.05（写真は x163.73 y365.88 849.09x566.06）。
+	   パネル左端 x921.32 より左に収める */
+	.p-cstory__sign {
+		position: absolute;
+		z-index: 2;
+		right: 14.6%;
+		bottom: 4%;
+		margin-top: 0;
+		text-align: right;
+		color: var(--color-white2);
+	}
+
+	.p-cstory__panel {
+		grid-area: 1 / 1;
+		position: relative; /* 写真列より手前に描画する（DOM 順で解決） */
+		justify-self: end;
+		width: 53.11%; /* 849.81 / 1600 */
+		margin-top: 5.9974vw; /* 481.03 - 365.88 */
+		/* 本文は x1014.56（パネル左端 921.32 から 93.24）。
+		   % パディングは親（body 幅 1600）基準になるため、その比で指定する。 */
+		padding: 0 5.8275% 5.747%;
+		box-shadow: var(--plans-card-shadow);
+	}
+
+	/* パネル上端をまたいで外側に出る（917:1556 は y425.41、パネル上端は y481.03） */
+	.p-cstory__panel-eng {
+		margin-top: -2.8969vw;
+	}
+
+	/* ブランドストーリー y519.54（Brand Story 上端から 94.13） */
+	.p-cstory__panel-jp {
+		margin-top: -0.4307vw;
+	}
+
+	/* 本文 y616.05（ブランドストーリー下端 579.54 から 36.51） */
+	.p-cstory__text {
+		margin-top: 1.9016vw;
+		font-weight: var(--fw-medium);
+		line-height: 2.2;
+	}
+
+	/* VISION / MISSION は画像の下・左寄せ。
+	   パネル左端（内側幅の 46.89%）より手前で折り返させ、文字がパネルに潜らないようにする。 */
+	.p-cstory__mv {
+		display: block;
+		width: 88.36%; /* 46.89 / 53.07 */
+		margin-top: 1.8807vw; /* 968.05 - (365.88 + 566.06) */
+	}
+
+	/* VISION は x182.97（内側左端 160 から 22.97）、説明は x339.91 */
+	.p-cstory__mv-item {
+		grid-template-columns: 7.7604vw 1fr;
+		gap: 1.5625vw;
+		padding-left: 1.1964vw;
+	}
+
+	/* MISSION は VISION より 34.3 右（182.97 → 217.27） */
+	.p-cstory__mv-item + .p-cstory__mv-item {
+		margin-top: 0;
+		padding-left: 2.9828vw;
+	}
+
+	/* --- 私たちが作る体験（PC のみ・917:1414 は #fefefe） --- */
+	.p-cvisible {
+		display: block;
+		padding-block: var(--co-pad);
+		background: var(--color-white2);
+	}
+
+	.p-cvisible__inner {
+		width: min(100% - var(--gutter) * 2, var(--co-inner));
+		margin-inline: auto;
+		text-align: center;
+	}
+
+	.p-cvisible__cards {
+		display: grid;
+		grid-template-columns: repeat(4, 1fr);
+		gap: var(--space-md);
+		margin-top: var(--space-xl);
+		text-align: left;
+	}
+
+	.p-cvisible__card-image {
+		width: 100%;
+		height: auto;
+		aspect-ratio: 377.8 / 481;
+		object-fit: cover;
+	}
+
+	.p-cvisible__card-eng {
+		margin-top: var(--space-sm);
+		font-size: 40px;
+		line-height: 1.6;
+		letter-spacing: 1px;
+		color: var(--color-off-white);
+	}
+
+	.p-cvisible__card-jp {
+		font-size: var(--co-jp-size);
+		font-weight: var(--fw-medium);
+		line-height: 2.5;
+		letter-spacing: var(--ls-wide);
+		color: var(--color-black2);
+	}
+
+	.p-cvisible__card-desc {
+		font-size: 18px;
+		line-height: 1.8;
+		letter-spacing: var(--ls-wide);
+		color: var(--color-black2);
+	}
+
+	/* --- EXone Quality（917:1425 は白） --- */
+	.p-cquality {
+		display: grid;
+		grid-template-columns: 41% 59%;
+		align-items: center;
+		background: var(--color-white2);
+	}
+
+	.p-cquality__media {
+		order: 2;
+	}
+
+	.p-cquality__media img {
+		height: 100%;
+	}
+
+	.p-cquality__body {
+		order: 1;
+		width: auto;
+		margin: 0;
+		padding: var(--co-pad) var(--space-xl) var(--co-pad) var(--gutter);
+	}
+
+	.p-cquality__jp {
+		font-weight: var(--fw-medium);
+		line-height: 2.5;
+		color: var(--color-black1);
+	}
+
+	/* --- Ecosystem --- */
+	/* カンプ 917:1481 は図が右（x843.47 y370.69 906.39x750.55）、
+	   テキストが左（x156.91 y372.98）。図はセクション下端をまたいで
+	   Partner Network 側へはみ出すため、ここでは overflow を切らない。 */
+	.p-ceco {
+		overflow: visible;
+	}
+
+	.p-ceco__body {
+		position: relative;
+		display: block;
+		min-height: 21.8vw;
+		margin-top: 0;
+	}
+
+	.p-ceco__purpose {
+		width: 34%; /* 544.66 / 1600 */
+		margin-top: 0;
+		padding-top: 2.7594vw; /* 見出し下端 → 372.98 */
+	}
+
+	/* 図 y370.69（セクション上端から）。本体開始位置との差を top で足す */
+	.p-ceco__figure {
+		display: block;
+		position: absolute;
+		top: 3.85vw;
+		right: -6.5%;
+		width: 56.65%; /* 906.39 / 1600 */
+	}
+
+	.p-ceco__figure img {
+		width: 100%;
+		height: auto;
+	}
+
+	/* PC は図に内容が入るのでリストは読み上げ用に隠す */
+	.p-ceco__list {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		margin: -1px;
+		padding: 0;
+		overflow: hidden;
+		clip-path: inset(50%);
+		border: 0;
+		white-space: nowrap;
+	}
+
+	/* --- Partner Network --- */
+	.p-cpartner__intro {
+		display: block;
+		width: 34%; /* 544.66 / 1600 */
+	}
+
+	.p-cpartner__intro-eng {
+		font-family: var(--font-ui);
+		font-size: 20px;
+		font-weight: var(--fw-bold);
+		line-height: 1.6;
+		letter-spacing: 3px;
+		color: var(--color-gray2);
+	}
+
+	.p-cpartner__intro-jp {
+		margin-top: var(--space-2xs);
+		font-size: 36px;
+		font-weight: var(--fw-bold);
+		line-height: 1.6;
+		letter-spacing: var(--ls-title);
+		color: var(--color-white2);
+	}
+
+	.p-cpartner__intro-text {
+		margin-top: var(--space-sm);
+		font-size: var(--co-text-size);
+		font-weight: var(--fw-medium);
+		line-height: 2.5;
+		letter-spacing: var(--ls-wide);
+		color: var(--color-gray2);
+	}
+
+	/* Partner Network y369.27（intro 下端 323.18 から 46.09） */
+	.p-cpartner__title {
+		margin-top: 2.4005vw;
+	}
+
+	.p-cpartner__lead {
+		line-height: 2.5;
+	}
+
+	/* カード y633.79（lead 下端 581.18 から 52.61）、間隔 33.43（158.43→566.86） */
+	.p-cpartner__cards {
+		grid-template-columns: repeat(4, 1fr);
+		gap: 1.7411vw;
+		margin-top: 2.7401vw;
+	}
+
+	.p-cpartner__outro-title {
+		letter-spacing: var(--ls-title);
+	}
+
+	/* 地図 y926.37（カード下端 870.44 から 55.93）。
+	   カンプではテキスト（x163.30 w938）と地図（x894.04 w835.82）が横に重なるため、
+	   2 分割ではなく同じセルに重ねて置く。列を半分にするとタイトルが折り返してしまう。 */
+	.p-cpartner__outro {
+		display: grid;
+		grid-template-columns: 1fr;
+		align-items: center;
+		margin-top: 2.913vw;
+	}
+
+	/* カンプのテキスト枠は 938 だが、見出しの実寸は 943 でわずかに溢れる
+	   （カンプ側も whitespace-nowrap で枠外に出ている）。1 行に収まる幅を取る。 */
+	.p-cpartner__outro-body {
+		grid-area: 1 / 1;
+		position: relative; /* 地図より前面に置く */
+		z-index: 1;
+		width: 60%; /* 960 / 1600（カンプ 938 + 見出しのはみ出し分） */
+	}
+
+	.p-cpartner__map {
+		grid-area: 1 / 1;
+		justify-self: end;
+		width: 52.24%; /* 835.82 / 1600 */
+		margin: 0 1.88% 0 0; /* 右端 1729.86 → 内側右端 1600 との差 */
+	}
+
+	/* --- 会社概要 ---
+	   カンプ実測（セクション上端 9331.05 基準・1920 幅）:
+	   写真 1920x950.61 / Company Profile y153.24 / 会社概要 y219.12
+	   コピー y429.42 / ロゴ y601.16 201.21x31.08 / カード x376.43 y849.03 1200x785
+	   表は カード内 x113.58 y80、ラベル列 219.42、行送り 60 */
+	.p-cprofile {
+		display: block;
+		padding-block: 0 min(9.6188vw, 185px);
+	}
+
+	/* 背景写真（975:91-92）はセクション上端に全幅で敷く */
+	.p-cprofile__media {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		/* 中間幅でもカードが写真の下端に重なるよう下限を持たせる */
+		height: max(49.5vw, 520px);
+		margin: 0;
+	}
+
+	.p-cprofile__media img {
+		width: 100%;
+		height: 100%;
+		aspect-ratio: auto;
+	}
+
+	/* 見出し・コピー・ロゴは写真の上に乗る */
+	.p-cprofile__head {
+		position: relative;
+		z-index: 1;
+		padding-top: 7.9812vw; /* 9484.29 - 9331.05 */
+		color: var(--color-white2);
+	}
+
+	.p-cprofile__lead {
+		display: block;
+		margin-top: 7.8281vw; /* 会社概要 下端 9610.17 → 9760.47 */
+		font-size: clamp(14px, 10px + 0.5208vw, 20px);
+		font-weight: var(--fw-medium);
+		line-height: 2.5;
+		letter-spacing: var(--ls-wide);
+		color: var(--color-gray2);
+	}
+
+	.p-cprofile__logo {
+		display: block;
+		width: 10.4797vw; /* 201.21 / 1920 */
+		max-width: 201px;
+		height: auto;
+		margin: 1.1323vw auto 0;
+	}
+
+	.p-cprofile__card {
+		position: relative;
+		z-index: 1;
+		order: 0;
+		width: min(100% - var(--gutter) * 2, 1200px);
+		margin-top: 11.2911vw; /* ロゴ下端 9963.29 → カード上端 10180.08 */
+		padding: min(4.1667vw, 80px) min(5.9156vw, 114px);
+		background: var(--color-white2);
+		border-radius: var(--co-card-radius);
+		box-shadow: 0 4px 8px 1px rgba(0, 0, 0, 0.05); /* 949:13 */
+	}
+
+	.p-cprofile__row {
+		grid-template-columns: 22.55% 1fr; /* 219.42 / 972.84 */
+		gap: 0;
+		padding-block: 0 10px;
+		border-top: 0;
+	}
+
+	.p-cprofile__row + .p-cprofile__row {
+		border-top: 0;
+	}
+
+	/* 罫線は値の列だけに引く（949:41-49 は x709.43 から） */
+	.p-cprofile__row:not(.p-cprofile__row--last) .p-cprofile__value {
+		border-bottom: var(--border-thin) solid var(--color-gray1);
+	}
+
+	.p-cprofile__row--last {
+		padding-bottom: 0;
+	}
+
+	.p-cprofile__label {
+		font-weight: var(--fw-medium);
+		color: var(--color-gray3);
+	}
+}
