@@ -310,9 +310,11 @@ Text Domain: exterior-exone
 	/* --- WORKS / NEWS / RECRUIT（917:85-123 / SP 917:788-884） --- */
 	--works-bg: linear-gradient(90deg, #1a1a1a 0.481%, #4d4d4d 50%, #1a1a1a 100%); /* 917:114 */
 	--works-cards-gap: clamp(16.8px, 4.46px + 3.2906vw, 67.64px); /* 16.8 → 67.64 : 見出し下→カード（見出しの行box差を補正） */
-	--works-card-w: clamp(262.39px, 246.97px + 4.112vw, 325.92px); /* 262.39 → 325.92 */
-	--works-card-h: clamp(317.96px, 299.273px + 4.9832vw, 394.95px); /* 317.96 → 394.95 */
-	--works-list-h: clamp(317.96px, 257.829px + 16.035vw, 565.7px); /* 317.96 → 565.7 : カード群の高さ（917:118） */
+	/* 768px 以下は「3 枚見え・両端は少しだけ見切れ」（SP カンプ 917:872-882 の 375px 時の構図）を
+	   どの幅でも保つため、カード寸法をビューポート幅比例にする。769px 以上は PC 用（5 枚見え）に上書き。 */
+	--works-card-w: 69.971vw; /* 262.39px @375 */
+	--works-card-h: 84.789vw; /* 317.96px @375（325.92:394.95 の縦横比） */
+	--works-list-h: 84.789vw; /* カード群の高さ = カード高（917:118） */
 	--works-text-gap: clamp(-110.75px, 58.508px + -8.8155vw, 25.45px); /* 25.45 → -110.75 : PC はカード群に説明文が重なる */
 	--works-btn-gap: clamp(25.46px, 15.715px + 2.5987vw, 65.61px); /* 25.46 → 65.61 : 説明文下→ボタン */
 	--works-desc-size: clamp(12px, 11.515px + 0.1294vw, 14px); /* 12 → 14 : 917:876 / 917:117 */
@@ -395,6 +397,16 @@ Text Domain: exterior-exone
 		--dx-pin-top: 0px;
 		--dx-pin-height: 100vh;
 		--fv-copy-top: 40.54%; /* PC: 437.88 / 1080（1:306 / 1:280） */
+
+		/* WORKS: どの幅でも「5 枚見え・両端 2 枚は 1/3 ほど見え」の構図
+		   （指定スクリーンショット = 1440px 幅時の旧実装の見た目）を保つため、
+		   PC はビューポート幅比例にする。カード縦横比（325.92:394.95）と
+		   1 枚あたり 10.24 度はカンプのまま。
+		   基準: 1440px 時 カード 306.18px・隣カードとの見かけの中心間隔 397.56px。
+		   この比率だと中央 ±1 は全部見え、±2 は 34% だけ見え、±3 は画面外になる。 */
+		--works-card-w: 21.263vw; /* 306.18px @1440 */
+		--works-card-h: 25.767vw; /* 371.05px @1440（325.92:394.95 の縦横比） */
+		--works-list-h: 36.5vw; /* 端カードの下がり 10.64vw + カード高 25.77vw */
 	}
 }
 
@@ -2732,7 +2744,7 @@ body.is-drawer-open {
 
 /* --- WORKS（917:113-123 / SP 917:872-882） --- */
 .p-works {
-	overflow: hidden; /* 扇状に配置したカードが左右にはみ出す（917:122 は x-25.23） */
+	overflow: hidden; /* 円弧上のカードが左右にはみ出す（917:122 は x-25.23） */
 	background: var(--works-bg);
 	color: var(--color-white3);
 }
@@ -2745,27 +2757,65 @@ body.is-drawer-open {
 	color: var(--color-white3);
 }
 
+/* 円弧（観覧車）スライダー。カードの回転角と回転原点（円の中心）は
+   js/works-carousel.js がカード幅から計算してインラインで与える。 */
 .p-works__slider {
+	position: relative;
+	height: var(--works-list-h);
 	margin-top: var(--works-cards-gap);
-	padding-left: var(--gutter);
+	touch-action: pan-y; /* 横ドラッグは輪、縦はページスクロール */
+	user-select: none;
+	-webkit-user-select: none;
 }
 
 .p-works__list {
-	align-items: flex-start;
-	min-height: var(--works-list-h);
+	position: relative;
+	height: 100%;
 }
 
 .p-works__card {
+	position: absolute;
+	top: 0;
+	left: 50%;
 	width: var(--works-card-w);
 	height: var(--works-card-h);
+	margin-left: calc(var(--works-card-w) / -2);
 	overflow: hidden;
 	border-radius: var(--plans-card-radius);
+	opacity: 0.5; /* 中央以外は半透明（917:119-122） */
+	transition: opacity 0.3s;
 }
 
-/* カード全体を施工事例の個別ページへのリンクにする（見た目は変えない） */
-.p-works__card > a {
+/* 輪のとき: リスト全体を送りゾーン（z-index: 2）より上に置き、クリックは
+   中央カードだけが受けてリンクへ、それ以外の場所はゾーンへ素通しする。
+   （リストには JS の transform が掛かりスタッキングコンテキストになるため、
+   カード単体の z-index ではゾーンの上に出せない） */
+.p-works__slider.is-wheel .p-works__list {
+	z-index: 3;
+	pointer-events: none;
+}
+
+.p-works__card.is-current {
+	opacity: 1;
+	pointer-events: auto; /* リストごと無効にしたポインターを中央カードだけ受け直す */
+}
+
+/* 中央から 3 枚目以降は見せない（常に「5 枚見え・両端 2 枚だけ少し見切れ」に保つ）。
+   輪の回転で 2 枚目の位置に入るときにフェードで現れる。 */
+.p-works__card.is-outside {
+	opacity: 0;
+}
+
+/* 個別ページへ飛べるのは中央のカードだけ。左右のカードのクリックは
+   透明な送りゾーン（.p-works__nav）に落として 1 枚送りにする。 */
+.p-works__card-link {
 	display: block;
 	height: 100%;
+	pointer-events: none;
+}
+
+.p-works__card.is-current .p-works__card-link {
+	pointer-events: auto;
 }
 
 .p-works__card img,
@@ -2774,6 +2824,7 @@ body.is-drawer-open {
 	width: 100%;
 	height: 100%;
 	object-fit: cover;
+	-webkit-user-drag: none; /* 画像のドラッグ既定動作が輪のドラッグを妨げないように */
 }
 
 /* 画像未設定時のプレースホルダ（NEWS カードと同じグレー） */
@@ -2781,7 +2832,118 @@ body.is-drawer-open {
 	background: var(--color-gray2);
 }
 
+/* JS が輪を組む前（無効時）は横並びで全件見せるフォールバック */
+.p-works__slider:not(.is-wheel) {
+	height: auto;
+	padding-left: var(--gutter);
+	overflow-x: auto;
+}
+
+.p-works__slider:not(.is-wheel) .p-works__list {
+	display: flex;
+	gap: 19.09px; /* SP のカード間（917:881 → 917:882） */
+	align-items: flex-start;
+	min-height: var(--works-list-h);
+}
+
+.p-works__slider:not(.is-wheel) .p-works__card {
+	position: static;
+	flex-shrink: 0;
+	margin-left: 0;
+	opacity: 1;
+}
+
+.p-works__slider:not(.is-wheel) .p-works__card-link {
+	pointer-events: auto;
+}
+
+/* 左右の送りゾーン（透明ボタン）。マウスストーカーの NEXT / PREV 判定（中央線）と
+   同じ「中央カードを除いた左右半分」を覆い、クリックで 1 枚送る。中央カードは
+   z-index でゾーンより上に出してリンクへ抜けさせる。
+   SP は中央カードが画面幅いっぱいでゾーンと重なるため出さない（スワイプのみ）。 */
+.p-works__nav {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	z-index: 2;
+	display: none;
+	width: 50%;
+	padding: 0;
+	border: 0;
+	background: transparent;
+	appearance: none;
+	-webkit-appearance: none;
+	cursor: pointer;
+}
+
+@media (min-width: 769px) {
+	.p-works__slider.is-wheel .p-works__nav {
+		display: block;
+	}
+}
+
+.p-works__nav--prev {
+	left: 0;
+}
+
+.p-works__nav--next {
+	right: 0;
+}
+
+/* マウスストーカー（カーソル追従の円 + NEXT / PREV / DRAG）。
+   位置は JS が transform で毎フレーム与える。ホバーできる環境のみ表示。 */
+.p-works__stalker {
+	position: absolute;
+	top: -45px;
+	left: -45px;
+	z-index: 3;
+	display: none;
+	width: 90px;
+	height: 90px;
+	pointer-events: none;
+	opacity: 0;
+	transition: opacity 0.25s;
+}
+
+.p-works__stalker.is-visible {
+	opacity: 1;
+}
+
+.p-works__stalker-circle {
+	position: absolute;
+	inset: 0;
+	border: 1px solid var(--color-white3);
+	border-radius: 50%;
+	transition: transform 0.3s;
+}
+
+.p-works__stalker.is-down .p-works__stalker-circle {
+	transform: scale(1.2);
+}
+
+.p-works__stalker-text {
+	position: absolute;
+	inset: 0;
+	display: grid;
+	place-items: center;
+	font-size: 12px;
+	letter-spacing: var(--ls-base);
+	color: var(--color-white3);
+}
+
+@media (hover: hover) and (pointer: fine) {
+	.p-works__slider.is-wheel .p-works__stalker {
+		display: block;
+	}
+
+	/* ゾーン上ではストーカーがカーソルの代わりになる */
+	.p-works__slider.is-wheel .p-works__nav {
+		cursor: none;
+	}
+}
+
 .p-works__desc {
+	text-align: center;
 	width: min(100% - var(--gutter) * 2, var(--works-desc-w));
 	margin-inline: auto;
 	margin-top: var(--works-text-gap);
@@ -2789,6 +2951,12 @@ body.is-drawer-open {
 	line-height: var(--works-desc-lh);
 	letter-spacing: var(--ls-base);
 	color: var(--color-gray2);
+	transition: opacity 0.2s;
+}
+
+/* カードの送り中はタイトルを一旦消し、確定後に差し替えて戻す */
+.p-works__desc.is-hidden {
+	opacity: 0;
 }
 
 .p-works__btn {
@@ -2921,28 +3089,8 @@ body.is-drawer-open {
 }
 
 @media (min-width: 769px) {
-	/* 扇状に重ねるため、はみ出しは隠さず中央に寄せる */
-	.p-works__slider {
-		padding-left: 0;
-		overflow: visible;
-	}
-
-	.p-works__card {
-		border-radius: var(--plans-card-radius);
-	}
-
 	.p-works__desc {
 		--works-desc-lh: 2.5; /* 917:117 は 14px・行高 2.5 で 3 行 105px */
-	}
-
-	/* アクティブ以外は半透明（917:119-122）。
-	   Swiper の creative エフェクトが inline で opacity を書くため !important で上書きする。 */
-	.p-works__card {
-		opacity: 0.5 !important;
-	}
-
-	.p-works__card.swiper-slide-active {
-		opacity: 1 !important;
 	}
 
 	.p-news__list {
