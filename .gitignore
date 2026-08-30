@@ -69,6 +69,7 @@
 # 依存・ビルド生成物
 **/node_modules/
 **/vendor/
+!**/js/vendor/
 **/.sass-cache/
 **/*.map
 **/.parcel-cache/
