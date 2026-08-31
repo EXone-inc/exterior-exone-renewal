@@ -78,6 +78,16 @@ $exterior_exone_works_archive = get_post_type_archive_link( 'works' );
 		<?php // 中身は js/works-carousel.js が選択中のカードのタイトルに差し替える。 ?>
 		<p class="p-works__desc" data-works-desc aria-live="polite"><?php echo esc_html( $exterior_exone_works[0]['title'] ); ?></p>
 
+		<?php // 現在何枚目かを示すドット。選択状態は js/works-carousel.js が切り替える。 ?>
+		<?php // 読み上げは上のタイトル（aria-live）が担うため装飾扱いにする。 ?>
+		<?php if ( count( $exterior_exone_works ) > 1 ) : ?>
+			<div class="p-works__dots" data-works-dots aria-hidden="true">
+				<?php foreach ( array_keys( $exterior_exone_works ) as $exterior_exone_works_index ) : ?>
+					<span class="p-works__dot<?php echo 0 === $exterior_exone_works_index ? ' is-active' : ''; ?>"></span>
+				<?php endforeach; ?>
+			</div>
+		<?php endif; ?>
+
 		<?php if ( $exterior_exone_works_archive ) : ?>
 			<a class="c-btn c-btn--white p-works__btn" href="<?php echo esc_url( $exterior_exone_works_archive ); ?>">VIEW MORE</a>
 		<?php endif; ?>

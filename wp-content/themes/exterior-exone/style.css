@@ -320,6 +320,9 @@ Text Domain: exterior-exone
 	--works-desc-size: clamp(12px, 11.515px + 0.1294vw, 14px); /* 12 → 14 : 917:876 / 917:117 */
 	--works-desc-w: clamp(320px, 263.91px + 14.9572vw, 551.089px); /* 320 → 551.09 : 説明文の幅（917:876 / 917:117） */
 	--works-desc-lh: 1.583; /* SP 19/12。PC は 2.5（917:117）に上書き */
+	--works-dot-size: 8px; /* 現在位置ドット（カンプ外・FELLOWS 参考） */
+	--works-dot-gap: 12px; /* ドット同士の間 */
+	--works-dots-gap: 24px; /* タイトル下 → ドット */
 	--news-cards-gap: clamp(23.4px, 14.468px + 2.3819vw, 60.2px); /* 23.4 → 60.2 */
 	--news-card-w: clamp(262.39px, 235.543px + 7.1592vw, 373px); /* 262.39 → 373 */
 	--news-card-img-h: clamp(167.41px, 153.189px + 3.7922vw, 226px); /* 167.41 → 226 */
@@ -2957,6 +2960,34 @@ body.is-drawer-open {
 /* カードの送り中はタイトルを一旦消し、確定後に差し替えて戻す */
 .p-works__desc.is-hidden {
 	opacity: 0;
+}
+
+/* 現在何枚目かを示すドット（カンプ外・FELLOWS 参考）。選択中だけ白く点灯する。
+   選択状態の切り替えは js/works-carousel.js。 */
+.p-works__dots {
+	display: flex;
+	gap: var(--works-dot-gap);
+	justify-content: center;
+	margin-top: var(--works-dots-gap);
+}
+
+.p-works__dot {
+	width: var(--works-dot-size);
+	height: var(--works-dot-size);
+	border-radius: 50%;
+	background: var(--color-gray2);
+	opacity: 0.4;
+	transition: opacity var(--transition-base), background-color var(--transition-base);
+}
+
+.p-works__dot.is-active {
+	background: var(--color-white3);
+	opacity: 1;
+}
+
+/* JS 無効時は「選択中」の概念が無い（横並びで全件見せる）ため出さない */
+.p-works__slider:not(.is-wheel) ~ .p-works__dots {
+	display: none;
 }
 
 .p-works__btn {

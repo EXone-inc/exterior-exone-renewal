@@ -38,6 +38,8 @@
 
 	var list = slider.querySelector('[data-works-list]');
 	var desc = document.querySelector('[data-works-desc]');
+	var dotsWrap = document.querySelector('[data-works-dots]');
+	var dots = dotsWrap ? Array.prototype.slice.call(dotsWrap.children) : [];
 	var prevBtn = slider.querySelector('[data-works-prev]');
 	var nextBtn = slider.querySelector('[data-works-next]');
 	var stalker = slider.querySelector('[data-works-stalker]');
@@ -212,6 +214,16 @@
 		return null;
 	}
 
+	// 現在何枚目かのドットを点灯し直す
+	function updateDots() {
+		var active = ((total % count) + count) % count;
+		var i;
+
+		for (i = 0; i < dots.length; i++) {
+			dots[i].classList.toggle('is-active', i === active);
+		}
+	}
+
 	function setCurrent() {
 		var node = findTopNode();
 
@@ -226,6 +238,7 @@
 		node.el.classList.add('is-current');
 		currentNode = node;
 		showTitle(node.el.getAttribute('data-works-title'));
+		updateDots();
 	}
 
 	function removeCurrent() {
