@@ -137,6 +137,7 @@ Text Domain: exterior-exone
 	   カンプ高さに対する比率で持つ。px 固定だと画面がカンプより低いほどコピーが下がる */
 	--fv-copy-top: 38.27%; /* SP: 259.41 / 677.81（16:94 / 16:64） */
 	--fv-sub-gap: 0px; /* カンプは行送りのみで密着（917:832→917:833 / 917:239→917:240） */
+	--fv-video-position: 50% 50%; /* cover ではみ出す分の切り抜き基準。SP は中央 */
 	--fv-thumbs-bottom: clamp(33.74px, 25.119px + 2.299vw, 69.26px); /* 33.74 → 69.26 */
 	--fv-thumb-size: clamp(39.818px, 28.851px + 2.9244vw, 85px); /* 39.818 → 85 : サムネイル径 */
 	--fv-thumb-gap: clamp(9.37px, 6.79px + 0.688vw, 20px); /* 9.37 → 20 */
@@ -219,7 +220,8 @@ Text Domain: exterior-exone
 	--stats-sp-label: 14px; /* PC と同値 (16:198 / 16:567) */
 
 	/* --- DX EXPERIENCE（917:172-212 / SP 917:799-848） ---
-	   PC 側は 768→1920 で補間（SP カンプは別レイアウトのため）。 */
+	   769px 以上はカンプ等倍スケール（--dx-u）で上書きする（DX セクションの
+	   @media 内を参照）。ここの clamp が効くのは SP レイアウトで使う値のみ。 */
 	--dx-pad-top: clamp(60px, 30.38px + 3.8568vw, 104.43px); /* 60 → 104.43 */
 	--dx-pad-bottom: clamp(64px, 31.727px + 4.2023vw, 112.41px); /* 64 → 112.41 */
 	--dx-title-size: clamp(66px, 36.667px + 3.8194vw, 110px); /* 66 → 110 (917:212) */
@@ -259,28 +261,42 @@ Text Domain: exterior-exone
 	--dx-pin-top: var(--header-height);
 	--dx-pin-height: calc(100vh - var(--header-height));
 	--dx-media-width: 70.12%;     /* 1103 / 1573.01 */
-	/* SP 専用（カンプ 375 実測） */
-	--dx-sp-pad-top: 47.36px;
+	/* SP 専用（カンプ 375 実測値 × --dx-su の等倍スケール）。
+	   固定 px のままだと 768px 付近の広い SP 幅でほぼ正方形のメディアが
+	   縦に伸び、ピン留めの 1 画面に収まらず上下が見切れるため、
+	   PC の --dx-u と同じ考え方でカンプの縮小拡大コピーとして組む。
+	   1 単位 --dx-su は次の 3 つの最小値:
+	   - 幅比 100vw/375
+	   - 高さ比 (100vh - ヘッダー) / 622。622 = 中身の実測 604px + 余白 18px
+	     （375x667 でちょうど 1 になり、従来の見た目と一致する）
+	   - 上限 1.04px（= 390px 時の見た目。--dx-su は「カンプ 1px の実寸」という
+	     長さなので、単位なしの数値を混ぜると min() 全体が無効になる点に注意）。
+	     SP 幅ではこれ以上拡大せず、
+	     広い SP 画面（タブレット縦など）は 390px の表示が中央に置かれ、
+	     余った分は上下左右の余白になる */
+	--dx-su: min(100vw / 375, (100vh - var(--header-height)) / 622, 1.04px);
+	--dx-sp-pad-top: 47.36px;   /* ピン中は padding 0 のため現状未使用 */
 	--dx-sp-pad-bottom: 78.86px;
-	--dx-sp-title-size: 48px;
-	--dx-sp-copy-size: 14px;
-	--dx-sp-copy-gap: 8.18px;
-	--dx-sp-media-gap: 28.6px;
-	--dx-sp-bars-gap: 23.93px;
-	--dx-sp-bar-w: 53.996px;
-	--dx-sp-bar-h: 4.207px;
-	--dx-sp-bar-gap: 4.9px;
-	--dx-sp-steps-gap: 19.72px;
-	--dx-sp-indicator-w: 20.12px;
-	--dx-sp-indicator-gap: 17.89px;
-	--dx-sp-dot: 15px;
-	--dx-sp-dot-active: 20.12px;
-	--dx-sp-dot-pitch: 56.25px;
+	--dx-sp-title-size: calc(48 * var(--dx-su));
+	--dx-sp-copy-size: max(11px, 14 * var(--dx-su));
+	--dx-sp-copy-gap: calc(8.18 * var(--dx-su));
+	--dx-sp-media-gap: calc(28.6 * var(--dx-su));
+	--dx-sp-bars-gap: calc(23.93 * var(--dx-su));
+	--dx-sp-bar-w: calc(53.996 * var(--dx-su));
+	--dx-sp-bar-h: calc(4.207 * var(--dx-su));
+	--dx-sp-bar-gap: calc(4.9 * var(--dx-su));
+	--dx-sp-steps-gap: calc(19.72 * var(--dx-su));
+	--dx-sp-indicator-w: calc(20.12 * var(--dx-su));
+	--dx-sp-indicator-gap: calc(17.89 * var(--dx-su));
+	--dx-sp-dot: calc(15 * var(--dx-su));
+	--dx-sp-dot-active: calc(20.12 * var(--dx-su));
+	--dx-sp-dot-pitch: calc(56.25 * var(--dx-su));
 
 	/* --- コピー / PLANS（917:35-38・917:124-141 / SP 917:747 ほか） --- */
 	--copy-height: clamp(722.81px, 636.113px + 23.1191vw, 1080px); /* 722.81 → 1080 */
 	--copy-overlay: rgba(0, 0, 0, 0.3); /* 917:37。PC のみ */
 	--plans-cards-gap: clamp(23.4px, 8.531px + 3.965vw, 84.66px); /* 23.4 → 84.66 */
+	--plans-cards-indent: var(--gutter); /* カード列の左余白。1920px 以上は幅比例に切り替える */
 	--plans-card-size: clamp(256px, 235.126px + 5.5663vw, 342px); /* 256 → 342 */
 	--plans-card-gap: clamp(14.5px, 10.167px + 1.1553vw, 32.35px); /* 14.5 → 32.35 */
 	--plans-card-name-size: clamp(14px, 12.544px + 0.3883vw, 20px); /* 14 → 20 */
@@ -400,6 +416,9 @@ Text Domain: exterior-exone
 		--dx-pin-top: 0px;
 		--dx-pin-height: 100vh;
 		--fv-copy-top: 40.54%; /* PC: 437.88 / 1080（1:306 / 1:280） */
+		/* 表示領域が 16:9 より横長だと動画は上下が切れる。中央基準だと下端の
+		   被写体（車・地面）が欠けるので、切れる分を上（空）側へ寄せる */
+		--fv-video-position: 50% 100%;
 
 		/* WORKS: どの幅でも「5 枚見え・両端 2 枚は 1/3 ほど見え」の構図
 		   （指定スクリーンショット = 1440px 幅時の旧実装の見た目）を保つため、
@@ -410,6 +429,22 @@ Text Domain: exterior-exone
 		--works-card-w: 21.263vw; /* 306.18px @1440 */
 		--works-card-h: 25.767vw; /* 371.05px @1440（325.92:394.95 の縦横比） */
 		--works-list-h: 36.5vw; /* 端カードの下がり 10.64vw + カード高 25.77vw */
+	}
+}
+
+/* カンプ幅 1920px を超えたら PLANS のカード列を幅比例で拡大する。
+   固定値のままだと列（約 2000px）が全部収まって右に余白が出てしまい、
+   カンプの「右端が画面外へ続く」構図が崩れるため（WORKS と同じ考え方）。
+   各値はカンプ値 ÷ 19.2（1920px = 100vw 換算） */
+@media (min-width: 1920px) {
+	:root {
+		--plans-cards-indent: 8.3333vw; /* 160px @1920 */
+		--plans-card-size: 17.8125vw; /* 342px @1920 */
+		--plans-card-gap: 1.6849vw; /* 32.35px @1920 */
+		--plans-card-name-size: 1.0417vw; /* 20px @1920 */
+		--plans-card-eng-size: 3.3333vw; /* 64px @1920 */
+		--plans-card-name-top: 1.1568vw; /* 22.21px @1920 */
+		--plans-card-eng-top: 2.4068vw; /* 46.21px @1920 */
 	}
 }
 
@@ -1134,6 +1169,7 @@ body.is-drawer-open {
 	width: 100%;
 	height: 100%;
 	object-fit: cover;
+	object-position: var(--fv-video-position);
 	opacity: 0;
 	/* 消えきってから visibility を落とす。先に落とすとフェードが飛ぶ */
 	visibility: hidden;
@@ -2070,6 +2106,9 @@ body.is-drawer-open {
    中身 863.8px が 1080px の中央に来るので、上下 108px とカンプの
    104.43 / 112.41 がほぼ一致する。画面が低いときも中身が縦に潰れない。 */
 .p-dx {
+	/* SP のコンテンツ幅もカンプ比（375 - 27.5x2 = 320）でスケールする。
+	   :root の --dx-inner-width は VR セクションが参照するため触らない */
+	--dx-inner-width: calc(320 * var(--dx-su));
 	height: calc(100vh * var(--dx-scroll-screens));
 }
 
@@ -2118,25 +2157,25 @@ body.is-drawer-open {
 
 .p-dx__step-number {
 	font-family: var(--font-ui);
-	font-size: 12px;
+	font-size: max(10px, 12 * var(--dx-su));
 	font-weight: var(--fw-light);
 	line-height: var(--lh-base);
 	letter-spacing: var(--ls-wide);
 }
 
 .p-dx__step-title {
-	margin-top: 3.2px;
+	margin-top: calc(3.2 * var(--dx-su));
 	font-family: var(--font-ui);
-	font-size: 16px;
+	font-size: max(12px, 16 * var(--dx-su));
 	font-weight: var(--fw-bold);
 	line-height: var(--lh-base);
 	letter-spacing: var(--ls-wide);
 }
 
 .p-dx__step-desc {
-	margin-top: 3.6px;
+	margin-top: calc(3.6 * var(--dx-su));
 	font-family: var(--font-ui);
-	font-size: 12px;
+	font-size: max(10px, 12 * var(--dx-su));
 	line-height: var(--lh-base);
 	letter-spacing: var(--ls-base);
 }
@@ -2144,22 +2183,23 @@ body.is-drawer-open {
 .p-dx__tags {
 	display: flex;
 	flex-wrap: wrap;
-	gap: 8.6px;
-	margin-top: 14.6px;
+	gap: calc(8.6 * var(--dx-su));
+	margin-top: calc(14.6 * var(--dx-su));
 }
 
 .p-dx__tag {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	min-width: 136.69px;
-	height: 28.175px;
-	padding-inline: 12px;
+	min-width: calc(136.69 * var(--dx-su));
+	height: calc(28.175 * var(--dx-su));
+	padding-inline: calc(12 * var(--dx-su));
 	background: rgba(255, 255, 255, 0.2);
 	border: var(--border-thin) solid #929292;
-	border-radius: 17px;
+	/* 高さがスケールしても常にピル形状（半径は半分で頭打ちになる） */
+	border-radius: 999px;
 	font-family: var(--font-ui);
-	font-size: 11px;
+	font-size: max(10px, 11 * var(--dx-su));
 	line-height: var(--lh-base);
 	letter-spacing: var(--ls-base);
 }
@@ -2225,9 +2265,38 @@ body.is-drawer-open {
 }
 
 @media (min-width: 769px) {
-	.p-dx__inner {
-		/* 画面が低いときはここだけ詰める（1080px ではカンプ値のまま） */
-		--dx-steps-top: min(clamp(100px, 49.893px + 6.5243vw, 175.16px), 16.2vh);
+	/* --- PC はカンプ（1920x1080）の等倍スケールで組む ---
+	   幅補間の clamp だと中間幅で中身が縦に伸び、ピン留め中の 100vh に
+	   収まらず下が見切れる。1 単位 --dx-u（カンプ 1px の実寸）を
+	   幅比・高さ比の小さい方から取り、セクション全体をカンプの縮小コピー
+	   として収める。余った分はピン中央寄せの上下余白になる（許容済み）。
+	   1920x1080 で --dx-u = 1px となりカンプ値と一致する。
+	   文字サイズだけは読める下限を max() で確保する */
+	.p-dx {
+		--dx-u: min(100vw / 1920, 100vh / 1080);
+		/* VR セクションが参照する :root の固定値はそのまま。ここは DX だけ */
+		--dx-inner-width: calc(1573.01 * var(--dx-u));
+		--dx-title-size: calc(110 * var(--dx-u));
+		--dx-copy-size: max(12px, 32 * var(--dx-u));
+		--dx-copy-offset: calc(34 * var(--dx-u));
+		--dx-head-gap: calc(50.92 * var(--dx-u));
+		--dx-steps-top: calc(175.16 * var(--dx-u));
+		--dx-step-gap: calc(48.5 * var(--dx-u));
+		--dx-step-height: calc(178 * var(--dx-u));
+		--dx-media-offset: calc(9 * var(--dx-u));
+		--dx-btn-offset: calc(8 * var(--dx-u));
+		--dx-num-size: max(10px, 16 * var(--dx-u));
+		--dx-step-title-size: max(12px, 22 * var(--dx-u));
+		--dx-step-desc-size: max(10px, 14 * var(--dx-u));
+		--dx-tag-size: max(10px, 14 * var(--dx-u));
+		--dx-tag-height: max(20px, 34 * var(--dx-u));
+		--dx-indicator-w: calc(37 * var(--dx-u));
+		--dx-dot: calc(26 * var(--dx-u));
+		--dx-dot-active: calc(37 * var(--dx-u));
+		--dx-indicator-gap: calc(31.01 * var(--dx-u));
+		--dx-bar-w: calc(77 * var(--dx-u));
+		--dx-bar-h: calc(6 * var(--dx-u));
+		--dx-media-foot-gap: calc(32 * var(--dx-u));
 	}
 
 	.p-dx__head {
@@ -2464,7 +2533,7 @@ body.is-drawer-open {
 	margin-top: var(--plans-cards-gap);
 	/* カードの浮き上がりが切れないよう、上下に逃げを取る */
 	padding: 8px 0 20px;
-	padding-left: var(--gutter);
+	padding-left: var(--plans-cards-indent);
 	overflow-x: auto;
 	scrollbar-width: none;
 	cursor: grab;
