@@ -38,8 +38,56 @@
 	--co-profile-pad-bottom: clamp(40px, 25.437px + 3.8835vw, 100px); /* 会社概要の下余白 */
 	--co-partner-pad-bottom: clamp(40px, 26.408px + 3.6246vw, 96px); /* Partner の下余白 */
 
+	/* --- ブランドストーリー見出しの字送り（[data-reveal="chars"]） --- */
+	--cstory-char-stagger: 0.03s; /* 1 文字ごとの遅れ */
+	--cstory-char-move: 0.35s; /* 1 文字がせり上がりきるまで */
+	--cstory-char-fade: 0.22s;
+	--cstory-char-shift: 18px; /* せり上がりの移動量。FV（70px）より小さく速く */
+	--cstory-char-squash: 0.85; /* 出る前の縦つぶれ */
+	--cstory-char-ease: cubic-bezier(0.16, 1, 0.22, 1); /* FV の字送りと同じ */
+	/* 英字「Brand Story」は 11 文字。最後の 1 文字が (11 - 1) 個ぶん遅れて動き出し、
+	   --cstory-char-move かけて出る。そこまで待ってから日本語を流し始める。
+	   （見出しの文字数を変えるときは下の 10 も合わせる） */
+	--cstory-char-lag: calc(10 * var(--cstory-char-stagger) + var(--cstory-char-move));
+
 	/* --- 色（このページ固有。共通トークンに無いもののみ） --- */
 	--co-bg-light: #f3f3f4; /* 917:1409・917:1418・917:1424 */
+	/* EXone Quality の写真左端のぼかし（22:673）。写真の幅に対する比で持つ。
+	   白側は写真の外へ 5.45px はみ出させ、背景との継ぎ目が出ないようにする。 */
+	--co-quality-fade-start: -0.48%; /* (784.81 - 790.25) / 1129.18 */
+	--co-quality-fade-width: 35.15%; /* 396.94 / 1129.18 */
+	--co-quality-fade-to: rgba(254, 254, 254, 0); /* --color-white2 の透明側 */
+
+	/* --- Partner Network の日本地図アニメーション（支給 HTML より） --- */
+	--co-map-line-edge: #53b6ff; /* 経路の両端 */
+	--co-map-line-mid: #dff5ff; /* 経路の中央 */
+	--co-map-trace: #a8dcff; /* 下敷きの破線 */
+	--co-map-halo: #4bb4ff; /* 拠点のにじみ */
+	--co-map-ring: #75c5ff; /* 拠点から広がる輪 */
+	--co-map-core: #fff; /* 拠点の中心と粒子 */
+	--co-map-net-shadow: rgba(79, 181, 255, 0.45);
+	--co-map-glow: rgba(77, 176, 255, 0.13);
+	--co-map-scan-soft: rgba(127, 207, 255, 0.14);
+	--co-map-scan-core: rgba(255, 255, 255, 0.55);
+	--co-map-arc-draw: 1.7s; /* 弧 1 本を引ききるまで */
+	--co-map-arc-step: 0.35s; /* 弧どうしの間隔 */
+	--co-map-node-start: 0.75s; /* 最初の拠点が出るまで */
+	--co-map-node-step: 0.3s; /* 拠点どうしの間隔 */
+	--co-map-ring-cycle: 2.6s;
+	--co-map-dash-cycle: 9s;
+	--co-map-scan-cycle: 7s;
+	--co-map-breathe-cycle: 4.8s;
+
+	/* --- 円環図の浮遊（TOP の円環図と同じ作り） --- */
+	--co-eco-float: 1.6cqw; /* 振れ幅（上下それぞれ）。図の幅に対する比 */
+	--co-eco-float-ease: ease-in-out;
+
+	/* --- 会社概要の朝 → 夜 --- */
+	--co-profile-night-delay: 0.6s; /* 到達してから朝を見せている時間 */
+	--co-profile-night-move: 1.2s; /* 夜へ切り替わる時間 */
+	/* 切り替わりが 7 割進んだあたりでリード文、その 0.15s 後にロゴ */
+	--co-profile-text-delay: calc(var(--co-profile-night-delay) + var(--co-profile-night-move) * 0.7);
+	--co-profile-logo-delay: calc(var(--co-profile-text-delay) + 0.15s);
 	--co-watermark-dark: #2f2f2f; /* 917:1474 Partner Network */
 	--co-value-eng-color-sp: #b8b8b8; /* 917:961 */
 }
@@ -115,6 +163,49 @@
 	line-height: 2;
 	letter-spacing: var(--ls-base);
 	color: var(--color-gray2);
+}
+
+/* --- FV のピン留め（page-company.php の .l-pin） ---
+   スクロールしても FV がその場に留まり、スクロール量に応じて暗幕が濃くなる。
+   TOP（style.css の .l-pin）と同じ演出で、進捗 --fv-mask-progress は
+   js/fv-mask.js が書き込む。.l-pin 自体と暗幕の板（.l-pin.is-scroll-mask::after）
+   は style.css 側の共通指定をそのまま使い、ここは中身の差分だけを持つ。
+   FV と Why We Exist は同じ写真（FV-bg.jpg）なので、留まった FV が
+   そのまま暗転して Why の背景になる。 */
+.l-pin .p-cfv {
+	position: sticky;
+	top: var(--fv-pin-top);
+	/* 留まっている間は画面を埋めきる必要がある。カンプ高さ（--fv-height）だと
+	   画面がそれより高いときに下端へ写真の無い帯が出てしまう。 */
+	height: var(--fv-pin-height);
+}
+
+/* 暗転と同じ進捗で FV の見出しを消す */
+.l-pin.is-scroll-mask .p-cfv__copy {
+	opacity: calc(1 - var(--fv-mask-progress, 0));
+}
+
+/* FV 自前の暗幕（30%）も同じ進捗で抜く。残したままだと二重掛けになり、
+   着地が Why のカンプ値（70%）より濃くなってしまう。
+   進捗 0 で 917:1427 の 30%、進捗 1 で 917:1535 の 70% にちょうど収まる。 */
+.l-pin.is-scroll-mask .p-cfv__bg::after {
+	opacity: calc(1 - var(--fv-mask-progress, 0));
+}
+
+/* 暗幕越しに、留まっている FV が透ける */
+.l-pin .p-cwhy {
+	z-index: 2;
+	background: transparent;
+}
+
+.l-pin .p-cwhy__bg img {
+	visibility: hidden;
+}
+
+/* Why 側に貼っていた暗幕は、板ごとせり上がって境界線が出るため
+   JS が動いているときは使わない。JS 無効時のフォールバックとして残す。 */
+.l-pin.is-scroll-mask .p-cwhy__bg::after {
+	display: none;
 }
 
 /* ============================================================
@@ -311,6 +402,39 @@
 	margin-top: var(--space-md);
 	padding: var(--space-lg) var(--space-md);
 	background: var(--color-white2);
+}
+
+/* 1 文字ずつ下からせり上がる。--char-index は PHP 側が振る通し番号 */
+.p-cstory__char {
+	display: inline-block;
+	opacity: 0;
+	transform: translateY(var(--cstory-char-shift)) scaleY(var(--cstory-char-squash));
+	transform-origin: bottom center;
+	transition:
+		opacity var(--cstory-char-fade) ease,
+		transform var(--cstory-char-move) var(--cstory-char-ease);
+	will-change: opacity, transform;
+}
+
+[data-reveal="chars"].is-inview .p-cstory__char {
+	opacity: 1;
+	transform: none;
+	transition-delay: calc(var(--cstory-char-start, 0s) + var(--char-index) * var(--cstory-char-stagger));
+}
+
+/* 日本語は英字が出そろうのを待ってから流れ出す */
+.p-cstory__panel-jp {
+	--cstory-char-start: var(--cstory-char-lag);
+}
+
+/* 動きを減らす設定では字送りせず、最初から出しておく
+   （--char-index の指定より後ろに置かないと後勝ちで効かない） */
+@media (prefers-reduced-motion: reduce) {
+	.p-cstory__char {
+		opacity: 1;
+		transform: none;
+		transition: none;
+	}
 }
 
 /* 薄いグレーの大きな英字（917:1556 / 917:966） */
@@ -854,11 +978,235 @@
 	color: var(--color-gray2);
 }
 
+/* --- 日本地図（支給アニメーション「日本地図アニメーション.html」の移植） ---
+   地図の静止画に、経路・拠点・粒子・走査線を SVG と疑似要素で重ねる。
+   座標は地図の実寸 1672x941 基準で、SVG の viewBox がそのまま効く。
+   画面に入って [data-reveal] の .is-inview が付いたときに動き出す。 */
 .p-cpartner__map {
+	position: relative;
+	/* 走査線の移動量を地図の高さで測るためのコンテナ */
+	container-type: size;
+	aspect-ratio: 1672 / 941;
+	margin: var(--space-lg) 0 0;
+}
+
+.p-cpartner__map-image {
 	width: 100%;
-	height: auto;
-	margin-top: var(--space-lg);
+	height: 100%;
+	object-fit: contain;
 	opacity: 0.8; /* 502:4 */
+}
+
+/* 地図の中心あたりでゆっくり明滅する光 */
+.p-cpartner__map-glow {
+	position: absolute;
+	inset: 8% 4%;
+	background: radial-gradient(ellipse at 62% 49%, var(--co-map-glow), transparent 42%);
+	filter: blur(24px);
+	pointer-events: none;
+}
+
+.p-cpartner__map.is-inview .p-cpartner__map-glow {
+	animation: p-cpartner-map-breathe var(--co-map-breathe-cycle) ease-in-out infinite;
+}
+
+@keyframes p-cpartner-map-breathe {
+	50% {
+		opacity: 0.55;
+		transform: scale(1.025);
+	}
+}
+
+.p-cpartner__map-net {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	overflow: visible;
+	pointer-events: none;
+	filter: drop-shadow(0 0 5px var(--co-map-net-shadow));
+}
+
+.p-cpartner__map-stop--edge {
+	stop-color: var(--co-map-line-edge);
+}
+
+.p-cpartner__map-stop--mid {
+	stop-color: var(--co-map-line-mid);
+}
+
+/* 拠点をつなぐ弧。--i の順に引かれる */
+.p-cpartner__map-arc {
+	fill: none;
+	stroke: url(#exone-map-line);
+	stroke-width: 1.15;
+	stroke-linecap: round;
+	opacity: 0.74;
+	vector-effect: non-scaling-stroke;
+	stroke-dasharray: 900;
+	stroke-dashoffset: 900;
+}
+
+.p-cpartner__map.is-inview .p-cpartner__map-arc {
+	animation: p-cpartner-map-draw var(--co-map-arc-draw) ease forwards;
+	animation-delay: calc(var(--i) * var(--co-map-arc-step));
+}
+
+@keyframes p-cpartner-map-draw {
+	to {
+		stroke-dashoffset: 0;
+	}
+}
+
+/* 弧の下敷きになる破線。ゆっくり流れ続ける */
+.p-cpartner__map-trace {
+	fill: none;
+	stroke: var(--co-map-trace);
+	stroke-width: 0.7;
+	opacity: 0.22;
+	stroke-dasharray: 3 9;
+	vector-effect: non-scaling-stroke;
+}
+
+.p-cpartner__map.is-inview .p-cpartner__map-trace {
+	animation: p-cpartner-map-dash var(--co-map-dash-cycle) linear infinite;
+}
+
+@keyframes p-cpartner-map-dash {
+	to {
+		stroke-dashoffset: -160;
+	}
+}
+
+/* 拠点。弧が引き終わるころから順に点く */
+.p-cpartner__map-node {
+	opacity: 0;
+}
+
+.p-cpartner__map.is-inview .p-cpartner__map-node {
+	animation: p-cpartner-map-node 0.48s ease forwards;
+	animation-delay: calc(var(--co-map-node-start) + var(--i) * var(--co-map-node-step));
+}
+
+@keyframes p-cpartner-map-node {
+	to {
+		opacity: 1;
+	}
+}
+
+.p-cpartner__map-halo {
+	fill: var(--co-map-halo);
+	opacity: 0.15;
+	filter: url(#exone-map-blur);
+}
+
+.p-cpartner__map-core {
+	fill: var(--co-map-core);
+	filter: url(#exone-map-glow);
+}
+
+/* 拠点から広がって消える輪 */
+.p-cpartner__map-ring {
+	fill: none;
+	stroke: var(--co-map-ring);
+	stroke-width: 1;
+	opacity: 0.68;
+	vector-effect: non-scaling-stroke;
+}
+
+.p-cpartner__map.is-inview .p-cpartner__map-ring {
+	animation: p-cpartner-map-ring var(--co-map-ring-cycle) ease-out infinite;
+}
+
+@keyframes p-cpartner-map-ring {
+	0% {
+		r: 4;
+		opacity: 0.78;
+	}
+
+	85%,
+	100% {
+		r: 22;
+		opacity: 0;
+	}
+}
+
+/* 弧の上を流れる粒子。動き自体は SVG の animateMotion（読み込み時から回っている）
+   なので、拠点が点くころに合わせて姿だけ出す */
+.p-cpartner__map-spark {
+	fill: var(--co-map-core);
+	filter: url(#exone-map-glow);
+	opacity: 0;
+}
+
+.p-cpartner__map.is-inview .p-cpartner__map-spark {
+	opacity: 0.95;
+	transition: opacity 0.6s ease var(--co-map-node-start);
+}
+
+/* 上から下へ流れる走査線 */
+.p-cpartner__map-scan {
+	position: absolute;
+	left: 7%;
+	right: 3%;
+	top: 14%;
+	height: 1px;
+	background: linear-gradient(
+		90deg,
+		transparent,
+		var(--co-map-scan-soft),
+		var(--co-map-scan-core),
+		var(--co-map-scan-soft),
+		transparent
+	);
+	filter: blur(0.3px);
+	opacity: 0.55;
+	pointer-events: none;
+}
+
+.p-cpartner__map.is-inview .p-cpartner__map-scan {
+	animation: p-cpartner-map-scan var(--co-map-scan-cycle) linear infinite;
+}
+
+/* 移動量は地図の高さ基準（支給 HTML は画面高さ基準だったぶんを置き換え） */
+@keyframes p-cpartner-map-scan {
+	from {
+		transform: translateY(-8cqh);
+	}
+
+	to {
+		transform: translateY(82cqh);
+	}
+}
+
+/* 動きを減らす設定では、引き終わり・点灯済みの状態で止める
+   （animation の指定より後ろに置かないと後勝ちで効かない） */
+@media (prefers-reduced-motion: reduce) {
+	/* animation を打ち消す側は .is-inview 付きの指定と同じ詳細度で書く
+	   （そうしないと詳細度で負けて効かない） */
+	.p-cpartner__map.is-inview .p-cpartner__map-glow,
+	.p-cpartner__map.is-inview .p-cpartner__map-arc,
+	.p-cpartner__map.is-inview .p-cpartner__map-trace,
+	.p-cpartner__map.is-inview .p-cpartner__map-node,
+	.p-cpartner__map.is-inview .p-cpartner__map-ring,
+	.p-cpartner__map.is-inview .p-cpartner__map-scan {
+		animation: none;
+	}
+
+	/* 引き終わり・点灯済みの状態で見せる */
+	.p-cpartner__map .p-cpartner__map-arc {
+		stroke-dashoffset: 0;
+	}
+
+	.p-cpartner__map .p-cpartner__map-node {
+		opacity: 1;
+	}
+
+	/* 広がる輪と流れる粒子は止めると意味がないので出さない */
+	.p-cpartner__map .p-cpartner__map-ring,
+	.p-cpartner__map .p-cpartner__map-spark {
+		display: none;
+	}
 }
 
 /* ============================================================
@@ -898,11 +1246,39 @@
 	margin-top: var(--space-lg);
 }
 
+/* 朝・夜の 2 枚を重ねる。高さは朝（通常フロー）が決める */
+.p-cprofile__media {
+	position: relative;
+}
+
 .p-cprofile__media img {
 	width: 100%;
 	height: auto;
 	aspect-ratio: 375 / 177;
 	object-fit: cover;
+}
+
+.p-cprofile__night {
+	position: absolute;
+	inset: 0;
+	height: 100%;
+	opacity: 0;
+}
+
+/* 到達したら、朝を少し見せてから夜へ切り替わる（スクロール量には連動しない） */
+.p-cprofile.is-inview .p-cprofile__night {
+	opacity: 1;
+	transition: opacity var(--co-profile-night-move) ease var(--co-profile-night-delay);
+}
+
+/* 動きを減らす設定では切り替えず、最初から夜にしておく
+   （transition の指定より後ろに置かないと後勝ちで効かない） */
+@media (prefers-reduced-motion: reduce) {
+	.p-cprofile__night,
+	.p-cprofile.is-inview .p-cprofile__night {
+		opacity: 1;
+		transition: none;
+	}
 }
 
 .p-cprofile__card {
@@ -1155,19 +1531,45 @@
 	}
 
 	/* --- EXone Quality（917:1425 は白） --- */
+	/* カンプ（31:999）は左テキスト 41% / 右写真 59%。ただし列幅は画面幅に比例して
+	   縮むのに対し、文字は clamp でゆるやかにしか縮まないため、そのままだと
+	   1920 未満で左のテキストが折り返す。カンプでは 4 行とも折り返し無しなので、
+	   下限を 41% に置いたまま、必要なら文字の幅ぶんまで列を広げる。 */
 	.p-cquality {
 		display: grid;
-		grid-template-columns: 41% 59%;
+		grid-template-columns: minmax(41%, max-content) minmax(30%, 1fr);
 		align-items: center;
 		background: var(--color-white2);
 	}
 
+	/* テキストは上下中央だが（align-items: center）、写真はカンプ 22:672 のとおり
+	   セクションの高さいっぱいに敷く。列が細くなる幅でも上下に白が残らない。 */
 	.p-cquality__media {
+		position: relative;
+		align-self: stretch;
 		order: 2;
 	}
 
 	.p-cquality__media img {
 		height: 100%;
+	}
+
+	/* 写真の左端を背景の白へなじませる（22:673 の gradation） */
+	.p-cquality__media::after {
+		content: "";
+		position: absolute;
+		inset-block: 0;
+		left: var(--co-quality-fade-start);
+		width: var(--co-quality-fade-width);
+		background: linear-gradient(to right, var(--color-white2), var(--co-quality-fade-to));
+		pointer-events: none;
+	}
+
+	/* カンプ（31:999）はどの行も折り返していない */
+	.p-cquality__eng,
+	.p-cquality__jp,
+	.p-cquality__item {
+		white-space: nowrap;
 	}
 
 	.p-cquality__body {
@@ -1205,17 +1607,98 @@
 	}
 
 	/* 図 y370.69（セクション上端から）。本体開始位置との差を top で足す */
+	/* 台紙（輪 + 中心円）の上に 6 項目のテキストを重ね、項目ごとに漂わせる。
+	   位置・幅は元画像 1813x1502 に対する比。--co-eco-float を図の幅で
+	   測るためにコンテナにしてある。 */
 	.p-ceco__figure {
 		display: block;
 		position: absolute;
 		top: 3.85vw;
 		right: -6.5%;
 		width: 56.65%; /* 906.39 / 1600 */
+		container-type: inline-size;
 	}
 
-	.p-ceco__figure img {
+	.p-ceco__figure-base {
+		display: block;
 		width: 100%;
 		height: auto;
+	}
+
+	.p-ceco__figure-item {
+		position: absolute;
+		left: var(--x);
+		top: var(--y);
+		width: var(--w);
+		height: auto;
+		animation: p-ceco-float var(--d) var(--co-eco-float-ease) var(--delay) infinite alternate;
+	}
+
+	/* 上から時計回り。周期と開始位置は 6 項目それぞれ変えてあり、互いに揃わない */
+	.p-ceco__figure-item--1 {
+		--x: 37.176%;
+		--y: 0.133%;
+		--w: 26.475%;
+		--d: 3.4s;
+		--delay: -0.1s;
+	}
+
+	.p-ceco__figure-item--2 {
+		--x: 70.712%;
+		--y: 19.308%;
+		--w: 28.02%;
+		--d: 4.1s;
+		--delay: -1.2s;
+	}
+
+	.p-ceco__figure-item--3 {
+		--x: 69.608%;
+		--y: 65.113%;
+		--w: 30.006%;
+		--d: 3.8s;
+		--delay: -0.5s;
+	}
+
+	.p-ceco__figure-item--4 {
+		--x: 38.941%;
+		--y: 84.82%;
+		--w: 22.945%;
+		--d: 4.6s;
+		--delay: -2.1s;
+	}
+
+	.p-ceco__figure-item--5 {
+		--x: 0.552%;
+		--y: 65.113%;
+		--w: 29.564%;
+		--d: 3.1s;
+		--delay: -0.8s;
+	}
+
+	.p-ceco__figure-item--6 {
+		--x: 0%;
+		--y: 18.242%;
+		--w: 31.881%;
+		--d: 4.3s;
+		--delay: -1.7s;
+	}
+
+	@keyframes p-ceco-float {
+		from {
+			transform: translateY(calc(var(--co-eco-float) * -1));
+		}
+
+		to {
+			transform: translateY(var(--co-eco-float));
+		}
+	}
+
+	/* 動きを減らす設定では漂わせない
+	   （animation の指定より後ろに置かないと後勝ちで効かない） */
+	@media (prefers-reduced-motion: reduce) {
+		.p-ceco__figure-item {
+			animation: none;
+		}
 	}
 
 	/* PC は図に内容が入るのでリストは読み上げ用に隠す */
@@ -1361,6 +1844,44 @@
 		max-width: 201px;
 		height: auto;
 		margin: 1.1323vw auto 0;
+	}
+
+	/* 夜になりきる少し前から、リード文 → ロゴの順に下から出る。
+	   見た目は共通の [data-reveal] と同じで、出るきっかけだけセクションに合わせる。 */
+	.p-cprofile__lead,
+	.p-cprofile__logo {
+		opacity: 0;
+		transform: translateY(var(--reveal-shift));
+		transition:
+			opacity var(--reveal-duration) var(--reveal-ease),
+			transform var(--reveal-duration) var(--reveal-ease);
+	}
+
+	.p-cprofile.is-inview .p-cprofile__lead,
+	.p-cprofile.is-inview .p-cprofile__logo {
+		opacity: 1;
+		transform: none;
+	}
+
+	.p-cprofile.is-inview .p-cprofile__lead {
+		transition-delay: var(--co-profile-text-delay);
+	}
+
+	.p-cprofile.is-inview .p-cprofile__logo {
+		transition-delay: var(--co-profile-logo-delay);
+	}
+
+	/* 動きを減らす設定では待たずに最初から出す
+	   （transition の指定より後ろに置かないと後勝ちで効かない） */
+	@media (prefers-reduced-motion: reduce) {
+		.p-cprofile__lead,
+		.p-cprofile__logo,
+		.p-cprofile.is-inview .p-cprofile__lead,
+		.p-cprofile.is-inview .p-cprofile__logo {
+			opacity: 1;
+			transform: none;
+			transition: none;
+		}
 	}
 
 	.p-cprofile__card {

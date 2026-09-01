@@ -41,12 +41,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<figcaption class="p-cstory__sign">株式会社EXone<br>代表取締役　中村 剣太</figcaption>
 				</figure>
 
+				<?php // 画面に入ったら VISION → MISSION の順に左からフェードイン（js/scroll-reveal.js）。 ?>
 				<dl class="p-cstory__mv">
-					<div class="p-cstory__mv-item">
+					<div class="p-cstory__mv-item" data-reveal="left">
 						<dt class="c-display p-cstory__mv-eng">VISION</dt>
 						<dd class="p-cstory__mv-desc">次世代の業界トレンドを創り、<br>社会に長期的なインパクトを与えるリーディングカンパニーへ。</dd>
 					</div>
-					<div class="p-cstory__mv-item">
+					<div class="p-cstory__mv-item" data-reveal="left" data-reveal-delay="120">
 						<dt class="c-display p-cstory__mv-eng">MISSION</dt>
 						<dd class="p-cstory__mv-desc">エクステリア業界の不透明さをなくし、<br>すべての人に見える顧客体験を提供する。</dd>
 					</div>
@@ -54,8 +55,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 			</div>
 
 			<div class="p-cstory__panel">
-				<p class="c-display p-cstory__panel-eng">Brand Story</p>
-				<p class="p-cstory__panel-jp">ブランドストーリー</p>
+				<?php
+				// 画面に入ったら 1 文字ずつ出す。英字が出そろってから日本語が流れ出す
+				// （待ち時間は css/company.css の --cstory-char-lag が持つ）。
+				?>
+				<p class="c-display p-cstory__panel-eng" data-reveal="chars"><?php echo exterior_exone_split_chars( 'Brand Story', 'p-cstory__char' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- ヘルパー内でエスケープ済み。 ?></p>
+				<p class="p-cstory__panel-jp" data-reveal="chars"><?php echo exterior_exone_split_chars( 'ブランドストーリー', 'p-cstory__char' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- ヘルパー内でエスケープ済み。 ?></p>
 
 				<div class="p-cstory__text">
 					<p>外構をもっと透明に。もっと分かりやすく。もっとワクワクするものへ。</p>

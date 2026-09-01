@@ -78,13 +78,25 @@ $exterior_exone_plan_cards = exterior_exone_plan_cards();
 
 	<div class="p-plans__highend">
 		<div class="p-plans__highend-media" aria-hidden="true">
-			<img
-				src="<?php echo esc_url( exterior_exone_top_image( 'highend.jpg' ) ); ?>"
-				width="1161"
-				height="667"
-				alt=""
-				loading="lazy"
-			>
+			<?php
+			// SP の枠は 375x421.875（縦長）で、横長の原版だと cover で左右が大きく
+			// 切れる。カンプ 16:111 は 960x1080 の縦位置素材なので、SP はそれを使う。
+			?>
+			<picture>
+				<source
+					media="(max-width: 768px)"
+					srcset="<?php echo esc_url( exterior_exone_top_image( 'highend-sp.jpg' ) ); ?>"
+					width="960"
+					height="1080"
+				>
+				<img
+					src="<?php echo esc_url( exterior_exone_top_image( 'highend.jpg' ) ); ?>"
+					width="1161"
+					height="667"
+					alt=""
+					loading="lazy"
+				>
+			</picture>
 		</div>
 
 		<div class="p-plans__text p-plans__text--highend">

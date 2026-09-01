@@ -1,11 +1,16 @@
 /**
  * ピン留めした FV に、スクロール量に応じて濃くなる暗幕をかける。
  *
- * 理念セクションの上端が画面下端にある時点を 0、画面上端に達した時点を 1 として
- * 進捗を出し、暗幕を 0 → --philo-overlay（#090908 / 70%）まで均一に濃くする。
- * 同じ進捗で FV のコピーとサムネイルも消える。スクロールを戻せば元に戻る。
+ * .l-pin の中の「1 つ目のセクション」が留まる側（FV）、「2 つ目のセクション」が
+ * その上にせり上がってくる側。2 つ目の上端が画面下端にある時点を 0、画面上端に
+ * 達した時点を 1 として進捗を出し、暗幕を 0 → --philo-overlay（#090908 / 70%）
+ * まで均一に濃くする。同じ進捗で FV の中身も消える。戻せば元に戻る。
  *
- * 描画自体は CSS 側（.l-pin.is-scroll-mask::after）が持ち、ここは進捗値
+ * 使う側の組み合わせは .l-pin の中身だけで決まるので、この JS は中身を問わない:
+ *   TOP      … .p-fv  + .p-philosophy
+ *   企業情報 … .p-cfv + .p-cwhy
+ *
+ * 描画自体は CSS 側（.l-pin.is-scroll-mask::after ほか）が持ち、ここは進捗値
  * --fv-mask-progress を書き込むだけ。ピン留めは CSS の sticky で PC / SP とも有効。
  */
 (function () {
@@ -17,10 +22,11 @@
 		return;
 	}
 
-	var fv = pin.querySelector('.p-fv');
-	var philosophy = pin.querySelector('.p-philosophy');
+	var sticky = pin.firstElementChild;
+	var cover = pin.lastElementChild;
 
-	if (!fv || !philosophy) {
+	// 2 つ揃っていなければ演出は成立しない（素の縦積みのまま出す）。
+	if (!sticky || !cover || sticky === cover) {
 		return;
 	}
 
@@ -38,7 +44,7 @@
 			return 1;
 		}
 
-		var ratio = 1 - philosophy.getBoundingClientRect().top / span;
+		var ratio = 1 - cover.getBoundingClientRect().top / span;
 
 		// 小数 3 桁で足りる。丸めておくと同値のときの書き込みを飛ばせる。
 		return Math.min(1, Math.max(0, Math.round(ratio * 1000) / 1000));
@@ -52,8 +58,8 @@
 		last = value;
 		pin.style.setProperty('--fv-mask-progress', String(value));
 
-		// ほぼ透明になったサムネイルはクリック対象から外す。
-		fv.classList.toggle('is-masked', value >= 0.9);
+		// ほぼ透明になった中身（TOP のサムネイル等）はクリック対象から外す。
+		sticky.classList.toggle('is-masked', value >= 0.9);
 	}
 
 	function update() {

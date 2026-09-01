@@ -292,6 +292,37 @@ Text Domain: exterior-exone
 	--dx-sp-dot-active: calc(20.12 * var(--dx-su));
 	--dx-sp-dot-pitch: calc(56.25 * var(--dx-su));
 
+	/* --- DX 03 SHARE のスマホの図（参照実装 test.html の 3 枚目） --- */
+	/* この図だけはカンプに無い。参照実装の実寸をそのまま設計値として持ち、
+	   ビジュアル枠の高さに対する比率で置き直す。単位は 2 つ:
+
+	   --dxm-u … 枠の中の位置決め（外周の円・つなぎ線）。
+	             枠の高さ = --dxm-frame 単位、と決めて割り当てる。
+	   --dxm-p … スマホの中身。参照実装の「幅 188 の端末」を 1 とした単位で、
+	             端末の大きさを変えれば中身も丸ごと追従する。
+
+	   PC / SP で違うのは枠の縦横比だけ。SP は枠が横長でないぶん端末を大きく、
+	   円を四隅に寄せる（参照実装が 980px 以下でしている配置と同じ考え方）。 */
+	--dxm-frame: 302.41; /* SP のビジュアル枠の高さ（= --dx-media-ratio の分母） */
+	--dxm-u: calc(100cqh / var(--dxm-frame));
+	--dxm-p: calc(var(--dxm-phone-w) * var(--dxm-u) / 188);
+	--dxm-lift: 8; /* 円が現れるときの持ち上がり量。枠から出ない範囲に収める */
+	--dxm-phone-w: 132; /* 端末の幅（--dxm-u 単位） */
+	--dxm-item: 78; /* 外周の円の直径（--dxm-u 単位） */
+	--dxm-item-size: 11; /* 円の中の文字（--dxm-u 単位） */
+	--dxm-item-x: 72; /* 枠中央から円の内側までの横距離 */
+	--dxm-item-y: 64; /* 枠中央から円の内側までの縦距離 */
+	--dxm-cycle: 8s; /* 集約アニメーションの 1 周 */
+	--dxm-accent: rgba(255, 132, 45, 0.48); /* 円の地色 */
+	--dxm-accent-weak: rgba(255, 132, 45, 0.32); /* チェック印の地色 */
+	--dxm-accent-text: #ffae5c; /* チェック印 */
+	--dxm-line: rgba(142, 232, 255, 0.38); /* 円と端末をつなぐ線 */
+	--dxm-screen-text: #edf5fb;
+	--dxm-screen-lead: #f5f7fa;
+	--dxm-screen-sub: rgba(140, 152, 168, 0.9);
+	--dxm-scrim: linear-gradient(90deg, rgba(0, 0, 0, 0.44), rgba(0, 0, 0, 0.24) 44%, rgba(0, 0, 0, 0.5)),
+		linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.5));
+
 	/* --- コピー / PLANS（917:35-38・917:124-141 / SP 917:747 ほか） --- */
 	--copy-height: clamp(722.81px, 636.113px + 23.1191vw, 1080px); /* 722.81 → 1080 */
 	--copy-overlay: rgba(0, 0, 0, 0.3); /* 917:37。PC のみ */
@@ -318,6 +349,10 @@ Text Domain: exterior-exone
 	--plans-desc-to-btn: clamp(13.96px, 2.785px + 2.9799vw, 60px); /* 13.96 → 60 */
 	/* バナーの最低高さ（917:861-863 / 917:125-128）。
 	   余白は上下 padding が作るが、SP は文字量が少なく帯が潰れるため下限を置く。 */
+	/* SP のハイエンド写真。枠を素材（16:111 は 960x1080）と同じ比にして切らずに出す。
+	   写真の上に残す帯はカンプ 375px 時の 77px を幅比で伸ばす（77 / 375）。 */
+	--plans-highend-media-ratio: 960 / 1080;
+	--plans-highend-media-top: 20.533vw;
 	--plans-highend-min-height: clamp(498.88px, 458.03px + 10.8932vw, 667.18px); /* 498.88 → 667.18 */
 	--plans-highend-indent: clamp(0px, -12.828px + 3.4207vw, 52.85px); /* 0 → 52.85 : 左余白からのテキスト字下げ（917:129） */
 	--plans-package-img-w: 56.25%; /* PC 900 / 1600 */
@@ -330,8 +365,10 @@ Text Domain: exterior-exone
 	   どの幅でも保つため、カード寸法をビューポート幅比例にする。769px 以上は PC 用（5 枚見え）に上書き。 */
 	--works-card-w: 69.971vw; /* 262.39px @375 */
 	--works-card-h: 84.789vw; /* 317.96px @375（325.92:394.95 の縦横比） */
-	--works-list-h: 84.789vw; /* カード群の高さ = カード高（917:118） */
-	--works-text-gap: clamp(-110.75px, 58.508px + -8.8155vw, 25.45px); /* 25.45 → -110.75 : PC はカード群に説明文が重なる */
+	/* 端カードは約 10 度傾くぶん外接矩形が縦に伸びるので、その下がり（12.55vw、
+	   実測）をカード高に足しておく。足さないと傾いた角が説明文に食い込む。 */
+	--works-list-h: 97.339vw; /* 端カードの下がり 12.55vw + カード高 84.79vw */
+	--works-text-gap: 6.787vw; /* 25.45px @375。PC ではカード群に重ねるため下で上書き */
 	--works-btn-gap: clamp(25.46px, 15.715px + 2.5987vw, 65.61px); /* 25.46 → 65.61 : 説明文下→ボタン */
 	--works-desc-size: clamp(12px, 11.515px + 0.1294vw, 14px); /* 12 → 14 : 917:876 / 917:117 */
 	--works-desc-w: clamp(320px, 263.91px + 14.9572vw, 551.089px); /* 320 → 551.09 : 説明文の幅（917:876 / 917:117） */
@@ -359,6 +396,8 @@ Text Domain: exterior-exone
 	--footer-logo-gap: clamp(30px, 22.718px + 1.9417vw, 60px); /* 30 → 60 : ロゴ下端→SNS ブロック上端 */
 	--footer-sns-gap: clamp(30px, 24.903px + 1.3592vw, 51px); /* 30 → 51 : SNS 下端→見出し / ブロック間 */
 	--footer-menu-gap: clamp(59.8px, 45.188px + 3.8964vw, 120px); /* 59.8 → 120 : リスト→コピーライト */
+	--footer-padding-bottom: clamp(30px, 26.117px + 1.0356vw, 46px); /* 30 → 46 : コピーライト下端→フッター下端。
+	   上（--section-padding-y）とは値が違うので padding-block を上下で分けて指定する */
 	--footer-menus-width: 1200px; /* PC カンプの MENU+STORE 全幅（553*2+94） */
 	--footer-block-width: clamp(320px, 263.447px + 15.0809vw, 553px); /* 320 → 553 : SP ブロック幅 */
 	--footer-block-gap: clamp(40px, 4.8958vw, 94px); /* 94 @1920 : MENU と STORE の間 */
@@ -415,6 +454,23 @@ Text Domain: exterior-exone
 		--fv-pin-top: 0px; /* PC はヘッダーが写真に重なり追従もしない */
 		--dx-pin-top: 0px;
 		--dx-pin-height: 100vh;
+
+		/* DX 03 SHARE の図。枠が横長になるぶん、参照実装どおり
+		   端末の左右に円を振り分けてつなぎ線を出す（枠高 500 = 設計値） */
+		/* PC の枠は幅が余って高さが足りない。高さ基準のままだと 769〜1100px あたりで
+		   図が読めない大きさになるので、次の 3 つの真ん中を取る:
+		   - 100cqh / 500 … 参照実装どおりの比率（広い画面ではこれが選ばれる）
+		   - 0.74px       … 画面の中の文字が 10px を割らない下限
+		   - 図の外接（556 x 416 に上下左右の余白を足した 580 x 440）が枠に収まる上限
+		   下限より上限が小さい狭い画面では、収まるぎりぎりまで図を持ち上げる。 */
+		--dxm-u: min(max(100cqh / 500, 0.74px), 100cqh / 440, 100cqw / 580);
+		--dxm-frame: 500; /* 上の式に直接書いてあるが、意図を残すため併記 */
+		--dxm-lift: 14;
+		--dxm-phone-w: 188;
+		--dxm-item: 116;
+		--dxm-item-size: 15;
+		--dxm-item-x: 162;
+		--dxm-item-y: 92;
 		--fv-copy-top: 40.54%; /* PC: 437.88 / 1080（1:306 / 1:280） */
 		/* 表示領域が 16:9 より横長だと動画は上下が切れる。中央基準だと下端の
 		   被写体（車・地面）が欠けるので、切れる分を上（空）側へ寄せる */
@@ -429,6 +485,8 @@ Text Domain: exterior-exone
 		--works-card-w: 21.263vw; /* 306.18px @1440 */
 		--works-card-h: 25.767vw; /* 371.05px @1440（325.92:394.95 の縦横比） */
 		--works-list-h: 36.5vw; /* 端カードの下がり 10.64vw + カード高 25.77vw */
+		/* PC はカンプ 917:117 どおり説明文をカード群に重ねる */
+		--works-text-gap: clamp(-110.75px, 58.508px + -8.8155vw, -9.3px);
 	}
 }
 
@@ -561,6 +619,22 @@ body.is-drawer-open {
 	transform: scale(0.94);
 }
 
+/* 左からフェードイン */
+[data-reveal="left"] {
+	transform: translateX(calc(var(--reveal-shift) * -1));
+}
+
+/* 器そのものは動かさず、中身を動かすための合図だけを受け取る。
+   chars は 1 文字ずつの見出し、stage は中で複数の要素を順に動かす舞台。
+   どちらも .is-inview はこの器に付き、中身は各セクションの CSS が動かす。 */
+[data-reveal="chars"],
+[data-reveal="stage"] {
+	opacity: 1;
+	transform: none;
+	transition: none;
+	will-change: auto;
+}
+
 [data-reveal].is-inview {
 	opacity: 1;
 	transform: none;
@@ -574,11 +648,8 @@ body.is-drawer-open {
 		transition: none;
 	}
 
-	/* 円環図は浮かせない */
-	.p-diagram__icon,
-	.p-diagram__copy {
-		animation: none;
-	}
+	/* 円環図と DX 03 SHARE の図は、それぞれの定義の直後で止める
+	   （animation の指定がこのブロックより下にあり、ここに書いても後勝ちで効かない） */
 
 	/* FV の字送りは動かさない。出ているコピーだけそのまま置く */
 	.p-fv__char {
@@ -1031,7 +1102,7 @@ body.is-drawer-open {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	padding-block: var(--section-padding-y);
+	padding-block: var(--section-padding-y) var(--footer-padding-bottom);
 	background: var(--color-black3);
 	color: var(--color-gray2);
 }
@@ -1569,6 +1640,14 @@ body.is-drawer-open {
 	}
 }
 
+/* 動きを減らす設定では浮かせない */
+@media (prefers-reduced-motion: reduce) {
+	.p-diagram__icon,
+	.p-diagram__copy {
+		animation: none;
+	}
+}
+
 .p-diagram__copy {
 	font-size: var(--diagram-copy-size);
 	line-height: var(--diagram-copy-lh);
@@ -2071,6 +2150,291 @@ body.is-drawer-open {
 	object-fit: cover;
 }
 
+/* --- 03 SHARE: 背景写真の上に重ねるスマホの図（参照実装 test.html の 3 枚目） ---
+   位置と大きさはすべて --dxm-u（枠基準）か --dxm-p（端末基準）に載せてある。
+   トークンの定義とその意図は :root を参照。 */
+
+/* cqh をこの枠の高さで測るためのコンテナ。--dxm-u / --dxm-p の基準になる */
+.p-dx__visual--mockup {
+	container-type: size;
+}
+
+/* 写真が明るいままでは円も画面も沈むので、参照実装と同じ暗幕を敷く */
+.p-dx__mockup-scrim {
+	position: absolute;
+	inset: 0;
+	background: var(--dxm-scrim);
+	pointer-events: none;
+}
+
+.p-dx__mockup {
+	position: absolute;
+	inset: 0;
+	overflow: hidden;
+}
+
+/* 外周に散らばっている確認事項。中央へ吸い込まれて消える */
+.p-dx__mockup-item {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: calc(var(--dxm-item) * var(--dxm-u));
+	height: calc(var(--dxm-item) * var(--dxm-u));
+	padding-inline: calc(var(--dxm-item) * var(--dxm-u) * 0.08);
+	border-radius: 50%;
+	background: var(--dxm-accent);
+	box-shadow: 0 calc(18 * var(--dxm-u)) calc(44 * var(--dxm-u)) rgba(0, 0, 0, 0.18);
+	backdrop-filter: blur(calc(12 * var(--dxm-u)));
+	color: rgba(255, 255, 255, 0.95);
+	font-size: calc(var(--dxm-item-size) * var(--dxm-u));
+	font-weight: 700;
+	letter-spacing: 0.1em;
+	text-align: center;
+	/* 動き出す前は出さない（アニメーションの 0% と揃える） */
+	opacity: 0;
+	transform: translate(var(--x), var(--y));
+	z-index: 3;
+}
+
+/* --x / --y は「枠の中心から円の左上まで」。円の内側の距離 + 直径で外側を出す */
+.p-dx__mockup-item--tl,
+.p-dx__mockup-item--bl {
+	--x: calc((var(--dxm-item-x) + var(--dxm-item)) * var(--dxm-u) * -1);
+}
+
+.p-dx__mockup-item--tr,
+.p-dx__mockup-item--br {
+	--x: calc(var(--dxm-item-x) * var(--dxm-u));
+}
+
+.p-dx__mockup-item--tl,
+.p-dx__mockup-item--tr {
+	--y: calc((var(--dxm-item-y) + var(--dxm-item)) * var(--dxm-u) * -1);
+}
+
+.p-dx__mockup-item--bl,
+.p-dx__mockup-item--br {
+	--y: calc(var(--dxm-item-y) * var(--dxm-u));
+}
+
+/* 円と端末をつなぐ線。SP は円が端末の上下に来て線が意味を持たないので出さない */
+.p-dx__mockup-line {
+	display: none;
+}
+
+.p-dx__mockup-phone {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	translate: -50% -50%;
+	width: calc(var(--dxm-phone-w) * var(--dxm-u));
+	aspect-ratio: 9 / 19.5;
+	border: 1px solid rgba(255, 255, 255, 0.22);
+	border-radius: calc(38 * var(--dxm-p));
+	background: linear-gradient(145deg, #202936, #07090d 52%, #161c25);
+	box-shadow:
+		inset 0 0 0 calc(7 * var(--dxm-p)) #050608,
+		inset 0 0 0 calc(8 * var(--dxm-p)) rgba(255, 255, 255, 0.09),
+		0 calc(28 * var(--dxm-p)) calc(58 * var(--dxm-p)) rgba(0, 0, 0, 0.5);
+	z-index: 5;
+}
+
+/* 受話口 */
+.p-dx__mockup-phone::before {
+	content: "";
+	position: absolute;
+	left: 50%;
+	top: calc(13 * var(--dxm-p));
+	translate: -50% 0;
+	width: calc(58 * var(--dxm-p));
+	height: calc(6 * var(--dxm-p));
+	border-radius: 999px;
+	background: #151a21;
+	z-index: 2;
+}
+
+.p-dx__mockup-screen {
+	position: absolute;
+	inset: calc(8 * var(--dxm-p)) calc(7 * var(--dxm-p));
+	border-radius: calc(32 * var(--dxm-p));
+	background:
+		radial-gradient(circle at 50% 0%, rgba(142, 232, 255, 0.2), transparent 42%),
+		linear-gradient(#0f151e, #06080c);
+	overflow: hidden;
+}
+
+.p-dx__mockup-app {
+	position: absolute;
+	left: calc(12 * var(--dxm-p));
+	right: calc(12 * var(--dxm-p));
+	top: calc(41 * var(--dxm-p));
+	color: var(--dxm-screen-sub);
+	font-size: calc(10 * var(--dxm-p));
+	line-height: 1;
+	letter-spacing: 0.14em;
+	text-align: center;
+}
+
+/* 改行はデータ側の配列を改行で連結して渡している */
+.p-dx__mockup-lead {
+	position: absolute;
+	left: calc(12 * var(--dxm-p));
+	right: calc(12 * var(--dxm-p));
+	top: calc(59 * var(--dxm-p));
+	color: var(--dxm-screen-lead);
+	font-size: calc(17 * var(--dxm-p));
+	font-weight: 700;
+	line-height: 1.32;
+	letter-spacing: 0.08em;
+	text-align: center;
+	white-space: pre-line;
+}
+
+/* 集まったあとの一覧。参照実装と同じく常に出ていて、チェック印だけ後から点く */
+.p-dx__mockup-list {
+	position: absolute;
+	left: 50%;
+	top: 54%;
+	translate: -50% -50%;
+	display: grid;
+	gap: calc(6 * var(--dxm-p));
+	width: calc(146 * var(--dxm-p));
+}
+
+.p-dx__mockup-row {
+	display: flex;
+	align-items: center;
+	gap: calc(9 * var(--dxm-p));
+	height: calc(38 * var(--dxm-p));
+	padding-inline: calc(12 * var(--dxm-p));
+	border: 1px solid rgba(255, 255, 255, 0.1);
+	border-radius: calc(11 * var(--dxm-p));
+	background: rgba(255, 255, 255, 0.06);
+	color: var(--dxm-screen-text);
+	font-size: calc(13.5 * var(--dxm-p));
+	font-weight: 700;
+	letter-spacing: 0.09em;
+}
+
+.p-dx__mockup-check {
+	flex: 0 0 auto;
+	display: grid;
+	place-items: center;
+	width: calc(20 * var(--dxm-p));
+	height: calc(20 * var(--dxm-p));
+	border-radius: 50%;
+	background: var(--dxm-accent-weak);
+	color: var(--dxm-accent-text);
+	font-size: calc(12 * var(--dxm-p));
+	font-style: normal;
+	line-height: 1;
+	opacity: 0;
+	transform: scale(0.82);
+}
+
+/* 表示中のときだけ回す */
+.p-dx__visual--mockup.is-active .p-dx__mockup-item {
+	animation: p-dx-mockup-gather var(--dxm-cycle) cubic-bezier(0.75, 0, 0.18, 1) infinite both;
+}
+
+.p-dx__visual--mockup.is-active .p-dx__mockup-line {
+	animation: p-dx-mockup-line var(--dxm-cycle) ease-in-out infinite both;
+}
+
+.p-dx__visual--mockup.is-active .p-dx__mockup-check {
+	animation: p-dx-mockup-check var(--dxm-cycle) cubic-bezier(0.16, 1, 0.3, 1) infinite both;
+}
+
+/* 少し持ち上がって現れ、そのまま止まってから中央へ縮んで消える */
+@keyframes p-dx-mockup-gather {
+	0%,
+	4% {
+		opacity: 0;
+		transform: translate(var(--x), calc(var(--y) + var(--dxm-lift) * var(--dxm-u))) scale(0.96);
+	}
+
+	10%,
+	50% {
+		opacity: 1;
+		transform: translate(var(--x), var(--y)) scale(1);
+	}
+
+	60% {
+		opacity: 1;
+		transform: translate(-50%, -50%) scale(0.42);
+	}
+
+	64%,
+	100% {
+		opacity: 0;
+		transform: translate(-50%, -50%) scale(0.22);
+	}
+}
+
+/* つなぎ線は円が出ている間だけ */
+@keyframes p-dx-mockup-line {
+	0%,
+	8% {
+		opacity: 0;
+	}
+
+	14%,
+	49% {
+		opacity: 0.62;
+	}
+
+	58%,
+	100% {
+		opacity: 0;
+	}
+}
+
+/* チェック印は円が吸い込まれ終わってから点く */
+@keyframes p-dx-mockup-check {
+	0%,
+	63% {
+		opacity: 0;
+		transform: scale(0.82);
+	}
+
+	68%,
+	98% {
+		opacity: 1;
+		transform: scale(1);
+	}
+
+	100% {
+		opacity: 0;
+		transform: scale(0.82);
+	}
+}
+
+/* 動きを減らす設定では集約させず、集まり終わった状態で置く */
+@media (prefers-reduced-motion: reduce) {
+	.p-dx__visual--mockup.is-active .p-dx__mockup-item,
+	.p-dx__visual--mockup.is-active .p-dx__mockup-line,
+	.p-dx__visual--mockup.is-active .p-dx__mockup-check {
+		animation: none;
+	}
+
+	/* 休止位置の見た目。PC 用の指定がこのブロックより下にあるので詳細度で上回らせる */
+	.p-dx__visual--mockup .p-dx__mockup-item {
+		opacity: 1;
+	}
+
+	.p-dx__visual--mockup .p-dx__mockup-line {
+		opacity: 0.62;
+	}
+
+	.p-dx__visual--mockup .p-dx__mockup-check {
+		opacity: 1;
+		transform: none;
+	}
+}
+
 .p-dx__media-foot {
 	position: relative;
 	display: flex;
@@ -2340,6 +2704,57 @@ body.is-drawer-open {
 		--dx-media-ratio: 1103 / 575;
 	}
 
+	/* 03 SHARE の図。枠が横長なので円が端末の左右に並び、つなぎ線が出せる */
+	.p-dx__mockup-line {
+		display: block;
+		position: absolute;
+		left: 50%;
+		top: 50%;
+		width: calc(176 * var(--dxm-u));
+		height: 1px;
+		background: linear-gradient(90deg, rgba(142, 232, 255, 0), var(--dxm-line), rgba(142, 232, 255, 0.18));
+		transform: translate(var(--px), var(--py)) rotate(var(--r));
+		transform-origin: left center;
+		opacity: 0;
+		z-index: 2;
+	}
+
+	.p-dx__mockup-line--tl,
+	.p-dx__mockup-line--bl {
+		--px: calc(-190 * var(--dxm-u));
+	}
+
+	.p-dx__mockup-line--tr,
+	.p-dx__mockup-line--br {
+		--px: calc(184 * var(--dxm-u));
+	}
+
+	.p-dx__mockup-line--tl,
+	.p-dx__mockup-line--tr {
+		--py: calc(-132 * var(--dxm-u));
+	}
+
+	.p-dx__mockup-line--bl,
+	.p-dx__mockup-line--br {
+		--py: calc(132 * var(--dxm-u));
+	}
+
+	.p-dx__mockup-line--tl {
+		--r: 32deg;
+	}
+
+	.p-dx__mockup-line--tr {
+		--r: 148deg;
+	}
+
+	.p-dx__mockup-line--bl {
+		--r: -32deg;
+	}
+
+	.p-dx__mockup-line--br {
+		--r: -148deg;
+	}
+
 	.p-dx__media-foot {
 		align-items: flex-start;
 		margin-top: var(--dx-media-foot-gap);
@@ -2500,13 +2915,26 @@ body.is-drawer-open {
 }
 
 .p-copy__media,
-.p-copy__image {
+.p-copy__image,
+.p-copy__video {
 	position: absolute;
 	inset: 0;
 	display: block;
 	width: 100%;
 	height: 100%;
 	object-fit: cover;
+}
+
+/* 背景動画。読み込めるまでは下の画像を見せておき、再生できたら重ねる。
+   src は js/copy-video.js が幅に応じて入れる（PC と SP で縦横比が違う）。 */
+.p-copy__video {
+	max-width: none;
+	opacity: 0;
+	transition: opacity var(--transition-base);
+}
+
+.p-copy__video.is-ready {
+	opacity: 1;
 }
 
 .p-copy__text {
@@ -2691,22 +3119,27 @@ body.is-drawer-open {
    PC は右半分に画像、左からのグラデーションでテキスト側を暗くする（917:125-128）。 */
 .p-plans__highend {
 	position: relative;
-	min-height: var(--plans-highend-min-height);
+	/* 写真の上の帯 + 写真の高さ（幅 x 1080/960）が入る高さは最低でも確保する。
+	   テキストが伸びたときは上へ広がり、写真は下端に着いたまま。 */
+	min-height: calc(var(--plans-highend-media-top) + 100vw * 1080 / 960);
 	padding-block: var(--section-padding-y);
 	overflow: hidden;
 	background: var(--color-black2);
 }
 
+/* 下端に着けて、高さは素材と同じ比で決める。
+   枠と素材の比が揃うので object-fit: cover でも切り取りが起きない。 */
 .p-plans__highend-media {
 	position: absolute;
-	/* 77 / 498.88、421.88 / 498.88（917:861-863）。帯の高さに追従させる */
-	top: 15.43%;
+	right: 0;
+	bottom: 0;
 	left: 0;
-	width: 100%;
-	height: 84.57%;
+	aspect-ratio: var(--plans-highend-media-ratio);
 }
 
+.p-plans__highend-media picture,
 .p-plans__highend-media img {
+	display: block;
 	width: 100%;
 	height: 100%;
 	object-fit: cover;
@@ -2717,7 +3150,7 @@ body.is-drawer-open {
 	content: "";
 	position: absolute;
 	inset: 0 0 auto;
-	height: 168.45px;
+	height: 44.92vw; /* 168.45 / 375 */
 	background: linear-gradient(180deg, var(--color-black2) 0%, rgba(26, 26, 26, 0) 100%);
 }
 
@@ -2790,12 +3223,18 @@ body.is-drawer-open {
 		align-items: center;
 	}
 
+	.p-plans__highend {
+		min-height: var(--plans-highend-min-height);
+	}
+
 	.p-plans__highend-media {
 		top: 0;
 		right: 0;
+		bottom: auto;
 		left: auto;
 		width: var(--plans-highend-img-w);
 		height: 100%;
+		aspect-ratio: auto;
 	}
 
 	/* PC は左から右へのグラデーション（917:128） */
@@ -2897,6 +3336,7 @@ body.is-drawer-open {
 	height: 100%;
 	object-fit: cover;
 	-webkit-user-drag: none; /* 画像のドラッグ既定動作が輪のドラッグを妨げないように */
+	border-radius: 20px;
 }
 
 /* 画像未設定時のプレースホルダ（NEWS カードと同じグレー） */

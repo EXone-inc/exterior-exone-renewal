@@ -5,8 +5,9 @@
  * カンプ: PC 917:1411-1412・917:1472-1473・917:1481-1523（左に Our Purpose、右に円環図）
  *         SP  917:976-1013（Our Purpose の下に 6 項目のリスト）
  *
- * 円環図（917:1481）はテキストごと 1 枚に焼き込まれた支給画像。PC ではこの図を、
- * SP では同じ内容のリストを見せるため、リストは PC で読み上げ用に隠す。
+ * 円環図（917:1481）は支給画像を「輪 + 中心円」と「6 項目のテキスト」に分けたもので、
+ * 項目ごとに別々の周期で上下に漂わせる。PC ではこの図を、SP では同じ内容のリストを
+ * 見せるため、リストは PC で読み上げ用に隠す。
  *
  * @package exterior-exone
  */
@@ -36,7 +37,7 @@ $exterior_exone_eco_lead  = 'EXoneは、デザイン・施工・テクノロジ�
 		</div>
 
 		<div class="p-ceco__body">
-			<div class="p-ceco__purpose">
+			<div class="p-ceco__purpose" data-reveal>
 				<div class="p-ceco__purpose-head">
 					<img
 						class="p-ceco__purpose-icon"
@@ -53,14 +54,30 @@ $exterior_exone_eco_lead  = 'EXoneは、デザイン・施工・テクノロジ�
 				<p class="p-ceco__purpose-text"><?php echo esc_html( $exterior_exone_eco_lead ); ?></p>
 			</div>
 
+			<?php
+			// 円環図。支給画像 1 枚を「輪 + 中心円（台紙）」と「6 項目のテキスト」に
+			// 分けてあり、項目ごとに別々の周期で漂わせる（TOP の円環図と同じ考え方）。
+			// 位置と幅は元画像 1813x1502 に対する比。並びは上から時計回りで、
+			// exterior_exone_company_ecosystem_items() と同じ順。
+			?>
 			<figure class="p-ceco__figure" aria-hidden="true">
 				<img
-					src="<?php echo esc_url( exterior_exone_company_image( 'ecosystem-feature.png' ) ); ?>"
+					class="p-ceco__figure-base"
+					src="<?php echo esc_url( exterior_exone_company_image( 'ecosystem-feature-base.png' ) ); ?>"
 					width="906"
 					height="751"
 					alt=""
 					loading="lazy"
 				>
+
+				<?php for ( $exterior_exone_index = 1; $exterior_exone_index <= 6; $exterior_exone_index++ ) : ?>
+					<img
+						class="p-ceco__figure-item p-ceco__figure-item--<?php echo esc_attr( (string) $exterior_exone_index ); ?>"
+						src="<?php echo esc_url( exterior_exone_company_image( 'ecosystem-feature-' . $exterior_exone_index . '.png' ) ); ?>"
+						alt=""
+						loading="lazy"
+					>
+				<?php endfor; ?>
 			</figure>
 
 			<ul class="p-ceco__list">

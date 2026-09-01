@@ -114,13 +114,22 @@ function exterior_exone_enqueue_assets() {
 		exterior_exone_asset_version( 'style.css' )
 	);
 
-	// 企業情報ページ専用スタイル（テーマ本体の後に読む）。
+	// 企業情報ページ専用アセット（CSS はテーマ本体の後に読む）。
 	if ( is_page_template( 'page-company.php' ) || is_page( 'company' ) ) {
 		wp_enqueue_style(
 			'exterior-exone-company',
 			get_theme_file_uri( 'css/company.css' ),
 			array( 'exterior-exone-style' ),
 			exterior_exone_asset_version( 'css/company.css' )
+		);
+
+		// FV の暗幕（TOP と同じ演出。対象は .l-pin の中身で決まる）。
+		wp_enqueue_script(
+			'exterior-exone-fv-mask',
+			get_theme_file_uri( 'js/fv-mask.js' ),
+			array(),
+			exterior_exone_asset_version( 'js/fv-mask.js' ),
+			true
 		);
 	}
 
@@ -187,6 +196,7 @@ function exterior_exone_front_page_scripts() {
 		'exterior-exone-works-carousel' => 'js/works-carousel.js',
 		'exterior-exone-scroll-row'     => 'js/scroll-row.js',
 		'exterior-exone-plans-switch'   => 'js/plans-switch.js',
+		'exterior-exone-copy-video'     => 'js/copy-video.js',
 	);
 }
 
@@ -201,21 +211,23 @@ function exterior_exone_top_video( $file ) {
 }
 
 /**
- * 文字列を 1 文字ずつ span で包む（FV の文字送りアニメーション用）。
+ * 文字列を 1 文字ずつ span で包む（文字送りアニメーション用）。
  *
  * --char-index に通し番号を入れ、CSS 側が transition-delay に掛けて 1 文字ずつ遅らせる。
  * 半角スペースはそのままだと行末で潰れて字送りの間隔が崩れるため &nbsp; にする。
  *
- * @param string $text 対象の文字列。
+ * @param string $text  対象の文字列。
+ * @param string $class 1 文字ずつの span に付けるクラス（送りの見た目は CSS 側が持つ）。
  * @return string エスケープ済みの HTML。
  */
-function exterior_exone_split_chars( $text ) {
+function exterior_exone_split_chars( $text, $class = 'p-fv__char' ) {
 	$chars = preg_split( '//u', $text, -1, PREG_SPLIT_NO_EMPTY );
 	$html  = '';
 
 	foreach ( (array) $chars as $index => $char ) {
 		$html .= sprintf(
-			'<span class="p-fv__char" style="--char-index:%d">%s</span>',
+			'<span class="%1$s" style="--char-index:%2$d">%3$s</span>',
+			esc_attr( $class ),
 			(int) $index,
 			' ' === $char ? '&nbsp;' : esc_html( $char )
 		);

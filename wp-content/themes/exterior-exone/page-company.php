@@ -14,9 +14,19 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 get_header();
 
+// FV は Why We Exist が重なる間その場に留まる（TOP と同じ、固定された FV に
+// 暗幕がかぶさる演出）。sticky の効き幅をこの 2 セクションに限るため、ここだけ包む。
+// 暗転の進捗は js/fv-mask.js が .l-pin の 1 つ目・2 つ目の子から算出する。
+?>
+<div class="l-pin">
+	<?php
+	get_template_part( 'template-parts/company/section', 'fv' );
+	get_template_part( 'template-parts/company/section', 'why' );
+	?>
+</div>
+<?php
+
 $exterior_exone_company_sections = array(
-	'fv',
-	'why',
 	'experience', // PC のみ（ブランドストーリー + VISION/MISSION）
 	'visible',    // PC のみ（見える価格/提案/施工管理/品質基準）
 	'principles',

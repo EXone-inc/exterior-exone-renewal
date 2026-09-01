@@ -38,7 +38,7 @@ function exterior_exone_global_menu_items() {
 		),
 		array(
 			'label' => 'COMPANY',
-			'url'   => '#',
+			'url'   => home_url( '/company/' ),
 		),
 		array(
 			'label' => 'RECRUIT',

@@ -10,6 +10,9 @@
  * PC は 3 ステップを同時に見せて現在地を点で示し、SP はカンプどおり 1 件ずつ
  * 入れ替える。ステップを押すと、その位置までスクロールする。
  *
+ * 03 SHARE のビジュアルだけは動画ではなく、背景写真の上にスマホの図を CSS で
+ * 重ねたもの（media.type = 'mockup'）。こちらも test.html の 3 枚目に合わせてある。
+ *
  * @package exterior-exone
  */
 
@@ -33,8 +36,9 @@ $exterior_exone_dx_steps = exterior_exone_dx_steps();
 				<?php // ステップぶんのビジュアルを重ねて置き、is-active の 1 枚だけを見せる。 ?>
 				<div class="p-dx__visuals">
 					<?php foreach ( $exterior_exone_dx_steps as $exterior_exone_index => $exterior_exone_step ) : ?>
+						<?php $exterior_exone_mockup = isset( $exterior_exone_step['media']['mockup'] ) ? $exterior_exone_step['media']['mockup'] : null; ?>
 						<div
-							class="p-dx__visual<?php echo 0 === $exterior_exone_index ? ' is-active' : ''; ?>"
+							class="p-dx__visual<?php echo $exterior_exone_mockup ? ' p-dx__visual--mockup' : ''; ?><?php echo 0 === $exterior_exone_index ? ' is-active' : ''; ?>"
 							data-dx-visual="<?php echo esc_attr( (string) $exterior_exone_index ); ?>"
 						>
 							<?php if ( 'video' === $exterior_exone_step['media']['type'] ) : ?>
@@ -55,6 +59,42 @@ $exterior_exone_dx_steps = exterior_exone_dx_steps();
 									alt=""
 									loading="lazy"
 								>
+							<?php endif; ?>
+
+							<?php if ( $exterior_exone_mockup ) : ?>
+								<?php
+								// 03 SHARE。背景写真の上に、確認事項の円がスマホの中に集まる図を CSS で描く
+								// （参照実装 test.html の 3 枚目）。中の文字は図の一部なので、
+								// 読み上げには role="img" の説明 1 本だけを渡す。
+								?>
+								<span class="p-dx__mockup-scrim" aria-hidden="true"></span>
+
+								<div class="p-dx__mockup" role="img" aria-label="<?php echo esc_attr( $exterior_exone_mockup['alt'] ); ?>">
+									<?php $exterior_exone_corners = array( 'tl', 'tr', 'bl', 'br' ); ?>
+
+									<?php // 円とスマホをつなぐ線（PC のみ。SP は円が上下に来るため出さない）。 ?>
+									<?php foreach ( $exterior_exone_corners as $exterior_exone_corner ) : ?>
+										<span class="p-dx__mockup-line p-dx__mockup-line--<?php echo esc_attr( $exterior_exone_corner ); ?>"></span>
+									<?php endforeach; ?>
+
+									<?php // スマホの外に散らばっている確認事項。中央へ吸い込まれて消える。 ?>
+									<?php foreach ( array_values( $exterior_exone_mockup['labels'] ) as $exterior_exone_label_index => $exterior_exone_label ) : ?>
+										<span class="p-dx__mockup-item p-dx__mockup-item--<?php echo esc_attr( $exterior_exone_corners[ $exterior_exone_label_index ] ); ?>"><?php echo esc_html( $exterior_exone_label ); ?></span>
+									<?php endforeach; ?>
+
+									<div class="p-dx__mockup-phone">
+										<div class="p-dx__mockup-screen">
+											<p class="p-dx__mockup-app"><?php echo esc_html( $exterior_exone_mockup['app'] ); ?></p>
+											<p class="p-dx__mockup-lead"><?php echo esc_html( implode( "\n", $exterior_exone_mockup['title'] ) ); ?></p>
+
+											<ul class="p-dx__mockup-list">
+												<?php foreach ( $exterior_exone_mockup['labels'] as $exterior_exone_label ) : ?>
+													<li class="p-dx__mockup-row"><i class="p-dx__mockup-check">&#10003;</i><?php echo esc_html( $exterior_exone_label ); ?></li>
+												<?php endforeach; ?>
+											</ul>
+										</div>
+									</div>
+								</div>
 							<?php endif; ?>
 						</div>
 					<?php endforeach; ?>

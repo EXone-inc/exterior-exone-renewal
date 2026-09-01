@@ -227,7 +227,9 @@ function exterior_exone_stats_items() {
  * media はステップごとの右側ビジュアル。PC はスクロール、SP はスライダーの
  * 現在位置に同期して切り替わる（js/dx-slider.js）。
  *
- * - type: 'video' なら videos/top/、'image' なら images/top/ を見る。
+ * - type: 'video' なら videos/top/、'image' / 'mockup' なら images/top/ を見る。
+ * - 'mockup' は画像の上にスマホの図を CSS で重ねる（03 SHARE。参照実装 test.html の 3 枚目）。
+ *   mockup.labels の 4 件が、外周の円とスマホ画面の中のリストの両方に使われる。
  *
  * @return array<int, array<string, mixed>>
  */
@@ -259,8 +261,14 @@ function exterior_exone_dx_steps() {
 			'desc'   => '変更点・確認事項・共有内容を一箇所に集約し、認識のズレを防止。',
 			'tags'   => array( '施主共有システム' ),
 			'media'  => array(
-				'type' => 'image',
-				'file' => 'dx_share.jpg',
+				'type'   => 'mockup',
+				'file'   => 'dx_share.jpg',
+				'mockup' => array(
+					'app'    => 'EXONE CHECK',
+					'title'  => array( 'WEBに', 'すべてを集約' ),
+					'labels' => array( '日程確認', '仕様確認', '資料共有', '色・素材' ),
+					'alt'    => '確認事項をスマホ画面の中に集約していく図',
+				),
 			),
 		),
 	);
