@@ -54,7 +54,9 @@ $exterior_exone_profile_last = count( $exterior_exone_profile ) - 1;
 		<h2 class="c-company-eng">Company Profile</h2>
 		<p class="c-company-jp">会社概要</p>
 
-		<p class="p-cprofile__lead">外構を、もっと自由に。もっと透明に。<br>デザインとテクノロジーの力で、外構づくりの新しいスタンダードをつくる。<br>住まいと暮らしの未来をデザインするEXTERIOR COMPANYです。</p>
+		<?php // 2 文目の文言が PC（949:81）と SP（34:1316）で異なるため出し分ける。 ?>
+		<p class="p-cprofile__lead p-cprofile__lead--pc">外構を、もっと自由に。もっと透明に。<br>デザインとテクノロジーの力で、外構づくりの新しいスタンダードをつくる。<br>住まいと暮らしの未来をデザインするEXTERIOR COMPANYです。</p>
+		<p class="p-cprofile__lead p-cprofile__lead--sp">外構を、もっと自由に。もっと透明に。<br>全てのプロセスを可視化し、外構づくりの新しいスタンダードをつくる。<br>住まいと暮らしの未来をデザインするEXTERIOR COMPANYです。</p>
 
 		<img
 			class="p-cprofile__logo"

@@ -5,8 +5,6 @@
  * カンプ: PC 917:1413-1417・917:1474-1480・917:1524-1531（リード + 4 カード + 日本地図）
  *         SP  917:905-913・917:1014-1017
  *
- * 冒頭のリード（917:1476）は PC カンプのみ。
- *
  * @package exterior-exone
  */
 
@@ -18,12 +16,6 @@ $exterior_exone_partners = exterior_exone_company_partners();
 ?>
 <section class="p-cpartner" data-section="company-partner">
 	<div class="p-cpartner__inner">
-		<div class="p-cpartner__intro" data-reveal>
-			<p class="p-cpartner__intro-eng">BUILDING THE FUTURE OF EXTERIOR</p>
-			<p class="p-cpartner__intro-jp">つなげる仕組みで、<br>業界の未来をつくる。</p>
-			<p class="p-cpartner__intro-text">EXoneは、デザイン・施工・テクノロジー・教育・ナレッジが循環する独自のエコシステムを構築。すべてのプロセスを可視化し、標準化することで、全国どこでも同じ品質と体験を提供します。</p>
-		</div>
-
 		<h2 class="c-display p-cpartner__title">Partner Network</h2>
 		<p class="p-cpartner__lead">信頼できるパートナーとともに、<br class="u-br-sp">全国へ高品質なサービスを届けます。</p>
 
@@ -42,6 +34,17 @@ $exterior_exone_partners = exterior_exone_company_partners();
 			<?php endforeach; ?>
 		</ul>
 
+		<?php
+		// SP カンプ（34:1173-1176）はカードの下にラベルだけを縦に並べる。
+		// PC ではカード内のラベルを使うため、この一覧は SP でだけ表示する
+		// （display: none で切り替えるので読み上げが二重になることはない）。
+		?>
+		<ul class="p-cpartner__label-list">
+			<?php foreach ( $exterior_exone_partners as $exterior_exone_partner ) : ?>
+				<li class="p-cpartner__label-item"><?php echo esc_html( $exterior_exone_partner['label'] ); ?></li>
+			<?php endforeach; ?>
+		</ul>
+
 		<div class="p-cpartner__outro">
 			<div class="p-cpartner__outro-body">
 				<p class="p-cpartner__outro-title"><span class="u-nobr">全国へ展開し、</span><br class="u-br-sp"><span class="u-nobr">業界の新しいスタンダードを創る。</span></p>
@@ -50,7 +53,7 @@ $exterior_exone_partners = exterior_exone_company_partners();
 
 			<?php
 			// 地図の上に、支給アニメーション（日本地図アニメーション.html）の
-			// 経路・拠点・粒子を SVG で重ねる。座標はすべて地図の実寸 1672x941 基準。
+			// 経路・拠点・粒子を SVG で重ねる。座標はすべて地図の実寸 1672x941 基準（枠はカンプどおり少し縦長で、画像と SVG は左寄せで右端を切り落として揃える）。
 			// id は文書内で衝突しないよう exone-map- を頭に付ける。
 			// 画面に入ると .is-inview が付いて動き出す（js/scroll-reveal.js）。
 
@@ -102,7 +105,7 @@ $exterior_exone_partners = exterior_exone_company_partners();
 				<svg
 					class="p-cpartner__map-net"
 					viewBox="0 0 1672 941"
-					preserveAspectRatio="xMidYMid meet"
+					preserveAspectRatio="xMinYMid slice"
 					aria-hidden="true"
 					focusable="false"
 				>

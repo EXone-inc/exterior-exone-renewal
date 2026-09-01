@@ -18,6 +18,9 @@ $exterior_exone_quality_items = array(
 );
 ?>
 <section class="p-cquality" data-section="company-quality">
+	<?php // SP カンプ（34:1090）の左端の縦書き飾り。見出しの h2 は SP では視覚的に隠す。 ?>
+	<p class="p-cquality__vert" aria-hidden="true">EXone Quality</p>
+
 	<div class="p-cquality__media">
 		<img
 			src="<?php echo esc_url( exterior_exone_company_image( 'qualitiy-bg.jpg' ) ); ?>"

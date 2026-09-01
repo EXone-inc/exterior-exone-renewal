@@ -99,7 +99,7 @@ function exterior_exone_drawer_menu_items() {
 		),
 		array(
 			'label' => '企業情報',
-			'url'   => '#',
+			'url'   => home_url( '/company/' ),
 		),
 		array(
 			'label' => '採用情報',

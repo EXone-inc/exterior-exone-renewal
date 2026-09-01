@@ -39,6 +39,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 						loading="lazy"
 					>
 					<figcaption class="p-cstory__sign">株式会社EXone<br>代表取締役　中村 剣太</figcaption>
+
+					<?php // オフィス写真（SP カンプ 34:1079 のみ。PC カンプには無いので PC では出さない）。 ?>
+					<img
+						class="p-cstory__office"
+						src="<?php echo esc_url( exterior_exone_company_image( 'profile-office.jpg' ) ); ?>"
+						width="1000"
+						height="603"
+						alt=""
+						loading="lazy"
+					>
 				</figure>
 
 				<?php // 画面に入ったら VISION → MISSION の順に左からフェードイン（js/scroll-reveal.js）。 ?>

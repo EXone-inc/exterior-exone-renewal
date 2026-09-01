@@ -2,7 +2,7 @@
 /**
  * 企業情報: EXone Ecosystem（事業構造）。
  *
- * カンプ: PC 917:1411-1412・917:1472-1473・917:1481-1523（左に Our Purpose、右に円環図）
+ * カンプ: PC 31:1000 の 33:1051（左に Our Purpose とリードの 2 ブロック、右に円環図）
  *         SP  917:976-1013（Our Purpose の下に 6 項目のリスト）
  *
  * 円環図（917:1481）は支給画像を「輪 + 中心円」と「6 項目のテキスト」に分けたもので、
@@ -52,6 +52,39 @@ $exterior_exone_eco_lead  = 'EXoneは、デザイン・施工・テクノロジ�
 				</div>
 
 				<p class="p-ceco__purpose-text"><?php echo esc_html( $exterior_exone_eco_lead ); ?></p>
+			</div>
+
+			<?php
+			// 顧客体験ブロック（SP カンプ 34:1187-1191 のみ。PC では円環図の中心が同じ役割を持つ）。
+			// 写真の後ろに、背景写真から黒へなじませるグラデーションを敷く。
+			?>
+			<div class="p-ceco__core" aria-hidden="false">
+				<span class="p-ceco__core-gradient" aria-hidden="true"></span>
+				<img
+					class="p-ceco__core-image"
+					src="<?php echo esc_url( exterior_exone_company_image( 'ecosystem-core.jpg' ) ); ?>"
+					width="1000"
+					height="667"
+					alt=""
+					loading="lazy"
+				>
+				<img
+					class="p-ceco__core-logo"
+					src="<?php echo esc_url( exterior_exone_top_image( 'logo.svg' ) ); ?>"
+					width="124"
+					height="19"
+					alt="EXone"
+					loading="lazy"
+				>
+				<p class="p-ceco__core-title">顧客体験</p>
+				<p class="p-ceco__core-text">すべての取り組みは、最高の顧客体験のために。</p>
+			</div>
+
+			<?php // 左カラムの 2 つ目のブロック（22:681）。PC カンプのみ。 ?>
+			<div class="p-ceco__lead" data-reveal>
+				<p class="p-ceco__lead-eng">BUILDING THE FUTURE OF EXTERIOR</p>
+				<p class="p-ceco__lead-jp">つなげる仕組みで、<br>業界の未来をつくる。</p>
+				<p class="p-ceco__lead-text"><?php echo esc_html( $exterior_exone_eco_lead ); ?></p>
 			</div>
 
 			<?php
