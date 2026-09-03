@@ -84,7 +84,7 @@ $exterior_exone_plan_cards = exterior_exone_plan_cards();
 			?>
 			<picture>
 				<source
-					media="(max-width: 768px)"
+					media="(max-width: 1024px)"
 					srcset="<?php echo esc_url( exterior_exone_top_image( 'highend-sp.jpg' ) ); ?>"
 					width="960"
 					height="1080"

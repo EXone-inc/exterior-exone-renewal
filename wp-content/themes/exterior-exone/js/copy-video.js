@@ -17,9 +17,30 @@
 		return;
 	}
 
-	var pc = window.matchMedia('(min-width: 769px)');
+	var pc = window.matchMedia('(min-width: 1025px)');
 	var current = '';
 	var inView = false;
+	var retryArmed = false;
+
+	// 低電力モード等で play() が拒否されたら、最初のタッチで再生し直す
+	//（ユーザー操作の直後なら許可される）。仕組みは js/fv-slider.js と同じ。
+	function armRetry() {
+		if (retryArmed) {
+			return;
+		}
+
+		retryArmed = true;
+
+		var retry = function () {
+			window.removeEventListener('touchstart', retry);
+			window.removeEventListener('pointerdown', retry);
+			retryArmed = false;
+			play();
+		};
+
+		window.addEventListener('touchstart', retry, { passive: true });
+		window.addEventListener('pointerdown', retry);
+	}
 
 	function play() {
 		if (!inView || !current) {
@@ -30,7 +51,9 @@
 
 		if (played && played.catch) {
 			played.catch(function () {
-				// 自動再生が拒否されても、下の画像が見えていれば足りる。
+				// 拒否されても下の画像が見えている（is-ready は playing まで付かない）。
+				// 初回タッチで再挑戦する。
+				armRetry();
 			});
 		}
 	}
@@ -52,7 +75,9 @@
 		play();
 	}
 
-	video.addEventListener('canplay', function () {
+	// canplay だと「読み込めたが再生はブロック」の状態でも動画が画像に被さるため、
+	// 実際に再生が始まってから前面に出す。
+	video.addEventListener('playing', function () {
 		video.classList.add('is-ready');
 	});
 

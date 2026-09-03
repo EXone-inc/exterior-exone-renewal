@@ -67,7 +67,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 </header>
 
 <?php // ハンバーガーメニュー（カンプ 1036:395・SP のみ）。 ?>
-<div class="p-drawer" id="global-drawer" data-drawer>
+<div class="p-drawer" id="global-drawer" data-drawer tabindex="-1">
 	<div class="p-drawer__bar">
 		<p class="p-drawer__logo">
 			<a href="<?php echo esc_url( home_url( '/' ) ); ?>">

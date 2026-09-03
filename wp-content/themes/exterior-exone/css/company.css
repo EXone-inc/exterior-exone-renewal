@@ -2,7 +2,7 @@
    企業情報ページ（固定ページ company）
    カンプ: PC 917:1408 / SP 917:901
    PC と SP でセクション構成・字送り・ウェイトが異なるため、
-   SP を基準に書き、769px 以上で PC カンプの値に上書きする。
+   SP を基準に書き、1025px 以上で PC カンプの値に上書きする。
    数値・色はすべて Figma の実測値（コメントの node-id が出典）。
    ============================================================ */
 :root {
@@ -67,15 +67,12 @@
 	--co-map-core: #fff; /* 拠点の中心と粒子 */
 	--co-map-net-shadow: rgba(79, 181, 255, 0.45);
 	--co-map-glow: rgba(77, 176, 255, 0.13);
-	--co-map-scan-soft: rgba(127, 207, 255, 0.14);
-	--co-map-scan-core: rgba(255, 255, 255, 0.55);
 	--co-map-arc-draw: 1.7s; /* 弧 1 本を引ききるまで */
 	--co-map-arc-step: 0.35s; /* 弧どうしの間隔 */
 	--co-map-node-start: 0.75s; /* 最初の拠点が出るまで */
 	--co-map-node-step: 0.3s; /* 拠点どうしの間隔 */
 	--co-map-ring-cycle: 2.6s;
 	--co-map-dash-cycle: 9s;
-	--co-map-scan-cycle: 7s;
 	--co-map-breathe-cycle: 4.8s;
 
 	/* --- 円環図の浮遊（TOP の円環図と同じ作り） --- */
@@ -363,11 +360,6 @@
 	text-align: center;
 }
 
-.p-cstory__eng--pc,
-.p-cstory__jp--pc {
-	display: none;
-}
-
 .p-cstory__body {
 	position: relative;
 	margin-top: var(--space-xl);
@@ -477,7 +469,7 @@
 .p-cstory__mv-item {
 	display: grid;
 	grid-template-columns: auto 1fr;
-	align-items: start;
+	align-items: center;
 	gap: var(--space-sm);
 }
 
@@ -618,7 +610,7 @@
 /* カード内の配置はカンプ実測（917:1419-1466、カード 510.26x656.94）。
    1920 基準の vw で指定し、狭い幅でも比率を保つ。
    01 +26.93 / アイコン下端 +188.74 / Challenge +218.39 / 説明 +293.35 / 画像 +380.38 */
-@media (min-width: 769px) {
+@media (min-width: 1025px) {
 	.p-cvalue__cards {
 		grid-template-columns: repeat(3, 1fr);
 		gap: var(--space-md);
@@ -1150,41 +1142,6 @@
 	transition: opacity 0.6s ease var(--co-map-node-start);
 }
 
-/* 上から下へ流れる走査線 */
-.p-cpartner__map-scan {
-	position: absolute;
-	left: 7%;
-	right: 3%;
-	top: 14%;
-	height: 1px;
-	background: linear-gradient(
-		90deg,
-		transparent,
-		var(--co-map-scan-soft),
-		var(--co-map-scan-core),
-		var(--co-map-scan-soft),
-		transparent
-	);
-	filter: blur(0.3px);
-	opacity: 0.55;
-	pointer-events: none;
-}
-
-.p-cpartner__map.is-inview .p-cpartner__map-scan {
-	animation: p-cpartner-map-scan var(--co-map-scan-cycle) linear infinite;
-}
-
-/* 移動量は地図の高さ基準（支給 HTML は画面高さ基準だったぶんを置き換え） */
-@keyframes p-cpartner-map-scan {
-	from {
-		transform: translateY(-8cqh);
-	}
-
-	to {
-		transform: translateY(82cqh);
-	}
-}
-
 /* 動きを減らす設定では、引き終わり・点灯済みの状態で止める
    （animation の指定より後ろに置かないと後勝ちで効かない） */
 @media (prefers-reduced-motion: reduce) {
@@ -1194,8 +1151,7 @@
 	.p-cpartner__map.is-inview .p-cpartner__map-arc,
 	.p-cpartner__map.is-inview .p-cpartner__map-trace,
 	.p-cpartner__map.is-inview .p-cpartner__map-node,
-	.p-cpartner__map.is-inview .p-cpartner__map-ring,
-	.p-cpartner__map.is-inview .p-cpartner__map-scan {
+	.p-cpartner__map.is-inview .p-cpartner__map-ring {
 		animation: none;
 	}
 
@@ -1321,9 +1277,9 @@
 }
 
 /* ============================================================
-   PC（769px 以上）
+   PC（1025px 以上）
    ============================================================ */
-@media (min-width: 769px) {
+@media (min-width: 1025px) {
 	.c-company-eng {
 		font-weight: var(--fw-semibold);
 	}
@@ -1397,16 +1353,6 @@
 	   画像 x163.73 y365.88 849.09x566.06 / パネル x921.32 y481.03 849.81x681.97
 	   Brand Story x1202.73 y425.41 / ブランドストーリー y519.54 / 本文 x1014.56 y616.05
 	   署名 x755.91 y861.05 / VISION y968.05 / MISSION y1051.05 */
-	.p-cstory__eng--pc,
-	.p-cstory__jp--pc {
-		display: block;
-	}
-
-	.p-cstory__eng--sp,
-	.p-cstory__jp--sp {
-		display: none;
-	}
-
 	/* 写真列（.p-cstory__col）とパネルを同じセルに重ねる。
 	   パネルを絶対配置にすると本文量でセクション高さが足りなくなり、
 	   次セクションへはみ出すため、両方を通常フローのグリッドアイテムにして
@@ -1415,7 +1361,7 @@
 		position: relative;
 		display: grid;
 		grid-template-columns: 1fr;
-		margin-top: 3.5937vw; /* 見出し下端 → 画像上端 */
+		margin-top: calc(80 * var(--co-vu)); /* 見出し下 80 ルール（カンプ実測 69 から変更） */
 	}
 
 	.p-cstory__col {
@@ -2063,7 +2009,7 @@
 	display: none;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
 	/* --- FV（34:1056）: 暗幕 0.4 --- */
 	.p-cfv__bg::after {
 		background: rgba(0, 0, 0, 0.4);
@@ -2072,17 +2018,17 @@
 	/* --- Why We Exist（34:1057） --- */
 	/* jp 下端 842.31 → リード 862.42 / リード下端 937.42 → 本文 982.52 */
 	.p-cwhy__lead {
-		margin-top: 20px;
+		margin-top: calc(20 * var(--co-su));
 	}
 
 	.p-cwhy__text {
-		margin-top: 45px;
+		margin-top: calc(45 * var(--co-su));
 	}
 
 	/* 線画（34:1065）はリードの右に重なる。inner 上端（= 見出し上端）基準 */
 	.p-cwhy__feature {
 		position: absolute;
-		top: 111px;
+		top: calc(111 * var(--co-su));
 		right: 0;
 		width: 54.73%; /* 175.15 / 320 */
 		margin: 0;
@@ -2090,16 +2036,16 @@
 
 	/* カード列（34:1066-1074）。本文下端 1078.52 → 1108.52 */
 	.p-cwhy__cards {
-		margin-top: 30px;
+		margin-top: calc(30 * var(--co-su));
 	}
 
 	.p-cwhy__card {
-		border-radius: 3px;
+		border-radius: calc(3 * var(--co-su));
 	}
 
 	/* ラベル帯（34:1068）: 高さ 35.16 / 透明 → 黒 50% */
 	.p-cwhy__card-body {
-		padding: 2px 4px;
+		padding: calc(2 * var(--co-su)) calc(4 * var(--co-su));
 		background: linear-gradient(180deg, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.5));
 	}
 
@@ -2108,22 +2054,22 @@
 	}
 
 	.p-cwhy__catch {
-		margin-top: 31px;
+		margin-top: calc(31 * var(--co-su));
 	}
 
 	.p-cwhy__outro {
-		margin-top: 30px;
+		margin-top: calc(30 * var(--co-su));
 		line-height: 2;
 	}
 
 	/* --- Industry Challenges（34:1077） --- */
 	/* 見出し下端 1582.41 → 写真 1604.97。写真列は左右いっぱいに使う */
 	.p-cstory__body {
-		margin-top: 22px;
+		margin-top: calc(22 * var(--co-su));
 		margin-inline: calc(var(--gutter) * -1);
 	}
 
-	/* 代表写真（34:1080）は左端から 255.85 幅。右のオフィス写真は 31px 下がる */
+	/* 代表写真（34:1080）は左端から 255.85 幅。右のオフィス写真は calc(31 * var(--co-su)) 下がる */
 	.p-cstory__media {
 		width: 68.23%; /* 255.85 / 375 */
 	}
@@ -2135,7 +2081,7 @@
 	.p-cstory__office {
 		display: block;
 		position: absolute;
-		top: 31px;
+		top: calc(31 * var(--co-su));
 		right: -31.77vw; /* media（幅 68.23vw）の右端 → 画面右端 */
 		width: 29.15vw; /* 109.31 / 375 */
 		height: auto;
@@ -2147,12 +2093,12 @@
 	.p-cstory__sign {
 		position: absolute;
 		left: var(--gutter);
-		bottom: 26px;
+		bottom: calc(26 * var(--co-su));
 		margin: 0;
-		font-size: 8px;
+		font-size: calc(8 * var(--co-su));
 		font-weight: var(--fw-regular);
 		line-height: 1.6;
-		letter-spacing: 1px;
+		letter-spacing: calc(1 * var(--co-su));
 		color: #fff;
 	}
 
@@ -2160,8 +2106,8 @@
 	.p-cstory__panel {
 		z-index: 1;
 		width: calc(100% - var(--gutter) * 2);
-		margin: -18px auto 0;
-		padding: 18px 35px 35px;
+		margin: calc(-18 * var(--co-su)) auto 0;
+		padding: calc(18 * var(--co-su)) calc(35 * var(--co-su)) calc(35 * var(--co-su));
 	}
 
 	/* SP カンプのカードに「ブランドストーリー」の和文見出しは無い */
@@ -2170,13 +2116,13 @@
 	}
 
 	.p-cstory__text {
-		margin-top: 7px;
-		letter-spacing: 2px;
+		margin-top: calc(7 * var(--co-su));
+		letter-spacing: calc(2 * var(--co-su));
 	}
 
 	/* カード下端 → セクション下端 71.3 */
 	.p-cstory {
-		padding-bottom: 71px;
+		padding-bottom: calc(71 * var(--co-su));
 	}
 
 	/* --- 私たちが作る体験（35:1379-1388）: スワイプで横送り --- */
@@ -2199,13 +2145,13 @@
 	/* 1 枚目の右に次のカードがのぞく（35:1388）。指で横に送れる */
 	.p-cvisible__cards {
 		display: flex;
-		gap: 15px; /* 291.05 - (38 + 238) */
-		margin-top: 22px;
+		gap: calc(15 * var(--co-su)); /* 291.05 - (38 + 238) */
+		margin-top: calc(22 * var(--co-su));
 		margin-inline: calc(var(--gutter) * -1);
-		padding-inline: 38px;
+		padding-inline: calc(38 * var(--co-su));
 		overflow-x: auto;
 		scroll-snap-type: x mandatory;
-		scroll-padding-inline: 38px;
+		scroll-padding-inline: calc(38 * var(--co-su));
 		scrollbar-width: none;
 	}
 
@@ -2225,13 +2171,13 @@
 		height: auto;
 		aspect-ratio: 238 / 303;
 		object-fit: cover;
-		border-radius: 5px;
+		border-radius: calc(5 * var(--co-su));
 	}
 
 	/* 大英字（35:1386）は写真の下端に 32 重なり、左へ 14 はみ出す */
 	.p-cvisible__card-eng {
-		margin: -32px 0 0 -10px;
-		font-size: 40px;
+		margin: calc(-32 * var(--co-su)) 0 0 calc(-10 * var(--co-su));
+		font-size: calc(40 * var(--co-su));
 		line-height: 1.6;
 		letter-spacing: 0;
 		white-space: nowrap; /* カンプ 35:1386。カード幅からはみ出してよい */
@@ -2239,18 +2185,18 @@
 	}
 
 	.p-cvisible__card-jp {
-		margin-top: -12px;
-		font-size: 14px;
+		margin-top: calc(-12 * var(--co-su));
+		font-size: calc(14 * var(--co-su));
 		font-weight: var(--fw-medium);
 		line-height: 2.5;
-		letter-spacing: 2px;
+		letter-spacing: calc(2 * var(--co-su));
 		color: var(--color-black2);
 	}
 
 	.p-cvisible__card-desc {
-		font-size: 12px;
+		font-size: calc(12 * var(--co-su));
 		line-height: 1.8;
-		letter-spacing: 2px;
+		letter-spacing: calc(2 * var(--co-su));
 		white-space: nowrap; /* 35:1384 */
 		color: var(--color-black2);
 	}
@@ -2258,26 +2204,26 @@
 	/* --- Our Principles（34:1089-1107） --- */
 	/* 帯は白カードに写真をはめ、英字がカード上端をまたぐ（34:1102 y2913.4 / カード 2934.39） */
 	.p-cvalue__cards {
-		gap: 30.5px;
-		margin-top: 33px;
+		gap: calc(30.5 * var(--co-su));
+		margin-top: calc(33 * var(--co-su));
 	}
 
 	.p-cvalue__card {
 		display: block;
 		position: relative;
 		width: 92.67%; /* 347.5 / 375 */
-		height: 86.72px;
-		padding: 24px 0 0 38.3%; /* 説明の位置 x160.13（カード左端から 133 = 38.3%） */
+		height: calc(86.72 * var(--co-su));
+		padding: calc(24 * var(--co-su)) 0 0 38.3%; /* 説明の位置 x160.13（カード左端から 133 = 38.3%） */
 		overflow: visible;
 		text-align: left;
-		border-radius: 5px 0 0 5px;
+		border-radius: calc(5 * var(--co-su)) 0 0 calc(5 * var(--co-su));
 		box-shadow: none;
 	}
 
 	.p-cvalue__card:nth-child(even) {
 		justify-self: start;
-		padding: 21px 0 0 28.7px;
-		border-radius: 0 5px 5px 0;
+		padding: calc(21 * var(--co-su)) 0 0 calc(28.7 * var(--co-su));
+		border-radius: 0 calc(5 * var(--co-su)) calc(5 * var(--co-su)) 0;
 	}
 
 	/* アイコンと番号は SP カンプに無い */
@@ -2291,13 +2237,13 @@
 		inset: 0 auto 0 0;
 		width: 35.13%; /* 122.09 / 347.5 */
 		overflow: hidden;
-		border-radius: 5px 0 0 5px;
+		border-radius: calc(5 * var(--co-su)) 0 0 calc(5 * var(--co-su));
 	}
 
 	.p-cvalue__card:nth-child(even) .p-cvalue__card-media {
 		inset: 0 0 0 auto;
 		width: 32.18%; /* 111.83 / 347.5 */
-		border-radius: 0 5px 5px 0;
+		border-radius: 0 calc(5 * var(--co-su)) calc(5 * var(--co-su)) 0;
 	}
 
 	.p-cvalue__card-media img {
@@ -2308,7 +2254,7 @@
 		content: "";
 		position: absolute;
 		inset: 0 0 0 auto;
-		width: 40.88px;
+		width: calc(40.88 * var(--co-su));
 		background: linear-gradient(to right, rgba(254, 254, 254, 0), var(--color-white2));
 	}
 
@@ -2317,20 +2263,20 @@
 		background: linear-gradient(to left, rgba(254, 254, 254, 0), var(--color-white2));
 	}
 
-	/* 英字はカード上端を 21px またぐ。奇数は文字面の中央、偶数は左寄せ */
+	/* 英字はカード上端を calc(21 * var(--co-su)) またぐ。奇数は文字面の中央、偶数は左寄せ */
 	.p-cvalue__card-eng {
 		position: absolute;
-		top: -21px;
+		top: calc(-21 * var(--co-su));
 		left: 35.13%;
 		right: 0;
-		font-size: 24px;
+		font-size: calc(24 * var(--co-su));
 		line-height: 1.6;
 		text-align: center;
 		color: var(--color-gray2);
 	}
 
 	.p-cvalue__card:nth-child(even) .p-cvalue__card-eng {
-		left: 28.7px;
+		left: calc(28.7 * var(--co-su));
 		right: auto;
 		text-align: left;
 	}
@@ -2340,8 +2286,8 @@
 	}
 
 	.p-cvalue__card-desc {
-		font-size: 12px;
-		letter-spacing: 1px;
+		font-size: calc(12 * var(--co-su));
+		letter-spacing: calc(1 * var(--co-su));
 		white-space: nowrap; /* 34:1104 */
 		color: var(--color-black1);
 	}
@@ -2352,18 +2298,18 @@
 	}
 
 	/* --- EXone Quality（34:1090-1112） --- */
-	/* 左端に縦書きの飾り、本文は 80px 右に寄せる。写真は右端まで伸ばす */
+	/* 左端に縦書きの飾り、本文は calc(80 * var(--co-su)) 右に寄せる。写真は右端まで伸ばす */
 	.p-cquality {
 		display: grid;
-		grid-template-columns: 80px 1fr;
-		padding-block: 61px 60px;
+		grid-template-columns: calc(80 * var(--co-su)) 1fr;
+		padding-block: calc(61 * var(--co-su)) calc(60 * var(--co-su));
 	}
 
 	/* 見出しの h2 は読み上げ用に残して視覚的には隠す（縦書きの飾りが代わり） */
 	.p-cquality__eng {
 		position: absolute;
-		width: 1px;
-		height: 1px;
+		width: calc(1 * var(--co-su));
+		height: calc(1 * var(--co-su));
 		overflow: hidden;
 		clip-path: inset(50%);
 		white-space: nowrap;
@@ -2375,14 +2321,14 @@
 	.p-cquality__vert {
 		display: block;
 		position: absolute;
-		top: 371px;
+		top: calc(371 * var(--co-su));
 		left: 0;
-		width: 310px;
+		width: calc(310 * var(--co-su));
 		font-family: var(--font-ui);
-		font-size: 48px;
+		font-size: calc(48 * var(--co-su));
 		font-weight: var(--fw-semibold);
 		line-height: 1.45;
-		letter-spacing: 1px;
+		letter-spacing: calc(1 * var(--co-su));
 		white-space: nowrap;
 		color: var(--color-gray2);
 		transform: rotate(-90deg);
@@ -2395,15 +2341,15 @@
 
 	.p-cquality__jp {
 		grid-column: 2;
-		font-size: 16px;
+		font-size: calc(16 * var(--co-su));
 		line-height: 1.625;
-		letter-spacing: 2px;
+		letter-spacing: calc(2 * var(--co-su));
 	}
 
 	.p-cquality__media {
 		grid-column: 2;
 		grid-row: 2;
-		margin-top: 18px;
+		margin-top: calc(18 * var(--co-su));
 	}
 
 	.p-cquality__media img {
@@ -2413,20 +2359,20 @@
 	.p-cquality__list {
 		grid-column: 2;
 		grid-row: 3;
-		margin-top: 13px;
+		margin-top: calc(13 * var(--co-su));
 	}
 
 	.p-cquality__item {
-		padding-left: 9.6px;
-		font-size: 11px;
-		letter-spacing: 1px;
+		padding-left: calc(9.6 * var(--co-su));
+		font-size: calc(11 * var(--co-su));
+		letter-spacing: calc(1 * var(--co-su));
 		color: var(--color-black1);
 	}
 
 	.p-cquality__item::before {
 		top: 50%;
-		width: 1.8px;
-		height: 14.6px;
+		width: calc(1.8 * var(--co-su));
+		height: calc(14.6 * var(--co-su));
 		transform: translateY(-50%);
 	}
 
@@ -2438,7 +2384,7 @@
 
 	.p-ceco__bg::after {
 		background: rgba(0, 0, 0, 0.5);
-		backdrop-filter: blur(5px);
+		backdrop-filter: blur(calc(5 * var(--co-su)));
 	}
 
 	.p-ceco::after {
@@ -2449,44 +2395,44 @@
 
 	/* 見出し下端 3792.4 → アイコン 3815.07 */
 	.p-ceco__purpose {
-		margin-top: 23px;
+		margin-top: calc(23 * var(--co-su));
 	}
 
 	.p-ceco__purpose-head {
-		gap: 9px;
+		gap: calc(9 * var(--co-su));
 	}
 
 	.p-ceco__purpose-icon {
-		height: 46.6px;
+		height: calc(46.6 * var(--co-su));
 	}
 
 	.p-ceco__purpose-jp {
-		font-size: 16px;
-		letter-spacing: 2px;
+		font-size: calc(16 * var(--co-su));
+		letter-spacing: calc(2 * var(--co-su));
 	}
 
 	.p-ceco__purpose-text {
-		margin-top: 12px;
-		font-size: 12px;
+		margin-top: calc(12 * var(--co-su));
+		font-size: calc(12 * var(--co-su));
 		font-weight: var(--fw-regular);
 		line-height: 2;
-		letter-spacing: 1px;
+		letter-spacing: calc(1 * var(--co-su));
 	}
 
 	/* 顧客体験（34:1187-1191）。写真の左下にロゴが重なる */
 	.p-ceco__core {
 		display: block;
 		position: relative;
-		margin-top: 25px;
+		margin-top: calc(25 * var(--co-su));
 	}
 
 	.p-ceco__core-gradient {
 		display: block;
 		position: absolute;
-		top: -15px;
+		top: calc(-15 * var(--co-su));
 		left: calc(50% - 50vw);
 		width: 100vw;
-		height: 84.3px;
+		height: calc(84.3 * var(--co-su));
 		background: linear-gradient(180deg, rgba(26, 26, 26, 0), var(--color-black2));
 	}
 
@@ -2496,7 +2442,7 @@
 		width: 73.31%; /* 234.58 / 320 */
 		height: auto;
 		margin-left: auto;
-		border-radius: 5px;
+		border-radius: calc(5 * var(--co-su));
 	}
 
 	.p-ceco__core-logo {
@@ -2504,49 +2450,49 @@
 		display: block;
 		width: 38.7%; /* 123.82 / 320 */
 		height: auto;
-		margin-top: -48px;
+		margin-top: calc(-48 * var(--co-su));
 	}
 
 	.p-ceco__core-title {
 		position: relative;
-		margin-top: 7px;
-		font-size: 16px;
+		margin-top: calc(7 * var(--co-su));
+		font-size: calc(16 * var(--co-su));
 		font-weight: var(--fw-bold);
 		line-height: 1.6;
-		letter-spacing: 2px;
+		letter-spacing: calc(2 * var(--co-su));
 		color: var(--color-orange1);
 	}
 
 	.p-ceco__core-text {
 		position: relative;
-		margin-top: 11px;
-		margin-left: 26px;
-		font-size: 12px;
+		margin-top: calc(11 * var(--co-su));
+		margin-left: calc(26 * var(--co-su));
+		font-size: calc(12 * var(--co-su));
 		line-height: 1.8;
-		letter-spacing: 1px;
+		letter-spacing: calc(1 * var(--co-su));
 		color: var(--color-gray2);
 	}
 
 	/* 6 項目（34:1192-1216）。オレンジの縦線が顧客体験の本文から下まで通る */
 	.p-ceco__list {
 		position: relative;
-		margin-top: 26px;
-		padding-left: 26px;
+		margin-top: calc(26 * var(--co-su));
+		padding-left: calc(26 * var(--co-su));
 		border-left: 0;
 	}
 
 	.p-ceco__list::before {
 		content: "";
 		position: absolute;
-		top: -51px;
-		left: 8px;
-		width: 1px;
-		height: calc(100% + 51px);
+		top: calc(-51 * var(--co-su));
+		left: calc(8 * var(--co-su));
+		width: calc(1 * var(--co-su));
+		height: calc(100% + calc(51 * var(--co-su)));
 		background: var(--color-orange1);
 	}
 
 	.p-ceco__item + .p-ceco__item {
-		margin-top: 5px;
+		margin-top: calc(5 * var(--co-su));
 		padding-top: 0;
 		border-top: 0;
 	}
@@ -2557,52 +2503,52 @@
 	}
 
 	.p-ceco__item-jp {
-		font-size: 14px;
-		letter-spacing: 2px;
+		font-size: calc(14 * var(--co-su));
+		letter-spacing: calc(2 * var(--co-su));
 	}
 
 	/* 英字は背景と同系の暗い色（34:1192 #2c2c2c） */
 	.p-ceco__item-eng {
-		font-size: 12px;
+		font-size: calc(12 * var(--co-su));
 		font-weight: var(--fw-semibold);
-		letter-spacing: 1px;
+		letter-spacing: calc(1 * var(--co-su));
 		color: #2c2c2c;
 	}
 
 	.p-ceco__item-desc {
-		margin-top: 10px;
-		font-size: 12px;
-		letter-spacing: 1px;
+		margin-top: calc(10 * var(--co-su));
+		font-size: calc(12 * var(--co-su));
+		letter-spacing: calc(1 * var(--co-su));
 	}
 
 	/* リスト下端 → Partner の大英字 43.3 */
 	.p-ceco {
-		padding-bottom: 43px;
+		padding-bottom: calc(43 * var(--co-su));
 	}
 
 	/* --- Partner Network（34:1169 内） --- */
 	.p-cpartner {
 		padding-top: 0;
-		padding-bottom: 60px;
+		padding-bottom: calc(60 * var(--co-su));
 	}
 
 	.p-cpartner__title {
-		font-size: 40px;
+		font-size: calc(40 * var(--co-su));
 		line-height: 1.6;
 	}
 
 	.p-cpartner__lead {
 		margin-top: 0;
-		font-size: 16px;
+		font-size: calc(16 * var(--co-su));
 		line-height: 1.8;
-		letter-spacing: 2px;
+		letter-spacing: calc(2 * var(--co-su));
 	}
 
 	/* 写真帯（34:1172-1218）: 全幅・角丸なし。指で横に送れる */
 	.p-cpartner__cards {
 		display: flex;
 		gap: 0;
-		margin-top: 14px;
+		margin-top: calc(14 * var(--co-su));
 		margin-inline: calc(var(--gutter) * -1);
 		overflow-x: auto;
 		scroll-snap-type: x mandatory;
@@ -2629,51 +2575,57 @@
 	}
 
 	.p-cpartner__label-list {
+		/* 右下に重なる地図（絶対配置）より前に出す。地図の下に潜ると文字が暗くなる */
+		position: relative;
+		z-index: 1;
 		display: block;
-		margin-top: 20px;
+		margin-top: calc(20 * var(--co-su));
 	}
 
 	.p-cpartner__label-item {
-		font-size: 12px;
+		font-size: calc(12 * var(--co-su));
 		font-weight: var(--fw-medium);
 		line-height: 1.6;
-		letter-spacing: 2px;
+		letter-spacing: calc(2 * var(--co-su));
 	}
 
 	.p-cpartner__label-item + .p-cpartner__label-item {
-		margin-top: 5px;
+		margin-top: calc(5 * var(--co-su));
 	}
 
 	/* 地図（34:1171）はラベル一覧の右下に小さく重なる */
 	.p-cpartner__outro {
 		position: relative;
-		margin-top: 66px;
+		margin-top: calc(66 * var(--co-su));
 	}
 
 	.p-cpartner__map {
 		position: absolute;
-		top: -95px;
-		right: -5px;
-		width: 59.75%; /* 191.19 / 320 */
+		top: calc(-95 * var(--co-su));
+		right: calc(-5 * var(--co-su));
+		/* 幅も --co-su 基準にする（375 では 191.19 / 320 = 59.75% と同値）。
+		   % のままだと --sp-scale-max で他が頭打ちになるタブレット縦で地図だけ広がり、
+		   下の見出しに重なる */
+		width: calc(191.19 * var(--co-su));
 		margin: 0;
 	}
 
 	.p-cpartner__outro-title {
-		letter-spacing: 2px;
+		letter-spacing: calc(2 * var(--co-su));
 	}
 
 	.p-cpartner__outro-desc {
-		margin-top: 15px;
+		margin-top: calc(15 * var(--co-su));
 		line-height: 2;
-		letter-spacing: 1px;
+		letter-spacing: calc(1 * var(--co-su));
 	}
 
 	/* --- Company Profile（34:1222-1318） --- */
 	/* 写真（34:1314）を上に敷き、見出しとリードを重ねる。カードは写真の下端に 46 重なる */
 	.p-cprofile {
 		position: relative;
-		padding-top: 60px;
-		padding-bottom: 81px;
+		padding-top: calc(60 * var(--co-su));
+		padding-bottom: calc(81 * var(--co-su));
 	}
 
 	.p-cprofile__media {
@@ -2708,11 +2660,11 @@
 	/* SP はリードを写真の上に出す（34:1316。文言も SP 版） */
 	.p-cprofile__lead--sp {
 		display: block;
-		margin-top: 25px;
-		font-size: 12px;
+		margin-top: calc(25 * var(--co-su));
+		font-size: calc(12 * var(--co-su));
 		font-weight: var(--fw-medium);
 		line-height: 1.8;
-		letter-spacing: 1px;
+		letter-spacing: calc(1 * var(--co-su));
 		text-align: left;
 		color: var(--color-gray2);
 	}
@@ -2721,13 +2673,13 @@
 	.p-cprofile__card {
 		position: relative;
 		z-index: 1;
-		margin-top: 25px;
-		padding: 17px 26.5px;
+		margin-top: calc(25 * var(--co-su));
+		padding: calc(17 * var(--co-su)) calc(26.5 * var(--co-su));
 		background: var(--color-white2);
 	}
 
 	.p-cprofile__row {
-		grid-template-columns: 90px 1fr;
+		grid-template-columns: calc(90 * var(--co-su)) 1fr;
 		gap: 0;
 		padding-block: 0;
 		border-bottom: var(--border-thin) solid #e5e5e5;
@@ -2738,18 +2690,240 @@
 	}
 
 	.p-cprofile__label {
-		font-size: 12px;
+		font-size: calc(12 * var(--co-su));
 		font-weight: var(--fw-bold);
 		line-height: 2.5;
-		letter-spacing: 1px;
+		letter-spacing: calc(1 * var(--co-su));
 		color: var(--color-black1);
 	}
 
 	.p-cprofile__value {
 		align-self: center;
-		font-size: 10px;
+		font-size: calc(10 * var(--co-su));
 		line-height: 1.9;
-		letter-spacing: 1px;
+		letter-spacing: calc(1 * var(--co-su));
 		color: var(--color-black1);
+	}
+}
+
+
+/* ============================================================
+   PC（1025px 以上）: 1920px カンプの縮小拡大コピー化
+   ------------------------------------------------------------
+   1 単位 --co-vu は「カンプ 1920 の 1px の実寸」。1920px 以上では 1px で
+   固定され、それ以下では画面幅に比例して縮む。文字・余白・角丸を
+   この単位（または既存の vw / % / --co-u）に載せることで、どの幅でも
+   1920px と同じ改行位置・比率を保つ。
+   Ecosystem / Partner は内側幅基準の --co-u（cqw）で先行対応済み。
+   ============================================================ */
+@media (min-width: 1025px) {
+	:root {
+		--co-vu: min(1px, calc(100vw / 1920));
+
+		/* clamp（375→1920 の補間）だった文字トークンを 1920 比例に置き換える */
+		--co-eng-size: calc(48 * var(--co-vu));
+		--co-eng-ls: calc(5 * var(--co-vu));
+		--co-jp-size: calc(24 * var(--co-vu));
+		--co-lead-size: calc(36 * var(--co-vu));
+		--co-text-size: calc(16 * var(--co-vu));
+		--co-outro-size: calc(20 * var(--co-vu));
+		--co-fv-sub: calc(24 * var(--co-vu));
+		--co-card-eng: calc(64 * var(--co-vu));
+		--co-story-eng: calc(64 * var(--co-vu));
+		--co-story-text: calc(16 * var(--co-vu));
+		--co-sign-size: calc(12 * var(--co-vu));
+		--co-value-eng: calc(36 * var(--co-vu));
+		--co-value-desc: calc(18 * var(--co-vu));
+		--co-quality-jp: calc(24 * var(--co-vu));
+		--co-quality-item: calc(22 * var(--co-vu));
+		--co-outro-title: calc(36 * var(--co-vu));
+		--co-profile-size: calc(20 * var(--co-vu));
+		--co-pad: calc(160 * var(--co-vu));
+		--co-card-radius: calc(10 * var(--co-vu));
+		--co-mv-indent: calc(48 * var(--co-vu));
+	}
+
+	/* 固定 px のグローバル字間トークンは、縮小すると文字サイズ比で相対的に
+	   広がって改行位置を変えてしまう。企業ページのセクション内だけ比例にする
+	   （ヘッダー・フッターには影響させない） */
+	.p-cfv,
+	.p-cwhy,
+	.p-cstory,
+	.p-cvisible,
+	.p-cvalue,
+	.p-cquality,
+	.p-ceco,
+	.p-cpartner,
+	.p-cprofile {
+		--ls-wide: calc(2 * var(--co-vu));
+		--ls-base: calc(1 * var(--co-vu));
+		--ls-title: calc(5 * var(--co-vu));
+	}
+
+	/* --- FV: 見出しも比例させる（グローバルの clamp を上書き） --- */
+	.p-cfv .c-display--hero {
+		font-size: calc(120 * var(--co-vu));
+		letter-spacing: calc(-3 * var(--co-vu));
+	}
+
+	/* --- Why We Exist: 共有トークン（clamp）だった間隔を比例に --- */
+	.p-cwhy__inner {
+		column-gap: calc(64 * var(--co-vu));
+	}
+
+	.p-cwhy__card-body {
+		padding: calc(24 * var(--co-vu));
+	}
+
+	/* --- ブランドストーリー --- */
+	.p-cstory__panel-eng {
+		letter-spacing: calc(1 * var(--co-vu));
+	}
+
+	/* --- 私たちが作る体験 --- */
+	.p-cvisible__cards {
+		gap: calc(32 * var(--co-vu));
+		margin-top: calc(80 * var(--co-vu)); /* 見出し下 80 ルール（旧 64） */
+	}
+
+	.p-cvisible__card-eng {
+		margin-top: calc(24 * var(--co-vu));
+		font-size: calc(40 * var(--co-vu));
+		letter-spacing: calc(1 * var(--co-vu));
+	}
+
+	.p-cvisible__card-desc {
+		font-size: calc(18 * var(--co-vu));
+	}
+
+	/* --- Our Principles --- */
+	.p-cvalue__cards {
+		gap: calc(32 * var(--co-vu));
+		margin-top: calc(80 * var(--co-vu)); /* 見出し下 80 ルール（旧 64） */
+	}
+
+	.p-cvalue__number {
+		font-size: calc(36 * var(--co-vu));
+		letter-spacing: calc(3 * var(--co-vu));
+	}
+
+	.p-cvalue__card-eng {
+		letter-spacing: calc(1 * var(--co-vu));
+	}
+
+	/* --- EXone Quality --- */
+	/* 文字が列と同じ比率で縮むようになったので、列幅をカンプの 41% / 59% に戻せる
+	   （以前は clamp の文字が縮まず、列を文字に合わせて広げていた） */
+	.p-cquality {
+		grid-template-columns: 41% 59%;
+	}
+
+	.p-cquality__body {
+		padding-right: calc(64 * var(--co-vu));
+	}
+
+	.p-cquality__list {
+		margin-top: calc(32 * var(--co-vu));
+	}
+
+	.p-cquality__item::before {
+		width: calc(3.58 * var(--co-vu));
+	}
+
+	/* --- Company Profile --- */
+	/* 写真の高さ下限（520px）を外し、常にカンプ比（950.61 / 1920）にする */
+	.p-cprofile__media {
+		height: 49.51vw;
+	}
+
+	.p-cprofile__lead {
+		font-size: calc(20 * var(--co-vu));
+	}
+
+	/* min(100% - ガター, 1200px) だと 1920 未満でカンプ比より広くなり、
+	   表の値の折り返し位置が変わるため、常に 1200 比例で持つ */
+	.p-cprofile__card {
+		width: calc(1200 * var(--co-vu));
+	}
+
+	.p-cprofile__row {
+		gap: calc(24 * var(--co-vu));
+		padding-block: calc(8 * var(--co-vu));
+	}
+}
+
+
+/* ============================================================
+   SP（1024px 以下）: 375px カンプの縮小拡大コピー化
+   ------------------------------------------------------------
+   1 単位 --co-su は「カンプ 375 の 1px の実寸」。PC の --co-vu と同じ考え方で、
+   どの幅でも 375px と同じ改行位置・比率を保つ（1024px では約 2.73 倍）。
+   上の SP ブロックの実測 px はすべてこの単位に載せ替えてある。
+   ============================================================ */
+@media (max-width: 1024px) {
+	:root {
+		--co-su: min(calc(100vw / 375), var(--sp-scale-max)); /* 上限は style.css の --sp-scale-max */
+
+		/* clamp（375→1920 の補間）だった文字トークンを 375 比例に置き換える */
+		--co-eng-size: calc(12 * var(--co-su));
+		--co-eng-ls: calc(1 * var(--co-su));
+		--co-jp-size: calc(20 * var(--co-su));
+		--co-lead-size: calc(14 * var(--co-su));
+		--co-text-size: calc(12 * var(--co-su));
+		--co-outro-size: calc(12 * var(--co-su));
+		--co-fv-sub: calc(16 * var(--co-su));
+		--co-card-eng: calc(20 * var(--co-su));
+		--co-story-eng: calc(24 * var(--co-su));
+		--co-story-text: calc(10 * var(--co-su));
+		--co-sign-size: calc(10 * var(--co-su));
+		--co-value-eng: calc(24 * var(--co-su));
+		--co-value-desc: calc(12 * var(--co-su));
+		--co-quality-jp: calc(18 * var(--co-su));
+		--co-quality-item: calc(12 * var(--co-su));
+		--co-partner-title: calc(40 * var(--co-su));
+		--co-partner-lead: calc(16 * var(--co-su));
+		--co-partner-label: calc(12 * var(--co-su));
+		--co-outro-title: calc(16 * var(--co-su));
+		--co-profile-size: calc(12 * var(--co-su));
+		--co-pad: calc(60 * var(--co-su));
+		--co-card-radius: calc(8 * var(--co-su));
+		--co-mv-indent: calc(12 * var(--co-su));
+	}
+
+	/* ガターと字間はグローバルの clamp / 固定 px のままだと比例にならず
+	   改行位置が変わるため、企業ページのセクション内だけ 375 比例にする
+	   （ヘッダー・フッターには影響させない） */
+	.p-cfv,
+	.p-cwhy,
+	.p-cstory,
+	.p-cvisible,
+	.p-cvalue,
+	.p-cquality,
+	.p-ceco,
+	.p-cpartner,
+	.p-cprofile {
+		--gutter: calc(27.5 * var(--co-su));
+		--ls-wide: calc(2 * var(--co-su));
+		--ls-base: calc(1 * var(--co-su));
+		--ls-title: calc(2 * var(--co-su));
+	}
+
+	/* トークンを通っていない文字の個別対応 */
+	.p-cfv .c-display--hero {
+		font-size: calc(64 * var(--co-su));
+		letter-spacing: calc(-3 * var(--co-su));
+	}
+
+	.p-ceco__purpose-eng {
+		font-size: calc(12 * var(--co-su));
+		letter-spacing: calc(3 * var(--co-su));
+	}
+
+	.p-cstory__panel-eng {
+		letter-spacing: calc(1 * var(--co-su));
+	}
+
+	.p-cpartner__title {
+		letter-spacing: calc(-1 * var(--co-su));
 	}
 }

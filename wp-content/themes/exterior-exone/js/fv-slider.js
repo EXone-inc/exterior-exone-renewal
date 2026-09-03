@@ -31,6 +31,90 @@
 	var current = 0;
 	var timer = null;
 
+	// --- 自動再生が拒否されたとき（iOS の低電力モード等）の静止画フォールバック ---
+	// 拒否を検知したら動画に is-blocked を付けて隣のポスター画像を見せ、
+	// 最初のタッチ（ユーザー操作の直後なら play() が許可される）で再生し直す。
+	var posters = Array.prototype.slice.call(fv.querySelectorAll('[data-fv-poster]'));
+	var retryArmed = false;
+
+	// --- PC / SP で動画を出し分ける ---
+	// 横長（1920x1080）を縦画面に cover で敷くと中央の細い帯を 2 倍以上に引き伸ばして
+	// 荒れるため、SP は縦に切り出した *-sp.mp4（1080x1920）を読む。両方をマークアップに
+	// 置くと通信が二重になるので、src は幅を見てここで入れる（js/copy-video.js と同じ）。
+	var pc = window.matchMedia('(min-width: 1025px)');
+	var sourceAttr = '';
+
+	function applySources() {
+		var attr = pc.matches ? 'data-src-pc' : 'data-src-sp';
+
+		if (attr === sourceAttr) {
+			return;
+		}
+
+		sourceAttr = attr;
+
+		videos.forEach(function (video) {
+			video.src = video.getAttribute(attr);
+			video.load();
+		});
+
+		// 失敗検知で既に出しているポスターは、向きに合わせて差し替える。
+		posters.forEach(function (poster) {
+			if (poster.getAttribute('src')) {
+				poster.setAttribute('src', poster.getAttribute(attr));
+			}
+		});
+	}
+
+	function markBlocked(video) {
+		video.classList.add('is-blocked');
+
+		// ポスターは失敗したときに初めて読み込む（通常時に余計な画像を落とさない）。
+		posters.forEach(function (poster) {
+			if (!poster.getAttribute('src')) {
+				poster.setAttribute('src', poster.getAttribute(sourceAttr));
+			}
+		});
+
+		armRetry();
+	}
+
+	function armRetry() {
+		if (retryArmed) {
+			return;
+		}
+
+		retryArmed = true;
+
+		var retry = function () {
+			window.removeEventListener('touchstart', retry);
+			window.removeEventListener('pointerdown', retry);
+
+			// 操作の直後に全部を一度起こし、表示中以外はすぐ止める。
+			// 1 本ずつだと後のスライドで再びブロックされるため。
+			videos.forEach(function (video, i) {
+				var played = video.play();
+
+				if (played && played.then) {
+					played.then(function () {
+						video.classList.remove('is-blocked');
+
+						if (i !== current) {
+							video.pause();
+						}
+					}).catch(function () {
+						// まだ拒否されるなら、次の操作でもう一度試す。
+						retryArmed = false;
+						armRetry();
+					});
+				}
+			});
+		};
+
+		window.addEventListener('touchstart', retry, { passive: true });
+		window.addEventListener('pointerdown', retry);
+	}
+
 	/**
 	 * サムネイルの外周リングを ratio（0〜1）ぶんだけ描く。
 	 */
@@ -63,8 +147,11 @@
 				var played = video.play();
 
 				if (played && played.catch) {
-					played.catch(function () {
-						// 自動再生が拒否されても静止画として見えていれば足りる。
+					played.then(function () {
+						video.classList.remove('is-blocked');
+					}).catch(function () {
+						// 低電力モード等で拒否されたら静止画を出し、初回タッチで再挑戦する。
+						markBlocked(video);
 					});
 				}
 			} else {
@@ -121,7 +208,21 @@
 		});
 	});
 
+	applySources();
 	show(0);
 	schedule();
 	window.requestAnimationFrame(update);
+
+	// 1024px をまたいでリサイズ／回転したら、向きに合った動画へ入れ替える。
+	var onMediaChange = function () {
+		applySources();
+		show(current);
+		schedule();
+	};
+
+	if (typeof pc.addEventListener === 'function') {
+		pc.addEventListener('change', onMediaChange);
+	} else if (typeof pc.addListener === 'function') {
+		pc.addListener(onMediaChange);
+	}
 })();

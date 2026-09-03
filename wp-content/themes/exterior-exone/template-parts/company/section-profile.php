@@ -39,7 +39,11 @@ $exterior_exone_profile_last = count( $exterior_exone_profile ) - 1;
 			loading="lazy"
 		>
 
-		<?php // 夜。朝の上に重ねてあり、遅れてフェードインしてくる。 ?>
+		<?php
+		// 夜。朝の上に重ねてあり、遅れてフェードインしてくる。
+		// data-reveal-wait: この画像が読み込み終わるまで .is-inview を待つ
+		// （未読込のままフェードすると、切り替わりが見えず突然夜になるため）。
+		?>
 		<img
 			class="p-cprofile__night"
 			src="<?php echo esc_url( exterior_exone_company_image( 'profile-bg.jpg' ) ); ?>"
@@ -47,6 +51,7 @@ $exterior_exone_profile_last = count( $exterior_exone_profile ) - 1;
 			height="951"
 			alt=""
 			loading="lazy"
+			data-reveal-wait
 		>
 	</div>
 

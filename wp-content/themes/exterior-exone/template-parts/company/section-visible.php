@@ -3,7 +3,7 @@
  * 企業情報: 私たちが作る体験（4 カード）。
  *
  * カンプ: PC 917:1414・917:1590-1607 のみ。SP カンプには存在しないため
- *         css/company.css で 768px 未満は非表示にしている。
+ *         css/company.css で 1024px 以下は非表示にしている。
  *
  * @package exterior-exone
  */

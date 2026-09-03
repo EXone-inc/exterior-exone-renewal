@@ -21,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 <section class="p-copy" data-section="copy">
 	<picture class="p-copy__media">
 		<source
-			media="(max-width: 768px)"
+			media="(max-width: 1024px)"
 			srcset="<?php echo esc_url( exterior_exone_top_image( 'dx-image-sp.jpg' ) ); ?>"
 		>
 		<img

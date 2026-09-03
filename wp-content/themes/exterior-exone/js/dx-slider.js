@@ -38,6 +38,62 @@
 	var ticking = false;
 	var lockUntil = 0;
 
+	// --- 自動再生が拒否されたとき（iOS の低電力モード等）の静止画フォールバック ---
+	// 仕組みは js/fv-slider.js と同じ。詳しくはそちらのコメントを参照。
+	var posters = Array.prototype.slice.call(section.querySelectorAll('[data-dx-poster]'));
+	var retryArmed = false;
+
+	function markBlocked(video) {
+		video.classList.add('is-blocked');
+
+		posters.forEach(function (poster) {
+			if (!poster.getAttribute('src')) {
+				poster.setAttribute('src', poster.getAttribute('data-src'));
+			}
+		});
+
+		armRetry();
+	}
+
+	function armRetry() {
+		if (retryArmed) {
+			return;
+		}
+
+		retryArmed = true;
+
+		var retry = function () {
+			window.removeEventListener('touchstart', retry);
+			window.removeEventListener('pointerdown', retry);
+
+			visuals.forEach(function (visual, i) {
+				var video = visual.querySelector('video');
+
+				if (!video) {
+					return;
+				}
+
+				var played = video.play();
+
+				if (played && played.then) {
+					played.then(function () {
+						video.classList.remove('is-blocked');
+
+						if (!(inView && i === current)) {
+							video.pause();
+						}
+					}).catch(function () {
+						retryArmed = false;
+						armRetry();
+					});
+				}
+			});
+		};
+
+		window.addEventListener('touchstart', retry, { passive: true });
+		window.addEventListener('pointerdown', retry);
+	}
+
 	/**
 	 * 表示中のビジュアルが動画なら再生、それ以外は止める。
 	 */
@@ -53,8 +109,11 @@
 				var played = video.play();
 
 				if (played && played.catch) {
-					played.catch(function () {
-						// 自動再生が拒否されても静止画として見えていれば足りる。
+					played.then(function () {
+						video.classList.remove('is-blocked');
+					}).catch(function () {
+						// 低電力モード等で拒否されたら静止画を出し、初回タッチで再挑戦する。
+						markBlocked(video);
 					});
 				}
 			} else {

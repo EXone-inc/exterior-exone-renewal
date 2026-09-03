@@ -68,7 +68,7 @@ Text Domain: exterior-exone
 	--fs-body: clamp(0.75rem, 0.659rem + 0.3883vw, 1.125rem); /* 12 → 18 : 本文 (917:868 / 917:133) */
 	--fs-section-title: clamp(1rem, 0.818rem + 0.7767vw, 1.75rem); /* 16 → 28 : セクションタイトル (917:880 / 917:112) */
 	--fs-button: clamp(0.75rem, 0.6286rem + 0.5178vw, 1.25rem); /* 12 → 20 : ボタンラベル (917:871 / 97:127) */
-	--fs-nav: clamp(12px, 6.667px + 0.6944vw, 20px); /* 20 @1920 : グローバルナビ（768px 以下は非表示） */
+	--fs-nav: clamp(12px, 6.667px + 0.6944vw, 20px); /* 20 @1920 : グローバルナビ（1024px 以下は非表示） */
 	--fs-footer-heading: clamp(1.125rem, 0.9126rem + 0.9061vw, 2rem); /* 18 → 32 : MENU/STORE 見出し (917:773 / I917:2595;917:68) */
 	--fs-footer-link: clamp(0.75rem, 0.6286rem + 0.5178vw, 1.25rem); /* 12 → 20 : フッターリンク (917:760 / I917:2595;917:66) */
 	--fs-sns-label: clamp(0.625rem, 0.534rem + 0.3883vw, 1rem); /* 10 → 16 : SNS ラベル (917:785 / I917:2595;917:83) */
@@ -90,6 +90,12 @@ Text Domain: exterior-exone
 	--ls-button: clamp(1px, 0.757px + 0.0647vw, 2px); /* 1 → 2 */
 
 	/* --- レイアウト --- */
+	/* SP レイアウト（1024px 以下）の比例ユニットの上限。375px カンプの何倍まで拡大するか。
+	   上限なしだと iPad 縦（820px）で 2.2 倍、iPad Pro 縦で 2.7 倍に膨らみ、
+	   本文 26〜33px・ヘッダー 100px 超と絵本のような見え方になる。1.6px（600px 幅相当）で
+	   頭打ちにし、写真は全幅のまま文字・余白だけを常識的な大きさに収める。
+	   --su / --dx-su / --co-su が参照する（長さの単位が必要。単位なしだと min() が無効になる） */
+	--sp-scale-max: 1.6px;
 	--container-max: 1920px;  /* PC カンプ幅 */
 	--content-width: 1600px;  /* PC の内容基準幅（左右 160px 余白） */
 	--content-narrow: 1240px; /* 中央寄せテキストブロック */
@@ -173,7 +179,7 @@ Text Domain: exterior-exone
 	--philo-eng-ls: clamp(-3px, -0.515px + -0.1295vw, -1px); /* -1 → -3 */
 	--philo-jp-ls: 3px; /* SP 14px / PC 24px とも 3px */
 	--philo-sub-ls: clamp(1px, 0.757px + 0.0647vw, 2px); /* 1 → 2 */
-	/* --- SP（768px 以下）だけで使う縦積み用の値。SP の上限 768px で PC 側の値へ繋ぐ --- */
+	/* --- SP（1024px 以下）だけで使う縦積み用の値 --- */
 	--philo-sp-item-gap: clamp(30px, 0.41px + 7.89vw, 61px); /* 30 @375 → 61 @768（PC の罫線余白へ繋ぐ） */
 	--philo-sp-text-indent: clamp(0px, 38.5px + -5.013vw, 19.71px); /* 19.71 @375 → 0 @768 */
 	--philo-sp-diagram-gap: clamp(54.19px, 0.72px + 14.26vw, 110px); /* 54.19 @375 → 110 @768 */
@@ -220,7 +226,7 @@ Text Domain: exterior-exone
 	--stats-sp-label: 14px; /* PC と同値 (16:198 / 16:567) */
 
 	/* --- DX EXPERIENCE（917:172-212 / SP 917:799-848） ---
-	   769px 以上はカンプ等倍スケール（--dx-u）で上書きする（DX セクションの
+	   1025px 以上はカンプ等倍スケール（--dx-u）で上書きする（DX セクションの
 	   @media 内を参照）。ここの clamp が効くのは SP レイアウトで使う値のみ。 */
 	--dx-pad-top: clamp(60px, 30.38px + 3.8568vw, 104.43px); /* 60 → 104.43 */
 	--dx-pad-bottom: clamp(64px, 31.727px + 4.2023vw, 112.41px); /* 64 → 112.41 */
@@ -269,16 +275,20 @@ Text Domain: exterior-exone
 	   - 幅比 100vw/375
 	   - 高さ比 (100vh - ヘッダー) / 622。622 = 中身の実測 604px + 余白 18px
 	     （375x667 でちょうど 1 になり、従来の見た目と一致する）
-	   - 上限 1.04px（= 390px 時の見た目。--dx-su は「カンプ 1px の実寸」という
+	   分母 655 = 中身の実測（最大 626.5。字間など一部が画面幅基準のため
+	   幅により 604〜626.5 で揺れる）+ 上下余白の予備。622 だと iPad 縦などで
+	   中身がはみ出し、最下部のタグが見切れていた。
+	   （かつては 390px 相当で止める上限があったが、全ページをカンプ比例に
+	   揃えた際に廃止した。--dx-su は「カンプ 1px の実寸」という
 	     長さなので、単位なしの数値を混ぜると min() 全体が無効になる点に注意）。
 	     SP 幅ではこれ以上拡大せず、
 	     広い SP 画面（タブレット縦など）は 390px の表示が中央に置かれ、
 	     余った分は上下左右の余白になる */
-	--dx-su: min(100vw / 375, (100vh - var(--header-height)) / 622, 1.04px);
+	--dx-su: min(100vw / 375, (100vh - var(--header-height)) / 655, var(--sp-scale-max));
 	--dx-sp-pad-top: 47.36px;   /* ピン中は padding 0 のため現状未使用 */
 	--dx-sp-pad-bottom: 78.86px;
 	--dx-sp-title-size: calc(48 * var(--dx-su));
-	--dx-sp-copy-size: max(11px, 14 * var(--dx-su));
+	--dx-sp-copy-size: calc(14 * var(--dx-su));
 	--dx-sp-copy-gap: calc(8.18 * var(--dx-su));
 	--dx-sp-media-gap: calc(28.6 * var(--dx-su));
 	--dx-sp-bars-gap: calc(23.93 * var(--dx-su));
@@ -326,7 +336,7 @@ Text Domain: exterior-exone
 	/* --- コピー / PLANS（917:35-38・917:124-141 / SP 917:747 ほか） --- */
 	--copy-height: clamp(722.81px, 636.113px + 23.1191vw, 1080px); /* 722.81 → 1080 */
 	--copy-overlay: rgba(0, 0, 0, 0.3); /* 917:37。PC のみ */
-	--plans-cards-gap: clamp(23.4px, 8.531px + 3.965vw, 84.66px); /* 23.4 → 84.66 */
+	--plans-cards-gap: clamp(23.4px, 9.662px + 3.6634vw, 80px); /* 23.4 → 80 : 見出し下 80 ルール（カンプ実測 84.66 から変更） */
 	--plans-cards-indent: var(--gutter); /* カード列の左余白。1920px 以上は幅比例に切り替える */
 	--plans-card-size: clamp(256px, 235.126px + 5.5663vw, 342px); /* 256 → 342 */
 	--plans-card-gap: clamp(14.5px, 10.167px + 1.1553vw, 32.35px); /* 14.5 → 32.35 */
@@ -360,9 +370,9 @@ Text Domain: exterior-exone
 
 	/* --- WORKS / NEWS / RECRUIT（917:85-123 / SP 917:788-884） --- */
 	--works-bg: linear-gradient(90deg, #1a1a1a 0.481%, #4d4d4d 50%, #1a1a1a 100%); /* 917:114 */
-	--works-cards-gap: clamp(16.8px, 4.46px + 3.2906vw, 67.64px); /* 16.8 → 67.64 : 見出し下→カード（見出しの行box差を補正） */
-	/* 768px 以下は「3 枚見え・両端は少しだけ見切れ」（SP カンプ 917:872-882 の 375px 時の構図）を
-	   どの幅でも保つため、カード寸法をビューポート幅比例にする。769px 以上は PC 用（5 枚見え）に上書き。 */
+	--works-cards-gap: clamp(16.8px, 1.46px + 4.0906vw, 80px); /* 16.8 → 80 : 見出し下 80 ルール（カンプ実測 67.64 から変更） */
+	/* SP（1024px 以下）は「3 枚見え・両端は少しだけ見切れ」（SP カンプ 917:872-882 の 375px 時の構図）を
+	   どの幅でも保つため、カード寸法をビューポート幅比例にする。1025px 以上は PC 用（5 枚見え）に上書き。 */
 	--works-card-w: 69.971vw; /* 262.39px @375 */
 	--works-card-h: 84.789vw; /* 317.96px @375（325.92:394.95 の縦横比） */
 	/* 端カードは約 10 度傾くぶん外接矩形が縦に伸びるので、その下がり（12.55vw、
@@ -376,7 +386,7 @@ Text Domain: exterior-exone
 	--works-dot-size: 8px; /* 現在位置ドット（カンプ外・FELLOWS 参考） */
 	--works-dot-gap: 12px; /* ドット同士の間 */
 	--works-dots-gap: 24px; /* タイトル下 → ドット */
-	--news-cards-gap: clamp(23.4px, 14.468px + 2.3819vw, 60.2px); /* 23.4 → 60.2 */
+	--news-cards-gap: clamp(23.4px, 9.662px + 3.6634vw, 80px); /* 23.4 → 80 : 見出し下 80 ルール（カンプ実測 60.2 から変更） */
 	--news-card-w: clamp(262.39px, 235.543px + 7.1592vw, 373px); /* 262.39 → 373 */
 	--news-card-img-h: clamp(167.41px, 153.189px + 3.7922vw, 226px); /* 167.41 → 226 */
 	--news-card-gap: clamp(19.09px, 14.925px + 1.1107vw, 36.25px); /* 19.09 → 36.25 */
@@ -385,7 +395,7 @@ Text Domain: exterior-exone
 	--news-title-lh: 1.833; /* SP 22/12。PC は 2.5（45/18）に上書き */
 	--news-btn-gap: clamp(0px, -15.842px + 4.2246vw, 65.27px); /* 0 → 65.27 */
 	--recruit-overlay: rgba(0, 0, 0, 0.5); /* 917:88 */
-	--recruit-copy-gap: clamp(22.41px, 13.689px + 2.3256vw, 58.34px); /* 22.41 → 58.34 */
+	--recruit-copy-gap: clamp(22.41px, 8.432px + 3.7275vw, 80px); /* 22.41 → 80 : 見出し下 80 ルール（カンプ実測 58.34 から変更） */
 	--recruit-copy-size: clamp(18px, 13.631px + 1.165vw, 36px); /* 18 → 36 */
 	--recruit-sub-gap: clamp(18.4px, 17.252px + 0.3061vw, 23.13px); /* 18.4 → 23.13 */
 	--recruit-sub-size: clamp(12px, 10.544px + 0.3883vw, 18px); /* 12 → 18 */
@@ -448,7 +458,7 @@ Text Domain: exterior-exone
 }
 
 /* PC はヘッダーが FV に重なり、カンプ高さも違う */
-@media (min-width: 769px) {
+@media (min-width: 1025px) {
 	:root {
 		--fv-pin-height: 100vh;
 		--fv-pin-top: 0px; /* PC はヘッダーが写真に重なり追従もしない */
@@ -457,13 +467,10 @@ Text Domain: exterior-exone
 
 		/* DX 03 SHARE の図。枠が横長になるぶん、参照実装どおり
 		   端末の左右に円を振り分けてつなぎ線を出す（枠高 500 = 設計値） */
-		/* PC の枠は幅が余って高さが足りない。高さ基準のままだと 769〜1100px あたりで
-		   図が読めない大きさになるので、次の 3 つの真ん中を取る:
-		   - 100cqh / 500 … 参照実装どおりの比率（広い画面ではこれが選ばれる）
-		   - 0.74px       … 画面の中の文字が 10px を割らない下限
-		   - 図の外接（556 x 416 に上下左右の余白を足した 580 x 440）が枠に収まる上限
-		   下限より上限が小さい狭い画面では、収まるぎりぎりまで図を持ち上げる。 */
-		--dxm-u: min(max(100cqh / 500, 0.74px), 100cqh / 440, 100cqw / 580);
+		/* 参照実装（枠高 500）に対する比率。枠の縦横比は常に一定なので、
+		   これだけでカンプ比例になる（かつてあった文字 10px の下限は、
+		   ページ全体をカンプ比例に揃えた際に廃止した） */
+		--dxm-u: calc(100cqh / 500);
 		--dxm-frame: 500; /* 上の式に直接書いてあるが、意図を残すため併記 */
 		--dxm-lift: 14;
 		--dxm-phone-w: 188;
@@ -489,6 +496,31 @@ Text Domain: exterior-exone
 		--works-text-gap: clamp(-110.75px, 58.508px + -8.8155vw, -9.3px);
 	}
 }
+
+/* モバイルブラウザの 100vh は URL バー・タブバー（が引っ込んだ状態）の領域まで含むため、
+   バーが出ている間はピン留め中の FV 下端＝サムネイル列がブラウザ UI に隠れる。
+   実際に見えている高さで測る dvh が使える環境ではそちらに載せ替える
+   （バーの出入りに高さが追従する。JS 側の window.innerHeight と同じ測り方になる）。
+   カスタムプロパティは対応外の単位でも後書きが無条件に勝ってしまうので、
+   フォールバックは 2 行書きではなく @supports で分岐する */
+@supports (height: 100dvh) {
+	:root {
+		--fv-pin-height: calc(100dvh - var(--header-height));
+		/* DX も同じ。ピン留めの箱（中央寄せの基準）は見えている高さ dvh に合わせ、
+		   中身の縮尺 --dx-su はバーが出た状態でも収まるよう小さいほうの svh で測る
+		   （dvh で測るとバーの出入りのたびに文字まで伸び縮みする） */
+		--dx-pin-height: calc(100dvh - var(--header-height));
+		--dx-su: min(100vw / 375, (100svh - var(--header-height)) / 655, var(--sp-scale-max));
+	}
+
+	@media (min-width: 1025px) {
+		:root {
+			--fv-pin-height: 100dvh;
+			--dx-pin-height: 100dvh;
+		}
+	}
+}
+
 
 /* カンプ幅 1920px を超えたら PLANS のカード列を幅比例で拡大する。
    固定値のままだと列（約 2000px）が全部収まって右に余白が出てしまい、
@@ -517,6 +549,10 @@ Text Domain: exterior-exone
 
 html {
 	-webkit-text-size-adjust: 100%;
+	/* ページ端のオーバースクロール（ラバーバンド）で見える地の色。
+	   指定が無いと body の白が地の色になり、暗いフッターの先に白い帯が覗く。
+	   ここに置いた色が地になり、body の白は本文領域にだけ残る */
+	background-color: var(--color-black3);
 	scroll-behavior: smooth;
 }
 
@@ -585,12 +621,18 @@ button {
 	outline-offset: 2px;
 }
 
+/* ドロワーはタップで開いたときにパネル自体へフォーカスを置く（js/nav-toggle.js）。
+   操作対象ではないので枠は出さない */
+.p-drawer:focus-visible {
+	outline: none;
+}
+
 /* 改行位置の出し分け（カンプは PC と SP で改行箇所が異なる） */
 .u-br-pc {
 	display: none;
 }
 
-@media (min-width: 769px) {
+@media (min-width: 1025px) {
 	.u-br-pc {
 		display: inline;
 	}
@@ -891,7 +933,7 @@ body.is-drawer-open {
 	color: var(--color-white2);
 }
 
-@media (min-width: 769px) {
+@media (min-width: 1025px) {
 	.p-header__toggle {
 		display: none;
 	}
@@ -1047,6 +1089,11 @@ body.is-drawer-open {
 	color: var(--color-white2);
 }
 
+/* リンクを li のセル全体に広げ、文字の外側もタップに反応させる */
+.p-drawer__list a {
+	display: block;
+}
+
 .p-drawer__contact {
 	width: var(--drawer-btn-width);
 	height: var(--drawer-btn-height);
@@ -1091,7 +1138,7 @@ body.is-drawer-open {
 }
 
 /* ドロワーは SP カンプのみ */
-@media (min-width: 769px) {
+@media (min-width: 1025px) {
 	.p-drawer {
 		display: none;
 	}
@@ -1200,7 +1247,7 @@ body.is-drawer-open {
 	text-align: center;
 }
 
-@media (min-width: 769px) {
+@media (min-width: 1025px) {
 	.p-footer__menus {
 		flex-direction: row;
 		gap: var(--footer-block-gap);
@@ -1251,6 +1298,30 @@ body.is-drawer-open {
 
 .p-fv__video.is-active {
 	z-index: 1;
+	opacity: 1;
+	visibility: visible;
+	transition: opacity var(--fv-fade) ease-in-out;
+}
+
+/* 自動再生が拒否されたとき（iOS の低電力モード等）に動画の代わりに見せる静止画。
+   src は再生失敗を検知した js/fv-slider.js が入れる（通常時は読み込まない）。
+   動画より後に描画されるので同じ z-index でも上に重なり、iOS の ▶ 表示も隠れる */
+.p-fv__poster {
+	position: absolute;
+	inset: 0;
+	z-index: 1;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	object-position: var(--fv-video-position);
+	opacity: 0;
+	visibility: hidden;
+	transition:
+		opacity var(--fv-fade) ease-in-out,
+		visibility 0s linear var(--fv-fade);
+}
+
+.p-fv__video.is-active.is-blocked + .p-fv__poster {
 	opacity: 1;
 	visibility: visible;
 	transition: opacity var(--fv-fade) ease-in-out;
@@ -1398,7 +1469,7 @@ body.is-drawer-open {
 	object-fit: cover;
 }
 
-@media (min-width: 769px) {
+@media (min-width: 1025px) {
 	.p-fv__text--left {
 		left: 25%;
 	}
@@ -1863,7 +1934,7 @@ body.is-drawer-open {
 	color: var(--color-gray1);
 }
 
-@media (min-width: 769px) {
+@media (min-width: 1025px) {
 	/* PC は MVV 列と円環図の横並び（917:279） */
 	.p-philosophy__body {
 		display: flex;
@@ -2148,6 +2219,22 @@ body.is-drawer-open {
 	width: 100%;
 	height: 100%;
 	object-fit: cover;
+}
+
+/* 自動再生が拒否されたとき（iOS の低電力モード等）に動画の代わりに見せる静止画。
+   src は再生失敗を検知した js/dx-slider.js が入れる（通常時は読み込まない） */
+.p-dx__poster {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	opacity: 0;
+	transition: opacity var(--transition-base);
+}
+
+.p-dx__image.is-blocked + .p-dx__poster {
+	opacity: 1;
 }
 
 /* --- 03 SHARE: 背景写真の上に重ねるスマホの図（参照実装 test.html の 3 枚目） ---
@@ -2473,6 +2560,11 @@ body.is-drawer-open {
 	/* SP のコンテンツ幅もカンプ比（375 - 27.5x2 = 320）でスケールする。
 	   :root の --dx-inner-width は VR セクションが参照するため触らない */
 	--dx-inner-width: calc(320 * var(--dx-su));
+	/* 字間も DX の縮尺（高さ基準になり得る）に載せる。画面幅基準のままだと
+	   文字より字間が相対的に広がり、折り返し位置が変わる */
+	--ls-wide: calc(2 * var(--dx-su));
+	--ls-base: calc(1 * var(--dx-su));
+	--ls-display-lg: calc(-3 * var(--dx-su));
 	height: calc(100vh * var(--dx-scroll-screens));
 }
 
@@ -2483,7 +2575,10 @@ body.is-drawer-open {
 	flex-direction: column;
 	justify-content: center;
 	height: var(--dx-pin-height);
-	padding-block: 0;
+	/* 箱の上下余白は中央寄せで等しいが、先頭の Antonio 見出しは行ボックスの
+	   上に約 0.18em（48u × 0.18 ≒ 8.6u）の空きを持つため、見た目の余白は
+	   上が大きく見える。その分だけ下に詰め物をして、文字基準で上下を揃える */
+	padding-block: 0 calc(8.6 * var(--dx-su));
 }
 
 /* 押したステップの位置までスクロールする */
@@ -2521,7 +2616,7 @@ body.is-drawer-open {
 
 .p-dx__step-number {
 	font-family: var(--font-ui);
-	font-size: max(10px, 12 * var(--dx-su));
+	font-size: calc(12 * var(--dx-su));
 	font-weight: var(--fw-light);
 	line-height: var(--lh-base);
 	letter-spacing: var(--ls-wide);
@@ -2530,7 +2625,7 @@ body.is-drawer-open {
 .p-dx__step-title {
 	margin-top: calc(3.2 * var(--dx-su));
 	font-family: var(--font-ui);
-	font-size: max(12px, 16 * var(--dx-su));
+	font-size: calc(16 * var(--dx-su));
 	font-weight: var(--fw-bold);
 	line-height: var(--lh-base);
 	letter-spacing: var(--ls-wide);
@@ -2539,7 +2634,7 @@ body.is-drawer-open {
 .p-dx__step-desc {
 	margin-top: calc(3.6 * var(--dx-su));
 	font-family: var(--font-ui);
-	font-size: max(10px, 12 * var(--dx-su));
+	font-size: calc(12 * var(--dx-su));
 	line-height: var(--lh-base);
 	letter-spacing: var(--ls-base);
 }
@@ -2563,7 +2658,7 @@ body.is-drawer-open {
 	/* 高さがスケールしても常にピル形状（半径は半分で頭打ちになる） */
 	border-radius: 999px;
 	font-family: var(--font-ui);
-	font-size: max(10px, 11 * var(--dx-su));
+	font-size: calc(11 * var(--dx-su));
 	line-height: var(--lh-base);
 	letter-spacing: var(--ls-base);
 }
@@ -2582,12 +2677,13 @@ body.is-drawer-open {
 	padding-top: calc((var(--dx-sp-dot-active) - var(--dx-sp-dot)) / 2);
 }
 
-/* 点をつなぐ縦線 */
+/* 点をつなぐ縦線。両端は点の中心で止め、点の裏に隠す
+   （下端を点の外まで伸ばすと、最後の点の下に線の尻尾が見える） */
 .p-dx__dots::before {
 	content: "";
 	position: absolute;
 	top: 6px;
-	bottom: calc(var(--dx-sp-dot) * -1);
+	bottom: calc(var(--dx-sp-dot) / 2);
 	left: 50%;
 	width: var(--border-thin);
 	background: var(--color-white3);
@@ -2628,20 +2724,25 @@ body.is-drawer-open {
 	content: none;
 }
 
-@media (min-width: 769px) {
+@media (min-width: 1025px) {
 	/* --- PC はカンプ（1920x1080）の等倍スケールで組む ---
 	   幅補間の clamp だと中間幅で中身が縦に伸び、ピン留め中の 100vh に
 	   収まらず下が見切れる。1 単位 --dx-u（カンプ 1px の実寸）を
 	   幅比・高さ比の小さい方から取り、セクション全体をカンプの縮小コピー
 	   として収める。余った分はピン中央寄せの上下余白になる（許容済み）。
 	   1920x1080 で --dx-u = 1px となりカンプ値と一致する。
-	   文字サイズだけは読める下限を max() で確保する */
+	   （かつて文字サイズに max() の可読下限があったが、ページ全体を
+	   カンプ比例に揃えた際に廃止した） */
 	.p-dx {
 		--dx-u: min(100vw / 1920, 100vh / 1080);
+		/* 字間も DX の縮尺に載せる（SP 側と同じ理由） */
+		--ls-wide: calc(2 * var(--dx-u));
+		--ls-base: calc(1 * var(--dx-u));
+		--ls-display-lg: calc(-2 * var(--dx-u));
 		/* VR セクションが参照する :root の固定値はそのまま。ここは DX だけ */
 		--dx-inner-width: calc(1573.01 * var(--dx-u));
 		--dx-title-size: calc(110 * var(--dx-u));
-		--dx-copy-size: max(12px, 32 * var(--dx-u));
+		--dx-copy-size: calc(32 * var(--dx-u));
 		--dx-copy-offset: calc(34 * var(--dx-u));
 		--dx-head-gap: calc(50.92 * var(--dx-u));
 		--dx-steps-top: calc(175.16 * var(--dx-u));
@@ -2649,11 +2750,11 @@ body.is-drawer-open {
 		--dx-step-height: calc(178 * var(--dx-u));
 		--dx-media-offset: calc(9 * var(--dx-u));
 		--dx-btn-offset: calc(8 * var(--dx-u));
-		--dx-num-size: max(10px, 16 * var(--dx-u));
-		--dx-step-title-size: max(12px, 22 * var(--dx-u));
-		--dx-step-desc-size: max(10px, 14 * var(--dx-u));
-		--dx-tag-size: max(10px, 14 * var(--dx-u));
-		--dx-tag-height: max(20px, 34 * var(--dx-u));
+		--dx-num-size: calc(16 * var(--dx-u));
+		--dx-step-title-size: calc(22 * var(--dx-u));
+		--dx-step-desc-size: calc(14 * var(--dx-u));
+		--dx-tag-size: calc(14 * var(--dx-u));
+		--dx-tag-height: calc(34 * var(--dx-u));
 		--dx-indicator-w: calc(37 * var(--dx-u));
 		--dx-dot: calc(26 * var(--dx-u));
 		--dx-dot-active: calc(37 * var(--dx-u));
@@ -3171,7 +3272,7 @@ body.is-drawer-open {
 	color: var(--color-off-white);
 }
 
-@media (min-width: 769px) {
+@media (min-width: 1025px) {
 	.p-copy__text {
 		white-space: nowrap;
 	}
@@ -3388,7 +3489,7 @@ body.is-drawer-open {
 	cursor: pointer;
 }
 
-@media (min-width: 769px) {
+@media (min-width: 1025px) {
 	.p-works__slider.is-wheel .p-works__nav {
 		display: block;
 	}
@@ -3628,7 +3729,7 @@ body.is-drawer-open {
 	margin-top: var(--recruit-btn-gap);
 }
 
-@media (min-width: 769px) {
+@media (min-width: 1025px) {
 	.p-works__desc {
 		--works-desc-lh: 2.5; /* 917:117 は 14px・行高 2.5 で 3 行 105px */
 	}
@@ -3652,3 +3753,360 @@ body.is-drawer-open {
 }
 
 /* --- 総合調整（S8） --- */
+
+
+/* ============================================================
+   カンプ 2 幅（PC 1920 / SP 375）の縮小拡大コピー化
+   ------------------------------------------------------------
+   :root の寸法トークンは元々 clamp() で 375 → 1920 を直線補間していたが、
+   それでは中間幅で文字と枠の比率が崩れて改行位置が変わる。ここで
+   ・1025px 以上 … 1 単位 --vu = min(1px, 100vw / 1920)（1920 超は等倍で停止）
+   ・1024px 以下 … 1 単位 --su = 100vw / 375（--sp-scale-max で頭打ち。タブレット縦で膨らみすぎないため）
+   に載せ替え、どの幅でもカンプと同じ改行位置・比率を保つ
+   （企業情報ページの --co-vu / --co-su と同じ考え方）。
+   対象外: アニメーションの移動量（--fv-char-shift 等）と 1px の罫線
+   （--border-thin。比例させると細部が消えるため）。
+   ============================================================ */
+@media (min-width: 1025px) {
+	:root {
+		--vu: min(1px, calc(100vw / 1920));
+
+		--fs-display-hero: calc(120 * var(--vu));
+		--fs-display-hero-sub: calc(46 * var(--vu));
+		--fs-display-lg: calc(76 * var(--vu));
+		--fs-copy-lg: calc(40 * var(--vu));
+		--fs-copy-md: calc(20 * var(--vu));
+		--fs-body: calc(18 * var(--vu));
+		--fs-section-title: calc(28 * var(--vu));
+		--fs-button: calc(20 * var(--vu));
+		--fs-nav: calc(20 * var(--vu));
+		--fs-footer-heading: calc(32 * var(--vu));
+		--fs-footer-link: calc(20 * var(--vu));
+		--fs-sns-label: calc(16 * var(--vu));
+		--fs-copyright: calc(14 * var(--vu));
+		--ls-display-lg: calc(-2 * var(--vu));
+		--ls-title: calc(5 * var(--vu));
+		--ls-button: calc(2 * var(--vu));
+		--gutter: calc(160 * var(--vu));
+		--header-height: calc(154 * var(--vu));
+		--header-pad-x: calc(80 * var(--vu));
+		--header-pad-right: calc(80 * var(--vu));
+		--header-logo-top: calc(41 * var(--vu));
+		--nav-gap: calc(40 * var(--vu));
+		--logo-width: calc(164 * var(--vu));
+		--footer-logo-width: calc(164 * var(--vu));
+		--fv-height: calc(1080 * var(--vu));
+		--fv-thumbs-bottom: calc(69.26 * var(--vu));
+		--fv-thumb-size: calc(85 * var(--vu));
+		--fv-thumb-gap: calc(20 * var(--vu));
+		--fv-ring-size: calc(100 * var(--vu));
+		--philo-pad-block: calc(161.41 * var(--vu));
+		--philo-eng-size: calc(64 * var(--vu));
+		--philo-jp-size: calc(24 * var(--vu));
+		--philo-sub-size: calc(16 * var(--vu));
+		--philo-eng-gap: calc(12.14 * var(--vu));
+		--philo-jp-gap: calc(8 * var(--vu));
+		--philo-eng-ls: calc(-1 * var(--vu));
+		--philo-sub-ls: calc(2 * var(--vu));
+		--philo-sp-item-gap: calc(61 * var(--vu));
+		--philo-sp-text-indent: calc(19.71 * var(--vu));
+		--philo-sp-diagram-gap: calc(110 * var(--vu));
+		--philo-sp-diagram-bleed: calc(10.855 * var(--vu));
+		--philo-sp-stats-gap: calc(100 * var(--vu));
+		--philo-rule-gap-before: calc(64.87 * var(--vu));
+		--philo-rule-gap-after: calc(54.44 * var(--vu));
+		--stats-band-gap: calc(122.18 * var(--vu));
+		--stats-heading-size: calc(32 * var(--vu));
+		--stats-logo-width: calc(180.04 * var(--vu));
+		--stats-heading-gap: calc(11.5 * var(--vu));
+		--stats-heading-list-gap: calc(51.91 * var(--vu));
+		--stats-value-gap: calc(8 * var(--vu));
+		--stats-label-size: calc(24 * var(--vu));
+		--stats-number-size: calc(96 * var(--vu));
+		--stats-unit-size: calc(24 * var(--vu));
+		--stats-icon-height: calc(92.69 * var(--vu));
+		--stats-item-gap: calc(60.3 * var(--vu));
+		--stats-badge-size: calc(212 * var(--vu));
+		--stats-badge-col-gap: calc(28.3 * var(--vu));
+		--stats-badge-row-gap: calc(21.14 * var(--vu));
+		--stats-badge-icon-height: calc(46 * var(--vu));
+		--stats-badge-icon-gap: calc(11.7 * var(--vu));
+		--stats-sp-number: calc(48 * var(--vu));
+		--stats-sp-unit: calc(14 * var(--vu));
+		--dx-pad-top: calc(104.43 * var(--vu));
+		--dx-pad-bottom: calc(112.41 * var(--vu));
+		--dx-title-size: calc(110 * var(--vu));
+		--dx-copy-size: calc(32 * var(--vu));
+		--dx-copy-offset: calc(34 * var(--vu));
+		--dx-head-gap: calc(50.92 * var(--vu));
+		--dx-steps-top: calc(175.16 * var(--vu));
+		--dx-step-gap: calc(48.5 * var(--vu));
+		--dx-step-height: calc(178 * var(--vu));
+		--dx-media-offset: calc(9 * var(--vu));
+		--dx-btn-offset: calc(8 * var(--vu));
+		--dx-num-size: calc(16 * var(--vu));
+		--dx-step-title-size: calc(22 * var(--vu));
+		--dx-step-desc-size: calc(14 * var(--vu));
+		--dx-tag-size: calc(14 * var(--vu));
+		--dx-tag-height: calc(34 * var(--vu));
+		--dx-indicator-w: calc(37 * var(--vu));
+		--dx-dot: calc(26 * var(--vu));
+		--dx-dot-active: calc(37 * var(--vu));
+		--dx-indicator-gap: calc(31.01 * var(--vu));
+		--dx-bar-w: calc(77 * var(--vu));
+		--dx-bar-h: calc(6 * var(--vu));
+		--dx-media-foot-gap: calc(32 * var(--vu));
+		--vr-height: calc(700 * var(--vu));
+		--vr-pad-block: calc(96 * var(--vu));
+		--copy-height: calc(1080 * var(--vu));
+		--plans-cards-gap: calc(80 * var(--vu));
+		--plans-card-size: calc(342 * var(--vu));
+		--plans-card-gap: calc(32.35 * var(--vu));
+		--plans-card-name-size: calc(20 * var(--vu));
+		--plans-card-eng-size: calc(64 * var(--vu));
+		--plans-card-name-top: calc(22.21 * var(--vu));
+		--plans-card-eng-top: calc(46.21 * var(--vu));
+		--plans-package-gap: calc(57.88 * var(--vu));
+		--plans-eng-size: calc(76 * var(--vu));
+		--plans-jp-size: calc(20 * var(--vu));
+		--plans-desc-size: calc(18 * var(--vu));
+		--plans-jp-to-eng: calc(-5.4 * var(--vu));
+		--plans-eng-to-desc: calc(26 * var(--vu));
+		--plans-desc-to-btn: calc(60 * var(--vu));
+		--plans-highend-min-height: calc(667.18 * var(--vu));
+		--plans-highend-indent: calc(52.85 * var(--vu));
+		--works-cards-gap: calc(80 * var(--vu));
+		--works-btn-gap: calc(65.61 * var(--vu));
+		--works-desc-size: calc(14 * var(--vu));
+		--works-desc-w: calc(551.089 * var(--vu));
+		--news-cards-gap: calc(80 * var(--vu));
+		--news-card-w: calc(373 * var(--vu));
+		--news-card-img-h: calc(226 * var(--vu));
+		--news-card-gap: calc(36.25 * var(--vu));
+		--news-title-gap: calc(10.29 * var(--vu));
+		--news-title-size: calc(18 * var(--vu));
+		--news-btn-gap: calc(65.27 * var(--vu));
+		--recruit-copy-gap: calc(80 * var(--vu));
+		--recruit-copy-size: calc(36 * var(--vu));
+		--recruit-sub-gap: calc(23.13 * var(--vu));
+		--recruit-sub-size: calc(18 * var(--vu));
+		--recruit-btn-gap: calc(59.79 * var(--vu));
+		--footer-logo-gap: calc(60 * var(--vu));
+		--footer-sns-gap: calc(51 * var(--vu));
+		--footer-menu-gap: calc(120 * var(--vu));
+		--footer-padding-bottom: calc(46 * var(--vu));
+		--footer-block-width: calc(553 * var(--vu));
+		--footer-block-gap: calc(94 * var(--vu));
+		--footer-row-gap: calc(10 * var(--vu));
+		--footer-rule-gap: calc(18.6 * var(--vu));
+		--footer-rule-list-gap: calc(31 * var(--vu));
+		--sns-width: calc(861 * var(--vu));
+		--sns-icon-size: calc(41 * var(--vu));
+		--sns-icon-gap: calc(11 * var(--vu));
+		--sns-divider-height: calc(78 * var(--vu));
+		--space-2xs: calc(8 * var(--vu));
+		--space-xs: calc(16 * var(--vu));
+		--space-sm: calc(24 * var(--vu));
+		--space-md: calc(32 * var(--vu));
+		--space-lg: calc(48 * var(--vu));
+		--space-xl: calc(64 * var(--vu));
+		--space-2xl: calc(96 * var(--vu));
+		--space-3xl: calc(128 * var(--vu));
+		--section-padding-y: calc(160 * var(--vu));
+		--btn-width: calc(265 * var(--vu));
+		--btn-height: calc(64 * var(--vu));
+
+		--ls-display-hero: calc(-3 * var(--vu));
+		--ls-wide: calc(2 * var(--vu));
+		--ls-base: calc(1 * var(--vu));
+		--content-narrow: calc(1240 * var(--vu));
+		--philo-body-width: calc(1462.63 * var(--vu));
+		--philo-jp-ls: calc(3 * var(--vu));
+		--dx-inner-width: calc(1573.01 * var(--vu));
+		--plans-card-radius: calc(10 * var(--vu));
+		--works-dot-size: calc(8 * var(--vu));
+		--works-dot-gap: calc(12 * var(--vu));
+		--works-dots-gap: calc(24 * var(--vu));
+		--footer-menus-width: calc(1200 * var(--vu));
+		--radius-md: calc(8 * var(--vu));
+		--radius-lg: calc(16 * var(--vu));
+	}
+}
+
+@media (max-width: 1024px) {
+	:root {
+		--su: min(calc(100vw / 375), var(--sp-scale-max));
+
+		--fs-display-hero: calc(64 * var(--su));
+		--fs-display-hero-sub: calc(24 * var(--su));
+		--fs-display-lg: calc(48 * var(--su));
+		--fs-copy-lg: calc(20 * var(--su));
+		--fs-copy-md: calc(14 * var(--su));
+		--fs-body: calc(12 * var(--su));
+		--fs-section-title: calc(16 * var(--su));
+		--fs-button: calc(12 * var(--su));
+		--fs-nav: calc(12 * var(--su));
+		--fs-footer-heading: calc(18 * var(--su));
+		--fs-footer-link: calc(12 * var(--su));
+		--fs-sns-label: calc(10 * var(--su));
+		--fs-copyright: calc(10 * var(--su));
+		--ls-display-lg: calc(-3 * var(--su));
+		--ls-title: calc(2 * var(--su));
+		--ls-button: calc(1 * var(--su));
+		--gutter: calc(27.5008 * var(--su));
+		--header-height: calc(45 * var(--su));
+		--header-pad-x: calc(15.64 * var(--su));
+		--header-pad-right: calc(19.18 * var(--su));
+		--header-logo-top: calc(14.82 * var(--su));
+		--nav-gap: calc(16 * var(--su));
+		--logo-width: calc(99.426 * var(--su));
+		--footer-logo-width: calc(109.571 * var(--su));
+		--fv-height: calc(677.81 * var(--su));
+		--fv-thumbs-bottom: calc(33.74 * var(--su));
+		--fv-thumb-size: calc(39.818 * var(--su));
+		--fv-thumb-gap: calc(9.37 * var(--su));
+		--fv-ring-size: calc(46.845 * var(--su));
+		--philo-pad-block: calc(60 * var(--su));
+		--philo-eng-size: calc(32 * var(--su));
+		--philo-jp-size: calc(14 * var(--su));
+		--philo-sub-size: calc(12 * var(--su));
+		--philo-eng-gap: calc(0 * var(--su));
+		--philo-jp-gap: calc(0 * var(--su));
+		--philo-eng-ls: calc(-3 * var(--su));
+		--philo-sub-ls: calc(1 * var(--su));
+		--philo-sp-item-gap: calc(30 * var(--su));
+		--philo-sp-text-indent: calc(19.71 * var(--su)); /* 375 の値（減る向きの clamp だったため下限と逆） */
+		--philo-sp-diagram-gap: calc(54.19 * var(--su));
+		--philo-sp-diagram-bleed: calc(10.855 * var(--su)); /* 同上 */
+		--philo-sp-stats-gap: calc(50.41 * var(--su));
+		--philo-rule-gap-before: calc(32 * var(--su));
+		--philo-rule-gap-after: calc(27 * var(--su));
+		--stats-band-gap: calc(61 * var(--su));
+		--stats-heading-size: calc(16 * var(--su));
+		--stats-logo-width: calc(97.276 * var(--su));
+		--stats-heading-gap: calc(3.98 * var(--su));
+		--stats-heading-list-gap: calc(23.71 * var(--su));
+		--stats-value-gap: calc(3.06 * var(--su));
+		--stats-label-size: calc(14 * var(--su));
+		--stats-number-size: calc(48 * var(--su));
+		--stats-unit-size: calc(14 * var(--su));
+		--stats-icon-height: calc(46 * var(--su));
+		--stats-item-gap: calc(30 * var(--su));
+		--stats-badge-size: calc(141.512 * var(--su));
+		--stats-badge-col-gap: calc(18.9 * var(--su));
+		--stats-badge-row-gap: calc(14.11 * var(--su));
+		--stats-badge-icon-height: calc(39.393 * var(--su));
+		--stats-badge-icon-gap: calc(7.8 * var(--su));
+		--stats-sp-number: calc(32 * var(--su));
+		--stats-sp-unit: calc(12 * var(--su));
+		--dx-pad-top: calc(60 * var(--su));
+		--dx-pad-bottom: calc(64 * var(--su));
+		--dx-title-size: calc(66 * var(--su));
+		--dx-copy-size: calc(20 * var(--su));
+		--dx-copy-offset: calc(20 * var(--su));
+		--dx-head-gap: calc(30 * var(--su));
+		--dx-steps-top: calc(100 * var(--su));
+		--dx-step-gap: calc(30 * var(--su));
+		--dx-step-height: calc(120 * var(--su));
+		--dx-media-offset: calc(5 * var(--su));
+		--dx-btn-offset: calc(4 * var(--su));
+		--dx-num-size: calc(12 * var(--su));
+		--dx-step-title-size: calc(16 * var(--su));
+		--dx-step-desc-size: calc(12 * var(--su));
+		--dx-tag-size: calc(12 * var(--su));
+		--dx-tag-height: calc(28 * var(--su));
+		--dx-indicator-w: calc(26 * var(--su));
+		--dx-dot: calc(18 * var(--su));
+		--dx-dot-active: calc(26 * var(--su));
+		--dx-indicator-gap: calc(22 * var(--su));
+		--dx-bar-w: calc(54 * var(--su));
+		--dx-bar-h: calc(4 * var(--su));
+		--dx-media-foot-gap: calc(20 * var(--su));
+		--vr-height: calc(420 * var(--su));
+		--vr-pad-block: calc(48 * var(--su));
+		--copy-height: calc(722.81 * var(--su));
+		--plans-cards-gap: calc(23.4 * var(--su));
+		--plans-card-size: calc(256 * var(--su));
+		--plans-card-gap: calc(14.5 * var(--su));
+		--plans-card-name-size: calc(14 * var(--su));
+		--plans-card-eng-size: calc(48 * var(--su));
+		--plans-card-name-top: calc(21.19 * var(--su));
+		--plans-card-eng-top: calc(38.19 * var(--su));
+		--plans-package-gap: calc(37.27 * var(--su));
+		--plans-eng-size: calc(48 * var(--su));
+		--plans-jp-size: calc(14 * var(--su));
+		--plans-desc-size: calc(12 * var(--su));
+		--plans-jp-to-eng: calc(-8 * var(--su));
+		--plans-eng-to-desc: calc(14.76 * var(--su));
+		--plans-desc-to-btn: calc(13.96 * var(--su));
+		--plans-highend-min-height: calc(498.88 * var(--su));
+		--plans-highend-indent: calc(0 * var(--su));
+		--works-cards-gap: calc(16.8 * var(--su));
+		--works-btn-gap: calc(25.46 * var(--su));
+		--works-desc-size: calc(12 * var(--su));
+		--works-desc-w: calc(320 * var(--su));
+		--news-cards-gap: calc(23.4 * var(--su));
+		--news-card-w: calc(262.39 * var(--su));
+		--news-card-img-h: calc(167.41 * var(--su));
+		--news-card-gap: calc(19.09 * var(--su));
+		--news-title-gap: calc(7 * var(--su));
+		--news-title-size: calc(12 * var(--su));
+		--news-btn-gap: calc(0 * var(--su));
+		--recruit-copy-gap: calc(22.41 * var(--su));
+		--recruit-copy-size: calc(18 * var(--su));
+		--recruit-sub-gap: calc(18.4 * var(--su));
+		--recruit-sub-size: calc(12 * var(--su));
+		--recruit-btn-gap: calc(30 * var(--su));
+		--footer-logo-gap: calc(30 * var(--su));
+		--footer-sns-gap: calc(30 * var(--su));
+		--footer-menu-gap: calc(59.8 * var(--su));
+		--footer-padding-bottom: calc(30 * var(--su));
+		--footer-block-width: calc(320 * var(--su));
+		--footer-block-gap: calc(40 * var(--su));
+		--footer-row-gap: calc(5.09 * var(--su));
+		--footer-rule-gap: calc(7.2 * var(--su));
+		--footer-rule-list-gap: calc(16.4 * var(--su));
+		--sns-width: calc(321 * var(--su));
+		--sns-icon-size: calc(17.78 * var(--su));
+		--sns-icon-gap: calc(5.8 * var(--su));
+		--sns-divider-height: calc(51.96 * var(--su));
+		--space-2xs: calc(4 * var(--su));
+		--space-xs: calc(8 * var(--su));
+		--space-sm: calc(12 * var(--su));
+		--space-md: calc(16 * var(--su));
+		--space-lg: calc(24 * var(--su));
+		--space-xl: calc(32 * var(--su));
+		--space-2xl: calc(48 * var(--su));
+		--space-3xl: calc(64 * var(--su));
+		--section-padding-y: calc(60 * var(--su));
+		--btn-width: calc(136.021 * var(--su));
+		--btn-height: calc(32.8496 * var(--su));
+
+		--ls-display-hero: calc(-3 * var(--su));
+		--ls-wide: calc(2 * var(--su));
+		--ls-base: calc(1 * var(--su));
+		--toggle-width: calc(25.6 * var(--su));
+		--toggle-gap: calc(5 * var(--su));
+		--drawer-rule-gap: calc(5.84 * var(--su));
+		--drawer-list-gap: calc(16.31 * var(--su));
+		--drawer-row-gap: calc(5.1 * var(--su));
+		--drawer-block-gap: calc(29.9 * var(--su));
+		--drawer-btn-gap: calc(23 * var(--su));
+		--drawer-btn-width: calc(161 * var(--su));
+		--drawer-btn-height: calc(38 * var(--su));
+		--drawer-sns-height: calc(51.96 * var(--su));
+		--drawer-sns-icon: calc(17.78 * var(--su));
+		--drawer-sns-icon-gap: calc(5.84 * var(--su));
+		--drawer-bottom-gap: calc(24.44 * var(--su));
+		--philo-jp-ls: calc(3 * var(--su));
+		--stats-sp-label: calc(14 * var(--su));
+		--dx-sp-pad-top: calc(47.36 * var(--su));
+		--dx-sp-pad-bottom: calc(78.86 * var(--su));
+		--plans-card-radius: calc(10 * var(--su));
+		--works-dot-size: calc(8 * var(--su));
+		--works-dot-gap: calc(12 * var(--su));
+		--works-dots-gap: calc(24 * var(--su));
+		--radius-md: calc(8 * var(--su));
+		--radius-lg: calc(16 * var(--su));
+	}
+}

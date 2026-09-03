@@ -200,7 +200,7 @@ function exterior_exone_company_profile() {
 		),
 		array(
 			'label' => '資本金',
-			'value' => '60,999,965円（内資本準備金含む）',
+			'value' => '359,723,195円(資本準備金含む)',
 		),
 		array(
 			'label' => '事業内容',
@@ -208,11 +208,7 @@ function exterior_exone_company_profile() {
 		),
 		array(
 			'label' => '従業員数',
-			'value' => '28名',
-		),
-		array(
-			'label' => '売上高',
-			'value' => '5億円（令和6年度）',
+			'value' => '45名(2026年8月1日時点)',
 		),
 		array(
 			'label' => '主要取引先',

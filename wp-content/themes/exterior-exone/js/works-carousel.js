@@ -52,7 +52,7 @@
 	var originals = Array.prototype.slice.call(list.children);
 	var count = originals.length;
 	var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-	var mqPc = window.matchMedia('(min-width: 769px)');
+	var mqPc = window.matchMedia('(min-width: 1025px)');
 	var STEP_RAD = (STEP_DEG * Math.PI) / 180;
 
 	var nodes = []; // { el, angle } を角度の昇順で保持

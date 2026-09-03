@@ -165,9 +165,6 @@ $exterior_exone_partners = exterior_exone_company_partners();
 						</circle>
 					<?php endforeach; ?>
 				</svg>
-
-				<?php // 上から下へ流れる走査線。 ?>
-				<span class="p-cpartner__map-scan" aria-hidden="true"></span>
 			</figure>
 		</div>
 	</div>

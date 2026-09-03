@@ -3,12 +3,12 @@
  *
  * ・ヘッダーのボタンで開き、× / Esc / メニュー内リンクの押下で閉じる
  * ・開いている間は背面をスクロールさせない
- * ・PC 幅（769px 以上）へリサイズしたら閉じる（ドロワーは SP のみ）
+ * ・PC 幅（1025px 以上）へリサイズしたら閉じる（ドロワーは SP のみ）
  */
 (function () {
 	'use strict';
 
-	var PC_QUERY = '(min-width: 769px)';
+	var PC_QUERY = '(min-width: 1025px)';
 
 	var drawer = document.querySelector('[data-drawer]');
 	var toggle = document.querySelector('.p-header__toggle');
@@ -29,7 +29,14 @@
 		);
 	}
 
-	function open() {
+	/**
+	 * @param {boolean} viaKeyboard キーボード操作で開いたか。
+	 *   キーボードなら × にフォーカスを移して操作を続けやすくする。
+	 *   タップで開いたときは × に移すと iOS Safari が :focus-visible の枠を
+	 *   出してしまうため、パネル自体（tabindex="-1"）に移して枠を出さない。
+	 *   Tab を押せばそこからメニュー内の先頭へ進めるので、キーボード操作は失わない。
+	 */
+	function open(viaKeyboard) {
 		if (isOpen) {
 			return;
 		}
@@ -41,11 +48,13 @@
 		toggle.setAttribute('aria-label', 'メニューを閉じる');
 
 		// クリック直後はブラウザが押した要素へフォーカスを戻すため、次フレームで移す。
-		if (closeButton) {
-			window.requestAnimationFrame(function () {
+		window.requestAnimationFrame(function () {
+			if (viaKeyboard && closeButton) {
 				closeButton.focus();
-			});
-		}
+			} else {
+				drawer.focus({ preventScroll: true });
+			}
+		});
 	}
 
 	function close(returnFocus) {
@@ -64,17 +73,22 @@
 		}
 	}
 
-	toggle.addEventListener('click', function () {
+	// キーボード（Enter / Space）による click は detail が 0、ポインタ操作は 1 以上。
+	// ポインタで閉じたときにボタンへフォーカスを戻すと、iOS Safari では
+	// ハンバーガー側に枠が出るため、戻すのはキーボード操作のときだけにする。
+	toggle.addEventListener('click', function (event) {
+		var viaKeyboard = event.detail === 0;
+
 		if (isOpen) {
-			close(true);
+			close(viaKeyboard);
 		} else {
-			open();
+			open(viaKeyboard);
 		}
 	});
 
 	if (closeButton) {
-		closeButton.addEventListener('click', function () {
-			close(true);
+		closeButton.addEventListener('click', function (event) {
+			close(event.detail === 0);
 		});
 	}
 

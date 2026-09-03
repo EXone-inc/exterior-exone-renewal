@@ -6,9 +6,8 @@
  *         （左上の写真に右下のパネルが重なり、写真の下に VISION / MISSION）
  *         SP  917:914-917・917:950-951・917:965-968
  *
- * 見出しは PC が「The Experience We Build / 私たちが作る体験」、
- * SP が「Industry Challenges / チャレンジし続ける理由」で異なるため両方を出力し、
- * css/company.css のメディアクエリで切り替える。
+ * 見出しは PC / SP 共通で「Industry Challenges / チャレンジし続ける理由」
+ * （PC カンプの「The Experience We Build」は誤りとの指示で SP 側に統一）。
  * VISION / MISSION は PC カンプのみ。
  *
  * @package exterior-exone
@@ -21,10 +20,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 <section class="p-cstory" data-section="company-story">
 	<div class="p-cstory__inner">
 		<div class="p-cstory__head">
-			<h2 class="c-company-eng p-cstory__eng p-cstory__eng--sp">Industry Challenges</h2>
-			<p class="c-company-jp p-cstory__jp p-cstory__jp--sp">チャレンジし続ける理由</p>
-			<h2 class="c-company-eng p-cstory__eng p-cstory__eng--pc">The Experience We Build</h2>
-			<p class="c-company-jp p-cstory__jp p-cstory__jp--pc">私たちが作る体験</p>
+			<h2 class="c-company-eng p-cstory__eng">Industry Challenges</h2>
+			<p class="c-company-jp p-cstory__jp">チャレンジし続ける理由</p>
 		</div>
 
 		<div class="p-cstory__body">

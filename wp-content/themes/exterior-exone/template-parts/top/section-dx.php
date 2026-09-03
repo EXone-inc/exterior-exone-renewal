@@ -50,6 +50,14 @@ $exterior_exone_dx_steps = exterior_exone_dx_steps();
 									playsinline
 									preload="metadata"
 								></video>
+								<?php // 自動再生が拒否されたとき（低電力モード等）に js/dx-slider.js が src を入れて見せる静止画。 ?>
+								<img
+									class="p-dx__poster"
+									data-dx-poster
+									data-src="<?php echo esc_url( exterior_exone_top_video_poster( $exterior_exone_step['media']['file'] ) ); ?>"
+									alt=""
+									aria-hidden="true"
+								>
 							<?php else : ?>
 								<img
 									class="p-dx__image"

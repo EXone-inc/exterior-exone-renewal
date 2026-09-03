@@ -256,6 +256,20 @@ function exterior_exone_top_image( $file ) {
 }
 
 /**
+ * TOP 用動画の静止画フォールバック URL を返す。
+ *
+ * iOS の低電力モード等で自動再生が拒否されたとき、動画の代わりに出す画像。
+ * 動画と同名の「<名前>-poster.jpg」を images/top/ に置く運用
+ *（webp 版があれば exterior_exone_top_image() がそちらを返す）。
+ *
+ * @param string $file videos/top/ 配下の動画ファイル名。
+ * @return string バージョンクエリ付き URL。
+ */
+function exterior_exone_top_video_poster( $file ) {
+	return exterior_exone_top_image( preg_replace( '/\.mp4$/i', '-poster.jpg', $file ) );
+}
+
+/**
  * 開発環境ではフロント側の WordPress 管理バーを出さない。
  *
  * カンプと同じ見え方で確認するため。判定は wp-config.php の

@@ -47,8 +47,25 @@
 					el.style.setProperty('--reveal-delay', delay + 'ms');
 				}
 
-				el.classList.add('is-inview');
 				revealObserver.unobserve(el);
+
+				// 中に [data-reveal-wait] の画像があるときは、その読み込みを待ってから
+				// 合図を出す（遅い回線で「フェードし終わってから画像が届く」のを防ぐ）。
+				var waitImg = el.querySelector('img[data-reveal-wait]');
+
+				if (waitImg && !(waitImg.complete && waitImg.naturalWidth > 0)) {
+					var start = function () {
+						el.classList.add('is-inview');
+					};
+
+					waitImg.addEventListener('load', start, { once: true });
+					// 読めなかったときも出す（隠れたままにしない）。
+					waitImg.addEventListener('error', start, { once: true });
+
+					return;
+				}
+
+				el.classList.add('is-inview');
 			});
 		},
 		{ rootMargin: '0px 0px -10% 0px', threshold: 0.15 }
