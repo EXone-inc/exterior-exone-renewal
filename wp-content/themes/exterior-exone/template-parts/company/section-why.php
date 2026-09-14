@@ -36,15 +36,11 @@ $exterior_exone_why_cards = exterior_exone_company_why_cards();
 			<p class="p-cwhy__text">私たちは、不透明な価格、属人的な提案、地域による品質格差といった業界課題に向き合い、テクノロジーとデザインの力で新しい顧客体験の仕組みを構築しています。</p>
 		</div>
 
-		<?php // 外構の線画（917:1536 / 917:941）。装飾のため alt は空にする。 ?>
-		<img
-			class="p-cwhy__feature"
-			src="<?php echo esc_url( exterior_exone_company_image( 'FV-feature.png' ) ); ?>"
-			width="916"
-			height="432"
-			alt=""
-			loading="lazy"
-		>
+		<?php
+		// 外構の線画（917:1536 / 917:941）。TOP の円環図と同じ line_animation.svg をインラインで置き、
+		// 画面に入ったら線描画する（js/line-draw.js。時間は style.css の --diagram-draw-*）。
+		echo exterior_exone_inline_line_svg( 'images/top/line_animation.svg', 'p-cwhy__feature' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- テーマ同梱の SVG をヘルパー内で整形済み。
+		?>
 
 		<ul class="p-cwhy__cards">
 			<?php foreach ( $exterior_exone_why_cards as $exterior_exone_card ) : ?>

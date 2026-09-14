@@ -160,6 +160,17 @@ function exterior_exone_enqueue_assets() {
 		true
 	);
 
+	// ライン画（line_animation.svg）の線描画。TOP の理念セクションと企業情報の Why We Exist。
+	if ( exterior_exone_has_fv_header() ) {
+		wp_enqueue_script(
+			'exterior-exone-line-draw',
+			get_theme_file_uri( 'js/line-draw.js' ),
+			array(),
+			exterior_exone_asset_version( 'js/line-draw.js' ),
+			true
+		);
+	}
+
 	// TOP ページで使うスライダー類。
 	if ( is_front_page() ) {
 		wp_enqueue_script( 'swiper' );
@@ -197,6 +208,7 @@ function exterior_exone_front_page_scripts() {
 		'exterior-exone-scroll-row'     => 'js/scroll-row.js',
 		'exterior-exone-plans-switch'   => 'js/plans-switch.js',
 		'exterior-exone-copy-video'     => 'js/copy-video.js',
+		'exterior-exone-philosophy-diagram' => 'js/philosophy-diagram.js',
 	);
 }
 
@@ -267,6 +279,43 @@ function exterior_exone_top_image( $file ) {
  */
 function exterior_exone_top_video_poster( $file ) {
 	return exterior_exone_top_image( preg_replace( '/\.mp4$/i', '-poster.jpg', $file ) );
+}
+
+/**
+ * テーマ内の SVG を、線描画アニメーション用に整えてインライン出力する。
+ *
+ * Illustrator 書き出しの XML 宣言・コメント・<defs> 内の <style>（.st0 等。
+ * ページ内で他の SVG と衝突する）・根要素の id を取り除き、各図形に
+ * pathLength="1" を付ける。これで CSS の stroke-dasharray / dashoffset を
+ * 0〜1 の比率で扱え、線の長さに関係なく同じ時間で描き切れる。
+ * グループの id（line_01 など）は描画順の制御に使うので残す。
+ *
+ * @param string $relative_path テーマルートからの相対パス。
+ * @param string $class         根要素に付けるクラス。
+ * @return string 整えた SVG。読めなければ空文字。
+ */
+function exterior_exone_inline_line_svg( $relative_path, $class ) {
+	$path = get_theme_file_path( $relative_path );
+
+	if ( ! file_exists( $path ) ) {
+		return '';
+	}
+
+	$svg = (string) file_get_contents( $path ); // phpcs:ignore WordPressVPCompat.FileSystem.FileGetContents -- テーマ同梱の静的ファイル。
+	$svg = preg_replace( '/<\?xml[^>]*\?>/', '', $svg );
+	$svg = preg_replace( '/<!--.*?-->/s', '', $svg );
+	$svg = preg_replace( '/<defs>.*?<\/defs>/s', '', $svg );
+	$svg = preg_replace( '/<svg\b[^>]*\bid="[^"]*"/', '<svg', $svg, 1 );
+	$svg = preg_replace( '/<svg\b[^>]*\bdata-name="[^"]*"/', '<svg', $svg, 1 );
+	$svg = preg_replace(
+		'/<svg\b/',
+		'<svg class="' . esc_attr( $class ) . '" data-line-draw aria-hidden="true" focusable="false"',
+		$svg,
+		1
+	);
+	$svg = preg_replace( '/<(path|line|polyline|polygon|rect|circle|ellipse)\b/', '<$1 pathLength="1"', $svg );
+
+	return trim( (string) $svg );
 }
 
 /**

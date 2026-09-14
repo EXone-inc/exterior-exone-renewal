@@ -49,7 +49,12 @@ $exterior_exone_philosophy_items = exterior_exone_philosophy_items();
 			//
 			// 位置は Figma の実測値を枠に対する % に直したもの（CSS 側）。
 			?>
-			<figure class="p-philosophy__diagram" data-reveal="scale" data-reveal-delay="120">
+			<?php
+			// 画面に入ったら中央のライン画（line_animation.svg）を描き、描き終わってから
+			// リング・ロゴ・6 項目がフェードイン、その後に浮遊が始まる（js/philosophy-diagram.js）。
+			// data-reveal="stage" は figure 自体を動かさず、合図（.is-inview）だけ受け取る指定。
+			?>
+			<figure class="p-philosophy__diagram" data-reveal="stage" data-philosophy-diagram>
 				<div class="p-diagram">
 					<?php
 					// リングは PC / SP とも、6 つのコピーの位置で切れた 6 本の弧。
@@ -87,14 +92,11 @@ $exterior_exone_philosophy_items = exterior_exone_philosophy_items();
 					<?php // 中央の文言は PC カンプのみ（SP 16:171 には無い）。 ?>
 					<p class="p-diagram__lead">私たちのすべての行動は<br>この思想から生まれています</p>
 
-					<img
-						class="p-diagram__art"
-						src="<?php echo esc_url( exterior_exone_top_image( 'vision-diagram-art.png' ) ); ?>"
-						width="1472"
-						height="694"
-						alt=""
-						loading="lazy"
-					>
+					<?php
+					// 住宅のライン画。線描画アニメーションのため画像ではなくインライン SVG
+					//（参照実装 test_cp の FV と同じ stroke-dashoffset 方式）。
+					echo exterior_exone_inline_line_svg( 'images/top/line_animation.svg', 'p-diagram__art' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- テーマ同梱の SVG をヘルパー内で整形済み。
+					?>
 
 					<?php foreach ( exterior_exone_philosophy_diagram_items() as $exterior_exone_index => $exterior_exone_item ) : ?>
 						<?php $exterior_exone_no = $exterior_exone_index + 1; ?>

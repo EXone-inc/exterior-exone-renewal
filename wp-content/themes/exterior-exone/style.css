@@ -194,8 +194,30 @@ Text Domain: exterior-exone
 	--diagram-copy-size: 2.927cqw; /* SP 10px / 341.71 */
 	--diagram-copy-lh: 1.6;
 	--diagram-copy-ls: 0.1em;
-	--diagram-float: 2.4cqw;       /* 浮遊の振れ幅（上下それぞれ）*/
+	--diagram-float: 1.7cqw;       /* 浮遊の振れ幅（上下それぞれ）。2.4 だと揺れが大きすぎた */
 	--diagram-float-ease: ease-in-out;
+	/* 中央のライン画の線描画（方式は参照実装 test_cp の FV と同じ stroke-dashoffset）。
+	   Illustrator のグループ line_01（敷地）→ 02（建物）→ 03（門柱・塀・フェンス）→ 04（植栽）
+	   の順に描く。グループ内は 1 本ずつ --diagram-draw-step ずつ遅らせ、次のグループは
+	   前のグループの最後の線が描き始まってから（+ --diagram-draw-gap）始める。
+	   開始時刻は線数から js/philosophy-diagram.js が計算する。
+	   全体 = 開始待ち + (線数の合計 − グループ数) × step + gap × 3 + duration
+	         = 0.2 + 117 × 0.0115 + 0 + 0.45 ≒ 2.0s（121 本の場合） */
+	--line-draw-stroke: 1px; /* 画面上の線幅。縮尺に関係なく一定（vector-effect）。企業情報の線画と共通 */
+	--line-draw-color: var(--color-gray1);
+	--diagram-draw-duration: 0.45s; /* 1 本を描き切る時間。短いほど段階の切れ目がはっきりする */
+	--diagram-draw-ease: cubic-bezier(0.55, 0, 0.2, 1);
+	--diagram-draw-start: 0.2s;    /* 画面に入ってから描き始めるまで */
+	--diagram-draw-step: 0.0115s;  /* 同じグループ内の線どうしの間隔。全体の長さはほぼこれで決まる */
+	--diagram-draw-gap: 0s;        /* グループの切れ目に置く間 */
+	/* 描き終えたあと、リング → ロゴ・文言 → 6 項目の順にふわっと出す。
+	   時間を長めに取り、減速の強いイージングでわずかに拡大しながら現れる */
+	--diagram-fade-duration: 1.6s;
+	--diagram-fade-ease: cubic-bezier(0.22, 1, 0.36, 1);
+	--diagram-fade-scale: 0.94;       /* 出始めの大きさ */
+	--diagram-fade-center-delay: 0.15s; /* ロゴ・文言はリングの少し後 */
+	--diagram-fade-items-start: 0.35s;  /* 1 つ目の項目が出始めるまで */
+	--diagram-fade-stagger: 0.12s;      /* 項目どうしの間隔 */
 	--philo-rule-gap-before: clamp(32px, 10.087px + 2.8533vw, 64.87px); /* 32 → 64.87 */
 	--philo-rule-gap-after: clamp(27px, 8.707px + 2.3819vw, 54.44px); /* 27 → 54.44 */
 	--stats-band-gap: clamp(61px, 20.273px + 5.3038vw, 122.18px); /* 61 → 122.18 : 円環図下端→数字で見る（PC） */
@@ -952,13 +974,6 @@ body.is-drawer-open {
 		inset: 0 0 auto;
 		background: var(--header-overlay);
 	}
-
-	/* 写真の区間を抜けたら SP と同じ不透明な帯にする。
-	   グラデーションは写真に重ねる前提の色で、白背景のセクションの上では
-	   灰色の帯になって読みづらいため（js/header-scroll.js が .is-solid を付ける）。 */
-	.has-fv-header .p-header.is-solid {
-		background: var(--color-black2);
-	}
 }
 
 /* --- ハンバーガーメニュー（1036:395・SP のみ） ---
@@ -1681,6 +1696,86 @@ body.is-drawer-open {
 	height: auto;
 }
 
+/* --- ライン画の線描画（[data-line-draw] の SVG。js/line-draw.js が進行クラスを付ける） ---
+   TOP の円環図の中央と、企業情報 Why We Exist の線画で共通。
+   線は画面上で一定の太さ。描き始める前は dashoffset で隠しておく
+   （各図形の pathLength="1" は functions.php の exterior_exone_inline_line_svg() が付ける） */
+svg[data-line-draw] {
+	overflow: visible;
+}
+
+svg[data-line-draw] :is(path, line, polyline, polygon, rect, circle, ellipse) {
+	fill: none;
+	stroke: var(--line-draw-color);
+	stroke-width: var(--line-draw-stroke);
+	stroke-linecap: round;
+	stroke-linejoin: round;
+	vector-effect: non-scaling-stroke;
+	stroke-dasharray: 1;
+	stroke-dashoffset: 1;
+}
+
+svg[data-line-draw].is-drawing :is(path, line, polyline, polygon, rect, circle, ellipse) {
+	animation: p-line-draw var(--diagram-draw-duration) var(--diagram-draw-ease) var(--delay, 0s) forwards;
+}
+
+@keyframes p-line-draw {
+	to {
+		stroke-dashoffset: 0;
+	}
+}
+
+/* 白で塗る面（.st1）は線を描き終えてから浮かび上がる */
+svg[data-line-draw] .st1 {
+	fill-opacity: 0;
+	transition: fill-opacity var(--diagram-fade-duration) var(--diagram-fade-ease);
+}
+
+svg[data-line-draw].is-drawn .st1 {
+	fill-opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	svg[data-line-draw] :is(path, line, polyline, polygon, rect, circle, ellipse) {
+		stroke-dashoffset: 0;
+		animation: none;
+	}
+
+	svg[data-line-draw] .st1 {
+		fill-opacity: 1;
+		transition: none;
+	}
+}
+
+/* リング・ロゴ・文言・6 項目は、線を描き終えた合図（.is-drawn）でふわっと出す。
+   拡大は transform ではなく scale プロパティで行う（transform は浮遊、translate は中央寄せが使う）。
+   出る順は --fade-delay で付ける: リング 0 → ロゴ・文言 → 項目 1〜6 */
+.p-diagram__ring,
+.p-diagram__logo,
+.p-diagram__lead,
+.p-diagram__icon,
+.p-diagram__copy {
+	opacity: 0;
+	scale: var(--diagram-fade-scale);
+	transition:
+		opacity var(--diagram-fade-duration) var(--diagram-fade-ease) var(--fade-delay, 0s),
+		scale var(--diagram-fade-duration) var(--diagram-fade-ease) var(--fade-delay, 0s);
+}
+
+.p-diagram__logo,
+.p-diagram__lead {
+	--fade-delay: var(--diagram-fade-center-delay);
+}
+
+.p-philosophy__diagram.is-drawn .p-diagram__ring,
+.p-philosophy__diagram.is-drawn .p-diagram__logo,
+.p-philosophy__diagram.is-drawn .p-diagram__lead,
+.p-philosophy__diagram.is-drawn .p-diagram__icon,
+.p-philosophy__diagram.is-drawn .p-diagram__copy {
+	opacity: 1;
+	scale: 1;
+}
+
 .p-diagram__icon {
 	width: var(--w);
 	line-height: 0;
@@ -1693,29 +1788,68 @@ body.is-drawer-open {
 }
 
 /* アイコンと、その下のコピーをひとまとまりで上下に漂わせる。
-   同じ周期・同じ開始位置を与えているので 2 つはずれずに動く。
-   6 組それぞれは周期も開始位置も変えてあり、互いに揃わない。 */
-.p-diagram__icon,
-.p-diagram__copy {
-	animation: p-diagram-float var(--diagram-float-duration) var(--diagram-float-ease) var(--diagram-float-delay) infinite alternate;
+   同じ周期・同じ向きを与えているので 2 つはずれずに動く。
+   6 組は周期を変え、さらに「上から動き出す組」と「下から動き出す組」を交互にして
+   互いに揃わないようにする。始めるのはフェードインが終わってから（.is-alive。js/philosophy-diagram.js）。
+   keyframes は必ず静止位置（0）から始める。途中の位置から始めたり負の遅延で位相を
+   ずらしたりすると、動き出す瞬間に位置が飛んでカクつく。 */
+.p-philosophy__diagram.is-alive .p-diagram__icon,
+.p-philosophy__diagram.is-alive .p-diagram__copy {
+	/* --diagram-float-duration は片道（上端→下端）の時間。1 周はその 2 倍 */
+	animation: var(--diagram-float-name, p-diagram-float) calc(var(--diagram-float-duration) * 2) var(--diagram-float-ease) infinite;
 	will-change: transform;
 }
 
+/* 0 → 上 → 0 → 下 → 0 */
 @keyframes p-diagram-float {
-	from {
+	0%,
+	100% {
+		transform: translateY(0);
+	}
+
+	25% {
 		transform: translateY(calc(var(--diagram-float) * -1));
 	}
 
-	to {
+	75% {
 		transform: translateY(var(--diagram-float));
 	}
 }
 
-/* 動きを減らす設定では浮かせない */
+/* 0 → 下 → 0 → 上 → 0（交互に使い、隣どうしが揃わないようにする） */
+@keyframes p-diagram-float-rev {
+	0%,
+	100% {
+		transform: translateY(0);
+	}
+
+	25% {
+		transform: translateY(var(--diagram-float));
+	}
+
+	75% {
+		transform: translateY(calc(var(--diagram-float) * -1));
+	}
+}
+
+/* 動きを減らす設定では、線は描かずに最初から出し、周りもフェードなしで出し、浮かせない
+   （浮遊は .is-alive 付きの指定なので、同じ詳細度で打ち消す） */
 @media (prefers-reduced-motion: reduce) {
 	.p-diagram__icon,
-	.p-diagram__copy {
+	.p-diagram__copy,
+	.p-philosophy__diagram.is-alive .p-diagram__icon,
+	.p-philosophy__diagram.is-alive .p-diagram__copy {
 		animation: none;
+	}
+
+	.p-diagram__ring,
+	.p-diagram__logo,
+	.p-diagram__lead,
+	.p-diagram__icon,
+	.p-diagram__copy {
+		opacity: 1;
+		scale: 1;
+		transition: none;
 	}
 }
 
@@ -1736,7 +1870,8 @@ body.is-drawer-open {
 .p-diagram__icon--1,
 .p-diagram__copy--1 {
 	--diagram-float-duration: 3.4s;
-	--diagram-float-delay: -0.1s;
+	--diagram-float-name: p-diagram-float;
+	--fade-delay: calc(var(--diagram-fade-items-start) + 0 * var(--diagram-fade-stagger));
 }
 
 .p-diagram__copy--1 {
@@ -1754,7 +1889,8 @@ body.is-drawer-open {
 .p-diagram__icon--2,
 .p-diagram__copy--2 {
 	--diagram-float-duration: 4.1s;
-	--diagram-float-delay: -1.2s;
+	--diagram-float-name: p-diagram-float-rev;
+	--fade-delay: calc(var(--diagram-fade-items-start) + 1 * var(--diagram-fade-stagger));
 }
 
 .p-diagram__copy--2 {
@@ -1772,7 +1908,8 @@ body.is-drawer-open {
 .p-diagram__icon--3,
 .p-diagram__copy--3 {
 	--diagram-float-duration: 3.8s;
-	--diagram-float-delay: -0.5s;
+	--diagram-float-name: p-diagram-float;
+	--fade-delay: calc(var(--diagram-fade-items-start) + 2 * var(--diagram-fade-stagger));
 }
 
 .p-diagram__copy--3 {
@@ -1790,7 +1927,8 @@ body.is-drawer-open {
 .p-diagram__icon--4,
 .p-diagram__copy--4 {
 	--diagram-float-duration: 4.6s;
-	--diagram-float-delay: -2.1s;
+	--diagram-float-name: p-diagram-float-rev;
+	--fade-delay: calc(var(--diagram-fade-items-start) + 3 * var(--diagram-fade-stagger));
 }
 
 .p-diagram__copy--4 {
@@ -1808,7 +1946,8 @@ body.is-drawer-open {
 .p-diagram__icon--5,
 .p-diagram__copy--5 {
 	--diagram-float-duration: 3.1s;
-	--diagram-float-delay: -0.8s;
+	--diagram-float-name: p-diagram-float;
+	--fade-delay: calc(var(--diagram-fade-items-start) + 4 * var(--diagram-fade-stagger));
 }
 
 .p-diagram__copy--5 {
@@ -1826,7 +1965,8 @@ body.is-drawer-open {
 .p-diagram__icon--6,
 .p-diagram__copy--6 {
 	--diagram-float-duration: 4.3s;
-	--diagram-float-delay: -1.7s;
+	--diagram-float-name: p-diagram-float-rev;
+	--fade-delay: calc(var(--diagram-fade-items-start) + 5 * var(--diagram-fade-stagger));
 }
 
 .p-diagram__copy--6 {

@@ -266,8 +266,9 @@
 	color: var(--color-gray2);
 }
 
-/* 線画（917:1536 / 917:941） */
+/* 線画（917:1536 / 917:941）。インライン SVG（線描画は style.css の [data-line-draw]） */
 .p-cwhy__feature {
+	display: block;
 	width: 55%; /* 175.15 / 320（917:941） */
 	max-width: 480px;
 	height: auto;
