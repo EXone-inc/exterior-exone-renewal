@@ -33,8 +33,10 @@ function exterior_exone_global_menu_items() {
 			'url'   => '#',
 		),
 		array(
-			'label' => 'STORE',
-			'url'   => '#',
+			'label'    => 'STORE',
+			'url'      => exterior_exone_store_index_url(),
+			// PC のグローバルナビでは遷移せず、ホバー／クリックで支店一覧を開く（children）。
+			'children' => exterior_exone_store_menu_items(),
 		),
 		array(
 			'label' => 'COMPANY',
@@ -125,41 +127,24 @@ function exterior_exone_contact_item() {
 }
 
 /**
- * フッター STORE の項目。
+ * フッター STORE の項目。カンプ 669:836（支店ページ）/ 775:993（TOP）。
+ *
+ * ラベルと URL の二重管理をしないため、inc/store-data.php の 7 拠点から導出する。
+ * 並び順もそちらが出典。
  *
  * @return array<int, array{label: string, url: string}>
  */
 function exterior_exone_store_menu_items() {
-	return array(
-		array(
-			'label' => '仙台支店',
-			'url'   => '#',
-		),
-		array(
-			'label' => '戸塚支店',
-			'url'   => '#',
-		),
-		array(
-			'label' => '盛岡支店',
-			'url'   => '#',
-		),
-		array(
-			'label' => '青森支店',
-			'url'   => '#',
-		),
-		array(
-			'label' => '八戸支店',
-			'url'   => '#',
-		),
-		array(
-			'label' => '弘前支店',
-			'url'   => '#',
-		),
-		array(
-			'label' => '東京オフィス',
-			'url'   => '#',
-		),
-	);
+	$items = array();
+
+	foreach ( exterior_exone_stores() as $slug => $store ) {
+		$items[] = array(
+			'label' => $store['name'],
+			'url'   => exterior_exone_store_url( $slug ),
+		);
+	}
+
+	return $items;
 }
 
 /**
@@ -205,7 +190,34 @@ function exterior_exone_sns_items() {
 function exterior_exone_render_menu_list( array $items, $class ) {
 	echo '<ul class="' . esc_attr( $class ) . '">';
 
-	foreach ( $items as $item ) {
+	foreach ( $items as $index => $item ) {
+		// children を持つ項目は遷移せず子メニューを開くトリガー（button）にする。
+		// 開閉は CSS（:hover / :focus-within）と js/gnav-sub.js（クリック・Esc）。
+		if ( ! empty( $item['children'] ) ) {
+			$sub_id = sanitize_html_class( $class . '-sub-' . $index );
+
+			printf(
+				'<li class="%1$s__item %1$s__item--has-sub"><button type="button" class="%1$s__trigger" aria-expanded="false" aria-controls="%2$s" data-gnav-sub-trigger>%3$s</button>',
+				esc_attr( $class ),
+				esc_attr( $sub_id ),
+				esc_html( $item['label'] )
+			);
+			echo '<ul class="' . esc_attr( $class ) . '__sub" id="' . esc_attr( $sub_id ) . '">';
+
+			foreach ( $item['children'] as $child ) {
+				printf(
+					'<li class="%1$s__sub-item"><a href="%2$s">%3$s</a></li>',
+					esc_attr( $class ),
+					esc_url( $child['url'] ),
+					esc_html( $child['label'] )
+				);
+			}
+
+			echo '</ul></li>';
+
+			continue;
+		}
+
 		printf(
 			'<li class="%1$s__item"><a href="%2$s">%3$s</a></li>',
 			esc_attr( $class ),

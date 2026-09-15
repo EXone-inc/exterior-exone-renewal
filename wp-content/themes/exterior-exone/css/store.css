@@ -1,0 +1,4622 @@
+/* ============================================================
+   支店ページ（固定ページ store の子・7 拠点共通 / page-store.php）
+   カンプ: PC 534:628（1920x28486・青森支店ベース）/ SP カンプなし
+   設計メモ: docs/figma-store-page.md
+   PC カンプを正とし、SP は TOP / 企業情報の流儀（縦積み・375 比例）で補間する。
+   数値・色はすべて Figma の実測値（コメントの node-id が出典）。
+   style.css の共通トークンはここで再定義しない。カンプに無い新規色は
+   セクションを実装するたびに :root へトークンとして足してから使う。
+   ============================================================ */
+:root {
+	/* --- FV（535:838 / 561:3 / 561:46 / 535:844-850） ---
+	   左: SP（375px・カンプ無しのため補間値）/ 右: PC 1920px の実測値 */
+	--st-fv-height: var(--fv-height); /* SP は TOP と同じ高さ。PC は 1237.5（535:838） */
+	--st-fv-eyebrow: clamp(13px, 10.33px + 0.712vw, 24px); /* 13 → 24 (535:833) */
+	--st-fv-eyebrow-ls: clamp(2px, 1.757px + 0.0647vw, 3px); /* 2 → 3 */
+	--st-fv-title: clamp(64px, 43.126px + 5.5663vw, 150px); /* 64 → 150 (534:650) */
+	--st-fv-title-ls: clamp(-3px, -1.514px + -0.0647vw, -2px); /* -2 → -3 */
+	--st-fv-lead: clamp(18px, 13.631px + 1.165vw, 36px); /* 18 → 36 (534:831) */
+	--st-fv-logo-width: clamp(160px, 129.611px + 8.1036vw, 285.2px); /* 160 → 285.2 (535:951) */
+	--st-fv-badge-height: clamp(28px, 24.602px + 0.9061vw, 42px); /* 28 → 42 (535:834) */
+	--st-fv-badge-pad: clamp(10px, 7.67px + 0.6214vw, 19.6px); /* 10 → 19.6 */
+	--st-fv-badge-gap: clamp(8px, 6.421px + 0.4212vw, 14.5px); /* 8 → 14.5 : コピーとバッジの間 */
+	--st-fv-badge-radius: 3px; /* 535:834 */
+	--st-fv-title-gap: clamp(8px, 6.457px + 0.4113vw, 14.35px); /* 8 → 14.35 : コピー下端 → 見出し */
+	--st-fv-lead-gap: clamp(12px, 11.386px + 0.1638vw, 14.55px); /* 12 → 14.55 : 見出し下端 → リード */
+	--st-fv-logo-gap: clamp(24px, 18.325px + 1.5133vw, 47.4px); /* 24 → 47.4 : リード下端 → ロゴ */
+	--st-fv-body-gap: 40px; /* SP のみ。コピー塊 → サムネイル行 */
+	--st-fv-thumb-size: clamp(44px, 34.049px + 2.6537vw, 85px); /* 44 → 85 (561:46) */
+	--st-fv-thumb-gap: clamp(10px, 7.573px + 0.6472vw, 20px); /* 10 → 20 : ピッチ 105 − 85 */
+	--st-fv-ring-size: clamp(52px, 40.35px + 3.1068vw, 100px); /* 52 → 100 (561:47) */
+	--st-fv-ring-stroke: 1.64; /* viewBox 82 に対する線幅。径 100 のとき 2px（561:47） */
+	--st-fv-ring-length: 251.327412; /* 2πr（r=40）。js/store-fv.js の RING_LENGTH と揃える */
+	--st-fv-ring-idle: rgba(255, 255, 255, 0.35); /* リングの下地（進捗の残り） */
+	--st-fv-fade: var(--fv-fade); /* 写真のクロスフェード。TOP の FV と同じ */
+	--st-fv-fade-height: clamp(80px, 57.87px + 5.9013vw, 171.2px); /* 80 → 171.2 (535:852) */
+	--st-fv-band-radius: clamp(3px, 2.514px + 0.1294vw, 5px); /* 3 → 5 */
+	--st-fv-band-gap: clamp(10px, 6.359px + 0.9709vw, 25px); /* 10 → 25 */
+	--st-fv-band-offset: 32px; /* SP のみ。PC は負の値で FV に食い込ませる */
+
+	/* --- 導入コピー（535:853 / 535:855） --- */
+	--st-intro-heading: clamp(18px, 13.631px + 1.165vw, 36px); /* 18 → 36 */
+	--st-intro-lead: clamp(13px, 11.301px + 0.4531vw, 20px); /* 13 → 20 */
+
+	/* --- 実績数字（Group 316 / 535:911） --- */
+	--st-stats-number: clamp(32px, 25.204px + 1.8123vw, 60px); /* 32 → 60 */
+	--st-stats-unit: clamp(13px, 10.33px + 0.712vw, 24px); /* 13 → 24 */
+	--st-stats-label: clamp(12px, 10.058px + 0.5178vw, 20px); /* 12 → 20 */
+
+	/* --- 不安提示（535:917 / 535:919 / 535:922） --- */
+	--st-concern-heading: clamp(16px, 11.146px + 1.2945vw, 36px); /* 16 → 36 */
+	--st-concern-worry: clamp(14px, 11.573px + 0.6472vw, 24px); /* 14 → 24 */
+	--st-concern-note: clamp(11px, 9.786px + 0.3236vw, 16px); /* 11 → 16 */
+
+	/* --- 選ばれる理由（Group 355 / Group 354） --- */
+	--st-reasons-copy: clamp(20px, 15.146px + 1.2945vw, 40px); /* 20 → 40 (535:1009) */
+	--st-reasons-copy-lead: clamp(12px, 10.058px + 0.5178vw, 20px); /* 12 → 20 (535:1000) */
+	--st-reasons-title: clamp(24px, 18.175px + 1.5534vw, 48px); /* 24 → 48 (535:1010) */
+	--st-reasons-title-lead: clamp(11px, 9.301px + 0.4531vw, 18px); /* 11 → 18 (535:1001) */
+	--st-reasons-eng: clamp(48px, 30.524px + 4.6602vw, 120px); /* 48 → 120 (535:1056) */
+	--st-reasons-eng-sub: clamp(18px, 12.175px + 1.5534vw, 42px); /* 18 → 42 (535:1023) */
+	--st-reasons-item-lead: clamp(12px, 8.602px + 0.9061vw, 26px); /* 12 → 26 */
+	--st-reasons-item-label: clamp(14px, 9.631px + 1.165vw, 32px); /* 14 → 32 */
+
+	/* --- SERVICE（572:456 / 691:1009） --- */
+	--st-service-card-eng: clamp(40px, 28.835px + 2.9773vw, 86px); /* 40 → 86 (691:1013) */
+	--st-service-card-label: clamp(16px, 13.087px + 0.7767vw, 28px); /* 16 → 28 (691:1012) */
+	--st-service-banner: clamp(15px, 10.874px + 1.1003vw, 32px); /* 15 → 32 (572:451) */
+	--st-service-lead: clamp(12px, 10.786px + 0.3236vw, 17px); /* 12 → 17 (572:450) */
+	--st-service-row-eng: clamp(28px, 19.262px + 2.3301vw, 64px); /* 28 → 64 */
+	--st-service-row-label: clamp(14px, 11.087px + 0.7767vw, 26px); /* 14 → 26 */
+	--st-service-photo-label: clamp(11px, 8.816px + 0.5825vw, 20px); /* 11 → 20 */
+
+	/* --- 見える安心（Group 360 / Group 376 / 572:617） --- */
+	--st-visible-eyebrow: clamp(16px, 13.087px + 0.7767vw, 32px); /* 16 → 32 (572:282) */
+	--st-visible-heading: clamp(20px, 13.204px + 1.8123vw, 48px); /* 20 → 48 (572:280) */
+	--st-visible-card-eng: clamp(20px, 13.204px + 1.8123vw, 48px); /* 20 → 48 */
+	--st-visible-card-label: clamp(13px, 10.33px + 0.712vw, 24px); /* 13 → 24 */
+	--st-visible-lead: clamp(12px, 10.058px + 0.5178vw, 20px); /* 12 → 20 (572:617) */
+
+	/* --- DX EXPERIENCE（Group 331 / 572:619） --- */
+	--st-dx-title: clamp(44px, 27.981px + 4.272vw, 110px); /* 44 → 110 (572:600) */
+	--st-dx-title-ls: clamp(-3.3px, -1.981px + -0.0854vw, -1.5px); /* -1.5 → -3.3 */
+	--st-dx-copy: clamp(16px, 12.117px + 1.0356vw, 32px); /* 16 → 32 (572:599) */
+	--st-dx-copy-ls: clamp(1.5px, 1.136px + 0.0971vw, 3px); /* 1.5 → 3 */
+	--st-dx-number: clamp(11px, 9.786px + 0.3236vw, 16px); /* 11 → 16 */
+	--st-dx-step-title: clamp(15px, 13.301px + 0.4531vw, 22px); /* 15 → 22 */
+	--st-dx-desc: clamp(11px, 10.272px + 0.1942vw, 14px); /* 11 → 14 */
+	--st-dx-tag: clamp(11px, 10.272px + 0.1942vw, 14px); /* 11 → 14 */
+
+	/* --- PLANS（Group 362 / Group 363 / Group 338 / Group 374） --- */
+	--st-plans-label: clamp(13px, 11.301px + 0.4531vw, 20px); /* 13 → 20 (599:23) */
+	--st-plans-eng: clamp(34px, 23.806px + 2.7184vw, 76px); /* 34 → 76 (599:21) */
+	--st-plans-eng-ls: -0.026em; /* 76px で -2px（決定事項: PACKAGE / HIGH-END は -2px） */
+	--st-plans-copy: clamp(12px, 10.544px + 0.3883vw, 18px); /* 12 → 18 (599:22) */
+	--st-plans-feature: clamp(12px, 10.058px + 0.5178vw, 20px); /* 12 → 20 */
+
+	/* --- WORKS（Group 380 / Group 382 / Group 379） --- */
+	--st-works-box-head: clamp(15px, 12.816px + 0.5825vw, 24px); /* 15 → 24 (698:1327) */
+	--st-works-box-text: clamp(12px, 10.544px + 0.3883vw, 18px); /* 12 → 18（左右とも 18px に統一） */
+	--st-works-render-label: clamp(10px, 9.029px + 0.2589vw, 14px); /* 10 → 14 (698:1329) */
+	--st-works-th: clamp(14px, 11.573px + 0.6472vw, 24px); /* 14 → 24 */
+	--st-works-td: clamp(11px, 9.786px + 0.3236vw, 16px); /* 11 → 16 */
+	--st-works-total: clamp(14px, 11.573px + 0.6472vw, 24px); /* 14 → 24 (698:1217) */
+
+	/* --- REVIEWS（Group 369 / 669:960） --- */
+	--st-reviews-score: clamp(14px, 11.573px + 0.6472vw, 24px); /* 14 → 24 */
+	--st-reviews-title: clamp(14px, 12.544px + 0.3883vw, 20px); /* 14 → 20 */
+	--st-reviews-text: clamp(12px, 11.029px + 0.2589vw, 16px); /* 12 → 16 */
+
+	/* --- FLOW（Group 371 / Group 370） --- */
+	--st-flow-chevron: clamp(12px, 11.029px + 0.2589vw, 16px); /* 12 → 16 */
+	--st-flow-number: clamp(28px, 19.262px + 2.3301vw, 64px); /* 28 → 64 */
+	--st-flow-row-title: clamp(15px, 12.816px + 0.5825vw, 24px); /* 15 → 24 */
+	--st-flow-row-desc: clamp(12px, 11.029px + 0.2589vw, 16px); /* 12 → 16 */
+
+	/* --- Quality（669:261 / 669:255 / 669:263 / 669:967 / 669:265） --- */
+	--st-quality-eng: clamp(16px, 12.117px + 1.0356vw, 32px); /* 16 → 32 */
+	--st-quality-heading: clamp(20px, 13.204px + 1.8123vw, 48px); /* 20 → 48 */
+	--st-quality-lead: clamp(12px, 10.058px + 0.5178vw, 20px); /* 12 → 20 */
+	--st-quality-badge: clamp(18px, 13.631px + 1.165vw, 36px); /* 18 → 36 */
+	--st-quality-badge-num: clamp(19px, 14.388px + 1.2298vw, 38px); /* 19 → 38 :「5」だけ 2px 大きい */
+	--st-quality-note: clamp(11px, 10.757px + 0.0647vw, 12px); /* 11 → 12 */
+
+	/* --- FAQ（Group 372 / 669:906） --- */
+	--st-faq-mark: clamp(28px, 19.262px + 2.3301vw, 64px); /* 28 → 64 :「Q」 */
+	--st-faq-q: clamp(14px, 11.573px + 0.6472vw, 24px); /* 14 → 24 */
+	--st-faq-a: clamp(12px, 11.029px + 0.2589vw, 16px); /* 12 → 16（回答文はカンプに無いので質問より 1 段小さく） */
+
+	/* --- AREA（628:338 / 628:329 / 628:310 / 1126:37 / 1148:45 / 1148:28 /
+	       1148:29 / 1148:80 / 1148:62） --- */
+	--st-area-banner: clamp(15px, 10.874px + 1.1003vw, 32px); /* 15 → 32 */
+	--st-area-lead: clamp(12px, 11.029px + 0.2589vw, 16px); /* 12 → 16 */
+	--st-area-table: clamp(12px, 11.029px + 0.2589vw, 16px); /* 12 → 16 */
+	--st-area-branch: clamp(13px, 11.786px + 0.3236vw, 18px); /* 13 → 18 */
+	--st-area-local-eng: clamp(18px, 14.602px + 0.9061vw, 32px); /* 18 → 32 */
+	--st-area-local-heading: clamp(20px, 15.146px + 1.2945vw, 40px); /* 20 → 40 */
+	--st-area-local-lead: clamp(12px, 11.029px + 0.2589vw, 16px); /* 12 → 16 */
+	--st-area-card-number: clamp(32px, 24.233px + 2.0712vw, 64px); /* 32 → 64 */
+	--st-area-card-label: clamp(14px, 11.573px + 0.6472vw, 24px); /* 14 → 24 */
+
+	/* --- お問い合わせ CTA（639:366 / 639:364 / 639:406 / 639:403） --- */
+	--st-cta-eng: clamp(16px, 12.117px + 1.0356vw, 32px); /* 16 → 32 */
+	--st-cta-heading: clamp(20px, 15.146px + 1.2945vw, 40px); /* 20 → 40 */
+	--st-cta-lead: clamp(12px, 10.058px + 0.5178vw, 20px); /* 12 → 20 */
+	--st-cta-button: clamp(15px, 10.874px + 1.1003vw, 32px); /* 15 → 32 */
+	--st-cta-button-ls: clamp(1px, 0.515px + 0.1294vw, 3px); /* 1 → 3 */
+
+	/* --- COLUMN（1148:91） --- */
+	--st-column-title: clamp(13px, 11.786px + 0.3236vw, 18px); /* 13 → 18 */
+
+	/* --- 角丸 --- */
+	--st-card-radius: clamp(6px, 5.029px + 0.2589vw, 10px); /* 6 → 10 : 大きめのカード（689:1001 ほか） */
+
+	/* --- 色（このページ固有。共通トークンに無いもののみ） --- */
+	--st-white: #ffffff; /* 535:917 見出し文字 / 572:493 白パネル / 535:852 FV の白グラデ */
+	--st-bg-light: #f3f3f4; /* 薄灰のセクション背景（535:868 / 572:448 ほか） */
+	--st-bg-light-0: rgba(243, 243, 244, 0); /* 上の透明側（グラデの端で灰色が濁らないように） */
+	--st-black2-0: rgba(26, 26, 26, 0); /* --color-black2 の透明側（561:75） */
+	--st-black-0: rgba(0, 0, 0, 0); /* 黒の透明側（691:1016） */
+	--st-card-shade: rgba(0, 0, 0, 0.4); /* SERVICE カード下端の暗幕（691:1018） */
+	/* 選ばれる理由の暗幕（SP / 中間幅で 561:80 の PNG の代わりに使う） */
+	--st-reasons-shade-top: rgba(0, 0, 0, 0.72);
+	--st-reasons-shade-mid: rgba(0, 0, 0, 0.6);
+	--st-white-0: rgba(255, 255, 255, 0); /* --st-white の透明側（669:958） */
+	--st-visible-eng: #666666; /* 見える安心の英字（572:292） */
+	--st-dx-tag-bg: rgba(255, 255, 255, 0.2); /* DX のタグ（TOP は #454545 の塗り） */
+	--st-dx-tag-border: #929292;
+	--st-dx-bar-idle: #808080; /* 572:597 */
+	--st-line-plans: #c8c8c8; /* PLANS の飾り線（620:286）と見積の区切り線 */
+	--st-line-feature: #c4c4c4; /* 特長 4 列の区切り線（602:90） */
+	--st-line-feature-dark: #515151; /* 同・ダーク版（602:102） */
+	--st-line-label: #eeeeee; /* 3D パースのラベル枠（698:1329）・保証バッジの枠（669:969） */
+	--st-line-photo: #ebebeb; /* 写真グリッド 3 枚目の枠（698:1180） */
+	--st-works-panel: #bcbcbc; /* 3D パースの下敷き（1153:104） */
+	--st-ring-light: #e2e2e2; /* 実績数字の外リング（535:895） */
+	--st-photo-shade: rgba(0, 0, 0, 0.3); /* 写真に重ねる黒（535:881 実績数字 / 669:257 Quality） */
+	/* Quality の暗幕。SP / 中間幅は写真の明部に文字が乗るので 30% では足りない */
+	--st-photo-shade-strong: rgba(0, 0, 0, 0.55);
+	--st-number: #b4bbc3; /* FLOW の番号・FAQ の「Q」（669:961 / 669:963） */
+	--st-note: #b8b8b8; /* 保証の注記（669:265） */
+	--st-area-bg: #ececec; /* AREA の背景（1111:14） */
+	--st-area-number: #6b6b6b; /* AREA カードの番号（1148:80） */
+	--st-cta-line: #06c755; /* LINE ボタン（639:401） */
+	/* 639:407。左から 1270.8 幅（その 85.6% までが黒 50%）を 1920 に対する比率で持つ */
+	--st-cta-overlay: linear-gradient(
+		90deg,
+		rgba(13, 0, 0, 0.5) 0%,
+		rgba(13, 0, 0, 0.5) 56.66%,
+		rgba(13, 0, 0, 0) 66.19%
+	);
+	/* SP / 中間幅は中央寄せの文字が暗幕からはみ出すので全面に敷く */
+	--st-cta-overlay-flat: rgba(13, 0, 0, 0.5);
+	--st-shadow-card: 0 4px 8px 1px rgba(0, 0, 0, 0.05); /* 628:303 パネル / 1153:108 カード */
+	--st-shadow-panel: 0 4px 4px rgba(0, 0, 0, 0.25); /* 1148:48 Local Expertise */
+	/* FLOW の矢羽根 7 段（Group 371 / 661:92-122） */
+	--st-flow-step1: #4f5964;
+	--st-flow-step2: #5a6671;
+	--st-flow-step3: #65737e;
+	--st-flow-step4: #70808b;
+	--st-flow-step5: #7b8d98;
+	--st-flow-step6: #869aa5;
+	--st-flow-step7: #91a7b2;
+	--st-ring-dark: #494949; /* 選ばれる理由の円（570:168） */
+	--st-line-service: #b1b1b1; /* SERVICE のカテゴリ区切り線（572:452） */
+	--st-fv-text: #eeeeee; /* FV サブコピー・バッジ枠（535:833 / 535:834） */
+	--st-badge-bg: rgba(0, 0, 0, 0.2); /* FV のバッジ（535:834）・保証バッジ（669:969） */
+	--st-fv-fade-to: var(--st-white); /* 535:852 の到達色（導入セクションの #fefefe へ繋ぐ） */
+	/* 534:647。上 29.3% までが黒 40%、下端で透明。 */
+	--st-fv-overlay: linear-gradient(
+		180deg,
+		rgba(0, 0, 0, 0.4) 0%,
+		rgba(0, 0, 0, 0.4) 29.3%,
+		rgba(0, 0, 0, 0) 100%
+	);
+
+	/* --- セクション見出し 3 点セット（PLANS / WORKS / REVIEWS / FLOW / FAQ / COLUMN / AREA 共通） --- */
+	--st-heading-gap: clamp(32px, 28.893px + 3.1068vw, 80px); /* 32 → 80 : 英字下端 → 和文 */
+	--st-heading-jp: clamp(16px, 14.058px + 0.5178vw, 24px); /* 16 → 24 */
+	--st-heading-lead: clamp(12px, 11.029px + 0.2589vw, 16px); /* 12 → 16 */
+}
+
+/* ============================================================
+   セクション見出し 3 点セット（英字タイトル / 和文見出し / リード文）
+   英字は共通トークン（--fs-section-title / --ls-title）と同値。
+   ============================================================ */
+.c-store-title {
+	margin: 0;
+	font-family: var(--font-ui);
+	font-size: var(--fs-section-title);
+	font-weight: var(--fw-semibold);
+	line-height: 1.18;
+	letter-spacing: var(--ls-title);
+	text-align: center;
+	color: var(--color-black2);
+}
+
+.c-store-jp {
+	margin: var(--st-heading-gap) 0 0;
+	font-size: var(--st-heading-jp);
+	font-weight: var(--fw-medium);
+	line-height: 2.5;
+	letter-spacing: var(--ls-wide);
+	text-align: center;
+	color: var(--color-black2);
+}
+
+/* 和文見出しの行ボックス（24 x 2.5 = 60）がそのまま余白になるので margin は持たない */
+.c-store-lead {
+	margin: 0;
+	font-size: var(--st-heading-lead);
+	font-weight: var(--fw-regular);
+	line-height: 2;
+	letter-spacing: var(--ls-wide);
+	text-align: center;
+	color: var(--color-black1);
+}
+
+/* ============================================================
+   FV（535:838 / 534:647 / 561:3 / 561:46 / 535:852）
+   背景写真の上に、左寄せのコピー塊と中央のサムネイル行。
+   下端をまたぐ写真 4 枚（__band）はセクションの外に置き、
+   負のマージンで引き上げる。
+   ============================================================ */
+.p-sfv {
+	position: relative;
+	display: flex;
+	min-height: var(--st-fv-height);
+	overflow: hidden;
+	color: var(--color-white3);
+}
+
+.p-sfv__bg {
+	position: absolute;
+	inset: 0;
+}
+
+/* 写真 5 枚を重ねて置き、is-active の 1 枚だけを見せる（js/store-fv.js）。
+   幅 114.5%・左寄せのトリミング（cover と同じ結果になる） */
+.p-sfv__slide {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	object-position: left center;
+	opacity: 0;
+	/* 消えきってから visibility を落とす。先に落とすとフェードが飛ぶ */
+	visibility: hidden;
+	transition:
+		opacity var(--st-fv-fade) ease-in-out,
+		visibility 0s linear var(--st-fv-fade);
+}
+
+.p-sfv__slide.is-active {
+	opacity: 1;
+	visibility: visible;
+	transition: opacity var(--st-fv-fade) ease-in-out;
+}
+
+/* 534:647 上からの黒幕 / 535:852 下端を白に溶かす帯。
+   z-index が auto のままだと、DOM 順で後ろにある __bg（同じく absolute）に
+   ::before が隠れて黒幕が効かない。写真より上に載せる。 */
+.p-sfv::before,
+.p-sfv::after {
+	content: "";
+	position: absolute;
+	right: 0;
+	left: 0;
+	z-index: 1;
+	pointer-events: none;
+}
+
+.p-sfv::before {
+	top: 0;
+	bottom: 0;
+	background: var(--st-fv-overlay);
+}
+
+.p-sfv::after {
+	bottom: 0;
+	height: var(--st-fv-fade-height);
+	background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, var(--st-fv-fade-to) 100%);
+}
+
+.p-sfv__body {
+	position: relative;
+	z-index: 2; /* 黒幕・白グラデ（z-index:1）より上。文字を必ず読める側に置く */
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	gap: var(--st-fv-body-gap);
+	width: 100%;
+	padding: var(--header-height) var(--gutter) 0;
+}
+
+/* --- コピー塊（561:3） --- */
+.p-sfv__eyebrow {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--st-fv-badge-gap);
+	margin: 0;
+	font-size: var(--st-fv-eyebrow);
+	font-weight: var(--fw-medium);
+	line-height: 1.8;
+	letter-spacing: var(--st-fv-eyebrow-ls);
+	color: var(--st-fv-text);
+}
+
+.p-sfv__badge {
+	display: inline-flex;
+	align-items: center;
+	height: var(--st-fv-badge-height);
+	padding-inline: var(--st-fv-badge-pad);
+	border: 1px solid var(--st-fv-text);
+	border-radius: var(--st-fv-badge-radius);
+	background: var(--st-badge-bg);
+	color: var(--color-white3);
+	white-space: nowrap;
+}
+
+.p-sfv__title {
+	display: flex;
+	flex-direction: column;
+	margin: var(--st-fv-title-gap) 0 0;
+	font-size: var(--st-fv-title);
+	font-weight: var(--fw-semibold);
+	line-height: 1.12;
+	letter-spacing: var(--st-fv-title-ls);
+	color: var(--color-white3);
+}
+
+.p-sfv__lead {
+	margin: var(--st-fv-lead-gap) 0 0;
+	font-size: var(--st-fv-lead);
+	font-weight: var(--fw-bold);
+	line-height: 1.5;
+	letter-spacing: var(--st-fv-eyebrow-ls);
+	color: var(--st-fv-text);
+}
+
+.p-sfv__logo {
+	margin: var(--st-fv-logo-gap) 0 0;
+	line-height: 0;
+}
+
+.p-sfv__logo img {
+	width: var(--st-fv-logo-width);
+	height: auto;
+}
+
+/* --- 円形サムネイル 5 個（561:46 / 561:47） --- */
+.p-sfv__thumbs {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: var(--st-fv-thumb-gap);
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.p-sfv__thumb-item {
+	display: flex;
+}
+
+.p-sfv__thumb {
+	position: relative;
+	display: grid;
+	place-items: center;
+	width: var(--st-fv-thumb-size);
+	height: var(--st-fv-thumb-size);
+	padding: 0;
+	border: 0;
+	background: none;
+	cursor: pointer;
+}
+
+.p-sfv__thumb-media {
+	display: block;
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+	border-radius: 50%;
+}
+
+.p-sfv__thumb-media img {
+	display: block;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+/* 561:47 アクティブリング。選択中だけ出し、次の写真までの残り時間ぶん一周する */
+.p-sfv__ring {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: var(--st-fv-ring-size);
+	/* リセットの max-width:100% はサムネイル径で頭打ちになる。リングは一回り大きい */
+	max-width: none;
+	height: var(--st-fv-ring-size);
+	overflow: visible;
+	opacity: 0;
+	pointer-events: none;
+	/* 12 時から時計回りに描き始める */
+	transform: translate(-50%, -50%) rotate(-90deg);
+}
+
+.p-sfv__thumb.is-active .p-sfv__ring {
+	opacity: 1;
+}
+
+.p-sfv__ring-track,
+.p-sfv__ring-bar {
+	fill: none;
+	stroke-width: var(--st-fv-ring-stroke);
+}
+
+.p-sfv__ring-track {
+	stroke: var(--st-fv-ring-idle);
+}
+
+.p-sfv__ring-bar {
+	stroke: var(--st-white);
+	stroke-linecap: round;
+	stroke-dasharray: var(--st-fv-ring-length);
+	stroke-dashoffset: var(--st-fv-ring-length);
+	opacity: 0;
+}
+
+/* 「動きを減らす」設定ではクロスフェードしない（自動送りも js 側で止める） */
+@media (prefers-reduced-motion: reduce) {
+	.p-sfv__slide,
+	.p-sfv__slide.is-active {
+		transition: none;
+	}
+}
+
+/* --- FV 下端をまたぐ写真 4 枚（535:844 / 535:845 / 268:348 / 535:850） --- */
+.p-sfv__band {
+	position: relative;
+	z-index: 1;
+	display: grid;
+	grid-template-columns: repeat(2, 1fr); /* SP は 2 列 2 段 */
+	gap: var(--st-fv-band-gap);
+	margin-top: var(--st-fv-band-offset);
+	padding-inline: var(--gutter);
+}
+
+.p-sfv__band-item {
+	display: block;
+	width: 100%;
+	aspect-ratio: 429.3 / 224.7;
+	border-radius: var(--st-fv-band-radius);
+	object-fit: cover;
+}
+
+/* ============================================================
+   導入コピー（535:842 / 535:966 / 535:853 / 535:855）
+   ------------------------------------------------------------
+   このセクション以降、余白・寸法はすべて下の比例ブロック
+  （PC: --st-vu / SP: --st-su）が持つ。ここでは構造と書体だけを決める。
+   ============================================================ */
+.p-sintro {
+	background: var(--color-white2);
+	text-align: center;
+}
+
+.p-sintro__icon {
+	margin: 0;
+	line-height: 0;
+}
+
+/* 画像はグローバルリセットで display:block。中央寄せは margin で行う */
+.p-sintro__icon img {
+	width: var(--st-intro-icon-w);
+	height: auto;
+	margin-inline: auto;
+}
+
+.p-sintro__heading {
+	font-size: var(--st-intro-heading);
+	font-weight: var(--fw-bold);
+	line-height: 1.8;
+	letter-spacing: var(--ls-wide);
+	color: var(--color-black2);
+}
+
+.p-sintro__lead {
+	font-size: var(--st-intro-lead);
+	font-weight: var(--fw-regular);
+	line-height: 2;
+	letter-spacing: var(--ls-wide);
+	color: var(--color-black1);
+}
+
+/* ============================================================
+   施工イメージ帯（535:860 / 669:916 / 535:861 / 669:920 / 535:871）
+   ------------------------------------------------------------
+   下端が次セクション（#f3f3f4）に食い込み、535:869 のグラデで
+   画像の足元をその色に溶かす。
+   ============================================================ */
+.p-sstrip {
+	position: relative;
+	z-index: 1;
+}
+
+.p-sstrip__list {
+	display: flex;
+	align-items: flex-end;
+	justify-content: space-between;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+/* 1 枚ずつ幅が違う（--strip-w はカンプ 1920 での幅） */
+.p-sstrip__item {
+	width: calc(var(--strip-w) * var(--st-strip-unit));
+}
+
+.p-sstrip__item img {
+	display: block;
+	width: 100%;
+	height: auto;
+}
+
+/* 669:920 だけ下角が丸い */
+.p-sstrip__item:nth-child(4) img {
+	border-end-start-radius: var(--st-fv-band-radius);
+	border-end-end-radius: var(--st-fv-band-radius);
+}
+
+/* 535:869 画像の足元を次セクションの色に溶かす */
+.p-sstrip::after {
+	content: "";
+	position: absolute;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	height: var(--st-strip-fade-height);
+	background: linear-gradient(180deg, var(--st-bg-light-0) 0%, var(--st-bg-light) 100%);
+	pointer-events: none;
+}
+
+/* ============================================================
+   実績数字（Group 316 / 535:911）
+   ============================================================ */
+.p-sstats {
+	background: var(--st-bg-light);
+}
+
+.p-sstats__list {
+	display: grid;
+	justify-content: center;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.p-sstats__item {
+	text-align: center;
+}
+
+/* 535:895 外リング（230）の内側に 200 の円形写真 */
+.p-sstats__ring {
+	position: relative;
+	display: grid;
+	place-items: center;
+	width: var(--st-stats-ring-size);
+	height: var(--st-stats-ring-size);
+	margin-inline: auto;
+	border: var(--st-stats-ring-width) solid var(--st-ring-light);
+	border-radius: 50%;
+}
+
+.p-sstats__photo {
+	position: absolute;
+	width: var(--st-stats-photo-size);
+	height: var(--st-stats-photo-size);
+	border-radius: 50%;
+	object-fit: cover;
+}
+
+/* 535:881 写真を暗くして数字を読ませる */
+.p-sstats__ring::after {
+	content: "";
+	position: absolute;
+	width: var(--st-stats-photo-size);
+	height: var(--st-stats-photo-size);
+	border-radius: 50%;
+	background: var(--st-photo-shade);
+}
+
+/* 黒 30%（__ring::after）より上に出す。数字が暗幕に沈まないように */
+.p-sstats__value {
+	position: relative;
+	z-index: 1;
+	margin: 0;
+	color: var(--color-white3);
+}
+
+.p-sstats__number {
+	display: block;
+	font-family: var(--font-display);
+	font-size: var(--st-stats-number);
+	font-weight: var(--fw-regular);
+	line-height: 0.95;
+	letter-spacing: normal;
+}
+
+.p-sstats__unit {
+	display: block;
+	font-size: var(--st-stats-unit);
+	font-weight: var(--fw-medium);
+	line-height: 2.375; /* 行ボックス 57px（カンプの数字と同じ送り） */
+	letter-spacing: var(--ls-base);
+}
+
+.p-sstats__label {
+	font-size: var(--st-stats-label);
+	font-weight: var(--fw-medium);
+	line-height: 1.6;
+	letter-spacing: var(--ls-wide);
+	color: var(--color-black1);
+}
+
+/* ============================================================
+   不安提示（535:932 / 535:917 / 535:919 / 535:922 / 535:933）
+   ------------------------------------------------------------
+   スケッチはカンプの見た目どおり右側に置く（左右反転で配置されている）。
+   文字より下のレイヤーに敷き、可読性を落とさない。
+   ============================================================ */
+.p-sconcern {
+	position: relative;
+	overflow: hidden;
+	background: var(--st-bg-light);
+}
+
+.p-sconcern__sketch {
+	position: absolute;
+	z-index: 0;
+	object-fit: cover;
+	transform: scaleX(-1);
+}
+
+.p-sconcern__body {
+	position: relative;
+	z-index: 1;
+}
+
+/* 535:932 黒帯の中に白文字（535:917） */
+.p-sconcern__heading {
+	margin: 0;
+	border-radius: var(--st-fv-band-radius);
+	background: var(--color-black2);
+	color: var(--st-white);
+	font-size: var(--st-concern-heading);
+	font-weight: var(--fw-bold);
+	line-height: 1.8;
+	letter-spacing: var(--ls-wide);
+}
+
+.p-sconcern__list {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.p-sconcern__item {
+	/* 折り返しても閉じ括弧が行頭に落ちないようにする */
+	line-break: strict;
+	font-size: var(--st-concern-worry);
+	font-weight: var(--fw-medium);
+	line-height: 1.8;
+	letter-spacing: var(--ls-wide);
+	color: var(--color-black2);
+}
+
+.p-sconcern__note {
+	font-size: var(--st-concern-note);
+	font-weight: var(--fw-medium);
+	line-height: 2;
+	letter-spacing: var(--ls-base);
+	color: var(--color-black1);
+}
+
+/* ============================================================
+   選ばれる理由（535:997 / 572:326 / Group 355 / Group 354）
+   ============================================================ */
+.p-sreasons {
+	position: relative;
+	overflow: hidden;
+	background: var(--color-black2);
+}
+
+.p-sreasons__bg {
+	position: absolute;
+	top: 0;
+	right: 0;
+	left: 0;
+}
+
+.p-sreasons__bg-photo {
+	display: block;
+	width: 100%;
+	height: var(--st-reasons-photo-height);
+	object-fit: cover;
+}
+
+/* 561:75 写真の下端を黒に溶かす */
+.p-sreasons__bg::after {
+	content: "";
+	position: absolute;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	height: var(--st-reasons-fade-height);
+	background: linear-gradient(180deg, var(--st-black2-0) 0%, var(--color-black2) 100%);
+}
+
+/* 561:80 写真の上部を暗くする（カンプの PNG をそのまま使う） */
+.p-sreasons__bg-shade {
+	position: absolute;
+	top: 0;
+	right: 0;
+	left: 0;
+	width: 100%;
+	height: var(--st-reasons-shade-height);
+}
+
+.p-sreasons__copy {
+	position: relative;
+	text-align: center;
+}
+
+.p-sreasons__copy-heading {
+	margin: 0;
+	font-size: var(--st-reasons-copy);
+	font-weight: var(--fw-bold);
+	line-height: 1.5;
+	letter-spacing: var(--ls-copy);
+	color: var(--color-white3);
+}
+
+.p-sreasons__copy-lead {
+	font-size: var(--st-reasons-copy-lead);
+	font-weight: var(--fw-regular);
+	line-height: 2.5;
+	letter-spacing: var(--ls-base);
+	color: var(--color-gray2);
+}
+
+.p-sreasons__diagram {
+	position: relative;
+}
+
+/* 570:168 アイコンの位置で途切れる円。PC だけ出す */
+.p-sreasons__ring {
+	display: none;
+}
+
+.p-sreasons__center {
+	position: relative;
+	text-align: center;
+}
+
+.p-sreasons__logo {
+	margin: 0;
+	line-height: 0;
+}
+
+.p-sreasons__logo img {
+	width: var(--st-reasons-logo-width);
+	height: auto;
+	margin-inline: auto;
+}
+
+.p-sreasons__title {
+	font-size: var(--st-reasons-title);
+	font-weight: var(--fw-bold);
+	line-height: 1.6;
+	letter-spacing: var(--ls-copy);
+	color: var(--color-white3);
+}
+
+.p-sreasons__title-lead {
+	font-size: var(--st-reasons-title-lead);
+	font-weight: var(--fw-medium);
+	line-height: 2;
+	letter-spacing: var(--ls-base);
+	color: var(--color-gray2);
+}
+
+.p-sreasons__house {
+	display: block;
+	width: var(--st-reasons-house-width);
+	height: auto;
+	margin-inline: auto;
+	opacity: 0.8; /* 989:98 */
+}
+
+.p-sreasons__eng {
+	font-size: var(--st-reasons-eng);
+	line-height: 1.2;
+	letter-spacing: -0.025em; /* 120px で -3px */
+	color: var(--color-white3);
+}
+
+.p-sreasons__eng-sub {
+	font-size: var(--st-reasons-eng-sub);
+	line-height: 1.2;
+	letter-spacing: -0.0238em; /* 42px で -1px */
+	color: var(--color-gray2);
+}
+
+.p-sreasons__items {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.p-sreasons__item {
+	text-align: center;
+}
+
+/* カンプのアイコン枠（--icon-w x --icon-h）で固定する。線画の縦横比は
+   枠と最大 14% ずれるので contain で収め、下のラベルの位置を項目間でそろえる */
+.p-sreasons__icon {
+	display: block;
+	width: calc(var(--icon-w) * var(--st-reasons-icon-unit));
+	height: calc(var(--icon-h) * var(--st-reasons-icon-unit));
+	object-fit: contain;
+	margin-inline: auto;
+}
+
+.p-sreasons__item-lead {
+	font-size: var(--st-reasons-item-lead);
+	font-weight: var(--fw-medium);
+	line-height: 1.6;
+	letter-spacing: var(--ls-base);
+	color: var(--color-gray2);
+}
+
+.p-sreasons__item-label {
+	font-size: var(--st-reasons-item-label);
+	font-weight: var(--fw-bold);
+	line-height: 1.6;
+	letter-spacing: var(--ls-base);
+	color: var(--color-white3);
+}
+
+/* ============================================================
+   SERVICE（572:448 / 572:456 / 691:1036 / 689:1001 / Group 377）
+   ============================================================ */
+.p-sservice {
+	background: var(--st-bg-light);
+}
+
+.p-sservice__cards {
+	display: grid;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.p-sservice__card-media {
+	position: relative;
+	overflow: hidden;
+	border-radius: var(--st-card-radius);
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+}
+
+.p-sservice__card-media img {
+	display: block;
+	width: 100%;
+	height: var(--st-service-card-height);
+	object-fit: cover;
+}
+
+/* 691:1016 写真の下端を暗くして英字を読ませる */
+.p-sservice__card-media::after {
+	content: "";
+	position: absolute;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	height: var(--st-service-card-shade);
+	background: linear-gradient(180deg, var(--st-black-0) 0%, var(--st-card-shade) 100%);
+}
+
+.p-sservice__card-eng {
+	position: absolute;
+	right: 0;
+	bottom: var(--st-service-card-eng-bottom);
+	left: 0;
+	z-index: 1;
+	margin: 0;
+	font-size: var(--st-service-card-eng);
+	line-height: 1.2;
+	letter-spacing: -0.035em; /* 86px で -3px */
+	text-align: center;
+	color: var(--color-white3);
+}
+
+.p-sservice__card-label {
+	font-size: var(--st-service-card-label);
+	font-weight: var(--fw-medium);
+	line-height: 1.6;
+	letter-spacing: var(--ls-base);
+	text-align: center;
+	color: var(--color-black2);
+}
+
+.p-sservice__panel {
+	position: relative;
+	background: var(--st-white);
+}
+
+/* 572:495 パネルの上端にかぶる黒帯 */
+.p-sservice__banner {
+	position: absolute;
+	top: var(--st-service-banner-top);
+	left: 50%;
+	display: grid;
+	place-items: center;
+	width: var(--st-service-banner-width);
+	height: var(--st-service-banner-height);
+	margin: 0;
+	border-radius: var(--st-fv-band-radius);
+	background: var(--color-black2);
+	font-size: var(--st-service-banner);
+	font-weight: var(--fw-bold);
+	line-height: 1.4;
+	letter-spacing: var(--ls-base);
+	text-align: center;
+	color: var(--color-white3);
+	transform: translateX(-50%);
+}
+
+.p-sservice__lead {
+	font-size: var(--st-service-lead);
+	font-weight: var(--fw-regular);
+	line-height: 2;
+	letter-spacing: var(--ls-base);
+	text-align: center;
+	color: var(--color-black1);
+}
+
+.p-sservice__rows {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.p-sservice__row {
+	position: relative;
+}
+
+/* 572:452 カテゴリの区切り線（写真の下をくぐる） */
+.p-sservice__row::before {
+	content: "";
+	position: absolute;
+	top: var(--st-service-line-top);
+	right: 0;
+	left: 0;
+	border-top: 1px solid var(--st-line-service);
+}
+
+.p-sservice__row-eng {
+	margin: 0;
+	font-size: var(--st-service-row-eng);
+	line-height: 1.6;
+	letter-spacing: -0.031em; /* 64px で -2px */
+	color: var(--color-gray2);
+}
+
+.p-sservice__row-label {
+	font-size: var(--st-service-row-label);
+	font-weight: var(--fw-medium);
+	line-height: 1.6;
+	letter-spacing: var(--ls-base);
+	color: var(--color-black2);
+}
+
+.p-sservice__photos {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.p-sservice__photo {
+	text-align: center;
+}
+
+.p-sservice__photo img {
+	display: block;
+	width: 100%;
+	height: var(--st-service-photo-height);
+	border-radius: var(--st-fv-band-radius);
+	object-fit: cover;
+	box-shadow: 0 4px 4px 1px rgba(0, 0, 0, 0.05);
+}
+
+.p-sservice__photo-label {
+	display: block;
+	font-size: var(--st-service-photo-label);
+	font-weight: var(--fw-medium);
+	line-height: 1.6;
+	letter-spacing: var(--ls-base);
+	color: var(--color-black2);
+}
+
+/* ============================================================
+   見える安心（572:502 / Group 360 / Group 376 / 572:617）
+   ------------------------------------------------------------
+   DX EXPERIENCE と地続きの黒背景。写真 4 枚は SERVICE と同じ作りで、
+   英字だけは写真の外（カードの上）に置き、下端にかぶせる。
+   ============================================================ */
+.p-svisible {
+	background: var(--color-black2);
+}
+
+.p-svisible__head {
+	position: relative;
+}
+
+/* 572:567 コピーの背景に敷く線画（Figma 上で opacity .3） */
+.p-svisible__sketch {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	object-fit: contain;
+	opacity: 0.3;
+}
+
+.p-svisible__copy {
+	position: relative;
+	text-align: center;
+}
+
+.p-svisible__eyebrow {
+	margin: 0;
+	font-family: var(--font-ui);
+	font-size: var(--st-visible-eyebrow);
+	font-weight: var(--fw-medium);
+	line-height: 1.12;
+	letter-spacing: var(--ls-base);
+	color: var(--color-gray2);
+}
+
+.p-svisible__heading {
+	margin: 0;
+	font-size: var(--st-visible-heading);
+	font-weight: var(--fw-bold);
+	line-height: 1.6;
+	letter-spacing: var(--ls-title);
+	color: var(--color-white3);
+}
+
+.p-svisible__cards {
+	display: grid;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.p-svisible__card {
+	position: relative;
+}
+
+.p-svisible__media {
+	position: relative;
+	overflow: hidden;
+	border-radius: var(--st-fv-band-radius);
+}
+
+.p-svisible__media img {
+	display: block;
+	width: 100%;
+	height: var(--st-visible-card-height);
+	object-fit: cover;
+}
+
+/* 572:569 写真の下端を背景の黒に溶かす */
+.p-svisible__media::after {
+	content: "";
+	position: absolute;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	height: var(--st-visible-card-shade);
+	background: linear-gradient(180deg, var(--st-black2-0) 0%, var(--color-black2) 100%);
+}
+
+/* 写真の下端にかぶり、少し下にはみ出す */
+.p-svisible__card-eng {
+	position: absolute;
+	top: var(--st-visible-card-eng-top);
+	right: 0;
+	left: 0;
+	margin: 0;
+	font-size: var(--st-visible-card-eng);
+	line-height: 1.6;
+	letter-spacing: normal;
+	text-align: center;
+	color: var(--st-visible-eng);
+}
+
+.p-svisible__card-label {
+	font-size: var(--st-visible-card-label);
+	font-weight: var(--fw-bold);
+	line-height: 2;
+	letter-spacing: var(--ls-wide);
+	text-align: center;
+	color: var(--color-white3);
+}
+
+.p-svisible__lead {
+	font-size: var(--st-visible-lead);
+	font-weight: var(--fw-regular);
+	line-height: 2.5;
+	letter-spacing: var(--ls-base);
+	text-align: center;
+	color: var(--color-gray2);
+}
+
+/* ============================================================
+   DX EXPERIENCE（Group 331 / 572:619）
+   ------------------------------------------------------------
+   TOP の DX と同じ見た目だが、支店はピン留めせずステップの見出しを
+   押して切り替える（js/store-dx.js）。タグは半透明 + 枠線、
+   VIEW MORE は枠の外・中央（572:602）。
+   ============================================================ */
+.p-sdx {
+	background: var(--color-black2);
+}
+
+.p-sdx__title {
+	margin: 0;
+	font-size: var(--st-dx-title);
+	line-height: 1;
+	letter-spacing: var(--st-dx-title-ls);
+	color: var(--color-gray3);
+}
+
+.p-sdx__copy {
+	margin: 0;
+	font-family: var(--font-ui);
+	font-size: var(--st-dx-copy);
+	font-weight: var(--fw-bold);
+	line-height: 1.6;
+	letter-spacing: var(--st-dx-copy-ls);
+	color: var(--color-white3);
+}
+
+.p-sdx__body {
+	position: relative;
+}
+
+.p-sdx__steps {
+	position: relative;
+}
+
+/* 572:585 ステップをつなぐ縦線 */
+.p-sdx__timeline {
+	position: absolute;
+	top: var(--st-dx-line-top);
+	left: var(--st-dx-marker-x);
+	width: 0;
+	height: var(--st-dx-line-height);
+	border-left: var(--border-thin) solid var(--color-white3);
+}
+
+.p-sdx__list {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.p-sdx__step {
+	position: relative;
+}
+
+/* 572:590 ステップの丸。アクティブは塗り（572:594）+ リング（572:595） */
+.p-sdx__step::before,
+.p-sdx__step::after {
+	content: "";
+	position: absolute;
+	top: var(--st-dx-marker-y);
+	left: calc(var(--st-dx-marker-x) - var(--st-dx-step-x));
+	border-radius: 50%;
+	transform: translate(-50%, -50%);
+}
+
+.p-sdx__step::before {
+	width: var(--st-dx-dot-size);
+	height: var(--st-dx-dot-size);
+	border: var(--border-thin) solid var(--color-white3);
+	background: var(--color-black2);
+}
+
+.p-sdx__step::after {
+	width: var(--st-dx-ring-size);
+	height: var(--st-dx-ring-size);
+	border: var(--border-thin) solid var(--color-accent);
+	opacity: 0;
+	transition: opacity var(--transition-base);
+}
+
+.p-sdx__step.is-active::before {
+	border-color: transparent;
+	background: var(--color-accent);
+}
+
+.p-sdx__step.is-active::after {
+	opacity: 1;
+}
+
+.p-sdx__step-head {
+	display: block;
+	width: 100%;
+	padding: 0;
+	border: 0;
+	background: none;
+	text-align: left;
+	cursor: pointer;
+}
+
+.p-sdx__step-number {
+	display: block;
+	font-family: var(--font-ui);
+	font-size: var(--st-dx-number);
+	font-weight: var(--fw-light);
+	line-height: 1.6;
+	letter-spacing: var(--ls-wide);
+	color: var(--color-gray2);
+}
+
+.p-sdx__step-title {
+	display: block;
+	font-family: var(--font-ui);
+	font-size: var(--st-dx-step-title);
+	font-weight: var(--fw-bold);
+	line-height: 1.6;
+	letter-spacing: var(--ls-wide);
+	color: var(--color-white3);
+}
+
+.p-sdx__step-desc {
+	font-family: var(--font-ui);
+	font-size: var(--st-dx-desc);
+	font-weight: var(--fw-regular);
+	line-height: 1.6;
+	letter-spacing: var(--ls-base);
+	color: var(--color-gray2);
+}
+
+.p-sdx__tags {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--st-dx-tag-gap);
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.p-sdx__tag {
+	display: grid;
+	place-items: center;
+	height: var(--st-dx-tag-height);
+	padding: 0 var(--st-dx-tag-pad);
+	border: var(--border-thin) solid var(--st-dx-tag-border);
+	border-radius: calc(var(--st-dx-tag-height) / 2);
+	background: var(--st-dx-tag-bg);
+	font-family: var(--font-ui);
+	font-size: var(--st-dx-tag);
+	line-height: 1.6;
+	letter-spacing: var(--ls-base);
+	color: var(--color-white3);
+}
+
+/* 572:593 ステップぶんの画像を重ね、アクティブな 1 枚だけ見せる */
+.p-sdx__media {
+	position: relative;
+	overflow: hidden;
+	height: var(--st-dx-media-height);
+	border-radius: var(--st-card-radius);
+}
+
+.p-sdx__visual {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	opacity: 0;
+	transition: opacity var(--transition-base);
+}
+
+.p-sdx__visual.is-active {
+	opacity: 1;
+}
+
+/* 572:596 / 572:597 現在のステップを示すバー */
+.p-sdx__bars {
+	display: flex;
+	justify-content: flex-end;
+	gap: var(--st-dx-bar-gap);
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.p-sdx__bar {
+	width: var(--st-dx-bar-width);
+	height: var(--st-dx-bar-height);
+	background: var(--st-dx-bar-idle);
+	transition: background-color var(--transition-base);
+}
+
+.p-sdx__bar.is-active {
+	background: var(--color-accent);
+}
+
+.p-sdx__foot {
+	text-align: center;
+}
+
+/* ============================================================
+   PLANS（572:620 / 669:975 / 602:129 / Group 362 / Group 363 /
+   Group 338 / Group 374）
+   ------------------------------------------------------------
+   上半分は薄灰 → 白のグラデ、ハイエンドの塊だけが黒。
+   施工イメージ帯（§3）の 5 枚を p-sstrip--plans として使い回す。
+   ============================================================ */
+.p-splans {
+	background: linear-gradient(
+		180deg,
+		var(--st-bg-light) 0,
+		var(--st-bg-light) var(--st-plans-light-end),
+		var(--st-white) var(--st-plans-white-start)
+	);
+}
+
+/* 620:286 本文とパッケージプランをつなぐ飾り線 */
+.p-splans__divider {
+	display: block;
+	width: 0;
+	height: var(--st-plans-divider-height);
+	margin-inline: auto;
+	border-left: var(--border-thin) solid var(--st-line-plans);
+}
+
+.p-splans__text {
+	text-align: center;
+}
+
+.p-splans__label {
+	margin: 0;
+	font-size: var(--st-plans-label);
+	font-weight: var(--fw-medium);
+	line-height: 1.6;
+	letter-spacing: var(--ls-wide);
+	color: var(--color-black1);
+}
+
+.p-splans__eng {
+	margin: 0;
+	font-size: var(--st-plans-eng);
+	letter-spacing: var(--st-plans-eng-ls);
+	color: var(--color-black2);
+}
+
+.p-splans__copy {
+	font-size: var(--st-plans-copy);
+	font-weight: var(--fw-regular);
+	line-height: 2;
+	letter-spacing: var(--ls-base);
+	color: var(--color-black1);
+}
+
+.p-splans__media {
+	position: relative;
+}
+
+/* 書き出し画像の比率はカンプのノード枠と違うので、枠の比率に合わせる
+   （アイコン・線画と同じ方針。高さが伸びて次の要素に食い込むのを防ぐ） */
+.p-splans__media img {
+	display: block;
+	width: 100%;
+	height: auto;
+	object-fit: cover;
+}
+
+/* 599:13 は透過 PNG なので切らずに収める */
+.p-splans__block--package .p-splans__media img {
+	aspect-ratio: 857 / 433.9;
+	object-fit: contain;
+}
+
+/* 610:273 は写真なので枠に合わせて切る */
+.p-splans__block--highend .p-splans__media img {
+	aspect-ratio: 1022.6 / 567.6;
+}
+
+/* 669:958 パースの下端を白に溶かす */
+.p-splans__block--package .p-splans__media::after {
+	content: "";
+	position: absolute;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	height: var(--st-plans-fade);
+	background: linear-gradient(180deg, var(--st-white-0) 0%, var(--st-white) 100%);
+}
+
+/* 610:278 夜景写真の右端を黒に溶かす */
+.p-splans__block--highend .p-splans__media::after {
+	content: "";
+	position: absolute;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	width: var(--st-plans-photo-fade);
+	background: linear-gradient(90deg, var(--st-black2-0) 0%, var(--color-black2) 100%);
+}
+
+.p-splans__highend {
+	background: var(--color-black2);
+}
+
+.p-splans__block--highend .p-splans__label,
+.p-splans__block--highend .p-splans__eng {
+	color: var(--color-white3);
+}
+
+.p-splans__block--highend .p-splans__copy {
+	line-height: 2.22; /* 18px で 40px */
+	color: var(--color-gray2);
+}
+
+.p-splans__features {
+	display: grid;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.p-splans__feature {
+	display: grid;
+	grid-template-rows: var(--st-plans-icon-row) auto;
+	text-align: center;
+}
+
+/* 602:90 / 602:102 列の区切り線 */
+.p-splans__feature + .p-splans__feature {
+	border-left: var(--border-thin) solid var(--st-line-feature);
+}
+
+.p-splans__features--dark .p-splans__feature + .p-splans__feature {
+	border-left-color: var(--st-line-feature-dark);
+}
+
+.p-splans__icon {
+	align-self: end;
+	width: calc(var(--icon-w) * var(--st-plans-icon-unit));
+	height: calc(var(--icon-h) * var(--st-plans-icon-unit));
+	margin-inline: auto;
+	object-fit: contain;
+}
+
+.p-splans__feature-label {
+	font-size: var(--st-plans-feature);
+	font-weight: var(--fw-bold);
+	line-height: 1.6;
+	letter-spacing: var(--ls-base);
+	color: var(--color-black1);
+}
+
+.p-splans__features--dark .p-splans__feature-label {
+	font-weight: var(--fw-medium);
+	color: var(--color-gray2);
+}
+
+/* 669:941 PLANS 側の帯は白に溶かす（§3 は #f3f3f4） */
+.p-sstrip--plans::after {
+	background: linear-gradient(180deg, var(--st-white-0) 0%, var(--st-white) 100%);
+}
+
+/* ============================================================
+   WORKS（698:1134 / 698:1181 / 1153:104 / Group 380 / Group 382 /
+   Group 379）
+   ------------------------------------------------------------
+   写真グリッド（メイン + 右列 4 段）と 2 ボックスは 1 つのグリッドに
+   収める。右列 4 段目はカンプどおり灰色の下敷き + 3D パース。
+   ============================================================ */
+.p-sworks {
+	background: var(--st-bg-light);
+}
+
+.p-sworks__main img,
+.p-sworks__sub img {
+	display: block;
+	width: 100%;
+	height: 100%;
+	border-radius: var(--st-card-radius);
+	object-fit: cover;
+}
+
+.p-sworks__subs {
+	display: grid;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.p-sworks__link {
+	display: block;
+	height: 100%;
+}
+
+/* 698:1180 3 枚目だけ枠線が付く */
+.p-sworks__sub:last-child img {
+	border: var(--border-thin) solid var(--st-line-photo);
+}
+
+.p-sworks__render {
+	position: relative;
+	overflow: hidden;
+	border-radius: var(--st-card-radius);
+	background: var(--st-works-panel);
+}
+
+.p-sworks__render-image {
+	position: absolute;
+	top: var(--st-works-render-top);
+	right: 0;
+	left: 0;
+	width: 100%;
+	height: var(--st-works-render-height);
+	object-fit: contain;
+}
+
+/* Group 381 パースに重なるラベル */
+.p-sworks__render-label {
+	position: absolute;
+	top: var(--st-works-label-top);
+	left: 50%;
+	display: grid;
+	place-items: center;
+	min-width: var(--st-works-label-width);
+	height: var(--st-works-label-height);
+	border: var(--border-thin) solid var(--st-line-label);
+	border-radius: var(--st-works-label-radius);
+	background: var(--st-card-shade);
+	font-size: var(--st-works-render-label);
+	font-weight: var(--fw-medium);
+	line-height: 1.8;
+	letter-spacing: var(--ls-base);
+	color: var(--color-white3);
+	transform: translateX(-50%);
+}
+
+.p-sworks__box {
+	overflow: hidden;
+	border-radius: var(--st-fv-band-radius);
+	background: var(--st-white);
+}
+
+.p-sworks__box-head {
+	display: grid;
+	place-items: center;
+	height: var(--st-works-box-head-height);
+	margin: 0;
+	background: var(--color-black2);
+	font-size: var(--st-works-box-head);
+	font-weight: var(--fw-medium);
+	line-height: 1.4;
+	letter-spacing: var(--ls-wide);
+	text-align: center;
+	color: var(--st-white);
+}
+
+.p-sworks__box-text {
+	margin: 0;
+	font-size: var(--st-works-box-text);
+	font-weight: var(--fw-regular);
+	line-height: 1.8;
+	letter-spacing: var(--ls-base);
+	color: var(--color-black1);
+}
+
+.p-sworks__estimate {
+	background: var(--st-white);
+	border-radius: var(--st-fv-band-radius);
+}
+
+.p-sworks__table {
+	width: 100%;
+	border-collapse: collapse;
+	table-layout: fixed;
+}
+
+.p-sworks__table th,
+.p-sworks__table td {
+	overflow-wrap: anywhere;
+	text-align: left;
+	vertical-align: top;
+}
+
+.p-sworks__table thead th {
+	font-size: var(--st-works-th);
+	font-weight: var(--fw-medium);
+	line-height: 2.5;
+	letter-spacing: var(--ls-wide);
+	color: var(--color-black2);
+}
+
+.p-sworks__table tbody th {
+	font-size: var(--st-works-td);
+	font-weight: var(--fw-regular);
+	line-height: 1.6;
+	letter-spacing: var(--ls-base);
+	color: var(--color-black1);
+}
+
+.p-sworks__table tbody td {
+	border-bottom: var(--border-thin) solid var(--st-line-plans);
+	font-family: var(--font-ui);
+	font-size: var(--st-works-td);
+	font-weight: var(--fw-regular);
+	line-height: 1.6;
+	letter-spacing: var(--ls-base);
+	color: var(--color-black1);
+}
+
+.p-sworks__table tbody th {
+	border-bottom: var(--border-thin) solid var(--st-line-plans);
+}
+
+/* 金額は右端（カンプ x1593.1）でそろえる。
+   列全体の text-align より詳細度を上げておく */
+.p-sworks__table .p-sworks__price {
+	text-align: right;
+	white-space: nowrap;
+}
+
+/* 建材列はカンプ（設計メモ §10）に字間の指定が無い。
+   1px でも 55 文字の行では枠を使い切ってしまう */
+.p-sworks__table tbody .p-sworks__material {
+	letter-spacing: normal;
+}
+
+.p-sworks__total {
+	margin: 0;
+	font-family: var(--font-ui);
+	font-size: var(--st-works-total);
+	font-weight: var(--fw-medium);
+	line-height: 1.6;
+	letter-spacing: var(--ls-base);
+	text-align: right;
+	color: var(--color-black2);
+}
+
+/* ============================================================
+   REVIEWS（620:289 / Group 369 / 669:223）
+   ------------------------------------------------------------
+   白背景にカード 3 枚。カンプの画像は灰色のプレースホルダなので
+   写真は置かず、同じ色のベタで枠だけ作る。
+   本文は長くなっても 3 行で省略する（決定事項 Q10）。
+   ============================================================ */
+.p-sreviews {
+	background: var(--st-white);
+}
+
+.p-sreviews__list {
+	display: grid;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.p-sreviews__card {
+	overflow: hidden;
+	border: var(--border-thin) solid var(--color-gray2);
+	border-radius: var(--st-card-radius);
+	background: var(--st-white);
+}
+
+.p-sreviews__thumb {
+	display: block;
+	background: var(--color-gray2);
+}
+
+.p-sreviews__rating {
+	display: flex;
+	align-items: center;
+	margin: 0;
+}
+
+.p-sreviews__stars {
+	display: block;
+	flex: none;
+}
+
+.p-sreviews__score {
+	font-family: var(--font-ui);
+	font-size: var(--st-reviews-score);
+	font-weight: var(--fw-medium);
+	line-height: 1.6;
+	letter-spacing: var(--ls-base);
+	color: var(--color-black1);
+}
+
+.p-sreviews__title {
+	margin: 0;
+	font-size: var(--st-reviews-title);
+	font-weight: var(--fw-medium);
+	line-height: 2.5;
+	letter-spacing: var(--ls-wide);
+	color: var(--color-black2);
+}
+
+/* 文字数が多いときは 3 行で省略する */
+.p-sreviews__text {
+	display: -webkit-box;
+	overflow: hidden;
+	margin: 0;
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: 3;
+	line-clamp: 3;
+	font-size: var(--st-reviews-text);
+	font-weight: var(--fw-regular);
+	line-height: 1.8;
+	letter-spacing: var(--ls-wide);
+	color: var(--color-black1);
+}
+
+/* ============================================================
+   FLOW（661:12 / Group 371 矢羽根 / Group 370 行 / 669:259 弧）
+   ------------------------------------------------------------
+   矢羽根の形は clip-path、段階色は --st-flow-step1〜7。
+   7 行目だけ下辺が浅い山形になって次セクション（Quality）の写真に
+   食い込むので、はみ出し分を最後の行の負マージンで作る。
+   ============================================================ */
+.p-sflow {
+	position: relative;
+	z-index: 1; /* はみ出した 7 行目を Quality の写真より前に出す */
+	background: var(--st-bg-light);
+}
+
+.p-sflow__chevrons {
+	display: flex;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.p-sflow__chevron {
+	display: grid;
+	flex: 1 1 0;
+	place-items: center;
+	height: var(--st-flow-chevron-height);
+	clip-path: polygon(
+		0 0,
+		calc(100% - var(--st-flow-notch)) 0,
+		100% 50%,
+		calc(100% - var(--st-flow-notch)) 100%,
+		0 100%,
+		var(--st-flow-notch) 50%
+	);
+	font-size: var(--st-flow-chevron);
+	font-weight: var(--fw-bold);
+	line-height: 2.2;
+	letter-spacing: var(--ls-base);
+	text-align: center;
+	color: var(--color-white3);
+}
+
+/* 先頭は左辺、最後は右辺が直線 */
+.p-sflow__chevron:first-child {
+	clip-path: polygon(
+		0 0,
+		calc(100% - var(--st-flow-notch)) 0,
+		100% 50%,
+		calc(100% - var(--st-flow-notch)) 100%,
+		0 100%
+	);
+}
+
+.p-sflow__chevron:last-child {
+	clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, var(--st-flow-notch) 50%);
+}
+
+.p-sflow__chevron:nth-child(1) {
+	background: var(--st-flow-step1);
+}
+
+.p-sflow__chevron:nth-child(2) {
+	background: var(--st-flow-step2);
+}
+
+.p-sflow__chevron:nth-child(3) {
+	background: var(--st-flow-step3);
+}
+
+.p-sflow__chevron:nth-child(4) {
+	background: var(--st-flow-step4);
+}
+
+.p-sflow__chevron:nth-child(5) {
+	background: var(--st-flow-step5);
+}
+
+.p-sflow__chevron:nth-child(6) {
+	background: var(--st-flow-step6);
+}
+
+.p-sflow__chevron:nth-child(7) {
+	background: var(--st-flow-step7);
+}
+
+.p-sflow__rows {
+	display: grid;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.p-sflow__row {
+	display: grid;
+	align-items: center;
+	background: var(--st-white);
+}
+
+.p-sflow__number {
+	font-family: var(--font-ui);
+	font-size: var(--st-flow-number);
+	font-weight: var(--fw-bold);
+	line-height: 2.2;
+	letter-spacing: var(--ls-base);
+	text-align: center;
+	color: var(--st-number);
+}
+
+.p-sflow__row-title {
+	margin: 0;
+	font-size: var(--st-flow-row-title);
+	font-weight: var(--fw-bold);
+	line-height: 2.2;
+	letter-spacing: var(--ls-base);
+	color: var(--color-black2);
+}
+
+.p-sflow__row-desc {
+	margin: 0;
+	font-size: var(--st-flow-row-desc);
+	font-weight: var(--fw-regular);
+	line-height: 1.6;
+	letter-spacing: var(--ls-base);
+	color: var(--color-black1);
+}
+
+/* ============================================================
+   Quality（669:258 / 669:257 / 669:261 / 669:255 / 669:263 /
+   669:969 / 669:265）
+   ------------------------------------------------------------
+   写真 1 枚 + 黒 30% の上に中央寄せのテキスト。上端には FLOW の
+   7 行目が食い込む。
+   ============================================================ */
+.p-squality {
+	position: relative;
+	overflow: hidden;
+	background: var(--color-black2);
+}
+
+.p-squality__bg {
+	position: absolute;
+	inset: 0;
+}
+
+.p-squality__bg-photo {
+	display: block;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+/* 669:257 写真の上に重ねる黒 */
+.p-squality__bg::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	background: var(--st-photo-shade);
+}
+
+.p-squality__inner {
+	position: relative;
+	text-align: center;
+}
+
+.p-squality__eng {
+	margin: 0;
+	font-family: var(--font-ui);
+	font-size: var(--st-quality-eng);
+	font-weight: var(--fw-medium);
+	line-height: 1.12;
+	letter-spacing: var(--ls-base);
+	color: var(--color-white3);
+}
+
+.p-squality__heading {
+	margin: 0;
+	font-size: var(--st-quality-heading);
+	font-weight: var(--fw-bold);
+	line-height: 1.6;
+	letter-spacing: var(--ls-title);
+	color: var(--color-white3);
+}
+
+.p-squality__lead {
+	font-size: var(--st-quality-lead);
+	font-weight: var(--fw-medium);
+	line-height: 2;
+	letter-spacing: var(--ls-base);
+	color: var(--color-gray2);
+}
+
+/* 669:969 + 669:967 */
+.p-squality__badge {
+	display: grid;
+	place-items: center;
+	border: var(--border-thin) solid var(--st-line-label);
+	background: var(--st-badge-bg);
+	font-size: var(--st-quality-badge);
+	font-weight: var(--fw-medium);
+	line-height: 1.6;
+	letter-spacing: var(--ls-title);
+	color: var(--color-white3);
+}
+
+/* 「施工保証 5年」は 1 行。「5」だけ 2px 大きい */
+.p-squality__badge-text {
+	white-space: nowrap;
+}
+
+.p-squality__badge-number {
+	font-size: var(--st-quality-badge-num);
+}
+
+.p-squality__note {
+	font-size: var(--st-quality-note);
+	font-weight: var(--fw-medium);
+	line-height: 2.5;
+	letter-spacing: var(--ls-base);
+	text-align: right;
+	color: var(--st-note);
+}
+
+/* ============================================================
+   FAQ（669:871 / Group 372 / 669:906）
+   ------------------------------------------------------------
+   質問行は button。回答は hidden 属性で出し入れし、開くときだけ
+   フェード + スライドで現れる（js/store-faq.js）。開くのは 1 つだけ。
+   開閉の演出はカンプに無いので、速さは共通の --transition-base に合わせる。
+   ============================================================ */
+.p-sfaq {
+	background: var(--st-bg-light);
+}
+
+/* 669:873 だけ行送りが 2.2 */
+.p-sfaq__lead {
+	line-height: 2.2;
+}
+
+.p-sfaq__list {
+	display: grid;
+}
+
+.p-sfaq__item {
+	overflow: hidden;
+	border-radius: var(--st-card-radius);
+	background: var(--st-white);
+}
+
+.p-sfaq__heading {
+	margin: 0;
+	font-size: inherit;
+	font-weight: inherit;
+}
+
+.p-sfaq__q {
+	display: grid;
+	align-items: center;
+	width: 100%;
+	border: 0;
+	background: none;
+	font-family: inherit;
+	text-align: left;
+	cursor: pointer;
+}
+
+.p-sfaq__mark {
+	font-family: var(--font-ui);
+	font-size: var(--st-faq-mark);
+	font-weight: var(--fw-bold);
+	line-height: 2.2;
+	letter-spacing: var(--ls-base);
+	text-align: center;
+	color: var(--st-number);
+}
+
+.p-sfaq__q-text {
+	font-size: var(--st-faq-q);
+	font-weight: var(--fw-bold);
+	line-height: 2.2;
+	letter-spacing: var(--ls-wide);
+	color: var(--color-black2);
+}
+
+/* 669:906。閉じているときは右向き、開くと下向き（画像は下向きが元） */
+.p-sfaq__arrow {
+	display: block;
+	width: var(--st-faq-arrow-width);
+	height: var(--st-faq-arrow-height);
+	justify-self: center;
+	transform: rotate(-90deg);
+	transition: transform var(--transition-base);
+}
+
+.p-sfaq__q.is-open .p-sfaq__arrow {
+	transform: rotate(0deg);
+}
+
+.p-sfaq__answer {
+	border-top: var(--border-thin) solid var(--color-gray2);
+	animation: st-faq-open var(--transition-base) both;
+}
+
+.p-sfaq__answer-text {
+	margin: 0;
+	font-size: var(--st-faq-a);
+	font-weight: var(--fw-regular);
+	line-height: 2;
+	letter-spacing: var(--ls-wide);
+	color: var(--color-black1);
+}
+
+@keyframes st-faq-open {
+	from {
+		opacity: 0;
+		transform: translateY(-0.5em);
+	}
+
+	to {
+		opacity: 1;
+		transform: none;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.p-sfaq__answer {
+		animation: none;
+	}
+
+	.p-sfaq__arrow {
+		transition: none;
+	}
+}
+
+/* ============================================================
+   AREA（620:292 / 628:302 / Group 472 / 628:337 / 628:329 /
+   628:307 / 628:306 / 1126:34 / 1148:48 / 1148:43 / 1151:93-101）
+   ------------------------------------------------------------
+   上端の店舗写真には見出しだけが乗り、その下に白パネル（リード文・
+   店舗情報テーブル・外観写真）。弧状ギャラリー（1126:34）は内側が透明な
+   合成 1 枚なので、PC ではパネルに重ねて置き、空いた中心にロゴと支店名を出す。
+   ============================================================ */
+.p-sarea {
+	position: relative;
+	background: var(--st-area-bg);
+}
+
+.p-sarea__bg {
+	position: absolute;
+	top: 0;
+	right: 0;
+	left: 0;
+	height: var(--st-area-bg-height);
+}
+
+.p-sarea__bg img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+/* 628:302。このページで唯一白抜きの見出し */
+.p-sarea__title {
+	position: relative;
+	color: var(--st-white);
+}
+
+.p-sarea__panel {
+	position: relative;
+	background: var(--st-white);
+	box-shadow: var(--st-shadow-card);
+}
+
+/* 628:337。パネルの上端にかぶる黒帯 */
+.p-sarea__banner {
+	display: grid;
+	place-items: center;
+	margin: 0 auto;
+	background: var(--color-black2);
+	font-size: var(--st-area-banner);
+	font-weight: var(--fw-bold);
+	line-height: 2.5;
+	letter-spacing: var(--ls-base);
+	text-align: center;
+	color: var(--color-white3);
+}
+
+.p-sarea__lead {
+	font-size: var(--st-area-lead);
+	line-height: 2;
+	letter-spacing: var(--ls-base);
+	text-align: center;
+	color: var(--color-black1);
+}
+
+/* 628:307 の区切り線は行と行の間だけ（最終行の下には無い） */
+.p-sarea__table {
+	margin: 0;
+}
+
+.p-sarea__row {
+	display: grid;
+}
+
+.p-sarea__row + .p-sarea__row {
+	border-top: var(--border-thin) solid var(--st-line-plans);
+}
+
+.p-sarea__row-label,
+.p-sarea__row-value {
+	margin: 0;
+	font-size: var(--st-area-table);
+	line-height: 1.6;
+	letter-spacing: var(--ls-base);
+}
+
+.p-sarea__row-label {
+	color: var(--color-black2);
+}
+
+.p-sarea__row-value {
+	color: var(--color-black1);
+}
+
+.p-sarea__photo {
+	display: block;
+	width: 100%;
+	aspect-ratio: 515.4 / 343.1;
+	border-radius: var(--st-card-radius);
+	object-fit: cover;
+}
+
+.p-sarea__gallery {
+	display: block;
+}
+
+.p-sarea__logo {
+	margin: 0;
+	line-height: 0;
+	text-align: center;
+}
+
+.p-sarea__logo img {
+	width: var(--st-area-logo-width);
+	height: auto;
+	/* 共通リセットで img は display: block のため、親の text-align では中央に寄らない */
+	margin-inline: auto;
+}
+
+.p-sarea__branch {
+	margin: 0;
+	font-size: var(--st-area-branch);
+	font-weight: var(--fw-medium);
+	line-height: 2;
+	letter-spacing: var(--ls-base);
+	text-align: center;
+	color: var(--color-black1);
+}
+
+/* --- Local Expertise（1148:48 / 1148:43 / 1148:45 / 1148:28 / 1148:29） --- */
+.p-sarea__local {
+	position: relative;
+}
+
+/* 写真（1148:43）はこのパネルの下に潜る */
+.p-sarea__local-body {
+	position: relative;
+	z-index: 1;
+	background: var(--st-white);
+	box-shadow: var(--st-shadow-panel);
+}
+
+.p-sarea__local-eng {
+	margin: 0;
+	font-family: var(--font-ui);
+	font-size: var(--st-area-local-eng);
+	font-weight: var(--fw-medium);
+	line-height: 1.12;
+	letter-spacing: var(--ls-base);
+	color: var(--color-black2);
+}
+
+.p-sarea__local-heading {
+	font-size: var(--st-area-local-heading);
+	font-weight: var(--fw-bold);
+	line-height: 1.6;
+	letter-spacing: var(--ls-title);
+	color: var(--color-black2);
+}
+
+.p-sarea__local-lead {
+	margin: 0;
+	font-size: var(--st-area-local-lead);
+	line-height: 2;
+	letter-spacing: var(--ls-base);
+	color: var(--color-gray3);
+}
+
+.p-sarea__local-photo {
+	display: block;
+	width: 100%;
+	object-fit: cover;
+	box-shadow: var(--st-shadow-panel);
+}
+
+/* --- カード 4 枚（1151:93-101） --- */
+.p-sarea__cards {
+	display: grid;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.p-sarea__card {
+	text-align: center;
+}
+
+/* 1148:80 はグループの最前面。円形写真の上端に数字が重なる */
+.p-sarea__card-number {
+	position: relative;
+	z-index: 1;
+	margin: 0;
+	font-family: var(--font-display);
+	font-size: var(--st-area-card-number);
+	font-weight: var(--fw-bold);
+	line-height: 1.6;
+	letter-spacing: var(--ls-base);
+	color: var(--st-area-number);
+}
+
+.p-sarea__card-photo {
+	display: block;
+	width: var(--st-area-card-photo);
+	height: var(--st-area-card-photo);
+	margin-inline: auto;
+	border-radius: 50%;
+	object-fit: cover;
+}
+
+.p-sarea__card-label {
+	font-size: var(--st-area-card-label);
+	font-weight: var(--fw-bold);
+	line-height: 1.6;
+	letter-spacing: var(--ls-base);
+	color: var(--color-black1);
+}
+
+/* ============================================================
+   お問い合わせ CTA（Group 373 / 639:366 / 639:364 / 639:406 / Group 340）
+   ------------------------------------------------------------
+   TOP の RECRUIT と骨格は同じだが、文字サイズとボタン 2 個が別物なので
+   共通部品にはしない。暗幕は PC だけカンプどおり左からのグラデ。
+   ============================================================ */
+.p-scta {
+	position: relative;
+	overflow: hidden;
+	background: var(--color-black2);
+	color: var(--color-white3);
+	text-align: center;
+}
+
+.p-scta__bg {
+	position: absolute;
+	inset: 0;
+}
+
+.p-scta__bg img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+/* 639:407 */
+.p-scta__bg::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	background: var(--st-cta-overlay);
+}
+
+.p-scta__inner {
+	position: relative;
+}
+
+.p-scta__eng {
+	margin: 0;
+	font-family: var(--font-ui);
+	font-size: var(--st-cta-eng);
+	font-weight: var(--fw-medium);
+	line-height: 1.12;
+	letter-spacing: var(--ls-base);
+	color: var(--color-white3);
+}
+
+.p-scta__heading {
+	margin: 0;
+	font-size: var(--st-cta-heading);
+	font-weight: var(--fw-bold);
+	line-height: 1.6;
+	letter-spacing: var(--ls-title);
+	color: var(--color-white3);
+}
+
+.p-scta__lead {
+	font-size: var(--st-cta-lead);
+	font-weight: var(--fw-medium);
+	line-height: 2;
+	letter-spacing: var(--ls-base);
+	color: var(--color-gray2);
+}
+
+.p-scta__buttons {
+	display: flex;
+	justify-content: center;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.p-scta__button {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: var(--st-cta-button);
+	font-weight: var(--fw-bold);
+	line-height: 1.6;
+	letter-spacing: var(--st-cta-button-ls);
+	color: var(--st-white);
+}
+
+/* 639:401 / 639:413 */
+.p-scta__button--line {
+	background: var(--st-cta-line);
+}
+
+.p-scta__button--tel {
+	background: var(--color-orange1);
+}
+
+.p-scta__button-icon {
+	display: block;
+}
+
+/* ============================================================
+   COLUMN（639:417 / 639:418 / 687:997 / 687:996 / Group 479 / 669:204）
+   ------------------------------------------------------------
+   TOP の NEWS と同じカード列。5 枚目が右端で見切れるのは横スクロールの
+   表現なので、PC でも列を横スクロールできるようにする。
+   ============================================================ */
+.p-scolumn {
+	background: var(--st-white);
+}
+
+/* 687:996 だけ行送りが 2.2 */
+.p-scolumn__lead {
+	line-height: 2.2;
+}
+
+.p-scolumn__list {
+	display: flex;
+	margin: 0;
+	padding: 0;
+	overflow-x: auto;
+	list-style: none;
+	scrollbar-width: none;
+}
+
+.p-scolumn__list::-webkit-scrollbar {
+	display: none;
+}
+
+.p-scolumn__card {
+	flex: 0 0 auto;
+}
+
+/* カード全体をお知らせの個別ページへのリンクにする */
+.p-scolumn__card-link {
+	display: block;
+}
+
+.p-scolumn__card-image {
+	display: block;
+	width: 100%;
+	object-fit: cover;
+	border-radius: var(--st-card-radius);
+	box-shadow: var(--st-shadow-card);
+}
+
+/* 画像未設定時のプレースホルダ（1153:108 と同じグレー） */
+.p-scolumn__card-image--empty {
+	background: var(--color-gray2);
+}
+
+.p-scolumn__card-title {
+	font-size: var(--st-column-title);
+	font-weight: var(--fw-medium);
+	line-height: 2.5;
+	letter-spacing: var(--ls-base);
+	color: var(--color-black1);
+}
+
+/* 669:204。枠・文字とも #4d4d4d（TOP の NEWS は文字が #1a1a1a） */
+.p-scolumn__btn {
+	display: flex;
+	margin-inline: auto;
+	border-color: var(--color-black1);
+	color: var(--color-black1);
+}
+
+/* ============================================================
+   支店一覧（親ページ /store/・デザイン未定の暫定表示）
+   ============================================================ */
+.p-store-index {
+	margin: var(--st-heading-gap) 0 0;
+	padding: 0;
+	list-style: none;
+}
+
+.p-store-index__item + .p-store-index__item {
+	margin-top: 0.75em;
+}
+
+.p-store-index__link {
+	font-size: var(--fs-copy-md);
+	font-weight: var(--fw-medium);
+	letter-spacing: var(--ls-wide);
+}
+
+/* ============================================================
+   PC（1025px 以上）: カンプ 534:628 の配置
+   ------------------------------------------------------------
+   コピー塊（x141.6 y280.4）とサムネイル行（y966.3・中央）は
+   FV の中で絶対配置する。
+   FV 以降のセクションは、長さをすべて --st-vu（下の比例ブロックで定義）
+   に載せてここに書く。数値はカンプ 1920 の実測値そのまま。
+   ============================================================ */
+@media (min-width: 1025px) {
+	.p-sfv__body {
+		display: block;
+		padding: 0;
+	}
+
+	.p-sfv__copy {
+		position: absolute;
+		top: var(--st-fv-copy-top);
+		left: var(--st-fv-copy-left);
+	}
+
+	.p-sfv__logo {
+		margin-left: var(--st-fv-logo-indent); /* x146.4 − x141.6 */
+	}
+
+	/* カンプはサムネイル上端 y973.3・1 個目の左端 x710.8（中央からわずかに右） */
+	.p-sfv__thumbs {
+		position: absolute;
+		top: var(--st-fv-thumbs-top);
+		left: var(--st-fv-thumbs-left);
+	}
+
+	.p-sfv__band {
+		grid-template-columns: repeat(4, 1fr);
+	}
+
+	/* --- 導入コピー（y1237.5〜2008.6） --- */
+	.p-sintro {
+		--st-intro-icon-w: calc(171.2 * var(--st-vu));
+
+		/* 上: 写真 4 枚の下端 1349.8 → アイコン 1431.3 / 下: 本文下端 1739.3 → 帯 1826.9 */
+		padding: calc(81.5 * var(--st-vu)) 0 calc(87.6 * var(--st-vu));
+	}
+
+	.p-sintro__heading {
+		margin: calc(17.2 * var(--st-vu)) 0 0;
+	}
+
+	.p-sintro__lead {
+		margin: calc(16.1 * var(--st-vu)) 0 0;
+	}
+
+	/* --- 施工イメージ帯（y1826.9〜2035.9） --- */
+	.p-sstrip {
+		--st-strip-unit: var(--st-vu);
+		--st-strip-fade-height: calc(69.5 * var(--st-vu));
+
+		/* 白（〜2008.6）から先は次セクションの #f3f3f4 を透かす */
+		background: linear-gradient(
+			180deg,
+			var(--color-white2) 0,
+			var(--color-white2) calc(181.7 * var(--st-vu)),
+			transparent calc(181.7 * var(--st-vu))
+		);
+		/* 下端 27.3 を次セクションに食い込ませる */
+		margin-bottom: calc(-27.3 * var(--st-vu));
+	}
+
+	/* --- 実績数字（y2115.9〜2411.9） --- */
+	.p-sstats {
+		--st-stats-ring-size: calc(230 * var(--st-vu));
+		--st-stats-ring-width: calc(3 * var(--st-vu));
+		--st-stats-photo-size: calc(200 * var(--st-vu));
+
+		padding: calc(107.3 * var(--st-vu)) 0 calc(130.2 * var(--st-vu));
+	}
+
+	.p-sstats__list {
+		grid-template-columns: repeat(4, auto);
+		column-gap: calc(60 * var(--st-vu)); /* ピッチ 290 − 230 */
+	}
+
+	.p-sstats__label {
+		margin: calc(34 * var(--st-vu)) 0 0;
+	}
+
+	/* --- 不安提示（y2542.1〜2924.6） --- */
+	.p-sconcern {
+		padding: 0 0 calc(149.2 * var(--st-vu));
+	}
+
+	/* 535:933。メタデータ上は x1771.8 だが、カンプの見た目は左右反転で x876.5〜1771.8 */
+	.p-sconcern__sketch {
+		top: 0;
+		left: calc(876.5 * var(--st-vu));
+		width: calc(895.3 * var(--st-vu));
+		height: calc(455 * var(--st-vu));
+	}
+
+	.p-sconcern__heading {
+		display: flex;
+		align-items: center;
+		width: calc(865.2 * var(--st-vu));
+		height: calc(91.1 * var(--st-vu));
+		margin-left: calc(177.6 * var(--st-vu));
+		padding-left: calc(34.6 * var(--st-vu));
+	}
+
+	.p-sconcern__list {
+		margin: calc(41.2 * var(--st-vu)) 0 0 calc(177.6 * var(--st-vu));
+	}
+
+	.p-sconcern__note {
+		margin: calc(40.7 * var(--st-vu)) 0 0 calc(188 * var(--st-vu));
+	}
+
+	/* --- 選ばれる理由（y3073.8〜5704.5） --- */
+	.p-sreasons {
+		--st-reasons-photo-height: calc(1532 * var(--st-vu));
+		--st-reasons-shade-height: calc(656.6 * var(--st-vu));
+		--st-reasons-fade-height: calc(365.9 * var(--st-vu));
+		--st-reasons-logo-width: calc(179.9 * var(--st-vu));
+		--st-reasons-house-width: calc(854.7 * var(--st-vu));
+		--st-reasons-icon-unit: var(--st-vu);
+
+		padding: calc(163 * var(--st-vu)) 0 calc(160 * var(--st-vu));
+	}
+
+	.p-sreasons__copy-lead {
+		margin: calc(23.5 * var(--st-vu)) 0 0;
+	}
+
+	/* Group 354（x192.1 y4344.5 1536.5x1200）。中身は円の上に絶対配置する */
+	.p-sreasons__diagram {
+		width: calc(1536.5 * var(--st-vu));
+		height: calc(1200 * var(--st-vu));
+		margin: calc(814.2 * var(--st-vu)) auto 0;
+	}
+
+	.p-sreasons__ring {
+		position: absolute;
+		top: 0;
+		left: calc(168.3 * var(--st-vu));
+		display: block;
+		width: calc(1200 * var(--st-vu));
+		height: calc(1200 * var(--st-vu));
+	}
+
+	.p-sreasons__center {
+		position: absolute;
+		top: calc(117.5 * var(--st-vu));
+		right: 0;
+		left: 0;
+	}
+
+	.p-sreasons__title {
+		margin: calc(6.4 * var(--st-vu)) 0 0;
+	}
+
+	.p-sreasons__title-lead {
+		margin: calc(25.8 * var(--st-vu)) 0 0;
+	}
+
+	/* 住宅 CG と英字はカンプ上でわずかに前の行に食い込む */
+	.p-sreasons__house {
+		margin-top: calc(-17.3 * var(--st-vu));
+	}
+
+	.p-sreasons__eng {
+		margin: calc(-14.8 * var(--st-vu)) 0 0;
+	}
+
+	.p-sreasons__eng-sub {
+		margin: calc(11 * var(--st-vu)) 0 0;
+	}
+
+	.p-sreasons__items {
+		position: absolute;
+		inset: 0;
+	}
+
+	/* 円周上の 6 項目（--item-x はラベルの中心 x、--icon-y はアイコン上端。
+	   いずれも Group 354 の左上からの距離） */
+	.p-sreasons__item {
+		position: absolute;
+		top: calc(var(--icon-y) * var(--st-vu));
+		left: calc(var(--item-x) * var(--st-vu));
+		width: max-content;
+		transform: translateX(-50%);
+	}
+
+	.p-sreasons__item:nth-child(1) {
+		--item-x: 316.3;
+		--icon-y: 115.8;
+	}
+
+	.p-sreasons__item:nth-child(2) {
+		--item-x: 1240.5;
+		--icon-y: 119;
+	}
+
+	.p-sreasons__item:nth-child(3) {
+		--item-x: 188.5;
+		--icon-y: 452.1;
+	}
+
+	.p-sreasons__item:nth-child(4) {
+		--item-x: 1388.5;
+		--icon-y: 452;
+	}
+
+	.p-sreasons__item:nth-child(5) {
+		--item-x: 316.3;
+		--icon-y: 826.7;
+	}
+
+	.p-sreasons__item:nth-child(6) {
+		--item-x: 1240.5;
+		--icon-y: 828.7;
+	}
+
+	.p-sreasons__item-lead {
+		margin: calc(24.6 * var(--st-vu)) 0 0;
+	}
+
+	.p-sreasons__item-label {
+		margin: 0;
+	}
+
+	/* --- SERVICE（y5704.5〜8413.9） --- */
+	.p-sservice {
+		--st-service-card-height: calc(519.6 * var(--st-vu));
+		--st-service-card-shade: calc(246.4 * var(--st-vu));
+		--st-service-card-eng-bottom: calc(31.8 * var(--st-vu));
+		--st-service-banner-top: calc(-45.4 * var(--st-vu));
+		--st-service-banner-width: calc(919 * var(--st-vu));
+		--st-service-banner-height: calc(90.6 * var(--st-vu));
+		--st-service-line-top: calc(158.8 * var(--st-vu));
+		--st-service-photo-height: calc(206.2 * var(--st-vu));
+
+		padding: calc(162.2 * var(--st-vu)) 0 calc(159.9 * var(--st-vu));
+	}
+
+	.p-sservice__cards {
+		grid-template-columns: repeat(2, calc(779.4 * var(--st-vu)));
+		justify-content: center;
+		column-gap: calc(48.4 * var(--st-vu));
+		margin-top: calc(75.5 * var(--st-vu));
+	}
+
+	.p-sservice__card-label {
+		margin: calc(24 * var(--st-vu)) 0 0;
+	}
+
+	.p-sservice__panel {
+		width: calc(1600 * var(--st-vu));
+		margin: calc(118.6 * var(--st-vu)) auto 0;
+		padding: calc(105.2 * var(--st-vu)) calc(85.1 * var(--st-vu)) calc(80.3 * var(--st-vu));
+	}
+
+	.p-sservice__lead {
+		margin: 0;
+	}
+
+	.p-sservice__rows {
+		margin-top: calc(80 * var(--st-vu));
+	}
+
+	/* 1 行 = 左のテキスト列 + 右の写真 3 枚。区切り線は写真の下をくぐる */
+	.p-sservice__row {
+		height: calc(253.4 * var(--st-vu));
+	}
+
+	.p-sservice__row + .p-sservice__row {
+		margin-top: calc(74.9 * var(--st-vu)); /* 行ピッチ 328.3 − 253.4 */
+	}
+
+	.p-sservice__row-head {
+		position: absolute;
+		top: calc(59.7 * var(--st-vu));
+		left: 0;
+	}
+
+	.p-sservice__row-label {
+		margin: calc(4.1 * var(--st-vu)) 0 0;
+	}
+
+	.p-sservice__photos {
+		position: absolute;
+		top: 0;
+		left: calc(308.6 * var(--st-vu)); /* 写真 1 枚目 x553.7 − 行の左端 245.1 */
+		grid-template-columns: repeat(3, calc(341.35 * var(--st-vu)));
+		column-gap: calc(30.6 * var(--st-vu));
+	}
+
+	.p-sservice__photo-label {
+		margin-top: calc(15.2 * var(--st-vu));
+	}
+
+	/* --- 見える安心（y8413.9〜9757.5） --- */
+	.p-svisible {
+		--st-visible-card-height: calc(224.7 * var(--st-vu));
+		--st-visible-card-shade: calc(93 * var(--st-vu));
+		--st-visible-card-eng-top: calc(178 * var(--st-vu)); /* 英字 y9302.5 − 写真上端 y9124.5 */
+
+		padding-top: calc(85.7 * var(--st-vu)); /* 8499.6 − 8413.9 */
+	}
+
+	/* Group 360。線画の上にコピーが重なる */
+	.p-svisible__head {
+		width: calc(1233.7 * var(--st-vu));
+		height: calc(653.9 * var(--st-vu));
+		margin-inline: auto;
+	}
+
+	.p-svisible__copy {
+		padding-top: calc(270.5 * var(--st-vu)); /* 8770.1 − 8499.6 */
+	}
+
+	/* 写真 4 枚（y9124.5）は線画の下端に少しかぶる */
+	.p-svisible__cards {
+		grid-template-columns: repeat(4, calc(429.3 * var(--st-vu)));
+		justify-content: center;
+		column-gap: calc(25.2 * var(--st-vu));
+		margin-top: calc(-29 * var(--st-vu));
+	}
+
+	.p-svisible__card-label {
+		margin: calc(30.3 * var(--st-vu)) 0 0; /* 和文 y9379.5 − 写真下端 y9349.2 */
+	}
+
+	.p-svisible__lead {
+		width: calc(1600 * var(--st-vu));
+		margin: calc(80 * var(--st-vu)) auto 0;
+	}
+
+	/* --- DX EXPERIENCE（y9855.2〜10945.7） --- */
+	.p-sdx {
+		--st-dx-marker-x: calc(18 * var(--st-vu)); /* 縦線 x191.5 − 枠左 173.5 */
+		--st-dx-step-x: calc(68 * var(--st-vu)); /* 文言 x241.5 − 枠左 173.5 */
+		--st-dx-marker-y: calc(12.8 * var(--st-vu)); /* 番号 1 行（16 x 1.6）の中心 */
+		--st-dx-line-top: calc(-3 * var(--st-vu)); /* 線 y10050.7 − 画像上端 y10053.7 */
+		--st-dx-line-height: calc(631 * var(--st-vu));
+		--st-dx-dot-size: calc(26 * var(--st-vu));
+		--st-dx-ring-size: calc(37 * var(--st-vu));
+		--st-dx-tag-height: calc(34 * var(--st-vu));
+		--st-dx-tag-pad: calc(15 * var(--st-vu));
+		--st-dx-tag-gap: calc(17 * var(--st-vu)); /* 2 個目 x404.5 − 1 個目の右端 */
+		--st-dx-media-height: calc(628 * var(--st-vu));
+		--st-dx-bar-width: calc(77 * var(--st-vu));
+		--st-dx-bar-height: calc(6 * var(--st-vu));
+		--st-dx-bar-gap: calc(7 * var(--st-vu));
+
+		padding-bottom: calc(120 * var(--st-vu)); /* ボタン下端 10825.7 → 10945.7 */
+	}
+
+	.p-sdx__inner {
+		width: calc(1573 * var(--st-vu));
+		margin-inline: auto;
+		padding-top: calc(97.7 * var(--st-vu)); /* 見える安心の本文下端 9757.5 → 9855.2 */
+	}
+
+	/* 見出しの右に説明（572:599）を重ねる */
+	.p-sdx__head {
+		position: relative;
+		height: calc(198.5 * var(--st-vu)); /* 見出し上端 → 画像上端 */
+	}
+
+	.p-sdx__copy {
+		position: absolute;
+		top: calc(34 * var(--st-vu));
+		left: calc(577.9 * var(--st-vu)); /* x751.4 − 枠左 173.5 */
+	}
+
+	/* 画像の上端（y10053.7）を基準に、ステップを実測 y へ絶対配置する。
+	   高さは画像（628）＝ステップ 03 のタグ下端（y10681.7）と同じ */
+	.p-sdx__body {
+		height: calc(628 * var(--st-vu));
+	}
+
+	.p-sdx__steps {
+		position: absolute;
+		inset: 0 auto 0 0;
+		width: calc(503.6 * var(--st-vu));
+	}
+
+	.p-sdx__step {
+		position: absolute;
+		left: var(--st-dx-step-x);
+		width: calc(372.7 * var(--st-vu));
+	}
+
+	.p-sdx__step:nth-child(1) {
+		top: calc(-9 * var(--st-vu)); /* 番号 y10044.7 */
+	}
+
+	.p-sdx__step:nth-child(2) {
+		top: calc(217.5 * var(--st-vu)); /* 番号 y10271.2 */
+	}
+
+	.p-sdx__step:nth-child(3) {
+		top: calc(450 * var(--st-vu)); /* 番号 y10503.7 */
+	}
+
+	.p-sdx__step-title {
+		margin-top: calc(6.4 * var(--st-vu));
+	}
+
+	.p-sdx__step-desc {
+		margin: 0;
+	}
+
+	.p-sdx__tags {
+		margin-top: calc(32 * var(--st-vu));
+	}
+
+	.p-sdx__media {
+		position: absolute;
+		top: 0;
+		right: 0;
+		width: calc(1069.4 * var(--st-vu));
+	}
+
+	.p-sdx__bars {
+		margin-top: calc(26.5 * var(--st-vu)); /* バー y10708.2 − 枠下端 10681.7 */
+	}
+
+	.p-sdx__foot {
+		margin-top: calc(47.5 * var(--st-vu)); /* ボタン y10761.7 − バー下端 10714.2 */
+	}
+
+	/* --- PLANS（y10945.7〜13912.3） --- */
+	.p-splans {
+		--st-plans-light-end: calc(519.7 * var(--st-vu)); /* #f3f3f4 の下端（669:975 の上端） */
+		--st-plans-white-start: calc(700 * var(--st-vu));
+		--st-plans-divider-height: calc(104.9 * var(--st-vu));
+		--st-plans-fade: calc(38.9 * var(--st-vu));
+		--st-plans-photo-fade: calc(365.9 * var(--st-vu));
+		--st-plans-icon-row: calc(128.2 * var(--st-vu)); /* アイコン下端 y12540.1 − 枠上端 y12411.9 */
+		--st-plans-icon-unit: var(--st-vu);
+
+		padding-top: calc(162.2 * var(--st-vu));
+	}
+
+	.p-splans__lead,
+	.p-sworks__lead {
+		width: calc(782.8 * var(--st-vu));
+		margin-inline: auto;
+	}
+
+	.p-splans__divider {
+		margin-top: calc(151.7 * var(--st-vu)); /* 本文（3 行）の下端 11376.9 → 線 11528.6 */
+	}
+
+	/* Group 362。テキスト左（中心 x511.4）・パース右 */
+	.p-splans__block--package {
+		position: relative;
+		width: calc(1465.2 * var(--st-vu));
+		height: calc(433.9 * var(--st-vu));
+		margin: calc(-24.5 * var(--st-vu)) auto 0; /* 飾り線の下端が枠に少し入る */
+	}
+
+	.p-splans__block--package .p-splans__text {
+		position: absolute;
+		top: calc(34.9 * var(--st-vu));
+		left: 0;
+		width: calc(568 * var(--st-vu));
+	}
+
+	.p-splans__block--package .p-splans__media {
+		position: absolute;
+		top: 0;
+		right: 0;
+		width: calc(857 * var(--st-vu));
+	}
+
+	/* 英字は和文の行ボックスに少しかぶる */
+	.p-splans__eng {
+		margin-top: calc(-8 * var(--st-vu));
+	}
+
+	/* 左右の負マージンは、最後の 1 文字の後ろに付く字間ぶんの逃がし。
+	   これが無いとカンプで 1 行に収まる行が 1px あふれて折り返す */
+	.p-splans__copy {
+		margin: calc(26 * var(--st-vu)) calc(-1 * var(--ls-base)) 0;
+	}
+
+	.p-splans__btn {
+		margin-top: calc(80 * var(--st-vu));
+	}
+
+	/* §3 と同じ 5 枚。PLANS 側は白に溶かし、次セクションへ食い込ませない */
+	.p-sstrip--plans {
+		--st-strip-fade-height: calc(27.9 * var(--st-vu));
+
+		margin-top: calc(76 * var(--st-vu));
+		margin-bottom: 0;
+		background: none;
+	}
+
+	.p-splans__features {
+		grid-template-columns: repeat(4, 1fr);
+		width: calc(1599.5 * var(--st-vu));
+		margin: calc(79.9 * var(--st-vu)) auto 0;
+	}
+
+	.p-splans__feature-label {
+		margin: calc(32.9 * var(--st-vu)) 0 0;
+	}
+
+	.p-splans__highend {
+		margin-top: calc(120 * var(--st-vu));
+		padding-bottom: calc(160 * var(--st-vu));
+	}
+
+	/* Group 338。写真左（枠いっぱい）・テキスト右 */
+	.p-splans__block--highend {
+		position: relative;
+		height: calc(687.6 * var(--st-vu));
+	}
+
+	.p-splans__block--highend .p-splans__media {
+		position: absolute;
+		top: calc(120 * var(--st-vu));
+		left: 0;
+		width: calc(1022.6 * var(--st-vu));
+	}
+
+	.p-splans__block--highend .p-splans__text {
+		position: absolute;
+		top: calc(217.8 * var(--st-vu));
+		left: calc(1096.5 * var(--st-vu));
+		width: calc(663 * var(--st-vu));
+	}
+
+	.p-splans__features--dark {
+		margin-top: calc(79.6 * var(--st-vu));
+	}
+
+	/* --- WORKS（y13912.3〜16414.8） --- */
+	.p-sworks {
+		--st-works-render-top: calc(31.6 * var(--st-vu));
+		--st-works-render-height: calc(205.8 * var(--st-vu));
+		--st-works-label-top: calc(114.2 * var(--st-vu));
+		--st-works-label-width: calc(152.7 * var(--st-vu));
+		--st-works-label-height: calc(42 * var(--st-vu));
+		--st-works-label-radius: calc(3 * var(--st-vu));
+		--st-works-box-head-height: calc(60 * var(--st-vu));
+
+		padding: calc(162.2 * var(--st-vu)) 0 calc(160 * var(--st-vu));
+	}
+
+	/* 1 段目 = メイン + 右列 3 枚、2 段目 = 2 ボックス + 3D パース */
+	.p-sworks__grid {
+		display: grid;
+		grid-template-columns: calc(1199.6 * var(--st-vu)) calc(380 * var(--st-vu));
+		justify-content: center;
+		column-gap: calc(20.4 * var(--st-vu));
+		row-gap: calc(19.9 * var(--st-vu));
+		margin-top: calc(80 * var(--st-vu));
+	}
+
+	.p-sworks__main {
+		grid-area: 1 / 1;
+		height: calc(836 * var(--st-vu));
+	}
+
+	.p-sworks__subs {
+		grid-area: 1 / 2;
+		grid-template-rows: calc(264.8 * var(--st-vu)) calc(265.6 * var(--st-vu)) calc(265.6 * var(--st-vu));
+		row-gap: calc(19.95 * var(--st-vu));
+	}
+
+	.p-sworks__render {
+		grid-area: 2 / 2;
+		height: calc(270.4 * var(--st-vu));
+	}
+
+	.p-sworks__boxes {
+		grid-area: 2 / 1;
+		display: grid;
+		grid-template-columns: repeat(2, calc(590.1 * var(--st-vu)));
+		column-gap: calc(19.4 * var(--st-vu));
+	}
+
+	.p-sworks__box {
+		height: 100%;
+	}
+
+	.p-sworks__box-body {
+		padding: calc(25.2 * var(--st-vu)) calc(47.5 * var(--st-vu)) calc(32 * var(--st-vu));
+	}
+
+	.p-sworks__estimate {
+		width: calc(1600 * var(--st-vu));
+		margin: calc(20 * var(--st-vu)) auto 0;
+		padding: calc(69.6 * var(--st-vu)) calc(167.5 * var(--st-vu)) calc(79.6 * var(--st-vu)) calc(134 * var(--st-vu));
+	}
+
+	/* 列幅は先頭行（列見出し）で決まる。施工内容 227.45 / 使用建材 884 / 残りが概算見積 */
+	.p-sworks__table thead th:first-child {
+		width: calc(227.45 * var(--st-vu));
+	}
+
+	.p-sworks__table thead th:nth-child(2) {
+		width: calc(884 * var(--st-vu));
+	}
+
+	.p-sworks__table thead th {
+		padding-bottom: calc(23.6 * var(--st-vu));
+	}
+
+	.p-sworks__table tbody th,
+	.p-sworks__table tbody td {
+		padding-bottom: calc(5.4 * var(--st-vu)); /* 区切り線は行の上端から 31 */
+	}
+
+	.p-sworks__table tbody tr + tr > * {
+		padding-top: calc(16.5 * var(--st-vu)); /* 行ピッチ 48.5（25.6 + 5.4 + 罫線 1） */
+	}
+
+	.p-sworks__total {
+		margin-top: calc(17 * var(--st-vu));
+	}
+
+	/* --- REVIEWS（y16414.8〜17569.5） --- */
+	.p-sreviews {
+		padding: calc(162.2 * var(--st-vu)) 0 calc(160 * var(--st-vu));
+	}
+
+	.p-sreviews__list {
+		grid-template-columns: repeat(3, calc(498.1 * var(--st-vu)));
+		justify-content: center;
+		column-gap: calc(36.25 * var(--st-vu));
+		margin: calc(80 * var(--st-vu)) 0 0;
+	}
+
+	.p-sreviews__card {
+		height: calc(515.5 * var(--st-vu));
+	}
+
+	.p-sreviews__thumb {
+		height: calc(245.6 * var(--st-vu));
+	}
+
+	.p-sreviews__body {
+		padding: 0 calc(41.4 * var(--st-vu));
+	}
+
+	/* 星と「5.0」は中心をそろえる（星 y17168.9 / 5.0 y17163.2） */
+	.p-sreviews__rating {
+		gap: calc(10.9 * var(--st-vu));
+		margin-top: calc(23.45 * var(--st-vu));
+	}
+
+	.p-sreviews__stars {
+		width: calc(154.6 * var(--st-vu));
+		height: calc(26.7 * var(--st-vu));
+	}
+
+	/* --- FLOW（y17569.5〜19307.9） --- */
+	.p-sflow {
+		--st-flow-chevron-height: calc(55.1 * var(--st-vu));
+		--st-flow-notch: calc(12.2764 * var(--st-vu)); /* 矢羽根の食い込み */
+		--st-flow-row-height: calc(149.297 * var(--st-vu));
+		--st-flow-curve-depth: calc(24.976 * var(--st-vu)); /* 669:259 の弧の深さ */
+		--st-flow-bleed: calc(80.6 * var(--st-vu)); /* 7 行目が Quality にはみ出す高さ */
+
+		padding: calc(162.2 * var(--st-vu)) 0 0;
+	}
+
+	.p-sflow__chevrons {
+		width: calc(1600 * var(--st-vu));
+		margin: calc(112 * var(--st-vu)) auto 0;
+	}
+
+	/* ピッチ 229.4 に対して幅 235.7（6.3 の重なり） */
+	.p-sflow__chevron + .p-sflow__chevron {
+		margin-left: calc(-6.315 * var(--st-vu));
+	}
+
+	.p-sflow__rows {
+		width: calc(1200 * var(--st-vu));
+		margin: calc(62.6 * var(--st-vu)) auto 0;
+		row-gap: calc(20 * var(--st-vu));
+	}
+
+	/* 番号中心 +88 / タイトル +179.4 / 説明 +518.6 */
+	.p-sflow__row {
+		grid-template-columns: calc(179.4 * var(--st-vu)) calc(339.2 * var(--st-vu)) 1fr;
+		height: var(--st-flow-row-height);
+	}
+
+	/* 669:259 7 行目だけ下辺が浅い山形になり、Quality の写真に食い込む */
+	.p-sflow__row:last-child {
+		height: calc(var(--st-flow-row-height) + var(--st-flow-curve-depth));
+		margin-bottom: calc(-1 * var(--st-flow-bleed));
+		padding-bottom: var(--st-flow-curve-depth);
+		clip-path: polygon(
+			0 0,
+			100% 0,
+			100% calc(100% - var(--st-flow-curve-depth)),
+			50% 100%,
+			0 calc(100% - var(--st-flow-curve-depth))
+		);
+	}
+
+	/* --- Quality（y19307.9〜20267.9） --- */
+	.p-squality {
+		min-height: calc(960 * var(--st-vu));
+	}
+
+	.p-squality__inner {
+		padding: calc(307.4 * var(--st-vu)) calc(28 * var(--st-vu)) calc(14 * var(--st-vu));
+	}
+
+	.p-squality__lead {
+		max-width: calc(1600 * var(--st-vu));
+		margin: calc(30.2 * var(--st-vu)) auto 0;
+	}
+
+	.p-squality__badge {
+		width: calc(315.1 * var(--st-vu));
+		height: calc(81.6 * var(--st-vu));
+		margin: calc(46.2 * var(--st-vu)) auto 0;
+		border-radius: calc(5 * var(--st-vu));
+	}
+
+	.p-squality__note {
+		margin: calc(217.8 * var(--st-vu)) 0 0;
+	}
+
+	/* --- FAQ（y20267.9〜22247.5） --- */
+	.p-sfaq {
+		--st-faq-arrow-width: calc(35.75 * var(--st-vu)); /* 回転前の書き出しサイズ */
+		--st-faq-arrow-height: calc(17.79 * var(--st-vu));
+
+		padding: calc(162.2 * var(--st-vu)) 0 calc(160 * var(--st-vu));
+	}
+
+	.p-sfaq__list {
+		width: calc(1200 * var(--st-vu));
+		margin: calc(79.6 * var(--st-vu)) auto 0;
+		row-gap: calc(20 * var(--st-vu));
+	}
+
+	/* 「Q」中心 +72 / 質問 +143.8 / 山形の中心は右から 78 */
+	.p-sfaq__q {
+		grid-template-columns: calc(143.8 * var(--st-vu)) 1fr calc(156.1 * var(--st-vu));
+		min-height: calc(149.297 * var(--st-vu));
+		padding: 0;
+	}
+
+	.p-sfaq__answer {
+		padding: calc(28 * var(--st-vu)) calc(156.1 * var(--st-vu)) calc(40 * var(--st-vu)) calc(143.8 * var(--st-vu));
+	}
+
+	/* --- AREA（y22247.5〜25606.8） --- */
+	.p-sarea {
+		--st-area-bg-height: calc(933.8 * var(--st-vu)); /* 620:292 */
+		--st-area-card-photo: calc(364.4 * var(--st-vu)); /* 1148:52 */
+		--st-area-logo-width: calc(288.5 * var(--st-vu)); /* 1131:38 */
+
+		/* 上: 見出し y160 / 下: カード 4 枚のラベル下端 y3172.6 → セクション下端 3359.3 */
+		padding: calc(160 * var(--st-vu)) 0 calc(167.7 * var(--st-vu));
+	}
+
+	/* 628:303。見出し下端 y193 → パネル上端 y613.9 */
+	.p-sarea__panel {
+		width: calc(1600 * var(--st-vu));
+		min-height: calc(987.6 * var(--st-vu));
+		margin: calc(420.9 * var(--st-vu)) auto 0;
+	}
+
+	.p-sarea__banner {
+		width: calc(919.1 * var(--st-vu));
+		height: calc(90.6 * var(--st-vu));
+		margin-top: calc(-48.3 * var(--st-vu)); /* パネル上端より 48.3 上から始まる */
+		border-radius: calc(5 * var(--st-vu));
+	}
+
+	.p-sarea__lead {
+		margin: calc(74.7 * var(--st-vu)) 0 0; /* 黒帯の下端 42.3 → リード 117 */
+	}
+
+	/* 表は x192.5（パネル基準）、外観写真は x879.4 */
+	.p-sarea__info {
+		display: grid;
+		grid-template-columns: calc(609.7 * var(--st-vu)) calc(515.4 * var(--st-vu));
+		column-gap: calc(77.2 * var(--st-vu));
+		margin-top: calc(112 * var(--st-vu));
+		padding-left: calc(192.5 * var(--st-vu));
+	}
+
+	/* 行ピッチ 50.4（文字 25.6 + 区切り線の上下） */
+	.p-sarea__row {
+		grid-template-columns: calc(158.2 * var(--st-vu)) 1fr;
+		padding: calc(17.2 * var(--st-vu)) 0 calc(7.2 * var(--st-vu));
+	}
+
+	.p-sarea__row:first-child {
+		padding-top: 0;
+	}
+
+	.p-sarea__row:last-child {
+		padding-bottom: 0;
+	}
+
+	/* 1126:34。パネルと背景にまたがって置く（内側は透明） */
+	.p-sarea__gallery {
+		position: absolute;
+		top: calc(919.9 * var(--st-vu));
+		left: calc(18.5 * var(--st-vu));
+		width: calc(1883.3 * var(--st-vu));
+		height: auto;
+		max-width: none;
+	}
+
+	/* ロゴと支店名は弧の内側（パネル上端から 746.9 / 801.4） */
+	.p-sarea__logo {
+		position: absolute;
+		top: calc(746.9 * var(--st-vu));
+		right: 0;
+		left: 0;
+	}
+
+	.p-sarea__branch {
+		position: absolute;
+		top: calc(801.4 * var(--st-vu));
+		right: 0;
+		left: 0;
+	}
+
+	/* --- Local Expertise（y24197.5〜24858） --- */
+	.p-sarea__local {
+		min-height: calc(660.5 * var(--st-vu));
+		margin-top: calc(348.5 * var(--st-vu)); /* パネル下端 y1601.5 → y1950 */
+	}
+
+	.p-sarea__local-body {
+		width: calc(1027 * var(--st-vu));
+		min-height: calc(571.8 * var(--st-vu));
+		margin-left: calc(0.7 * var(--st-vu));
+		padding: calc(132.1 * var(--st-vu)) 0 calc(132.1 * var(--st-vu)) calc(268.5 * var(--st-vu));
+		border-radius: 0 calc(10 * var(--st-vu)) calc(10 * var(--st-vu)) 0;
+	}
+
+	.p-sarea__local-heading {
+		margin: calc(24 * var(--st-vu)) 0 0;
+	}
+
+	.p-sarea__local-lead {
+		width: calc(544.1 * var(--st-vu));
+		margin-top: calc(23.8 * var(--st-vu));
+	}
+
+	.p-sarea__local-photo {
+		position: absolute;
+		top: calc(82.2 * var(--st-vu));
+		left: calc(962.5 * var(--st-vu));
+		z-index: 0;
+		width: calc(957.5 * var(--st-vu));
+		height: calc(578.3 * var(--st-vu));
+		border-radius: calc(10 * var(--st-vu)) 0 0 calc(10 * var(--st-vu));
+	}
+
+	/* --- カード 4 枚（y24914〜25420・400 幅・ピッチ 411.2） --- */
+	.p-sarea__cards {
+		grid-template-columns: repeat(4, calc(400 * var(--st-vu)));
+		column-gap: calc(11.2 * var(--st-vu));
+		justify-content: center;
+		margin-top: calc(56 * var(--st-vu));
+	}
+
+	/* 番号の行ボックス 102.4 に対して写真は 50.8 の位置から始まる */
+	.p-sarea__card-photo {
+		margin-top: calc(-51.6 * var(--st-vu));
+	}
+
+	.p-sarea__card-label {
+		margin: calc(33.1 * var(--st-vu)) 0 0;
+	}
+
+	/* --- お問い合わせ CTA（y25606.8〜26590.4） --- */
+	.p-scta {
+		min-height: calc(983.5 * var(--st-vu));
+	}
+
+	.p-scta__inner {
+		padding: calc(338.8 * var(--st-vu)) var(--gutter) calc(227 * var(--st-vu));
+	}
+
+	.p-scta__lead {
+		margin: calc(30.6 * var(--st-vu)) 0 0;
+	}
+
+	.p-scta__buttons {
+		column-gap: calc(33.5 * var(--st-vu));
+		margin-top: calc(76.6 * var(--st-vu));
+	}
+
+	.p-scta__button {
+		width: calc(431.6 * var(--st-vu));
+		height: calc(90.5 * var(--st-vu));
+		border-radius: calc(8 * var(--st-vu));
+	}
+
+	.p-scta__button--line {
+		column-gap: calc(11 * var(--st-vu));
+	}
+
+	.p-scta__button--line .p-scta__button-icon {
+		width: calc(81.8 * var(--st-vu));
+		height: calc(81.8 * var(--st-vu));
+	}
+
+	.p-scta__button--tel {
+		column-gap: calc(26.4 * var(--st-vu));
+	}
+
+	.p-scta__button--tel .p-scta__button-icon {
+		width: calc(60.7 * var(--st-vu));
+		height: calc(60.7 * var(--st-vu));
+	}
+
+	/* --- COLUMN（y26590.4〜27677.6） --- */
+	.p-scolumn {
+		padding: calc(162.2 * var(--st-vu)) 0 calc(160 * var(--st-vu));
+	}
+
+	/* カード 373 幅・ピッチ約 410。5 枚目が右端（x1796）で見切れる */
+	.p-scolumn__list {
+		gap: calc(36 * var(--st-vu));
+		margin-top: calc(80 * var(--st-vu));
+		padding-inline: calc(159 * var(--st-vu));
+	}
+
+	.p-scolumn__card {
+		flex-basis: calc(373 * var(--st-vu));
+	}
+
+	.p-scolumn__card-image {
+		height: calc(226 * var(--st-vu));
+	}
+
+	.p-scolumn__card-title {
+		margin: calc(7 * var(--st-vu)) 0 0;
+	}
+
+	.p-scolumn__btn {
+		margin-top: calc(65 * var(--st-vu));
+	}
+}
+
+/* ============================================================
+   SP（1024px 以下）: カンプが無いので縦積みに補間
+   ------------------------------------------------------------
+   コピー塊は左寄せのまま、サムネイル行はその下に中央寄せ。
+   写真 4 枚は FV の外に出して 2 列 2 段にする。
+   ============================================================ */
+@media (max-width: 1024px) {
+	.p-sfv__body {
+		/* ヘッダー（流れの中で写真の上に積まれる）と重ならないよう上下に余白を取る */
+		padding-block: var(--st-fv-pad-block);
+	}
+
+	.p-sfv__title {
+		/* 「YOUR LIFE」が 1 行に収まらない幅では自動で縮める */
+		font-size: min(var(--st-fv-title), 17vw);
+	}
+
+	/* カンプの改行位置は 1920 幅のもの。SP で長い段落をそのまま折ると
+	   行末がひどく揃わないので、幅の広い本文だけ改行を無効にして自然に流す */
+	.p-sintro__lead br,
+	.p-sconcern__note br,
+	.p-sreasons__copy-lead br,
+	.p-sservice__lead br,
+	.p-sarea__lead br,
+	.p-sarea__local-lead br,
+	.p-scta__lead br,
+	.p-scolumn__lead br {
+		display: none;
+	}
+
+	/* --- 導入コピー --- */
+	.p-sintro {
+		--st-intro-icon-w: calc(120 * var(--st-su));
+
+		padding: calc(40 * var(--st-su)) var(--gutter) calc(48 * var(--st-su));
+	}
+
+	.p-sintro__heading {
+		margin: calc(16 * var(--st-su)) 0 0;
+	}
+
+	.p-sintro__lead {
+		margin: calc(14 * var(--st-su)) 0 0;
+	}
+
+	/* --- 施工イメージ帯: 帯ごと画面幅に比例縮小（1920 → 375 で約 19.5%） --- */
+	.p-sstrip {
+		--st-strip-unit: calc(var(--st-su) * 0.1953);
+		--st-strip-fade-height: calc(24 * var(--st-su));
+
+		background: var(--color-white2);
+	}
+
+	/* --- 実績数字: 2 列 2 段 --- */
+	.p-sstats {
+		--st-stats-ring-size: calc(140 * var(--st-su));
+		--st-stats-ring-width: calc(2 * var(--st-su));
+		--st-stats-photo-size: calc(122 * var(--st-su));
+
+		padding: calc(48 * var(--st-su)) var(--gutter) calc(56 * var(--st-su));
+	}
+
+	.p-sstats__list {
+		grid-template-columns: repeat(2, auto);
+		column-gap: calc(16 * var(--st-su));
+		row-gap: calc(28 * var(--st-su));
+	}
+
+	.p-sstats__label {
+		margin: calc(12 * var(--st-su)) 0 0;
+	}
+
+	/* --- 不安提示: スケッチは右上の背景に回す --- */
+	.p-sconcern {
+		padding: 0 0 calc(56 * var(--st-su));
+	}
+
+	.p-sconcern__sketch {
+		top: calc(-16 * var(--st-su));
+		right: calc(-30 * var(--st-su));
+		width: calc(330 * var(--st-su));
+		height: auto;
+		object-fit: fill;
+		opacity: 0.7;
+	}
+
+	.p-sconcern__body {
+		padding-inline: var(--gutter);
+	}
+
+	.p-sconcern__heading {
+		padding: calc(14 * var(--st-su)) calc(16 * var(--st-su));
+	}
+
+	.p-sconcern__list {
+		margin: calc(24 * var(--st-su)) 0 0;
+	}
+
+	.p-sconcern__note {
+		margin: calc(20 * var(--st-su)) 0 0;
+	}
+
+	/* --- 選ばれる理由: 円形ダイアグラムをやめて縦積み + 2 列 --- */
+	.p-sreasons {
+		--st-reasons-photo-height: calc(420 * var(--st-su));
+		--st-reasons-shade-height: calc(180 * var(--st-su));
+		--st-reasons-fade-height: calc(140 * var(--st-su));
+		--st-reasons-logo-width: calc(130 * var(--st-su));
+		--st-reasons-house-width: 100%;
+		--st-reasons-icon-unit: calc(var(--st-su) * 0.55);
+
+		padding: calc(56 * var(--st-su)) var(--gutter) calc(64 * var(--st-su));
+	}
+
+	/* 561:80 の PNG は高さ固定でリード文がはみ出すため、SP / 中間幅では使わない。
+	   代わりにテキスト塊自身へ暗幕を敷き、コピーの量が変わっても必ず覆う */
+	.p-sreasons__bg-shade {
+		display: none;
+	}
+
+	.p-sreasons__copy {
+		margin-top: calc(-56 * var(--st-su)); /* セクション上余白ぶん上へ伸ばす */
+		margin-inline: calc(var(--gutter) * -1); /* 全幅に広げる */
+		padding: calc(56 * var(--st-su)) var(--gutter) calc(40 * var(--st-su));
+		background: linear-gradient(
+			180deg,
+			var(--st-reasons-shade-top) 0%,
+			var(--st-reasons-shade-mid) 80%,
+			var(--st-black-0) 100%
+		);
+	}
+
+	.p-sreasons__copy-lead {
+		margin: calc(16 * var(--st-su)) 0 0;
+	}
+
+	.p-sreasons__diagram {
+		margin-top: calc(24 * var(--st-su));
+	}
+
+	.p-sreasons__title {
+		margin: calc(8 * var(--st-su)) 0 0;
+	}
+
+	.p-sreasons__title-lead {
+		margin: calc(12 * var(--st-su)) 0 0;
+	}
+
+	.p-sreasons__house {
+		margin-top: calc(16 * var(--st-su));
+	}
+
+	.p-sreasons__eng {
+		margin: calc(8 * var(--st-su)) 0 0;
+	}
+
+	.p-sreasons__eng-sub {
+		margin: calc(4 * var(--st-su)) 0 0;
+	}
+
+	.p-sreasons__items {
+		display: grid;
+		grid-template-columns: repeat(2, 1fr);
+		column-gap: calc(12 * var(--st-su));
+		row-gap: calc(32 * var(--st-su));
+		margin-top: calc(48 * var(--st-su));
+	}
+
+	/* アイコンの高さが不揃いなので、ラベルの高さを揃えて行をそろえる */
+	.p-sreasons__item {
+		display: grid;
+		grid-template-rows: calc(64 * var(--st-su)) auto 1fr;
+		align-items: end;
+	}
+
+	.p-sreasons__icon {
+		align-self: end;
+	}
+
+	.p-sreasons__item-lead {
+		/* 説明が 1 行の項目と 2 行の項目が混ざるので、2 行ぶんの高さで固定して
+		   下のラベルを横並びでそろえる */
+		min-height: calc(var(--st-reasons-item-lead) * 3.2);
+		margin: calc(10 * var(--st-su)) 0 0;
+	}
+
+	.p-sreasons__item-label {
+		margin: calc(2 * var(--st-su)) 0 0;
+		align-self: start;
+	}
+
+	/* --- SERVICE: カード・カテゴリ行を縦積み --- */
+	.p-sservice {
+		--st-service-card-height: calc(200 * var(--st-su));
+		--st-service-card-shade: calc(110 * var(--st-su));
+		--st-service-card-eng-bottom: calc(12 * var(--st-su));
+		--st-service-banner-top: calc(-22 * var(--st-su));
+		--st-service-banner-width: calc(300 * var(--st-su));
+		--st-service-banner-height: auto;
+		--st-service-line-top: calc(-16 * var(--st-su));
+		--st-service-photo-height: calc(66 * var(--st-su));
+
+		padding: calc(56 * var(--st-su)) var(--gutter) calc(64 * var(--st-su));
+	}
+
+	.p-sservice__cards {
+		row-gap: calc(32 * var(--st-su));
+		margin-top: calc(32 * var(--st-su));
+	}
+
+	.p-sservice__card-label {
+		margin: calc(12 * var(--st-su)) 0 0;
+	}
+
+	.p-sservice__banner {
+		padding: calc(10 * var(--st-su)) calc(12 * var(--st-su));
+	}
+
+	.p-sservice__panel {
+		margin: calc(56 * var(--st-su)) 0 0;
+		padding: calc(40 * var(--st-su)) calc(16 * var(--st-su)) calc(32 * var(--st-su));
+	}
+
+	.p-sservice__rows {
+		margin-top: calc(32 * var(--st-su));
+	}
+
+	.p-sservice__row + .p-sservice__row {
+		margin-top: calc(32 * var(--st-su));
+	}
+
+	.p-sservice__photos {
+		column-gap: calc(8 * var(--st-su));
+		margin-top: calc(12 * var(--st-su));
+	}
+
+	.p-sservice__photo-label {
+		margin-top: calc(6 * var(--st-su));
+	}
+
+	/* --- 見える安心: 写真 4 枚を 2 列 2 段に折る --- */
+	.p-svisible {
+		--st-visible-card-height: calc(110 * var(--st-su));
+		--st-visible-card-shade: calc(56 * var(--st-su));
+		--st-visible-card-eng-top: calc(86 * var(--st-su));
+
+		padding: calc(56 * var(--st-su)) var(--gutter) calc(48 * var(--st-su));
+	}
+
+	.p-svisible__head {
+		padding: calc(24 * var(--st-su)) 0;
+	}
+
+	.p-svisible__heading {
+		margin-top: calc(8 * var(--st-su));
+	}
+
+	.p-svisible__cards {
+		grid-template-columns: repeat(2, 1fr);
+		column-gap: calc(12 * var(--st-su));
+		row-gap: calc(28 * var(--st-su));
+		margin-top: calc(32 * var(--st-su));
+	}
+
+	.p-svisible__card-label {
+		margin: calc(26 * var(--st-su)) 0 0;
+	}
+
+	.p-svisible__lead {
+		margin: calc(32 * var(--st-su)) 0 0;
+	}
+
+	/* --- DX EXPERIENCE: 画像を上に出し、ステップを縦に並べる --- */
+	.p-sdx {
+		--st-dx-marker-x: calc(9 * var(--st-su));
+		--st-dx-marker-y: calc(9 * var(--st-su));
+		--st-dx-line-top: calc(9 * var(--st-su));
+		--st-dx-line-height: calc(100% - 18 * var(--st-su));
+		--st-dx-dot-size: calc(14 * var(--st-su));
+		--st-dx-ring-size: calc(20 * var(--st-su));
+		--st-dx-tag-height: calc(26 * var(--st-su));
+		--st-dx-tag-pad: calc(10 * var(--st-su));
+		--st-dx-tag-gap: calc(8 * var(--st-su));
+		--st-dx-media-height: calc(200 * var(--st-su));
+		--st-dx-bar-width: calc(48 * var(--st-su));
+		--st-dx-bar-height: calc(4 * var(--st-su));
+		--st-dx-bar-gap: calc(6 * var(--st-su));
+
+		padding: 0 var(--gutter) calc(56 * var(--st-su));
+	}
+
+	.p-sdx__copy {
+		margin-top: calc(12 * var(--st-su));
+	}
+
+	.p-sdx__body {
+		display: grid;
+		row-gap: calc(28 * var(--st-su));
+		margin-top: calc(28 * var(--st-su));
+	}
+
+	.p-sdx__media {
+		order: -1;
+	}
+
+	.p-sdx__list {
+		display: grid;
+		row-gap: calc(28 * var(--st-su));
+	}
+
+	/* 丸はステップの左端に置く（PC はタイムラインの絶対位置） */
+	.p-sdx__step {
+		padding-left: calc(30 * var(--st-su));
+	}
+
+	.p-sdx__step::before,
+	.p-sdx__step::after {
+		left: var(--st-dx-marker-x);
+	}
+
+	.p-sdx__step-title {
+		margin-top: calc(4 * var(--st-su));
+	}
+
+	.p-sdx__step-desc {
+		margin: calc(6 * var(--st-su)) 0 0;
+	}
+
+	.p-sdx__tags {
+		margin-top: calc(10 * var(--st-su));
+	}
+
+	.p-sdx__bars {
+		margin-top: calc(24 * var(--st-su));
+	}
+
+	.p-sdx__foot {
+		margin-top: calc(24 * var(--st-su));
+	}
+
+	/* --- PLANS: テキストと画像を縦積み、特長は 2 列 2 段 --- */
+	.p-splans {
+		--st-plans-light-end: calc(140 * var(--st-su));
+		--st-plans-white-start: calc(200 * var(--st-su));
+		--st-plans-divider-height: calc(40 * var(--st-su));
+		--st-plans-fade: calc(24 * var(--st-su));
+		--st-plans-photo-fade: calc(80 * var(--st-su));
+		--st-plans-icon-row: calc(48 * var(--st-su));
+		--st-plans-icon-unit: calc(var(--st-su) * 0.45);
+
+		padding: calc(56 * var(--st-su)) 0 0;
+	}
+
+	.p-splans__lead,
+	.p-sworks__lead {
+		padding-inline: var(--gutter);
+	}
+
+	.p-splans__divider {
+		margin-top: calc(24 * var(--st-su));
+	}
+
+	.p-splans__block {
+		display: grid;
+		row-gap: calc(20 * var(--st-su));
+		padding-inline: var(--gutter);
+	}
+
+	/* ハイエンドの写真だけは画面の端まで伸ばす（カンプの左端そろえ） */
+	.p-splans__block--highend {
+		padding-inline: 0;
+	}
+
+	.p-splans__block--highend .p-splans__text {
+		padding-inline: var(--gutter);
+	}
+
+	.p-splans__eng {
+		margin-top: calc(-2 * var(--st-su));
+	}
+
+	.p-splans__copy {
+		margin: calc(12 * var(--st-su)) 0 0;
+	}
+
+	.p-splans__btn {
+		margin-top: calc(24 * var(--st-su));
+	}
+
+	.p-sstrip--plans {
+		margin-top: calc(32 * var(--st-su));
+		background: none;
+	}
+
+	.p-splans__features {
+		grid-template-columns: repeat(2, 1fr);
+		row-gap: calc(28 * var(--st-su));
+		margin-top: calc(32 * var(--st-su));
+		padding-inline: var(--gutter);
+	}
+
+	/* 2 列に折るので、区切り線は右列の左側だけにする */
+	.p-splans__feature + .p-splans__feature {
+		border-left: 0;
+	}
+
+	.p-splans__feature:nth-child(even) {
+		border-left: var(--border-thin) solid var(--st-line-feature);
+	}
+
+	.p-splans__features--dark .p-splans__feature:nth-child(even) {
+		border-left-color: var(--st-line-feature-dark);
+	}
+
+	.p-splans__feature-label {
+		margin: calc(12 * var(--st-su)) 0 0;
+	}
+
+	.p-splans__highend {
+		margin-top: calc(40 * var(--st-su));
+		padding: calc(40 * var(--st-su)) 0;
+	}
+
+	/* --- WORKS: 写真グリッド・2 ボックス・テーブルを縦積み --- */
+	.p-sworks {
+		--st-works-render-top: calc(16 * var(--st-su));
+		--st-works-render-height: calc(110 * var(--st-su));
+		--st-works-label-top: calc(58 * var(--st-su));
+		--st-works-label-width: calc(104 * var(--st-su));
+		--st-works-label-height: calc(26 * var(--st-su));
+		--st-works-label-radius: calc(3 * var(--st-su));
+		--st-works-box-head-height: calc(40 * var(--st-su));
+
+		padding: calc(56 * var(--st-su)) var(--gutter) calc(64 * var(--st-su));
+	}
+
+	.p-sworks__grid {
+		display: grid;
+		row-gap: calc(12 * var(--st-su));
+		margin-top: calc(32 * var(--st-su));
+	}
+
+	.p-sworks__main {
+		height: calc(200 * var(--st-su));
+	}
+
+	.p-sworks__subs {
+		grid-template-columns: repeat(3, 1fr);
+		column-gap: calc(8 * var(--st-su));
+		height: calc(72 * var(--st-su));
+	}
+
+	.p-sworks__render {
+		height: calc(150 * var(--st-su));
+	}
+
+	.p-sworks__boxes {
+		display: grid;
+		row-gap: calc(12 * var(--st-su));
+	}
+
+	.p-sworks__box-body {
+		padding: calc(16 * var(--st-su));
+	}
+
+	.p-sworks__estimate {
+		margin-top: calc(12 * var(--st-su));
+		padding: calc(20 * var(--st-su)) calc(16 * var(--st-su));
+	}
+
+	.p-sworks__table thead th {
+		padding-bottom: calc(10 * var(--st-su));
+	}
+
+	.p-sworks__table thead th:first-child {
+		width: 24%;
+	}
+
+	.p-sworks__table thead th:nth-child(2) {
+		width: 46%;
+	}
+
+	.p-sworks__table tbody th,
+	.p-sworks__table tbody td {
+		padding-bottom: calc(8 * var(--st-su));
+	}
+
+	.p-sworks__table tbody tr + tr > * {
+		padding-top: calc(10 * var(--st-su));
+	}
+
+	.p-sworks__table tbody th,
+	.p-sworks__material {
+		padding-right: calc(8 * var(--st-su));
+	}
+
+	.p-sworks__total {
+		margin-top: calc(12 * var(--st-su));
+	}
+
+	/* --- REVIEWS: カード 3 枚を縦積み --- */
+	.p-sreviews {
+		padding: calc(56 * var(--st-su)) var(--gutter) calc(64 * var(--st-su));
+	}
+
+	.p-sreviews__list {
+		row-gap: calc(16 * var(--st-su));
+		margin: calc(32 * var(--st-su)) 0 0;
+	}
+
+	.p-sreviews__thumb {
+		height: calc(160 * var(--st-su));
+	}
+
+	.p-sreviews__body {
+		padding: 0 calc(16 * var(--st-su)) calc(20 * var(--st-su));
+	}
+
+	.p-sreviews__rating {
+		gap: calc(8 * var(--st-su));
+		margin-top: calc(14 * var(--st-su));
+	}
+
+	.p-sreviews__stars {
+		width: calc(100 * var(--st-su));
+		height: calc(17.25 * var(--st-su));
+	}
+
+	/* --- FLOW: 矢羽根は下向きにして縦積み、行はカード化 --- */
+	.p-sflow {
+		--st-flow-chevron-height: calc(44 * var(--st-su));
+		--st-flow-notch: calc(10 * var(--st-su));
+
+		padding: calc(56 * var(--st-su)) var(--gutter) calc(64 * var(--st-su));
+	}
+
+	.p-sflow__chevrons {
+		flex-direction: column;
+		row-gap: calc(4 * var(--st-su));
+		margin: calc(32 * var(--st-su)) 0 0;
+	}
+
+	/* 下向きの矢羽根。文字は先端を避けて上寄りの矩形に収める */
+	.p-sflow__chevron,
+	.p-sflow__chevron:first-child {
+		padding-bottom: var(--st-flow-notch);
+		clip-path: polygon(
+			0 0,
+			100% 0,
+			100% calc(100% - var(--st-flow-notch)),
+			50% 100%,
+			0 calc(100% - var(--st-flow-notch))
+		);
+	}
+
+	.p-sflow__chevron:last-child {
+		padding-bottom: 0;
+		clip-path: none;
+	}
+
+	.p-sflow__rows {
+		row-gap: calc(12 * var(--st-su));
+		margin: calc(24 * var(--st-su)) 0 0;
+	}
+
+	.p-sflow__row {
+		grid-template-columns: auto 1fr;
+		column-gap: calc(10 * var(--st-su));
+		row-gap: calc(6 * var(--st-su));
+		padding: calc(16 * var(--st-su));
+		border-radius: var(--st-card-radius);
+	}
+
+	.p-sflow__number {
+		line-height: 1.2;
+	}
+
+	.p-sflow__row-title {
+		line-height: 1.4;
+	}
+
+	.p-sflow__row-desc {
+		grid-column: 1 / -1;
+	}
+
+	/* --- Quality: 中央寄せのまま縦に詰める --- */
+	.p-squality__bg::after {
+		background: var(--st-photo-shade-strong);
+	}
+
+	/* 16 文字の見出しが 375 で 2 行に割れないよう、狭い幅では自動で縮める */
+	.p-squality__heading {
+		font-size: min(var(--st-quality-heading), 4.7vw);
+	}
+
+	.p-squality__inner {
+		padding: calc(56 * var(--st-su)) var(--gutter) calc(40 * var(--st-su));
+	}
+
+	.p-squality__lead {
+		margin: calc(16 * var(--st-su)) auto 0;
+	}
+
+	.p-squality__badge {
+		width: calc(190 * var(--st-su));
+		height: calc(52 * var(--st-su));
+		margin: calc(24 * var(--st-su)) auto 0;
+		border-radius: calc(5 * var(--st-su));
+	}
+
+	.p-squality__note {
+		margin: calc(28 * var(--st-su)) 0 0;
+	}
+
+	/* --- FAQ: 「Q」・質問・山形を 1 行に詰める --- */
+	.p-sfaq {
+		--st-faq-arrow-width: calc(20 * var(--st-su));
+		--st-faq-arrow-height: calc(10 * var(--st-su));
+
+		padding: calc(56 * var(--st-su)) var(--gutter) calc(64 * var(--st-su));
+	}
+
+	.p-sfaq__list {
+		row-gap: calc(12 * var(--st-su));
+		margin: calc(32 * var(--st-su)) 0 0;
+	}
+
+	.p-sfaq__q {
+		grid-template-columns: calc(30 * var(--st-su)) 1fr calc(28 * var(--st-su));
+		align-items: center;
+		column-gap: calc(8 * var(--st-su));
+		padding: calc(14 * var(--st-su));
+	}
+
+	.p-sfaq__mark {
+		line-height: 1.2;
+	}
+
+	.p-sfaq__q-text {
+		line-height: 1.6;
+	}
+
+	.p-sfaq__answer {
+		padding: calc(12 * var(--st-su)) calc(14 * var(--st-su)) calc(16 * var(--st-su));
+	}
+
+	/* --- AREA: パネルの中身を縦積みにし、弧状ギャラリーは流れの中に置く --- */
+	.p-sarea {
+		--st-area-bg-height: calc(240 * var(--st-su));
+		--st-area-card-photo: calc(200 * var(--st-su));
+		--st-area-logo-width: calc(160 * var(--st-su));
+
+		padding: calc(56 * var(--st-su)) 0 calc(56 * var(--st-su));
+	}
+
+	.p-sarea__panel {
+		width: calc(100% - var(--gutter) * 2);
+		margin: calc(130 * var(--st-su)) auto 0;
+		padding-bottom: calc(28 * var(--st-su));
+	}
+
+	/* 黒帯は 2 行に折れるので高さは中身に任せる */
+	.p-sarea__banner {
+		width: calc(100% - 16 * var(--st-su));
+		margin-top: calc(-24 * var(--st-su));
+		padding: calc(10 * var(--st-su)) calc(12 * var(--st-su));
+		border-radius: calc(5 * var(--st-su));
+		line-height: 1.6;
+	}
+
+	.p-sarea__lead {
+		margin: calc(20 * var(--st-su)) 0 0;
+		padding-inline: calc(16 * var(--st-su));
+	}
+
+	.p-sarea__info {
+		display: grid;
+		row-gap: calc(20 * var(--st-su));
+		margin-top: calc(20 * var(--st-su));
+		padding-inline: calc(16 * var(--st-su));
+	}
+
+	.p-sarea__row {
+		grid-template-columns: calc(84 * var(--st-su)) 1fr;
+		column-gap: calc(8 * var(--st-su));
+		padding: calc(10 * var(--st-su)) 0;
+	}
+
+	.p-sarea__logo {
+		margin-top: calc(28 * var(--st-su));
+	}
+
+	.p-sarea__branch {
+		margin-top: calc(6 * var(--st-su));
+	}
+
+	.p-sarea__gallery {
+		width: 100%;
+		height: auto;
+		margin-top: calc(24 * var(--st-su));
+	}
+
+	/* Local Expertise: 写真をパネルの下に少しだけ潜らせる */
+	.p-sarea__local {
+		margin-top: calc(40 * var(--st-su));
+	}
+
+	.p-sarea__local-body {
+		padding: calc(28 * var(--st-su)) var(--gutter) calc(32 * var(--st-su));
+		border-radius: 0 calc(10 * var(--st-su)) calc(10 * var(--st-su)) 0;
+	}
+
+	.p-sarea__local-heading {
+		margin: calc(12 * var(--st-su)) 0 0;
+	}
+
+	.p-sarea__local-lead {
+		margin-top: calc(16 * var(--st-su));
+	}
+
+	.p-sarea__local-photo {
+		height: calc(200 * var(--st-su));
+		margin-top: calc(-16 * var(--st-su));
+		border-radius: calc(10 * var(--st-su)) 0 0 calc(10 * var(--st-su));
+	}
+
+	.p-sarea__cards {
+		row-gap: calc(28 * var(--st-su));
+		margin-top: calc(40 * var(--st-su));
+		padding-inline: var(--gutter);
+	}
+
+	.p-sarea__card-photo {
+		margin-top: calc(-24 * var(--st-su));
+	}
+
+	.p-sarea__card-label {
+		margin: calc(16 * var(--st-su)) 0 0;
+	}
+
+	/* --- お問い合わせ CTA: 中央寄せのまま 2 ボタンを縦積み --- */
+	.p-scta__bg::after {
+		background: var(--st-cta-overlay-flat);
+	}
+
+	.p-scta__inner {
+		padding: calc(56 * var(--st-su)) var(--gutter) calc(64 * var(--st-su));
+	}
+
+	.p-scta__heading {
+		margin-top: calc(8 * var(--st-su));
+	}
+
+	.p-scta__lead {
+		margin: calc(16 * var(--st-su)) 0 0;
+	}
+
+	.p-scta__buttons {
+		flex-direction: column;
+		align-items: center;
+		row-gap: calc(16 * var(--st-su));
+		margin-top: calc(28 * var(--st-su));
+	}
+
+	.p-scta__button {
+		width: calc(280 * var(--st-su));
+		height: calc(56 * var(--st-su));
+		border-radius: calc(8 * var(--st-su));
+	}
+
+	.p-scta__button--line {
+		column-gap: calc(6 * var(--st-su));
+	}
+
+	.p-scta__button--line .p-scta__button-icon {
+		width: calc(44 * var(--st-su));
+		height: calc(44 * var(--st-su));
+	}
+
+	.p-scta__button--tel {
+		column-gap: calc(12 * var(--st-su));
+	}
+
+	.p-scta__button--tel .p-scta__button-icon {
+		width: calc(32 * var(--st-su));
+		height: calc(32 * var(--st-su));
+	}
+
+	/* --- COLUMN: カード列はそのまま横スクロール（TOP の NEWS と同じ） --- */
+	.p-scolumn {
+		padding: calc(56 * var(--st-su)) 0 calc(64 * var(--st-su));
+	}
+
+	.p-scolumn__list {
+		gap: calc(16 * var(--st-su));
+		margin-top: calc(32 * var(--st-su));
+		padding-inline: var(--gutter);
+	}
+
+	.p-scolumn__card {
+		flex-basis: calc(240 * var(--st-su));
+	}
+
+	.p-scolumn__card-image {
+		height: calc(145 * var(--st-su));
+	}
+
+	.p-scolumn__card-title {
+		margin: calc(6 * var(--st-su)) 0 0;
+		line-height: 1.8;
+	}
+
+	.p-scolumn__btn {
+		margin-top: calc(32 * var(--st-su));
+	}
+}
+
+/* 600px 以上は AREA のカードの円が大きくなりすぎるので 2 列にする
+  （カンプが無い中間幅の補間。375 は 1 列のまま） */
+@media (min-width: 600px) and (max-width: 1024px) {
+	.p-sarea__cards {
+		grid-template-columns: repeat(2, 1fr);
+		column-gap: calc(16 * var(--st-su));
+	}
+
+	.p-sarea__card-photo {
+		width: calc(150 * var(--st-su));
+		height: calc(150 * var(--st-su));
+	}
+}
+
+/* ============================================================
+   PC（1025px 以上）: 1920px カンプの縮小拡大コピー化
+   ------------------------------------------------------------
+   1 単位 --st-vu は「カンプ 1920 の 1px の実寸」。1920px 以上では 1px で
+   固定され、それ以下では画面幅に比例して縮む。文字・余白・角丸を
+   この単位に載せることで、どの幅でも 1920px と同じ改行位置・比率を保つ。
+   ============================================================ */
+@media (min-width: 1025px) {
+	:root {
+		--st-vu: min(1px, calc(100vw / 1920));
+
+		/* clamp（375→1920 の補間）だった FV のトークンを 1920 比例に置き換える */
+		--st-fv-height: calc(1237.5 * var(--st-vu));
+		--st-fv-eyebrow: calc(24 * var(--st-vu));
+		--st-fv-eyebrow-ls: calc(3 * var(--st-vu));
+		--st-fv-title: calc(150 * var(--st-vu));
+		--st-fv-title-ls: calc(-3 * var(--st-vu));
+		--st-fv-lead: calc(36 * var(--st-vu));
+		--st-fv-logo-width: calc(285.2 * var(--st-vu));
+		--st-fv-logo-indent: calc(4.8 * var(--st-vu));
+		--st-fv-badge-height: calc(42 * var(--st-vu));
+		--st-fv-badge-pad: calc(19.6 * var(--st-vu));
+		--st-fv-badge-gap: calc(14.5 * var(--st-vu));
+		--st-fv-badge-radius: calc(3 * var(--st-vu));
+		--st-fv-title-gap: calc(14.35 * var(--st-vu));
+		--st-fv-lead-gap: calc(14.55 * var(--st-vu));
+		--st-fv-logo-gap: calc(47.4 * var(--st-vu));
+		--st-fv-thumb-size: calc(85 * var(--st-vu));
+		--st-fv-thumb-gap: calc(20 * var(--st-vu));
+		--st-fv-ring-size: calc(100 * var(--st-vu));
+		--st-fv-fade-height: calc(171.2 * var(--st-vu));
+		--st-fv-band-radius: calc(5 * var(--st-vu));
+		--st-fv-band-gap: calc(25 * var(--st-vu));
+		--st-fv-copy-top: calc(280.4 * var(--st-vu));
+		--st-fv-copy-left: calc(141.6 * var(--st-vu));
+		--st-fv-thumbs-top: calc(973.3 * var(--st-vu)); /* サムネイル上端（リング上端は 966.3） */
+		--st-fv-thumbs-left: calc(710.8 * var(--st-vu)); /* 1 個目の左端 */
+		/* 写真の上端 y1125.1 − FV 下端 y1237.5 */
+		--st-fv-band-offset: calc(-112.4 * var(--st-vu));
+
+		/* 見出し 3 点セット */
+		--st-heading-gap: calc(80 * var(--st-vu));
+		--st-heading-jp: calc(24 * var(--st-vu));
+		--st-heading-lead: calc(16 * var(--st-vu));
+
+		/* 導入コピー以降の文字サイズ（カンプ 1920 の実測値） */
+		--st-intro-heading: calc(36 * var(--st-vu));
+		--st-intro-lead: calc(20 * var(--st-vu));
+		--st-stats-number: calc(60 * var(--st-vu));
+		--st-stats-unit: calc(24 * var(--st-vu));
+		--st-stats-label: calc(20 * var(--st-vu));
+		--st-concern-heading: calc(36 * var(--st-vu));
+		--st-concern-worry: calc(24 * var(--st-vu));
+		--st-concern-note: calc(16 * var(--st-vu));
+		--st-reasons-copy: calc(40 * var(--st-vu));
+		--st-reasons-copy-lead: calc(20 * var(--st-vu));
+		--st-reasons-title: calc(48 * var(--st-vu));
+		--st-reasons-title-lead: calc(18 * var(--st-vu));
+		--st-reasons-eng: calc(120 * var(--st-vu));
+		--st-reasons-eng-sub: calc(42 * var(--st-vu));
+		--st-reasons-item-lead: calc(26 * var(--st-vu));
+		--st-reasons-item-label: calc(32 * var(--st-vu));
+		--st-service-card-eng: calc(86 * var(--st-vu));
+		--st-service-card-label: calc(28 * var(--st-vu));
+		--st-service-banner: calc(32 * var(--st-vu));
+		--st-service-lead: calc(17 * var(--st-vu));
+		--st-service-row-eng: calc(64 * var(--st-vu));
+		--st-service-row-label: calc(26 * var(--st-vu));
+		--st-service-photo-label: calc(20 * var(--st-vu));
+		--st-visible-eyebrow: calc(32 * var(--st-vu));
+		--st-visible-heading: calc(48 * var(--st-vu));
+		--st-visible-card-eng: calc(48 * var(--st-vu));
+		--st-visible-card-label: calc(24 * var(--st-vu));
+		--st-visible-lead: calc(20 * var(--st-vu));
+		--st-dx-title: calc(110 * var(--st-vu));
+		--st-dx-title-ls: calc(-3.3 * var(--st-vu));
+		--st-dx-copy: calc(32 * var(--st-vu));
+		--st-dx-copy-ls: calc(3 * var(--st-vu));
+		--st-dx-number: calc(16 * var(--st-vu));
+		--st-dx-step-title: calc(22 * var(--st-vu));
+		--st-dx-desc: calc(14 * var(--st-vu));
+		--st-dx-tag: calc(14 * var(--st-vu));
+		--st-plans-label: calc(20 * var(--st-vu));
+		--st-plans-eng: calc(76 * var(--st-vu));
+		--st-plans-copy: calc(18 * var(--st-vu));
+		--st-plans-feature: calc(20 * var(--st-vu));
+		--st-works-box-head: calc(24 * var(--st-vu));
+		--st-works-box-text: calc(18 * var(--st-vu));
+		--st-works-render-label: calc(14 * var(--st-vu));
+		--st-works-th: calc(24 * var(--st-vu));
+		--st-works-td: calc(16 * var(--st-vu));
+		--st-works-total: calc(24 * var(--st-vu));
+		--st-reviews-score: calc(24 * var(--st-vu));
+		--st-reviews-title: calc(20 * var(--st-vu));
+		--st-reviews-text: calc(16 * var(--st-vu));
+		--st-flow-chevron: calc(16 * var(--st-vu));
+		--st-flow-number: calc(64 * var(--st-vu));
+		--st-flow-row-title: calc(24 * var(--st-vu));
+		--st-flow-row-desc: calc(16 * var(--st-vu));
+		--st-quality-eng: calc(32 * var(--st-vu));
+		--st-quality-heading: calc(48 * var(--st-vu));
+		--st-quality-lead: calc(20 * var(--st-vu));
+		--st-quality-badge: calc(36 * var(--st-vu));
+		--st-quality-badge-num: calc(38 * var(--st-vu));
+		--st-quality-note: calc(12 * var(--st-vu));
+		--st-faq-mark: calc(64 * var(--st-vu));
+		--st-faq-q: calc(24 * var(--st-vu));
+		--st-faq-a: calc(16 * var(--st-vu));
+		--st-area-banner: calc(32 * var(--st-vu));
+		--st-area-lead: calc(16 * var(--st-vu));
+		--st-area-table: calc(16 * var(--st-vu));
+		--st-area-branch: calc(18 * var(--st-vu));
+		--st-area-local-eng: calc(32 * var(--st-vu));
+		--st-area-local-heading: calc(40 * var(--st-vu));
+		--st-area-local-lead: calc(16 * var(--st-vu));
+		--st-area-card-number: calc(64 * var(--st-vu));
+		--st-area-card-label: calc(24 * var(--st-vu));
+		--st-cta-eng: calc(32 * var(--st-vu));
+		--st-cta-heading: calc(40 * var(--st-vu));
+		--st-cta-lead: calc(20 * var(--st-vu));
+		--st-cta-button: calc(32 * var(--st-vu));
+		--st-cta-button-ls: calc(3 * var(--st-vu));
+		--st-column-title: calc(18 * var(--st-vu));
+		--st-card-radius: calc(10 * var(--st-vu));
+		--st-fv-band-radius: calc(5 * var(--st-vu));
+	}
+
+	/* 固定 px のグローバル字間トークンは、縮小すると文字サイズ比で相対的に
+	   広がって改行位置を変えてしまう。支店ページのセクション内だけ比例にする
+	   （ヘッダー・フッターには影響させない） */
+	.p-sfv,
+	.p-sfv__band,
+	.p-sintro,
+	.p-sstrip,
+	.p-sstats,
+	.p-sconcern,
+	.p-sreasons,
+	.p-sservice,
+	.p-svisible,
+	.p-sdx,
+	.p-splans,
+	.p-sworks,
+	.p-sreviews,
+	.p-sflow,
+	.p-squality,
+	.p-sfaq,
+	.p-sarea,
+	.p-scta,
+	.p-scolumn {
+		--ls-wide: calc(2 * var(--st-vu));
+		--ls-base: calc(1 * var(--st-vu));
+		--ls-title: calc(5 * var(--st-vu));
+	}
+
+	/* ボタン（265x64・文字 20px）も 1920 比例にする */
+	.p-sdx,
+	.p-splans,
+	.p-scolumn {
+		--btn-width: calc(265 * var(--st-vu));
+		--btn-height: calc(64 * var(--st-vu));
+		--fs-button: calc(20 * var(--st-vu));
+		--ls-button: calc(2 * var(--st-vu));
+		--radius-pill: calc(32 * var(--st-vu));
+	}
+
+	.p-sfv,
+	.p-sfv__band {
+		--gutter: calc(63.2 * var(--st-vu)); /* 写真 4 枚の左右余白（535:844 の x63.2） */
+	}
+}
+
+/* ============================================================
+   SP（1024px 以下）: 375px 基準の縮小拡大コピー化
+   ------------------------------------------------------------
+   1 単位 --st-su は「375px 幅での 1px の実寸」。PC の --st-vu と同じ考え方で、
+   どの幅でも 375px と同じ比率を保つ（上限は style.css の --sp-scale-max）。
+   SP カンプが無いため、値は TOP / 企業情報の SP ルールからの補間。
+   ============================================================ */
+@media (max-width: 1024px) {
+	:root {
+		--st-su: min(calc(100vw / 375), var(--sp-scale-max));
+
+		--st-fv-eyebrow: calc(13 * var(--st-su));
+		--st-fv-eyebrow-ls: calc(2 * var(--st-su));
+		--st-fv-title: calc(64 * var(--st-su));
+		--st-fv-title-ls: calc(-2 * var(--st-su));
+		--st-fv-lead: calc(18 * var(--st-su));
+		--st-fv-logo-width: calc(160 * var(--st-su));
+		--st-fv-badge-height: calc(28 * var(--st-su));
+		--st-fv-badge-pad: calc(10 * var(--st-su));
+		--st-fv-badge-gap: calc(8 * var(--st-su));
+		--st-fv-badge-radius: calc(3 * var(--st-su));
+		--st-fv-title-gap: calc(8 * var(--st-su));
+		--st-fv-lead-gap: calc(12 * var(--st-su));
+		--st-fv-logo-gap: calc(24 * var(--st-su));
+		--st-fv-body-gap: calc(40 * var(--st-su));
+		--st-fv-pad-block: calc(56 * var(--st-su));
+		--st-fv-thumb-size: calc(44 * var(--st-su));
+		--st-fv-thumb-gap: calc(10 * var(--st-su));
+		--st-fv-ring-size: calc(52 * var(--st-su));
+		--st-fv-fade-height: calc(80 * var(--st-su));
+		--st-fv-band-radius: calc(3 * var(--st-su));
+		--st-fv-band-gap: calc(10 * var(--st-su));
+		--st-fv-band-offset: calc(32 * var(--st-su));
+
+		--st-heading-gap: calc(32 * var(--st-su));
+		--st-heading-jp: calc(16 * var(--st-su));
+		--st-heading-lead: calc(12 * var(--st-su));
+
+		/* 導入コピー以降の文字サイズ（SP カンプが無いので TOP / 企業情報からの補間） */
+		--st-intro-heading: calc(18 * var(--st-su));
+		--st-intro-lead: calc(13 * var(--st-su));
+		--st-stats-number: calc(32 * var(--st-su));
+		--st-stats-unit: calc(13 * var(--st-su));
+		--st-stats-label: calc(12 * var(--st-su));
+		--st-concern-heading: calc(16 * var(--st-su));
+		--st-concern-worry: calc(13 * var(--st-su));
+		--st-concern-note: calc(12 * var(--st-su));
+		--st-reasons-copy: calc(20 * var(--st-su));
+		--st-reasons-copy-lead: calc(12 * var(--st-su));
+		--st-reasons-title: calc(24 * var(--st-su));
+		--st-reasons-title-lead: calc(11 * var(--st-su));
+		--st-reasons-eng: calc(48 * var(--st-su));
+		--st-reasons-eng-sub: calc(18 * var(--st-su));
+		--st-reasons-item-lead: calc(11 * var(--st-su));
+		--st-reasons-item-label: calc(14 * var(--st-su));
+		--st-service-card-eng: calc(40 * var(--st-su));
+		--st-service-card-label: calc(16 * var(--st-su));
+		--st-service-banner: calc(15 * var(--st-su));
+		--st-service-lead: calc(12 * var(--st-su));
+		--st-service-row-eng: calc(28 * var(--st-su));
+		--st-service-row-label: calc(14 * var(--st-su));
+		--st-service-photo-label: calc(10 * var(--st-su));
+		--st-visible-eyebrow: calc(16 * var(--st-su));
+		--st-visible-heading: calc(20 * var(--st-su));
+		--st-visible-card-eng: calc(20 * var(--st-su));
+		--st-visible-card-label: calc(13 * var(--st-su));
+		--st-visible-lead: calc(12 * var(--st-su));
+		--st-dx-title: calc(44 * var(--st-su));
+		--st-dx-title-ls: calc(-1.5 * var(--st-su));
+		--st-dx-copy: calc(16 * var(--st-su));
+		--st-dx-copy-ls: calc(1.5 * var(--st-su));
+		--st-dx-number: calc(11 * var(--st-su));
+		--st-dx-step-title: calc(15 * var(--st-su));
+		--st-dx-desc: calc(11 * var(--st-su));
+		--st-dx-tag: calc(11 * var(--st-su));
+		--st-plans-label: calc(13 * var(--st-su));
+		--st-plans-eng: calc(34 * var(--st-su));
+		--st-plans-copy: calc(12 * var(--st-su));
+		--st-plans-feature: calc(12 * var(--st-su));
+		--st-works-box-head: calc(15 * var(--st-su));
+		--st-works-box-text: calc(12 * var(--st-su));
+		--st-works-render-label: calc(10 * var(--st-su));
+		--st-works-th: calc(14 * var(--st-su));
+		--st-works-td: calc(11 * var(--st-su));
+		--st-works-total: calc(14 * var(--st-su));
+		--st-reviews-score: calc(14 * var(--st-su));
+		--st-reviews-title: calc(14 * var(--st-su));
+		--st-reviews-text: calc(12 * var(--st-su));
+		--st-flow-chevron: calc(12 * var(--st-su));
+		--st-flow-number: calc(28 * var(--st-su));
+		--st-flow-row-title: calc(15 * var(--st-su));
+		--st-flow-row-desc: calc(12 * var(--st-su));
+		--st-quality-eng: calc(16 * var(--st-su));
+		--st-quality-heading: calc(20 * var(--st-su));
+		--st-quality-lead: calc(12 * var(--st-su));
+		--st-quality-badge: calc(18 * var(--st-su));
+		--st-quality-badge-num: calc(19 * var(--st-su));
+		--st-quality-note: calc(11 * var(--st-su));
+		--st-faq-mark: calc(28 * var(--st-su));
+		--st-faq-q: calc(14 * var(--st-su));
+		--st-faq-a: calc(12 * var(--st-su));
+		--st-area-banner: calc(15 * var(--st-su));
+		--st-area-lead: calc(12 * var(--st-su));
+		--st-area-table: calc(12 * var(--st-su));
+		--st-area-branch: calc(13 * var(--st-su));
+		--st-area-local-eng: calc(18 * var(--st-su));
+		--st-area-local-heading: calc(20 * var(--st-su));
+		--st-area-local-lead: calc(12 * var(--st-su));
+		--st-area-card-number: calc(32 * var(--st-su));
+		--st-area-card-label: calc(14 * var(--st-su));
+		--st-cta-eng: calc(16 * var(--st-su));
+		--st-cta-heading: calc(20 * var(--st-su));
+		--st-cta-lead: calc(12 * var(--st-su));
+		--st-cta-button: calc(15 * var(--st-su));
+		--st-cta-button-ls: calc(1 * var(--st-su));
+		--st-column-title: calc(13 * var(--st-su));
+		--st-card-radius: calc(6 * var(--st-su));
+		--st-fv-band-radius: calc(3 * var(--st-su));
+	}
+
+	/* ガターと字間はグローバルの clamp / 固定 px のままだと比例にならないため、
+	   支店ページのセクション内だけ 375 比例にする */
+	.p-sfv,
+	.p-sfv__band,
+	.p-sintro,
+	.p-sstrip,
+	.p-sstats,
+	.p-sconcern,
+	.p-sreasons,
+	.p-sservice,
+	.p-svisible,
+	.p-sdx,
+	.p-splans,
+	.p-sworks,
+	.p-sreviews,
+	.p-sflow,
+	.p-squality,
+	.p-sfaq,
+	.p-sarea,
+	.p-scta,
+	.p-scolumn {
+		--gutter: calc(27.5 * var(--st-su));
+		--ls-wide: calc(2 * var(--st-su));
+		--ls-base: calc(1 * var(--st-su));
+		--ls-title: calc(2 * var(--st-su));
+	}
+
+	/* ボタンも 375 比例にする */
+	.p-sdx,
+	.p-splans,
+	.p-scolumn {
+		--btn-width: calc(180 * var(--st-su));
+		--btn-height: calc(44 * var(--st-su));
+		--fs-button: calc(13 * var(--st-su));
+		--ls-button: calc(1 * var(--st-su));
+		--radius-pill: calc(22 * var(--st-su));
+	}
+}

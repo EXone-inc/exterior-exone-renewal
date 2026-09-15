@@ -112,6 +112,12 @@ Text Domain: exterior-exone
 		var(--header-logo-top) + (var(--header-logo-height) - var(--fs-nav) * var(--lh-heading)) / 2
 	);
 	--nav-gap: clamp(16px, 2.0833vw, 40px); /* 40 @1920 : 項目間 */
+	/* グローバルナビ STORE のドロップダウン（カンプに無い状態。ヘッダー／ドロワーの意匠に合わせる） */
+	--gnav-sub-offset: 12px;   /* トリガー下端からパネルまでの間（ホバーが途切れない範囲で） */
+	--gnav-sub-pad-y: 14px;
+	--gnav-sub-pad-x: 28px;
+	--gnav-sub-row-pad: 10px;  /* 支店リンクの上下 */
+	--gnav-sub-bg: rgba(26, 26, 26, 0.94); /* --color-black2 を少し透かす */
 	--logo-width: clamp(99.426px, 83.753px + 4.1795vw, 164px); /* 99.426 → 164 : ヘッダーロゴ */
 	--header-logo-height: calc(var(--logo-width) * 25 / 164); /* ロゴ SVG の縦横比 164:25 */
 	--footer-logo-width: clamp(109.571px, 96.36px + 3.5229vw, 164px); /* 109.571 → 164 : フッターロゴ */
@@ -953,6 +959,89 @@ body.is-drawer-open {
 	line-height: var(--lh-heading);
 	letter-spacing: normal;
 	color: var(--color-white2);
+}
+
+/* --- STORE のドロップダウン --- */
+.p-gnav__list__item--has-sub {
+	position: relative;
+}
+
+/* トリガーはリンクと同じ見た目のボタン */
+.p-gnav__list__trigger {
+	padding: 0;
+	border: 0;
+	background: none;
+	font: inherit;
+	letter-spacing: inherit;
+	color: inherit;
+	cursor: pointer;
+}
+
+/* パネル。トリガー直下に中央合わせで出す。トリガーとの間はパネル側の padding で埋め、
+   マウスが隙間を通っても閉じないようにする */
+.p-gnav__list__sub {
+	position: absolute;
+	top: 100%;
+	left: 50%;
+	z-index: 1;
+	min-width: max-content;
+	margin: 0;
+	padding-top: var(--gnav-sub-offset);
+	translate: -50% 0;
+	opacity: 0;
+	visibility: hidden;
+	transition: opacity var(--transition-base), visibility 0s var(--transition-base);
+}
+
+.p-gnav__list__sub::before {
+	content: "";
+	position: absolute;
+	inset: var(--gnav-sub-offset) 0 0;
+	z-index: -1;
+	border: var(--border-thin) solid var(--color-gray3);
+	border-radius: var(--radius-md);
+	background: var(--gnav-sub-bg);
+}
+
+/* 開く条件: ホバー / トリガーを Enter・クリックで開いた（aria-expanded）/ パネル内のリンクにフォーカスがある。
+   トリガー自体のフォーカスでは開かない（Esc で閉じてトリガーに戻ったとき再び開いてしまうため） */
+.p-gnav__list__item--has-sub:hover .p-gnav__list__sub,
+.p-gnav__list__sub:focus-within,
+.p-gnav__list__trigger[aria-expanded="true"] + .p-gnav__list__sub {
+	opacity: 1;
+	visibility: visible;
+	transition: opacity var(--transition-base);
+}
+
+.p-gnav__list__sub-item + .p-gnav__list__sub-item {
+	border-top: var(--border-thin) solid var(--color-gray3);
+}
+
+.p-gnav__list__sub-item a {
+	display: block;
+	padding: var(--gnav-sub-row-pad) var(--gnav-sub-pad-x);
+	white-space: nowrap;
+	transition: color var(--transition-base);
+}
+
+.p-gnav__list__sub-item:first-child a {
+	padding-top: var(--gnav-sub-pad-y);
+}
+
+.p-gnav__list__sub-item:last-child a {
+	padding-bottom: var(--gnav-sub-pad-y);
+}
+
+.p-gnav__list__sub-item a:hover,
+.p-gnav__list__sub-item a:focus-visible {
+	color: var(--color-orange1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.p-gnav__list__sub,
+	.p-gnav__list__sub-item a {
+		transition: none;
+	}
 }
 
 @media (min-width: 1025px) {

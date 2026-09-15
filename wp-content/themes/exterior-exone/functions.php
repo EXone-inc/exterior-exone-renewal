@@ -14,6 +14,7 @@ require_once get_theme_file_path( 'inc/post-types.php' );
 require_once get_theme_file_path( 'inc/meta-boxes.php' );
 require_once get_theme_file_path( 'inc/top-data.php' );
 require_once get_theme_file_path( 'inc/company-data.php' );
+require_once get_theme_file_path( 'inc/store-data.php' );
 
 /**
  * テーマサポートの登録。
@@ -133,6 +134,45 @@ function exterior_exone_enqueue_assets() {
 		);
 	}
 
+	// 支店ページ専用アセット（CSS はテーマ本体の後に読む）。
+	// 親ページ /store/（暫定の支店一覧）も同じ CSS を使う。
+	if ( exterior_exone_is_store_page() || is_page( 'store' ) ) {
+		wp_enqueue_style(
+			'exterior-exone-store',
+			get_theme_file_uri( 'css/store.css' ),
+			array( 'exterior-exone-style' ),
+			exterior_exone_asset_version( 'css/store.css' )
+		);
+	}
+
+	// 支店ページの FV（写真の切り替え）・DX EXPERIENCE（ステップの切り替え）・
+	// FAQ（アコーディオン）。
+	if ( exterior_exone_is_store_page() ) {
+		wp_enqueue_script(
+			'exterior-exone-store-fv',
+			get_theme_file_uri( 'js/store-fv.js' ),
+			array(),
+			exterior_exone_asset_version( 'js/store-fv.js' ),
+			true
+		);
+
+		wp_enqueue_script(
+			'exterior-exone-store-dx',
+			get_theme_file_uri( 'js/store-dx.js' ),
+			array(),
+			exterior_exone_asset_version( 'js/store-dx.js' ),
+			true
+		);
+
+		wp_enqueue_script(
+			'exterior-exone-store-faq',
+			get_theme_file_uri( 'js/store-faq.js' ),
+			array(),
+			exterior_exone_asset_version( 'js/store-faq.js' ),
+			true
+		);
+	}
+
 	// ハンバーガーメニューの開閉（全ページ共通）。
 	wp_enqueue_script(
 		'exterior-exone-nav-toggle',
@@ -142,12 +182,12 @@ function exterior_exone_enqueue_assets() {
 		true
 	);
 
-	// 追従ヘッダーの背景切り替え（全ページ共通）。
+	// グローバルナビ STORE のドロップダウン（全ページ共通。PC のみ表示）。
 	wp_enqueue_script(
-		'exterior-exone-header-scroll',
-		get_theme_file_uri( 'js/header-scroll.js' ),
+		'exterior-exone-gnav-sub',
+		get_theme_file_uri( 'js/gnav-sub.js' ),
 		array(),
-		exterior_exone_asset_version( 'js/header-scroll.js' ),
+		exterior_exone_asset_version( 'js/gnav-sub.js' ),
 		true
 	);
 
@@ -352,7 +392,7 @@ add_filter( 'show_admin_bar', 'exterior_exone_hide_admin_bar' );
  * @return bool
  */
 function exterior_exone_has_fv_header() {
-	return is_front_page() || is_page( 'company' );
+	return is_front_page() || is_page( 'company' ) || exterior_exone_is_store_page();
 }
 
 /**
@@ -366,6 +406,10 @@ function exterior_exone_body_class( $classes ) {
 		$classes[] = 'is-front-page';
 	}
 
+	if ( exterior_exone_is_store_page() ) {
+		$classes[] = 'is-store-page';
+	}
+
 	if ( exterior_exone_has_fv_header() ) {
 		$classes[] = 'has-fv-header';
 	}
@@ -373,3 +417,36 @@ function exterior_exone_body_class( $classes ) {
 	return $classes;
 }
 add_filter( 'body_class', 'exterior_exone_body_class' );
+
+/**
+ * 支店ページのテンプレートを割り当てる。
+ *
+ * 7 拠点は固定ページのスラッグ（inc/store-data.php）で判定して page-store.php、
+ * 親ページ /store/ は page-store-index.php で描画する。管理画面でのテンプレート
+ * 指定を必要としないので、固定ページを作り直しても割り当てが外れない。
+ *（親は WordPress のテンプレート階層だと page-store.php に吸われてしまうため、
+ *   ここで明示的に振り分ける）
+ *
+ * @param string $template 選ばれているテンプレートのパス。
+ * @return string
+ */
+function exterior_exone_store_template( $template ) {
+	if ( ! is_page() ) {
+		return $template;
+	}
+
+	if ( exterior_exone_is_store_page() ) {
+		$store_template = locate_template( 'page-store.php' );
+
+		return $store_template ? $store_template : $template;
+	}
+
+	if ( is_page( 'store' ) ) {
+		$index_template = locate_template( 'page-store-index.php' );
+
+		return $index_template ? $index_template : $template;
+	}
+
+	return $template;
+}
+add_filter( 'template_include', 'exterior_exone_store_template' );
