@@ -1,0 +1,831 @@
+/* ============================================================
+   WORKS（支店ページ / DX EXPERIENCE ページ共通の部品）
+   テンプレート: template-parts/common/section-works.php
+   カンプ: 支店 PC 698:1134・698:1181・1153:104・Group 379-382（SP カンプ無し）
+           DX  PC 437:460（436:326-341 / 437:462 / 437:463）
+               SP 439:992-1019 + 見積モーダル 439:1020-1062
+   設計メモ: docs/figma-store-page.md §10 / docs/figma-dx-page.md §2.7・§3.8・§3.9
+   ------------------------------------------------------------
+   PC は 2 ページともカンプが同じ組みなので共通。差分（見出し帯 #454545・
+   罫線 #dadada・3D 枠の下敷き・ラベル 232x55）は .p-cworks--dx が持つ。
+   SP は DX にだけカンプがあるため、既定は支店の現行の組みのままにして
+   .p-cworks--dx でカンプどおりに組み替える。
+   長さは style.css の共通単位（PC: --vu / SP: --su）に載せる。
+   ============================================================ */
+:root {
+	/* --- 色（カンプ実測。共通トークンに無いものだけ） --- */
+	--cw-bg: #f3f3f4; /* 698:1134 / 436:320 */
+	--cw-panel: #ffffff; /* 箱と見積表の地 */
+	--cw-band-bg: var(--color-black2); /* 698:1327 見出し帯。DX は #454545 */
+	--cw-band-color: #ffffff;
+	--cw-rule: #c8c8c8; /* 見積の罫線。DX は #dadada */
+	--cw-render-bg: #bcbcbc; /* 1153:104 3D パースの下敷き（DX は空写真） */
+	--cw-label-border: #eeeeee; /* 698:1329 ラベルの枠。DX は #dadada */
+	--cw-label-bg: rgba(0, 0, 0, 0.4); /* 698:1329 / 436:378 */
+	--cw-photo-border: #ebebeb; /* 698:1180 / 436:322 写真 3 枚目の枠 */
+	/* 439:1027 暗幕。カンプは写真をぼかした暗背景だが、決定事項どおり単色にする。
+	   背面の明るいセクション（#f3f3f4）が透けて文字が読みにくくならない濃さ */
+	--cw-scrim: rgba(26, 26, 26, 0.95);
+	/* 単色だけでは背面のボタンや文言の輪郭がうっすら残るため、対応ブラウザでは
+	   カンプのぼかしに近づける（非対応ブラウザは単色のまま） */
+	--cw-scrim-blur: 8px;
+	--cw-modal-rule: var(--color-black1); /* 439:1028 モーダル内の罫線 */
+	--cw-sheet-z: calc(var(--z-header) - 1); /* カンプどおりヘッダーは暗幕の上 */
+
+	/* --- 文字サイズ・余白（下の PC / SP の比例ブロックが上書きする保険） --- */
+	--cw-heading-gap: clamp(32px, 28.893px + 3.1068vw, 80px); /* 32 → 80 */
+	--cw-jp: clamp(16px, 14.058px + 0.5178vw, 24px); /* 16 → 24 */
+	--cw-jp-lh: 2.5;
+	--cw-jp-ls: var(--ls-wide);
+	--cw-lead: clamp(12px, 11.029px + 0.2589vw, 16px); /* 12 → 16 */
+	--cw-lead-ls: var(--ls-wide);
+	--cw-box-head: clamp(15px, 12.816px + 0.5825vw, 24px); /* 15 → 24 (698:1327) */
+	--cw-box-text: clamp(12px, 10.544px + 0.3883vw, 18px); /* 12 → 18 */
+	--cw-box-text2: var(--cw-box-text); /* 提案側の本文（DX の PC だけ 16px） */
+	--cw-render-label: clamp(10px, 9.029px + 0.2589vw, 14px); /* 10 → 14 (698:1329) */
+	--cw-th: clamp(14px, 11.573px + 0.6472vw, 24px); /* 14 → 24 */
+	--cw-td: clamp(11px, 9.786px + 0.3236vw, 16px); /* 11 → 16 */
+	--cw-total: clamp(14px, 11.573px + 0.6472vw, 24px); /* 14 → 24 (698:1217) */
+	--cw-photo-radius: clamp(6px, 5.029px + 0.2589vw, 10px);
+	--cw-box-radius: clamp(3px, 2.514px + 0.1294vw, 5px);
+}
+
+.p-cworks {
+	background: var(--cw-bg);
+}
+
+/* DX の配色差分（PC / SP 共通。長さは各ブロック） */
+.p-cworks--dx {
+	--cw-band-bg: var(--color-gray3); /* 436:329 #454545 */
+	--cw-rule: var(--color-gray1); /* 436:339 #dadada */
+	--cw-label-border: var(--color-gray1); /* 436:378 #dadada */
+}
+
+/* ============================================================
+   見出し 3 点セット（698:1136-1138 / 436:326-328）
+   ============================================================ */
+.p-cworks__title {
+	margin: 0;
+	font-family: var(--font-ui);
+	font-size: var(--fs-section-title);
+	font-weight: var(--fw-semibold);
+	line-height: 1.18;
+	letter-spacing: var(--ls-title);
+	text-align: center;
+	color: var(--color-black2);
+}
+
+.p-cworks__jp {
+	margin: var(--cw-heading-gap) 0 0;
+	font-size: var(--cw-jp);
+	font-weight: var(--fw-medium);
+	line-height: var(--cw-jp-lh);
+	letter-spacing: var(--cw-jp-ls);
+	text-align: center;
+	color: var(--color-black2);
+}
+
+/* 和文見出しの行ボックスがそのまま余白になるので margin は持たない */
+.p-cworks__lead {
+	margin: 0;
+	font-size: var(--cw-lead);
+	font-weight: var(--fw-regular);
+	line-height: 2;
+	letter-spacing: var(--cw-lead-ls);
+	text-align: center;
+	color: var(--color-black1);
+}
+
+/* PC と SP で改行位置が違うリード文（436:327 / 439:1010）。既定は SP を出す */
+.p-cworks__lead-text {
+	display: none;
+}
+
+.p-cworks__lead-text--sp {
+	display: block;
+}
+
+/* ============================================================
+   写真グリッド（698:1181 ほか / 437:462）
+   ============================================================ */
+.p-cworks__main img,
+.p-cworks__sub img {
+	display: block;
+	width: 100%;
+	height: 100%;
+	border-radius: var(--cw-photo-radius);
+	object-fit: cover;
+}
+
+.p-cworks__subs {
+	display: grid;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.p-cworks__link {
+	display: block;
+	height: 100%;
+}
+
+/* 698:1180 / 436:322 3 枚目だけ枠線が付く */
+.p-cworks__sub:last-child img {
+	border: var(--border-thin) solid var(--cw-photo-border);
+}
+
+/* 1153:104 灰色の下敷き / 437:463 空写真の下敷き */
+.p-cworks__render {
+	position: relative;
+	overflow: hidden;
+	border-radius: var(--cw-photo-radius);
+	background: var(--cw-render-bg);
+}
+
+.p-cworks__render-backdrop {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+.p-cworks__render-image {
+	position: absolute;
+	top: var(--cw-render-top);
+	right: 0;
+	left: 0;
+	width: 100%;
+	height: var(--cw-render-height);
+	object-fit: contain;
+}
+
+/* 436:376 は枠（380x205.8）と同じ比率に切り出した画像なので枠を埋める */
+.p-cworks--dx .p-cworks__render-image {
+	object-fit: cover;
+}
+
+/* Group 381 / 436:378 パースに重なるラベル */
+.p-cworks__render-label {
+	position: absolute;
+	top: var(--cw-label-top);
+	left: 50%;
+	display: grid;
+	place-items: center;
+	min-width: var(--cw-label-width);
+	height: var(--cw-label-height);
+	border: var(--border-thin) solid var(--cw-label-border);
+	border-radius: var(--cw-label-radius);
+	background: var(--cw-label-bg);
+	font-size: var(--cw-render-label);
+	font-weight: var(--fw-medium);
+	line-height: 1.8;
+	letter-spacing: var(--ls-base);
+	color: var(--color-white2);
+	transform: translateX(-50%);
+}
+
+/* ============================================================
+   要望 / 提案の 2 ボックス（Group 380 / Group 382 / 436:329・436:334）
+   ============================================================ */
+.p-cworks__box {
+	overflow: hidden;
+	border-radius: var(--cw-box-radius);
+	background: var(--cw-panel);
+}
+
+.p-cworks__box-head {
+	display: grid;
+	place-items: center;
+	height: var(--cw-band-height);
+	margin: 0;
+	background: var(--cw-band-bg);
+	font-size: var(--cw-box-head);
+	font-weight: var(--fw-medium);
+	line-height: 1.4;
+	letter-spacing: var(--ls-wide);
+	text-align: center;
+	color: var(--cw-band-color);
+}
+
+.p-cworks__box-text {
+	margin: 0;
+	font-size: var(--cw-box-text);
+	font-weight: var(--fw-regular);
+	line-height: 1.8;
+	letter-spacing: var(--ls-base);
+	color: var(--color-black1);
+}
+
+/* 要望は 1 行 1 項目。行の箱を分けておき、「・」始まりの行は折り返しても
+   2 行目以降が「・」の下に潜らないようぶら下げインデントにする */
+.p-cworks__box-line {
+	display: block;
+}
+
+.p-cworks__box-line--bullet {
+	padding-left: 1em;
+	text-indent: -1em;
+}
+
+/* 436:335 提案側の本文だけ 1 段小さい */
+.p-cworks__box:last-child .p-cworks__box-text {
+	font-size: var(--cw-box-text2);
+}
+
+/* ============================================================
+   見積（Group 379 / 436:339-341）
+   PC はそのまま表、SP（1024px 以下）はモーダルの中身になる。
+   表の DOM は 1 つだけで、器ごと位置と配色を変えている。
+   ============================================================ */
+.p-cworks__estimate {
+	border-radius: var(--cw-box-radius);
+	background: var(--cw-panel);
+}
+
+.p-cworks__table {
+	width: 100%;
+	border-collapse: collapse;
+	table-layout: fixed;
+}
+
+.p-cworks__table th,
+.p-cworks__table td {
+	overflow-wrap: anywhere;
+	text-align: left;
+	vertical-align: top;
+}
+
+.p-cworks__table thead th {
+	font-size: var(--cw-th);
+	font-weight: var(--fw-medium);
+	line-height: 2.5;
+	letter-spacing: var(--ls-wide);
+	color: var(--color-black2);
+}
+
+.p-cworks__table tbody th {
+	border-bottom: var(--border-thin) solid var(--cw-rule);
+	font-size: var(--cw-td);
+	font-weight: var(--fw-regular);
+	line-height: 1.6;
+	letter-spacing: var(--ls-base);
+	color: var(--color-black1);
+}
+
+.p-cworks__table tbody td {
+	border-bottom: var(--border-thin) solid var(--cw-rule);
+	font-family: var(--font-ui);
+	font-size: var(--cw-td);
+	font-weight: var(--fw-regular);
+	line-height: 1.6;
+	letter-spacing: var(--ls-base);
+	color: var(--color-black1);
+}
+
+/* 金額は右端（カンプ x1592.5）でそろえる。
+   列全体の text-align より詳細度を上げておく */
+.p-cworks__table .p-cworks__price {
+	text-align: right;
+	white-space: nowrap;
+}
+
+/* 建材列はカンプに字間の指定が無い。
+   1px でも 55 文字の行では枠を使い切ってしまう */
+.p-cworks__table tbody .p-cworks__material {
+	letter-spacing: normal;
+}
+
+.p-cworks__total {
+	margin: 0;
+	font-family: var(--font-ui);
+	font-size: var(--cw-total);
+	font-weight: var(--fw-medium);
+	line-height: 1.6;
+	letter-spacing: var(--ls-base);
+	text-align: right;
+	color: var(--color-black2);
+}
+
+/* ============================================================
+   見積モーダル（439:993 ボタン / 439:1020-1062）
+   ------------------------------------------------------------
+   既定（PC・JS が動かないとき）は器が素通しで、見積表がそのまま並ぶ。
+   SP で JS が動いたときだけ .is-modal-ready / .is-open でモーダルになる。
+   ============================================================ */
+.p-cworks__actions {
+	display: none;
+	margin: 0;
+	text-align: center;
+}
+
+.p-cworks__more {
+	display: inline-grid;
+	place-items: center;
+	width: var(--cw-more-width);
+	height: var(--cw-more-height);
+	padding: 0;
+	border: 0;
+	border-radius: var(--cw-more-radius);
+	background: var(--color-black2);
+	font-family: var(--font-ui);
+	font-size: var(--cw-more);
+	font-weight: var(--fw-medium);
+	line-height: 1.6;
+	letter-spacing: var(--ls-base);
+	color: var(--color-white2);
+	cursor: pointer;
+}
+
+.p-cworks__sheet-scrim,
+.p-cworks__sheet-image,
+.p-cworks__sheet-close {
+	display: none;
+}
+
+/* モーダル表示中は背面をスクロールさせない（ドロワーと同じ作法） */
+body.is-works-modal-open {
+	overflow: hidden;
+}
+
+/* ============================================================
+   PC（1025px 以上）: カンプ 698:1134 / 437:460 の配置
+   ============================================================ */
+@media (min-width: 1025px) {
+	:root {
+		--cw-heading-gap: calc(80 * var(--vu));
+		--cw-jp: calc(24 * var(--vu));
+		--cw-lead: calc(16 * var(--vu));
+		--cw-box-head: calc(24 * var(--vu));
+		--cw-box-text: calc(18 * var(--vu));
+		--cw-render-label: calc(14 * var(--vu));
+		--cw-th: calc(24 * var(--vu));
+		--cw-td: calc(16 * var(--vu));
+		--cw-total: calc(24 * var(--vu));
+		--cw-photo-radius: calc(10 * var(--vu));
+		--cw-box-radius: calc(5 * var(--vu));
+	}
+
+	.p-cworks {
+		--cw-render-top: calc(31.6 * var(--vu));
+		--cw-render-height: calc(205.8 * var(--vu));
+		--cw-label-top: calc(114.2 * var(--vu));
+		--cw-label-width: calc(152.7 * var(--vu));
+		--cw-label-height: calc(42 * var(--vu));
+		--cw-label-radius: calc(3 * var(--vu));
+		--cw-band-height: calc(60 * var(--vu));
+		--cw-frame-height: calc(270.4 * var(--vu));
+
+		padding: calc(162.2 * var(--vu)) 0 calc(160 * var(--vu));
+	}
+
+	/* 437:463。パースの位置・ラベルの大きさ・帯の高さが支店と違う */
+	.p-cworks--dx {
+		--cw-render-top: calc(30.8 * var(--vu));
+		--cw-label-top: calc(107 * var(--vu));
+		--cw-label-width: calc(232 * var(--vu));
+		--cw-label-height: calc(55 * var(--vu));
+		--cw-label-radius: calc(5 * var(--vu));
+		--cw-render-label: calc(20 * var(--vu));
+		--cw-band-height: calc(58.8 * var(--vu));
+		--cw-frame-height: calc(265 * var(--vu));
+		--cw-box-text2: calc(16 * var(--vu));
+	}
+
+	.p-cworks__lead-text--pc {
+		display: block;
+	}
+
+	.p-cworks__lead-text--sp {
+		display: none;
+	}
+
+	.p-cworks__lead {
+		width: calc(782.8 * var(--vu));
+		margin-inline: auto;
+	}
+
+	/* 1 段目 = メイン + 右列 3 枚、2 段目 = 2 ボックス + 3D パース */
+	.p-cworks__grid {
+		display: grid;
+		grid-template-columns: calc(1199.6 * var(--vu)) calc(380 * var(--vu));
+		justify-content: center;
+		column-gap: calc(20.4 * var(--vu));
+		row-gap: calc(19.9 * var(--vu));
+		margin-top: calc(80 * var(--vu));
+	}
+
+	.p-cworks__main {
+		grid-area: 1 / 1;
+		height: calc(836 * var(--vu));
+	}
+
+	.p-cworks__subs {
+		grid-area: 1 / 2;
+		grid-template-rows: calc(264.8 * var(--vu)) calc(265.6 * var(--vu)) calc(265.6 * var(--vu));
+		row-gap: calc(19.95 * var(--vu));
+	}
+
+	.p-cworks__render {
+		grid-area: 2 / 2;
+		height: var(--cw-frame-height);
+	}
+
+	.p-cworks__boxes {
+		grid-area: 2 / 1;
+		display: grid;
+		grid-template-columns: repeat(2, calc(590.1 * var(--vu)));
+		column-gap: calc(19.4 * var(--vu));
+	}
+
+	.p-cworks__box {
+		height: 100%;
+	}
+
+	.p-cworks__box-body {
+		padding: calc(25.2 * var(--vu)) calc(47.5 * var(--vu)) calc(32 * var(--vu));
+	}
+
+	.p-cworks__estimate {
+		width: calc(1600 * var(--vu));
+		margin: calc(20 * var(--vu)) auto 0;
+		padding: calc(69.6 * var(--vu)) calc(167.5 * var(--vu)) calc(79.6 * var(--vu)) calc(134 * var(--vu));
+	}
+
+	/* 列幅は先頭行（列見出し）で決まる。施工内容 227.45 / 使用建材 884 / 残りが概算見積 */
+	.p-cworks__table thead th:first-child {
+		width: calc(227.45 * var(--vu));
+	}
+
+	.p-cworks__table thead th:nth-child(2) {
+		width: calc(884 * var(--vu));
+	}
+
+	.p-cworks__table thead th {
+		padding-bottom: calc(23.6 * var(--vu));
+	}
+
+	.p-cworks__table tbody th,
+	.p-cworks__table tbody td {
+		padding-bottom: calc(5.4 * var(--vu)); /* 区切り線は行の上端から 31 */
+	}
+
+	.p-cworks__table tbody tr + tr > * {
+		padding-top: calc(16.5 * var(--vu)); /* 行ピッチ 48.5（25.6 + 5.4 + 罫線 1） */
+	}
+
+	.p-cworks__total {
+		margin-top: calc(17 * var(--vu));
+	}
+}
+
+/* ============================================================
+   SP（1024px 以下）
+   既定は支店の縦積み（SP カンプ無し）。DX はカンプ 439:992 どおりに組む。
+   ============================================================ */
+@media (max-width: 1024px) {
+	:root {
+		--cw-heading-gap: calc(32 * var(--su));
+		--cw-jp: calc(16 * var(--su));
+		--cw-lead: calc(12 * var(--su));
+		--cw-box-head: calc(15 * var(--su));
+		--cw-box-text: calc(12 * var(--su));
+		--cw-render-label: calc(10 * var(--su));
+		--cw-th: calc(14 * var(--su));
+		--cw-td: calc(11 * var(--su));
+		--cw-total: calc(14 * var(--su));
+		--cw-photo-radius: calc(5 * var(--su));
+		--cw-box-radius: calc(5 * var(--su));
+		/* 439:993 のボタン */
+		--cw-more: calc(12 * var(--su));
+		--cw-more-width: calc(183 * var(--su));
+		--cw-more-height: calc(33 * var(--su));
+		--cw-more-radius: calc(32 * var(--su));
+	}
+
+	.p-cworks {
+		--cw-render-top: calc(16 * var(--su));
+		--cw-render-height: calc(110 * var(--su));
+		--cw-label-top: calc(58 * var(--su));
+		--cw-label-width: calc(104 * var(--su));
+		--cw-label-height: calc(26 * var(--su));
+		--cw-label-radius: calc(3 * var(--su));
+		--cw-band-height: calc(40 * var(--su));
+		--cw-frame-height: calc(150 * var(--su));
+
+		padding: calc(56 * var(--su)) var(--gutter) calc(64 * var(--su));
+	}
+
+	.p-cworks__lead {
+		padding-inline: var(--gutter);
+	}
+
+	.p-cworks__grid {
+		display: grid;
+		row-gap: calc(12 * var(--su));
+		margin-top: calc(32 * var(--su));
+	}
+
+	.p-cworks__main {
+		height: calc(200 * var(--su));
+	}
+
+	.p-cworks__subs {
+		grid-template-columns: repeat(3, 1fr);
+		column-gap: calc(8 * var(--su));
+		height: calc(72 * var(--su));
+	}
+
+	.p-cworks__render {
+		height: var(--cw-frame-height);
+	}
+
+	.p-cworks__boxes {
+		display: grid;
+		row-gap: calc(12 * var(--su));
+	}
+
+	.p-cworks__box-body {
+		padding: calc(16 * var(--su));
+	}
+
+	.p-cworks__estimate {
+		margin-top: calc(12 * var(--su));
+		padding: calc(20 * var(--su)) calc(16 * var(--su));
+	}
+
+	.p-cworks__table thead th {
+		padding-bottom: calc(10 * var(--su));
+	}
+
+	.p-cworks__table thead th:first-child {
+		width: 24%;
+	}
+
+	.p-cworks__table thead th:nth-child(2) {
+		width: 46%;
+	}
+
+	.p-cworks__table tbody th,
+	.p-cworks__table tbody td {
+		padding-bottom: calc(8 * var(--su));
+	}
+
+	.p-cworks__table tbody tr + tr > * {
+		padding-top: calc(10 * var(--su));
+	}
+
+	.p-cworks__table tbody th,
+	.p-cworks__material {
+		padding-right: calc(8 * var(--su));
+	}
+
+	.p-cworks__total {
+		margin-top: calc(12 * var(--su));
+	}
+
+	/* --- DX の SP カンプ（439:992-1019） --- */
+	.p-cworks--dx {
+		--cw-band-bg: var(--color-black1); /* 439:996 は #4d4d4d（PC は #454545） */
+		--cw-band-color: var(--color-white2); /* 439:997 #fefefe */
+		--cw-jp: calc(14 * var(--su));
+		--cw-jp-lh: 1.5;
+		--cw-jp-ls: var(--ls-base);
+		--cw-lead-ls: var(--ls-base);
+		--cw-heading-gap: calc(30 * var(--su));
+		--cw-box-head: calc(14 * var(--su));
+		--cw-band-height: calc(34.3 * var(--su));
+		--cw-render-top: calc(6.2 * var(--su));
+		--cw-render-height: calc(43.6 * var(--su));
+		--cw-frame-height: calc(56 * var(--su));
+
+		padding: calc(60 * var(--su)) calc(19 * var(--su));
+	}
+
+	.p-cworks--dx .p-cworks__lead {
+		width: calc(314 * var(--su));
+		margin: calc(8 * var(--su)) auto 0;
+		padding-inline: 0;
+	}
+
+	/* 1 段目 = メイン、2 段目 = サムネ 3 枚 + 3D パース、3 段目 = 2 ボックス */
+	.p-cworks--dx .p-cworks__grid {
+		grid-template-columns: repeat(4, 1fr);
+		column-gap: calc(4.5 * var(--su));
+		row-gap: calc(5 * var(--su));
+		margin-top: calc(30 * var(--su));
+	}
+
+	.p-cworks--dx .p-cworks__main {
+		grid-column: 1 / -1;
+		height: calc(235 * var(--su));
+	}
+
+	/* 行の高さを枠（56）で決め打ちする。既定の auto 行だと写真の縦横比で
+	   背が伸び、中間幅（768）で右の 3D 枠と下端がずれる */
+	.p-cworks--dx .p-cworks__subs {
+		grid-column: 1 / 4;
+		grid-template-rows: 100%;
+		column-gap: calc(4.5 * var(--su));
+		height: calc(56 * var(--su));
+	}
+
+	.p-cworks--dx .p-cworks__render {
+		grid-column: 4 / -1;
+	}
+
+	/* 439:1016。SP はラベルを出さない（決定事項 Q7） */
+	.p-cworks--dx .p-cworks__render-label {
+		display: none;
+	}
+
+	.p-cworks--dx .p-cworks__boxes {
+		grid-column: 1 / -1;
+		row-gap: calc(8 * var(--su));
+	}
+
+	.p-cworks--dx .p-cworks__box-body {
+		padding: calc(14.7 * var(--su)) calc(27 * var(--su)) calc(16 * var(--su));
+	}
+
+	/* --- 見積モーダル（439:993 / 439:1020-1062） ---
+	   JS が動いたときだけ表をしまい、ボタンから開く形にする。 */
+	.p-cworks.is-modal-ready .p-cworks__actions {
+		display: block;
+		margin-top: calc(24 * var(--su));
+	}
+
+	.p-cworks--dx.is-modal-ready .p-cworks__actions {
+		margin-top: calc(30 * var(--su));
+	}
+
+	.p-cworks.is-modal-ready .p-cworks__sheet {
+		display: none;
+	}
+
+	.p-cworks.is-modal-ready .p-cworks__sheet.is-open {
+		position: fixed;
+		inset: 0;
+		z-index: var(--cw-sheet-z);
+		display: block;
+		overflow-x: hidden;
+		overflow-y: auto;
+		overscroll-behavior: contain;
+		animation: cw-sheet-in 0.2s ease;
+	}
+
+	.p-cworks__sheet.is-open .p-cworks__sheet-scrim {
+		position: fixed;
+		inset: 0;
+		display: block;
+		background: var(--cw-scrim);
+		-webkit-backdrop-filter: blur(var(--cw-scrim-blur));
+		backdrop-filter: blur(var(--cw-scrim-blur));
+	}
+
+	/* 内側の余白 = 暗幕の見えている部分。ここを押すと閉じる
+	   （js/works-estimate-modal.js） */
+	.p-cworks__sheet.is-open .p-cworks__sheet-window {
+		position: relative;
+		min-height: 100%;
+		padding: calc(65 * var(--su)) calc(20 * var(--su)) calc(20 * var(--su));
+	}
+
+	.p-cworks__sheet.is-open .p-cworks__sheet-panel {
+		max-width: calc(335 * var(--su));
+		margin-inline: auto;
+	}
+
+	/* 439:1034。カンプどおり画面の左右いっぱいに出す */
+	.p-cworks__sheet.is-open .p-cworks__sheet-image {
+		display: block;
+		width: 100vw;
+		max-width: none;
+		height: calc(203 * var(--su));
+		margin-inline: calc(50% - 50vw);
+		object-fit: cover;
+	}
+
+	/* 439:1049 の見出し行は画像の下端に 33px 重なる（画像 203 / 見出し y170） */
+	.p-cworks__sheet.is-open .p-cworks__estimate {
+		position: relative;
+		margin-top: calc(-33 * var(--su));
+		padding: 0;
+		border-radius: 0;
+		background: none;
+	}
+
+	.p-cworks__sheet.is-open .p-cworks__table {
+		table-layout: auto;
+	}
+
+	/* 439:1028。モーダルでは「使用建材」の列を出さない */
+	.p-cworks__sheet.is-open .p-cworks__table thead th:nth-child(2),
+	.p-cworks__sheet.is-open .p-cworks__material {
+		display: none;
+	}
+
+	.p-cworks__sheet.is-open .p-cworks__table thead th {
+		width: auto;
+		padding: 0;
+		font-size: calc(20 * var(--su));
+		font-weight: var(--fw-bold);
+		line-height: 2.5;
+		letter-spacing: var(--ls-base);
+		color: var(--color-white2);
+	}
+
+	.p-cworks__sheet.is-open .p-cworks__table thead th:last-child {
+		text-align: right;
+	}
+
+	.p-cworks__sheet.is-open .p-cworks__table tbody th,
+	.p-cworks__sheet.is-open .p-cworks__table tbody td {
+		padding: 0;
+		border-bottom: var(--border-thin) solid var(--cw-modal-rule);
+		font-size: calc(14 * var(--su));
+		font-weight: var(--fw-medium);
+		line-height: 2.5; /* 行ピッチ 35 */
+		letter-spacing: var(--ls-base);
+		color: var(--color-gray2);
+	}
+
+	.p-cworks__sheet.is-open .p-cworks__table tbody tr + tr > * {
+		padding-top: 0;
+	}
+
+	.p-cworks__sheet.is-open .p-cworks__table tbody td {
+		font-weight: var(--fw-regular);
+	}
+
+	.p-cworks__sheet.is-open .p-cworks__total {
+		margin-top: calc(8 * var(--su));
+		font-size: calc(20 * var(--su));
+		color: var(--color-white2);
+	}
+
+	/* 439:1029 CLOSE */
+	.p-cworks__sheet.is-open .p-cworks__sheet-close {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: calc(9 * var(--su));
+		width: calc(131 * var(--su));
+		height: calc(33 * var(--su));
+		margin: calc(30 * var(--su)) auto 0;
+		padding: 0;
+		border: var(--border-thin) solid var(--color-gray2);
+		border-radius: calc(32 * var(--su));
+		background: none;
+		font-family: var(--font-ui);
+		font-size: calc(12 * var(--su));
+		font-weight: var(--fw-medium);
+		line-height: 1.6;
+		letter-spacing: var(--ls-base);
+		color: var(--color-white2);
+		cursor: pointer;
+	}
+
+	/* 439:1033 の × は画像を使わず 2 本線で描く */
+	.p-cworks__sheet-close-icon {
+		position: relative;
+		width: calc(10 * var(--su));
+		height: calc(10 * var(--su));
+	}
+
+	.p-cworks__sheet-close-icon::before,
+	.p-cworks__sheet-close-icon::after {
+		position: absolute;
+		top: 50%;
+		left: 0;
+		width: 100%;
+		height: var(--border-thin);
+		background: var(--color-white2);
+		content: "";
+	}
+
+	.p-cworks__sheet-close-icon::before {
+		transform: rotate(45deg);
+	}
+
+	.p-cworks__sheet-close-icon::after {
+		transform: rotate(-45deg);
+	}
+}
+
+@keyframes cw-sheet-in {
+	from {
+		opacity: 0;
+	}
+
+	to {
+		opacity: 1;
+	}
+}
+
+/* 動きを減らす設定では即時に開く */
+@media (prefers-reduced-motion: reduce) {
+	.p-cworks__sheet.is-open {
+		animation: none;
+	}
+}

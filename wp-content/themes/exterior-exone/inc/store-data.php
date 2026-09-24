@@ -602,8 +602,8 @@ function exterior_exone_store_dx() {
 				'dir'    => 'top',
 			),
 		),
-		// 572:602。リンク先は未定のため仮置き（決定事項 Q9）。
-		'more'  => '#',
+		// 572:602。DX EXPERIENCE ページ（固定ページ dx / page-dx.php）へ。
+		'more'  => home_url( '/dx/' ),
 	);
 }
 
@@ -704,96 +704,41 @@ function exterior_exone_store_plans() {
 /**
  * WORKS の事例。698:1136 / Group 380 / Group 382 / Group 379。全支店共通。
  *
- * 写真グリッドは既存 CPT works の最新を使い（template-parts/store/section-works.php）、
- * ここが持つのは枠を埋めるカンプ写真と、要望・提案・見積の文言。
+ * 表示は共通部品（template-parts/common/section-works.php）。事例の中身
+ *（要望・提案・見積・モーダルの文言）は DX ページと共通なので inc/works-data.php
+ * が持ち、ここが持つのは支店の見出し・リード文と、枠を埋めるカンプ写真。
  *
  * 見出し「EXoneからのご提案」はカンプ上で見切れているが全文を出す
  *（docs/spec-20260911-store-page-decisions.md Q4）。左右ボックスの本文も 18px に統一。
  *
- * TODO: 要望・提案・見積はカンプの 1 事例ぶんの実値。支店ごと・事例ごとの
- *       出し分けが必要になったらこの配列を投稿側へ移す。
- *
  * @return array<string, mixed>
  */
 function exterior_exone_store_works() {
-	return array(
-		'title'     => 'WORKS',
-		'jp'        => '暮らしの希望から生まれた、外構のご提案',
-		'lead'      => array(
-			'EXoneが紹介するのは、完成写真だけではありません。',
-			'お客様がどのような悩みや希望を持ち、どんな考え方でデザインをご提案したのか。',
-			'完成までの背景とともに、外構づくりの事例をご紹介します。',
-		),
-		// 698:1181 / 698:1178 / 698:1180。CPT の画像が足りないときに使う。
-		'photos'    => array(
-			'works-main-698-1181.jpg',
-			'works-sub2-698-1178.jpg',
-			'works-sub3-698-1180.jpg',
-		),
-		// 698:1197 + Group 381（698:1329）。
-		'render'    => array(
-			'image' => 'works-3d-698-1197.png',
-			'label' => 'ご提案時3Dパース',
-		),
-		'request'   => array(
-			'title' => 'お客様のご要望',
-			'lines' => array(
-				'・和風の自宅に調和する落ち着いた雰囲気の外構にしたい',
-				'・シンプルながらも門まわりにデザイン性を取り入れたい',
-				'・予算を350万に抑えたい',
+	// 要望・提案・見積・モーダルの文言は DX ページと共通（inc/works-data.php）。
+	$case = exterior_exone_works_case();
+
+	return array_merge(
+		$case,
+		array(
+			'title'  => 'WORKS',
+			'jp'     => '暮らしの希望から生まれた、外構のご提案',
+			'lead'   => array(
+				'EXoneが紹介するのは、完成写真だけではありません。',
+				'お客様がどのような悩みや希望を持ち、どんな考え方でデザインをご提案したのか。',
+				'完成までの背景とともに、外構づくりの事例をご紹介します。',
 			),
-		),
-		'proposal'  => array(
-			'title' => 'EXoneからのご提案',
-			'body'  => '建物の雰囲気に合わせ、ツートンカラーの門柱を採用し、和モダンな印象に仕上げました。玄関前には植栽と高さの異なる塗り壁を配置し、立体感とアクセントのあるアプローチをご提案しました。',
-		),
-		'estimate'  => array(
-			'columns' => array( '施工内容', '使用建材', '概算見積' ),
-			'rows'    => array(
-				array(
-					'work'     => 'フロア',
-					'material' => 'コンクリート、タイル:セラレバンテ、砕石 + 防草シート:グランドシールド、ウッドチップ、化粧真砂土敷きならし',
-					'price'    => '¥1,048,220',
-				),
-				array(
-					'work'     => 'アクセントライン',
-					'material' => '砕石ライン 幅:80mm + 型枠、ピンコロライン 幅:90mm',
-					'price'    => '¥81,060',
-				),
-				array(
-					'work'     => '壁',
-					'material' => '12cmコンクリートブロック3段 + 塗り、12cmコンクリートブロック5段 + 塗り',
-					'price'    => '¥302,400',
-				),
-				array(
-					'work'     => '門まわり(その他)',
-					'material' => 'エバースクリーンフレーム W1800・H2400',
-					'price'    => '¥76,600',
-				),
-				array(
-					'work'     => 'ライティング',
-					'material' => 'ガーデンポールライト 5型 (12V)、ガーデンアップライト ミオ 4.5W フード 12V、ウォールアップライト 900 12V、LEDIUS ローボルトトランス75W、ガーデンスケープ用コード 15m(12V用)、ドライコーン(12V用)',
-					'price'    => '¥180,000',
-				),
-				array(
-					'work'     => 'ウッドデッキ',
-					'material' => '人工木 エバーエコウッドII(床板幅195mm)',
-					'price'    => '¥425,600',
-				),
-				array(
-					'work'     => '植栽',
-					'material' => '落葉樹(高さ2.0m/2.5m/4.0m/3.0m) + 土壌改良、下草・草花類 + 土壌改良',
-					'price'    => '¥307,500',
-				),
-				array(
-					'work'     => 'その他',
-					'material' => '門まわりパッケージ AB46、アートボード門柱、エクスレッズ ウォールライト5型、letter cube',
-					'price'    => '¥479,700',
-				),
+			// 698:1181 / 698:1178 / 698:1180。CPT の画像が足りないときに使う。
+			'photos' => array(
+				'works-main-698-1181.jpg',
+				'works-sub2-698-1178.jpg',
+				'works-sub3-698-1180.jpg',
 			),
-		),
-		// 698:1217。全角スペースを含めてカンプどおり。
-		'total'     => '合計　¥2,901,080',
+			// 698:1197 + Group 381（698:1329）。ラベルは共通データのもの。
+			'render' => array_merge(
+				$case['render'],
+				array( 'image' => 'works-3d-698-1197.png' )
+			),
+		)
 	);
 }
 
@@ -1162,44 +1107,6 @@ function exterior_exone_store_column( array $store ) {
  */
 function exterior_exone_store_lines( array $lines ) {
 	return implode( '<br>', array_map( 'esc_html', $lines ) );
-}
-
-/**
- * WORKS の写真グリッド 1 枠ぶんを出力する。
- *
- * CPT works の画像があればそれを投稿へのリンク付きで、無ければカンプ写真を出す。
- *
- * @param array{image_id:int, file:string, url:string, title:string} $slot 枠のデータ。
- */
-function exterior_exone_store_works_photo( array $slot ) {
-	if ( $slot['image_id'] ) {
-		$image = wp_get_attachment_image(
-			$slot['image_id'],
-			'large',
-			false,
-			array(
-				'alt'     => $slot['title'],
-				'loading' => 'lazy',
-			)
-		);
-	} else {
-		$image = sprintf(
-			'<img src="%s" width="1200" height="844" alt="" loading="lazy">',
-			esc_url( exterior_exone_store_image( $slot['file'] ) )
-		);
-	}
-
-	if ( ! $slot['url'] ) {
-		echo wp_kses_post( $image );
-
-		return;
-	}
-
-	printf(
-		'<a class="p-sworks__link" href="%s">%s</a>',
-		esc_url( $slot['url'] ),
-		wp_kses_post( $image )
-	);
 }
 
 /**

@@ -15,6 +15,8 @@ require_once get_theme_file_path( 'inc/meta-boxes.php' );
 require_once get_theme_file_path( 'inc/top-data.php' );
 require_once get_theme_file_path( 'inc/company-data.php' );
 require_once get_theme_file_path( 'inc/store-data.php' );
+require_once get_theme_file_path( 'inc/dx-data.php' );
+require_once get_theme_file_path( 'inc/works-data.php' );
 
 /**
  * テーマサポートの登録。
@@ -142,6 +144,74 @@ function exterior_exone_enqueue_assets() {
 			get_theme_file_uri( 'css/store.css' ),
 			array( 'exterior-exone-style' ),
 			exterior_exone_asset_version( 'css/store.css' )
+		);
+	}
+
+	// WORKS（支店ページと DX ページで共通の部品）。
+	if ( exterior_exone_is_store_page() || is_page( 'dx' ) ) {
+		wp_enqueue_style(
+			'exterior-exone-works',
+			get_theme_file_uri( 'css/works.css' ),
+			array( 'exterior-exone-style' ),
+			exterior_exone_asset_version( 'css/works.css' )
+		);
+
+		// SP の見積モーダル（439:993 / 439:1020-1062）。
+		wp_enqueue_script(
+			'exterior-exone-works-estimate-modal',
+			get_theme_file_uri( 'js/works-estimate-modal.js' ),
+			array(),
+			exterior_exone_asset_version( 'js/works-estimate-modal.js' ),
+			true
+		);
+	}
+
+	// DX EXPERIENCE ページ専用アセット（CSS はテーマ本体の後に読む）。
+	if ( is_page( 'dx' ) ) {
+		wp_enqueue_style(
+			'exterior-exone-dx',
+			get_theme_file_uri( 'css/dx.css' ),
+			array( 'exterior-exone-style' ),
+			exterior_exone_asset_version( 'css/dx.css' )
+		);
+
+		// FV の背景動画（TOP の FV05 を流用）。PC / SP の出し分けは TOP のコピー
+		// セクションと同じ仕組み。
+		wp_enqueue_script(
+			'exterior-exone-copy-video',
+			get_theme_file_uri( 'js/copy-video.js' ),
+			array(),
+			exterior_exone_asset_version( 'js/copy-video.js' ),
+			true
+		);
+
+		// DX のステップ 01〜04: 画面に固定してスクロール量で 1 画面ずつ切り替える。
+		wp_enqueue_script(
+			'exterior-exone-dx-steps',
+			get_theme_file_uri( 'js/dx-steps.js' ),
+			array(),
+			exterior_exone_asset_version( 'js/dx-steps.js' ),
+			true
+		);
+
+		// Exterior Explorer: 全画面ピン留めと本番映像の正逆スクラブ。
+		wp_enqueue_script(
+			'exterior-exone-dx-explorer',
+			get_theme_file_uri( 'js/dx-explorer.js' ),
+			array(),
+			exterior_exone_asset_version( 'js/dx-explorer.js' ),
+			true
+		);
+
+		// summary の円環図の出現順（線描画 → フェードイン → 浮遊）。
+		// TOP の理念セクションと同じ図を流用しているため JS も共通
+		//（TOP 側は exterior_exone_front_page_scripts() が読む）。
+		wp_enqueue_script(
+			'exterior-exone-philosophy-diagram',
+			get_theme_file_uri( 'js/philosophy-diagram.js' ),
+			array(),
+			exterior_exone_asset_version( 'js/philosophy-diagram.js' ),
+			true
 		);
 	}
 
@@ -386,13 +456,13 @@ add_filter( 'show_admin_bar', 'exterior_exone_hide_admin_bar' );
  * ヘッダーを FV に重ねるページかどうか。
  *
  * 全幅の FV から始まるページは、ヘッダーを写真の上に半透明で重ねる
- * （カンプ TOP 917:2733 / 企業情報 393:546）。それ以外は黒帯のまま。
+ * （カンプ TOP 917:2733 / 企業情報 393:546 / DX 436:381）。それ以外は黒帯のまま。
  * 下層ページが増えたらここに追加する。
  *
  * @return bool
  */
 function exterior_exone_has_fv_header() {
-	return is_front_page() || is_page( 'company' ) || exterior_exone_is_store_page();
+	return is_front_page() || is_page( 'company' ) || is_page( 'dx' ) || exterior_exone_is_store_page();
 }
 
 /**
@@ -408,6 +478,10 @@ function exterior_exone_body_class( $classes ) {
 
 	if ( exterior_exone_is_store_page() ) {
 		$classes[] = 'is-store-page';
+	}
+
+	if ( is_page( 'dx' ) ) {
+		$classes[] = 'is-dx-page';
 	}
 
 	if ( exterior_exone_has_fv_header() ) {

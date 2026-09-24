@@ -1838,12 +1838,16 @@ svg[data-line-draw].is-drawn .st1 {
 
 /* リング・ロゴ・文言・6 項目は、線を描き終えた合図（.is-drawn）でふわっと出す。
    拡大は transform ではなく scale プロパティで行う（transform は浮遊、translate は中央寄せが使う）。
-   出る順は --fade-delay で付ける: リング 0 → ロゴ・文言 → 項目 1〜6 */
+   出る順は --fade-delay で付ける: リング 0 → ロゴ・文言 → 項目 1〜6
+   __display / __tagline は DX ページの円環図（css/dx.css の .p-diagram--dx）だけが持つ。
+   合図は器の [data-philosophy-diagram] で受けるので、TOP 以外のページでも同じ順で動く。 */
 .p-diagram__ring,
 .p-diagram__logo,
 .p-diagram__lead,
 .p-diagram__icon,
-.p-diagram__copy {
+.p-diagram__copy,
+.p-diagram__display,
+.p-diagram__tagline {
 	opacity: 0;
 	scale: var(--diagram-fade-scale);
 	transition:
@@ -1852,15 +1856,19 @@ svg[data-line-draw].is-drawn .st1 {
 }
 
 .p-diagram__logo,
-.p-diagram__lead {
+.p-diagram__lead,
+.p-diagram__display,
+.p-diagram__tagline {
 	--fade-delay: var(--diagram-fade-center-delay);
 }
 
-.p-philosophy__diagram.is-drawn .p-diagram__ring,
-.p-philosophy__diagram.is-drawn .p-diagram__logo,
-.p-philosophy__diagram.is-drawn .p-diagram__lead,
-.p-philosophy__diagram.is-drawn .p-diagram__icon,
-.p-philosophy__diagram.is-drawn .p-diagram__copy {
+[data-philosophy-diagram].is-drawn .p-diagram__ring,
+[data-philosophy-diagram].is-drawn .p-diagram__logo,
+[data-philosophy-diagram].is-drawn .p-diagram__lead,
+[data-philosophy-diagram].is-drawn .p-diagram__icon,
+[data-philosophy-diagram].is-drawn .p-diagram__copy,
+[data-philosophy-diagram].is-drawn .p-diagram__display,
+[data-philosophy-diagram].is-drawn .p-diagram__tagline {
 	opacity: 1;
 	scale: 1;
 }
@@ -1882,8 +1890,8 @@ svg[data-line-draw].is-drawn .st1 {
    互いに揃わないようにする。始めるのはフェードインが終わってから（.is-alive。js/philosophy-diagram.js）。
    keyframes は必ず静止位置（0）から始める。途中の位置から始めたり負の遅延で位相を
    ずらしたりすると、動き出す瞬間に位置が飛んでカクつく。 */
-.p-philosophy__diagram.is-alive .p-diagram__icon,
-.p-philosophy__diagram.is-alive .p-diagram__copy {
+[data-philosophy-diagram].is-alive .p-diagram__icon,
+[data-philosophy-diagram].is-alive .p-diagram__copy {
 	/* --diagram-float-duration は片道（上端→下端）の時間。1 周はその 2 倍 */
 	animation: var(--diagram-float-name, p-diagram-float) calc(var(--diagram-float-duration) * 2) var(--diagram-float-ease) infinite;
 	will-change: transform;
@@ -1926,8 +1934,8 @@ svg[data-line-draw].is-drawn .st1 {
 @media (prefers-reduced-motion: reduce) {
 	.p-diagram__icon,
 	.p-diagram__copy,
-	.p-philosophy__diagram.is-alive .p-diagram__icon,
-	.p-philosophy__diagram.is-alive .p-diagram__copy {
+	[data-philosophy-diagram].is-alive .p-diagram__icon,
+	[data-philosophy-diagram].is-alive .p-diagram__copy {
 		animation: none;
 	}
 
@@ -1935,7 +1943,9 @@ svg[data-line-draw].is-drawn .st1 {
 	.p-diagram__logo,
 	.p-diagram__lead,
 	.p-diagram__icon,
-	.p-diagram__copy {
+	.p-diagram__copy,
+	.p-diagram__display,
+	.p-diagram__tagline {
 		opacity: 1;
 		scale: 1;
 		transition: none;

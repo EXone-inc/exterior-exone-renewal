@@ -1,0 +1,1933 @@
+/* ============================================================
+   DX EXPERIENCE ページ（固定ページ dx / page-dx.php）
+   カンプ: PC 436:95（1920x18029）/ SP 439:1070（本体 439:752・375 基準）
+   設計メモ: docs/figma-dx-page.md
+   PC・SP ともカンプが揃っているため、両方を忠実再現の対象にする。
+   数値・色はすべて Figma の実測値（コメントの node-id が出典）。
+   style.css の共通トークンはここで再定義しない。カンプに無い新規色は
+   セクションを実装するたびに :root へトークンとして足してから使う。
+   プレフィックスは --dxp-（--dx- は TOP の DX セクションが使用中）。
+   ============================================================ */
+:root {
+	/* --- FV（436:381 / 439:777-796） ---
+	   各 clamp は「SP 375px の実測値 → PC 1920px の実測値」を通る直線。
+	   コメントの数値がカンプ実測値（左: SP / 右: PC）。
+	   実際の表示は下の比例ブロック（--dxp-vu / --dxp-su）が上書きする。 */
+	/* SP はヘッダー（45）が写真の上に積まれるぶんを引く。カンプの 723 はヘッダー込みで 1 画面（style.css の --fv-height と同じ考え方） */
+	--dxp-fv-height: clamp(678px, 580.427px + 26.0194vw, 1080px); /* 678（723 − 45）→ 1080 */
+	--dxp-fv-dx: clamp(110px, 80.874px + 7.767vw, 230px); /* 110 → 230 (439:792 / 436:114) */
+	--dxp-fv-en: clamp(74px, 60.893px + 3.4951vw, 128px); /* 74 → 128 (439:793 / 436:117) */
+	--dxp-fv-display-lh: 1.12; /* PC/SP 共通 */
+	--dxp-fv-display-ls: -3px; /* PC/SP とも -3 */
+	--dxp-fv-heading: clamp(20px, 16.117px + 1.0356vw, 36px); /* 20 → 36 (439:794 / 436:115) */
+	--dxp-fv-heading-ls: clamp(1px, 0.515px + 0.1294vw, 3px); /* 1 → 3 */
+	--dxp-fv-heading-lh: 1.5; /* PC/SP 共通 */
+	--dxp-fv-body: clamp(12px, 10.058px + 0.5178vw, 20px); /* 12 → 20 (439:795 / 436:118) */
+	--dxp-fv-body-ls: clamp(1px, 0.757px + 0.0647vw, 2px); /* 1 → 2 */
+	--dxp-fv-body-lh: 2; /* PC/SP 共通 */
+	--dxp-fv-body-color: var(--color-gray2); /* SP #d9d9d9 / PC は #dadada に差し替え */
+	/* コピー塊 436:113（x131 y251）/ Group 473 439:791（x25 y372.6）の位置 */
+	--dxp-fv-copy-left: clamp(25px, -0.728px + 6.8608vw, 131px); /* 25 → 131 */
+	--dxp-fv-copy-top: clamp(327.6px, 346.192px + -4.9579vw, 251px); /* 327.6（372.6 − ヘッダー 45）→ 251 */
+	/* DX の上端 → EXPERIENCE の下端。この高さの中で 2 語を重ねる */
+	--dxp-fv-title-height: clamp(151.1px, 110.66px + 10.7832vw, 317.7px); /* 151.1 → 317.7 */
+	/* カンプのテキストボックスの幅。中央揃えなので、書体の字幅が Figma と多少
+	   違っても文字列の中心がカンプの位置に留まる */
+	--dxp-fv-dx-width: clamp(94px, 53.72px + 10.7379vw, 260px); /* 94 → 260 */
+	--dxp-fv-en-width: clamp(274px, 221.08px + 14.1100vw, 492px); /* 274 → 492 */
+	--dxp-fv-en-x: clamp(42.3px, 34.921px + 1.9676vw, 72.7px); /* 42.3 → 72.7 : DX 左端からの寄り */
+	--dxp-fv-en-y: clamp(68.1px, 42.226px + 6.8997vw, 174.7px); /* 68.1 → 174.7 : DX 上端からの下げ */
+	--dxp-fv-text-x: clamp(8.3px, -1.093px + 2.5049vw, 47px); /* 8.3 → 47 : 和文の左インデント */
+	--dxp-fv-heading-gap: clamp(16.9px, 11.827px + 1.3528vw, 37.8px); /* 16.9 → 37.8 : EXPERIENCE 下端 → 和文見出し */
+	--dxp-fv-lead-gap: clamp(8.4px, 5.73px + 0.712vw, 19.4px); /* 8.4 → 19.4 : 和文見出し下端 → 本文 */
+	/* 暗幕 436:104（幅 980.6 / 1920）/ 439:778（高さ 432 / 723） */
+	--dxp-fv-shade-width: 51.07%;
+	--dxp-fv-shade-height: 59.75%;
+	--dxp-fv-shade-color: rgba(0, 0, 0, 0.4);
+	--dxp-fv-shade-end: rgba(0, 0, 0, 0); /* 黒のまま抜く（transparent 指定だと灰色を経由する実装があるため） */
+	--dxp-fv-shade-stop: 29%; /* ここまでベタ、以降は端へ向かって抜ける */
+	--dxp-fv-dx-color: rgba(245, 245, 245, 0.5); /* 436:114 = --color-white3 の 50% */
+
+	/* --- カンプのトークン外の色（Figma 変数に無いもの） --- */
+	--dxp-color-white1: #ffffff; /* Figma white 1。why dx の背景と SP の円ラベル */
+	--dxp-color-gray-mid: #6d6d6d; /* 436:289 の見出し */
+	--dxp-color-gray-circle: #a4a4a4; /* 436:272 の円 */
+	--dxp-color-gray-label: #dddddd; /* 439:946 ほか。SP の summary ラベル */
+
+	/* --- Exterior Explorer（スクロール連動映像。436:388 + 436:390-393） --- */
+	--dxp-ex-bg: rgb(184, 198, 211); /* 映像の縁の色。ポスターが出るまでのつなぎ */
+	--dxp-ex-rail: 500vh; /* 映像 1 本ぶんのスクロール量（画面 4 つぶん進む） */
+	--dxp-ex-rail-svh: 500svh;
+	--dxp-ex-fade: 0.4s; /* 章の切り替わりのフェード */
+	/* 上端は 436:100（15%）より濃くして白文字を保つ（映像の上端が rgb(184,198,211)
+	   の淡いグレーのため。決定事項 2026-09-20）。下端は本文 #4d4d4d 用の薄い白幕 */
+	--dxp-ex-scrim-top: linear-gradient(180deg, rgba(0, 0, 0, 0.45) 0, rgba(0, 0, 0, 0.3) 32%, rgba(0, 0, 0, 0) 55%);
+	/* 章ラベル（白）が映像の明るい床に乗るときの保険。カンプには無いが文字は崩さない */
+	--dxp-ex-chapter-shadow: 0 2px 24px rgba(0, 0, 0, 0.35);
+
+	/* --- why dx（436:384 / 439:797-923）/ 3D section（436:388 / 439:753-755）/
+	   3D sample の右下ラベル（436:390-393 Group 460。Exterior Explorer の章ラベルが使う） ---
+	   行高と色だけをここに置く。長さ（px 由来の値）は下の PC / SP の比例ブロックが
+	   幅ごとに定義する。2 ブロックで全幅を覆うので、FV のような clamp の
+	   フォールバックは重複になるため置かない。 */
+	--dxp-why-deco-lh: 1.12; /* PC/SP 共通 */
+	--dxp-why-heading-lh: 1.6; /* PC/SP 共通 */
+	--dxp-why-heading-color: var(--dxp-color-gray-mid); /* 436:289。SP は #4d4d4d */
+	--dxp-why-label-lh: 1.6; /* PC/SP 共通 */
+	--dxp-why-label-color: var(--color-white2); /* 436:276。SP は #ffffff */
+	--dxp-why-closing-lh: 2; /* PC/SP 共通 */
+	--dxp-why-closing-color: var(--color-black2); /* 436:101。SP は #4d4d4d */
+	--dxp-ex-label-lh: 1.12; /* PC/SP 共通 */
+	--dxp-ex-copy-lh: 1.6; /* PC/SP 共通 */
+	--dxp-sample-ja-lh: 1.5; /* PC/SP 共通 */
+	--dxp-sample-en-lh: 1.12; /* PC/SP 共通 */
+
+	/* --- DX タイトル帯 + ステップ 01〜04 + フローバー
+	   （436:394-395・436:125/161/189/216・436:399 /
+	     439:765-775・439:758/756/759/760・439:839） ---
+	   行高・線の太さ・色だけをここに置き、長さは PC / SP の比例ブロックが決める。 */
+	--dxp-steps-label-lh: 1.12; /* PC/SP 共通 */
+	--dxp-steps-copy-lh: 1.6; /* PC/SP 共通 */
+	--dxp-step-num-lh: 1.12; /* PC/SP 共通 */
+	--dxp-step-name-lh: 2; /* PC/SP 共通 */
+	--dxp-step-en-lh: 1.12; /* PC/SP 共通 */
+	--dxp-step-heading-lh: 1.8; /* PC/SP 共通 */
+	--dxp-step-body-lh: 2; /* PC/SP 共通 */
+	--dxp-step-line-w: 1px; /* 区切り線（436:157 ほか）。髪の毛線なので比例させない */
+	/* 01 の区切り線だけ #f5f5f5 だが、作図ブレとみなして他と揃える（決定事項 2026-09-19） */
+	--dxp-step-line-color: var(--color-gray1);
+	--dxp-step-btn-bg: rgba(0, 0, 0, 0.4); /* 436:396 / 439:772 */
+	--dxp-step-btn-lh: 1.6; /* PC/SP 共通 */
+	--dxp-flow-label-lh: 1.8; /* PC/SP 共通 */
+	--dxp-flow-line-w: 1px;
+	--dxp-flow-line-color: var(--color-gray1); /* 436:139 / 439:840 */
+	--dxp-flow-dot-color: var(--color-white3); /* 未到達ドットの線（436:150 ほか） */
+	--dxp-flow-active-color: var(--color-orange1); /* 436:159-160 / 439:856 */
+
+	/* --- ステップのスクロール切り替え（js/dx-steps.js。2026-09-24） ---
+	   カンプに動きの指定は無いため、TOP の DX セクションと同じ「固定して 1 画面
+	   1 ステップ」で、今のステップが左へ流れて次が右から入る */
+	--dxp-steps-slide: 0.9s; /* 流れる速さ */
+	--dxp-steps-ease: cubic-bezier(0.65, 0, 0.35, 1); /* 動き出しと止まりをなめらかに */
+	--dxp-steps-shift: 100%; /* 流れる距離（画面幅いっぱい） */
+	/* SP: 固定表示で 1 ステップ + フローバーが要る高さ（375 基準）。いちばん背の高い
+	   02（写真〜本文 約 518）+ フローバー約 71 + 上下の空き */
+	--dxp-steps-fit-h: 660;
+
+	/* --- summary（437:450 / 439:937-968） ---
+	   幅で変わらない値だけをここに置く。長さ・行高・色は PC / SP の比例ブロック。 */
+	--dxp-sum-copy-lh: 1.5; /* PC/SP 共通 */
+	--dxp-sum-lead-lh: 1.6; /* PC/SP 共通 */
+	/* 写真の上下を背景色（#1a1a1a）へ繋ぐグラデ。抜ける側も同じ色のまま
+	   透明にする（transparent 指定だと灰色を経由する実装があるため） */
+	--dxp-sum-fade-from: var(--color-black2);
+	--dxp-sum-fade-to: rgba(26, 26, 26, 0);
+}
+
+/* ============================================================
+   見出しコンポーネント（WORKS の 3 点セット等）
+   ------------------------------------------------------------
+   複数セクションで共有する見出しは、必要になったスプリントでここに置く。
+   ============================================================ */
+
+/* ============================================================
+   FV（436:381 / 439:777-796）
+   背景写真 + 暗幕の上に、半透明の「DX」と白の「EXPERIENCE」を重ねた
+   コピー塊を左寄せで置く。長さはすべて下の比例ブロックが決める。
+   ============================================================ */
+.p-dxfv {
+	position: relative;
+	min-height: var(--dxp-fv-height);
+	overflow: hidden;
+	background-color: var(--color-black2);
+	color: var(--color-white2);
+}
+
+.p-dxfv__bg {
+	position: absolute;
+	inset: 0;
+}
+
+.p-dxfv__bg img,
+.p-dxfv__video {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+/* 再生が始まってからポスターの上に重ねる（js/copy-video.js が .is-ready を付ける） */
+.p-dxfv__video {
+	max-width: none;
+	opacity: 0;
+	transition: opacity var(--transition-base);
+}
+
+.p-dxfv__video.is-ready {
+	opacity: 1;
+}
+
+/* 436:104 / 439:778。位置と向きは PC / SP の上書きブロックで決める。 */
+.p-dxfv__shade {
+	position: absolute;
+}
+
+/* 436:113 / 439:791。幅は中身なり（縮小しても和文が折り返さない） */
+.p-dxfv__copy {
+	position: absolute;
+	top: var(--dxp-fv-copy-top);
+	left: var(--dxp-fv-copy-left);
+	z-index: 1;
+}
+
+/* ページの主見出し。読みは「DX EXPERIENCE」、見た目は 2 語を重ねた組み。 */
+.p-dxfv__title {
+	position: relative;
+	height: var(--dxp-fv-title-height);
+	margin: 0;
+	font-family: var(--font-display);
+	font-weight: var(--fw-semibold);
+	line-height: var(--dxp-fv-display-lh);
+	letter-spacing: var(--dxp-fv-display-ls);
+	white-space: nowrap;
+}
+
+/* 436:114 / 439:792。背後に敷く半透明の DX。
+   カンプのテキストボックス（PC 260 / SP 94）を幅に取り、中央揃えで置く。 */
+.p-dxfv__title-dx {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: var(--dxp-fv-dx-width);
+	font-size: var(--dxp-fv-dx);
+	text-align: center;
+	color: var(--dxp-fv-dx-color);
+}
+
+/* 436:117 / 439:793。DX の右下に重ねる白の EXPERIENCE。 */
+.p-dxfv__title-en {
+	position: absolute;
+	top: var(--dxp-fv-en-y);
+	left: var(--dxp-fv-en-x);
+	width: var(--dxp-fv-en-width);
+	font-size: var(--dxp-fv-en);
+	text-align: center;
+	color: var(--color-white2);
+}
+
+/* 436:115 / 439:794 */
+.p-dxfv__heading {
+	margin: var(--dxp-fv-heading-gap) 0 0 var(--dxp-fv-text-x);
+	font-size: var(--dxp-fv-heading);
+	font-weight: var(--fw-bold);
+	line-height: var(--dxp-fv-heading-lh);
+	letter-spacing: var(--dxp-fv-heading-ls);
+	color: var(--color-white2);
+}
+
+/* 436:118 / 439:795 */
+.p-dxfv__lead {
+	margin: var(--dxp-fv-lead-gap) 0 0 var(--dxp-fv-text-x);
+	font-size: var(--dxp-fv-body);
+	font-weight: var(--fw-regular);
+	line-height: var(--dxp-fv-body-lh);
+	letter-spacing: var(--dxp-fv-body-ls);
+	color: var(--dxp-fv-body-color);
+}
+
+/* カンプの改行位置で 1 行ずつ組む。 */
+.p-dxfv__lead-line {
+	display: block;
+}
+
+/* ============================================================
+   why dx（436:384 / 439:797-923）
+   飾り文字「WHY DX」に見出しを重ね、灰色の円 4 個（アイコン + ラベル）と
+   結びの本文を置く。円は PC 横 1 列 / SP 2x2。
+   ============================================================ */
+.p-dxwhy {
+	padding-block: var(--dxp-why-pad-top) var(--dxp-why-pad-bottom);
+	background: var(--dxp-color-white1);
+}
+
+.p-dxwhy__head {
+	text-align: center;
+}
+
+/* 436:97 / 439:799。見出しの背後に敷く飾り文字。 */
+.p-dxwhy__deco {
+	margin: 0;
+	font-family: var(--font-display);
+	font-size: var(--dxp-why-deco);
+	font-weight: var(--fw-semibold);
+	line-height: var(--dxp-why-deco-lh);
+	letter-spacing: var(--dxp-why-deco-ls);
+	color: var(--color-gray1);
+}
+
+/* 436:289 / 439:800-801。PC は負のマージンで飾り文字に重ね、SP は下に離す。 */
+.p-dxwhy__heading {
+	position: relative;
+	margin: var(--dxp-why-heading-offset) 0 0;
+	font-size: var(--dxp-why-heading);
+	font-weight: var(--fw-bold);
+	line-height: var(--dxp-why-heading-lh);
+	letter-spacing: var(--dxp-why-heading-ls);
+	color: var(--dxp-why-heading-color);
+	text-shadow: var(--dxp-why-heading-shadow);
+}
+
+/* 436:272 / 439:798。PC は 4 個が横 1 列、SP は折り返して 2x2。 */
+.p-dxwhy__list {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--dxp-why-row-gap) var(--dxp-why-col-gap);
+	justify-content: center;
+	margin: var(--dxp-why-list-gap) 0 0;
+	padding: 0;
+	list-style: none;
+}
+
+.p-dxwhy__circle {
+	position: relative;
+	width: var(--dxp-why-circle);
+	height: var(--dxp-why-circle);
+	border-radius: 50%;
+	background: var(--dxp-color-gray-circle);
+}
+
+/* 白線画。カンプは PNG を余白ごと枠に収めているので、枠を固定して contain で
+   合わせる。横は円の中央、縦はラベルの少し上で下端を揃える。 */
+.p-dxwhy__icon {
+	position: absolute;
+	bottom: var(--dxp-why-icon-bottom);
+	left: 50%;
+	object-fit: contain;
+	transform: translateX(-50%);
+}
+
+.p-dxwhy__item:nth-child(1) .p-dxwhy__icon {
+	width: var(--dxp-why-icon1-w);
+	height: var(--dxp-why-icon1-h);
+}
+
+.p-dxwhy__item:nth-child(2) .p-dxwhy__icon {
+	width: var(--dxp-why-icon2-w);
+	height: var(--dxp-why-icon2-h);
+}
+
+.p-dxwhy__item:nth-child(3) .p-dxwhy__icon {
+	width: var(--dxp-why-icon3-w);
+	height: var(--dxp-why-icon3-h);
+}
+
+.p-dxwhy__item:nth-child(4) .p-dxwhy__icon {
+	width: var(--dxp-why-icon4-w);
+	height: var(--dxp-why-icon4-h);
+}
+
+/* 436:276 / 439:803。円の下寄りに置く。 */
+.p-dxwhy__label {
+	position: absolute;
+	top: var(--dxp-why-label-top);
+	right: 0;
+	left: 0;
+	margin: 0;
+	font-size: var(--dxp-why-label);
+	font-weight: var(--fw-bold);
+	line-height: var(--dxp-why-label-lh);
+	letter-spacing: var(--dxp-why-label-ls);
+	text-align: center;
+	color: var(--dxp-why-label-color);
+}
+
+/* 436:101 / 439:923。PC は中央揃え、SP は左揃え（SP ブロックで上書き）。 */
+.p-dxwhy__closing {
+	margin: var(--dxp-why-closing-gap) 0 0;
+	font-size: var(--dxp-why-closing);
+	line-height: var(--dxp-why-closing-lh);
+	letter-spacing: var(--dxp-why-closing-ls);
+	text-align: center;
+	color: var(--dxp-why-closing-color);
+}
+
+/* カンプの改行位置で 1 行ずつ組む。 */
+.p-dxwhy__closing-line {
+	display: block;
+}
+
+/* ============================================================
+   Exterior Explorer の固定コピー（436:388 / 439:753・439:988-989）
+   英字ラベル + 2 行コピー。映像の上に重ねる組み方と章ラベルはファイル末尾の
+   「Exterior Explorer（スクロール連動映像）」ブロック。
+   ============================================================ */
+.p-dxex {
+	position: relative;
+	overflow: hidden;
+	padding-block: var(--dxp-ex-pad-top) var(--dxp-ex-pad-bottom);
+	background: var(--color-bg);
+}
+
+/* 映像が position: absolute なので、コピー側も重ね順を上げる。 */
+.p-dxex__inner {
+	position: relative;
+	z-index: 1;
+	text-align: center;
+}
+
+/* 436:119 / 439:988 */
+.p-dxex__label {
+	margin: 0;
+	font-family: var(--font-ui);
+	font-size: var(--dxp-ex-label);
+	font-weight: var(--fw-medium);
+	line-height: var(--dxp-ex-label-lh);
+	letter-spacing: var(--dxp-ex-label-ls);
+	color: var(--color-white3);
+}
+
+/* 436:121 / 439:989 */
+.p-dxex__copy {
+	margin: var(--dxp-ex-copy-gap) 0 0;
+	font-size: var(--dxp-ex-copy);
+	font-weight: var(--fw-bold);
+	line-height: var(--dxp-ex-copy-lh);
+	letter-spacing: var(--dxp-ex-copy-ls);
+	color: var(--color-white2);
+}
+
+.p-dxex__copy-line {
+	display: block;
+}
+
+/* ============================================================
+   DX（436:394 / 439:765-760）
+   タイトル帯 + ステップ 01〜04 + 各ステップ下のフローバー。背景は通しで #1a1a1a。
+   PC は 1 ステップ = 1 画面（1920x1080）で、テキスト列とビジュアルを左右交互に
+   置く。SP は縦積み（ビジュアル → 文）。左右の入れ替えと縦積みは PC / SP の
+   上書きブロックが受け持つ。
+   ============================================================ */
+.p-dxsteps {
+	padding-bottom: var(--dxp-steps-pad-bottom);
+	background: var(--color-black2);
+}
+
+/* 436:395 / 439:765 */
+.p-dxsteps__head {
+	padding-block: var(--dxp-steps-pad-top) var(--dxp-steps-head-gap);
+	text-align: center;
+}
+
+/* 436:120 / 439:774 */
+.p-dxsteps__label {
+	margin: 0;
+	font-family: var(--font-ui);
+	font-size: var(--dxp-steps-label);
+	font-weight: var(--fw-medium);
+	line-height: var(--dxp-steps-label-lh);
+	letter-spacing: var(--dxp-steps-label-ls);
+	color: var(--color-white3);
+}
+
+/* 436:122 / 439:775 */
+.p-dxsteps__copy {
+	margin: var(--dxp-steps-copy-gap) 0 0;
+	font-size: var(--dxp-steps-copy);
+	font-weight: var(--fw-bold);
+	line-height: var(--dxp-steps-copy-lh);
+	letter-spacing: var(--dxp-steps-copy-ls);
+	color: var(--color-white2);
+}
+
+/* カンプの改行位置で 1 行ずつ組む。 */
+.p-dxsteps__copy-line {
+	display: block;
+}
+
+/* --- ステップ 01〜04（436:125/161/189/216 / 439:758/756/759/760） ---
+   PC はカンプどおり 1 画面ぶんの高さを確保し、余った縦の余白は
+   フローバーの margin-top: auto が吸って、フローバーが下端に寄る。 */
+.p-dxstep {
+	display: flex;
+	flex-direction: column;
+	min-height: var(--dxp-step-h);
+	padding-block: var(--dxp-step-pad-top) var(--dxp-step-pad-bottom);
+}
+
+.p-dxstep__inner {
+	display: flex;
+	justify-content: space-between;
+	width: var(--dxp-step-inner-w);
+	margin-inline: auto;
+	gap: var(--dxp-step-inner-gap);
+}
+
+/* 端末モックアップを重ねる基準。 */
+.p-dxstep__text {
+	position: relative;
+	width: var(--dxp-step-text-w);
+}
+
+/* 436:126 ほか / 439:816 ほか */
+.p-dxstep__num {
+	margin: 0;
+	font-family: var(--font-display);
+	font-size: var(--dxp-step-num);
+	font-weight: var(--fw-semibold);
+	line-height: var(--dxp-step-num-lh);
+	letter-spacing: var(--dxp-step-num-ls);
+	color: var(--color-orange1);
+}
+
+/* 436:133 / 436:166 ほか。番号の右に重ねる端末（カンプは余白ごとの画像なので
+   枠を固定して contain で合わせる）。 */
+.p-dxstep__device {
+	position: absolute;
+	top: var(--dxp-step-device-y);
+	left: var(--dxp-step-device-x);
+	width: var(--dxp-step-device-w);
+	height: var(--dxp-step-device-h);
+	object-fit: contain;
+}
+
+/* 和文名。番号と端末画像のぶんだけ間隔を空けて置く（間隔はステップごと）。 */
+.p-dxstep__name {
+	margin: var(--dxp-step-name-gap) 0 0;
+	font-size: var(--dxp-step-name);
+	font-weight: var(--fw-medium);
+	line-height: var(--dxp-step-name-lh);
+	letter-spacing: var(--dxp-step-name-ls);
+	color: var(--color-white3);
+}
+
+/* 英字名。カンプでは和文名に少し重なる（PC の CLIENT PORTAL だけ列幅に
+   収まらず 2 行になるのもカンプどおり）。 */
+.p-dxstep__en {
+	margin: var(--dxp-step-en-gap) 0 0;
+	font-family: var(--font-display);
+	font-size: var(--dxp-step-en);
+	font-weight: var(--fw-semibold);
+	line-height: var(--dxp-step-en-lh);
+	letter-spacing: var(--dxp-step-en-ls);
+	color: var(--color-white2);
+}
+
+/* 436:157 ほかの区切り線は見出しの上罫線で引く。
+   見出しだけはカンプでもテキスト列（482）より広い箱に 1 行で組まれている
+   （02 は 492）ので、折り返さずに列からはみ出させる。 */
+.p-dxstep__heading {
+	margin: var(--dxp-step-line-gap) 0 0;
+	border-top: var(--dxp-step-line-w) solid var(--dxp-step-line-color);
+	padding-top: var(--dxp-step-heading-gap);
+	white-space: nowrap;
+	font-size: var(--dxp-step-heading);
+	font-weight: var(--fw-bold);
+	line-height: var(--dxp-step-heading-lh);
+	letter-spacing: var(--dxp-step-heading-ls);
+	color: var(--color-white2);
+}
+
+/* 436:132 ほか / 439:817 ほか */
+.p-dxstep__body {
+	/* 折り返しても長音記号や閉じ括弧が行頭に落ちないようにする */
+	line-break: strict;
+	margin: var(--dxp-step-body-gap) 0 0;
+	font-size: var(--dxp-step-body);
+	line-height: var(--dxp-step-body-lh);
+	letter-spacing: var(--dxp-step-body-ls);
+	color: var(--color-gray2);
+}
+
+/* カンプの段落の切れ目で 1 ブロックずつ組む（中は幅なりに折り返す）。 */
+.p-dxstep__body-line {
+	display: block;
+}
+
+/* 02・03 は PC と SP で文言が違う（決定事項 Q1）。既定は SP を隠し、
+   PC ブロックで入れ替える。 */
+.p-dxstep__body--pc {
+	display: none;
+}
+
+/* 436:134 / 436:164 ほか。写真・動画枠・3D モデルの枠。 */
+.p-dxstep__visual {
+	position: relative;
+	flex-shrink: 0;
+	overflow: hidden;
+	width: var(--dxp-step-visual-w);
+	height: var(--dxp-step-visual-h);
+	margin-top: var(--dxp-step-visual-offset);
+	border-radius: var(--dxp-step-radius);
+}
+
+.p-dxstep__visual img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+/* 436:164 / 439:757。影が付くのは 02 の写真だけ。 */
+.p-dxstep--02 .p-dxstep__visual {
+	box-shadow: var(--dxp-step-shadow);
+}
+
+/* 436:191 / 439:761。3D モデルは角丸なしの透過 PNG。切らずに収める。 */
+.p-dxstep--03 .p-dxstep__visual {
+	border-radius: 0;
+}
+
+.p-dxstep--03 .p-dxstep__visual img {
+	object-fit: contain;
+}
+
+/* 436:396 / 439:772。動画枠の中央下に重ねるボタン。遷移先は未定のため # */
+.p-dxstep__button {
+	position: absolute;
+	bottom: var(--dxp-step-btn-bottom);
+	left: 50%;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: var(--dxp-step-btn-w);
+	height: var(--dxp-step-btn-h);
+	transform: translateX(-50%);
+	border: var(--dxp-step-btn-border) solid var(--color-white3);
+	border-radius: var(--dxp-step-btn-radius);
+	background: var(--dxp-step-btn-bg);
+	font-size: var(--dxp-step-btn-font);
+	font-weight: var(--fw-medium);
+	line-height: var(--dxp-step-btn-lh);
+	letter-spacing: var(--dxp-step-btn-ls);
+	color: var(--dxp-step-btn-color);
+	transition: background-color var(--transition-base), color var(--transition-base);
+}
+
+/* カンプにホバーの指定は無いので、共通ボタン（.c-btn--white）と同じ反転にする。 */
+.p-dxstep__button:hover {
+	background: var(--color-white3);
+	color: var(--color-black2);
+}
+
+/* --- フローバー（436:399 / 439:839） ---
+   6 等分のグリッドに置き、両端はアイコン・間の 4 つはドット。カンプでは 01 の
+   下にしか無いが、01〜04 すべてに出してそのステップをオレンジで示す
+   （決定事項 2026-09-19）。到達済み / 未到達の区別はカンプに無いので付けない。 */
+.p-dxflow {
+	position: relative;
+	width: var(--dxp-flow-w);
+	/* PC は 1 画面の中で下端に寄せる（auto）。SP は本文からの間隔。 */
+	margin: var(--dxp-flow-gap) auto 0;
+}
+
+/* 436:139 / 439:840。ドットの中心を通す横線。 */
+.p-dxflow__line {
+	position: absolute;
+	top: var(--dxp-flow-line-y);
+	right: var(--dxp-flow-line-inset);
+	left: var(--dxp-flow-line-inset);
+	border-top: var(--dxp-flow-line-w) solid var(--dxp-flow-line-color);
+}
+
+.p-dxflow__list {
+	display: grid;
+	grid-template-columns: repeat(6, 1fr);
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+/* アイコン・ドットの置き場をラベルの上に確保する。 */
+.p-dxflow__item {
+	position: relative;
+	padding-top: var(--dxp-flow-marker-h);
+	text-align: center;
+}
+
+/* 436:151 / 436:138。両端のアイコン（枠を固定して contain で合わせる）。 */
+.p-dxflow__icon {
+	position: absolute;
+	left: 50%;
+	object-fit: contain;
+	transform: translateX(-50%);
+}
+
+.p-dxflow__item:first-child .p-dxflow__icon {
+	top: var(--dxp-flow-icon-start-top);
+	width: var(--dxp-flow-icon-start-w);
+	height: var(--dxp-flow-icon-start-h);
+}
+
+.p-dxflow__item:last-child .p-dxflow__icon {
+	top: var(--dxp-flow-icon-end-top);
+	width: var(--dxp-flow-icon-end-w);
+	height: var(--dxp-flow-icon-end-h);
+}
+
+/* 436:150 ほか / 439:851。未到達のドットは線だけ。 */
+.p-dxflow__dot {
+	position: absolute;
+	top: var(--dxp-flow-dot-top);
+	left: 50%;
+	width: var(--dxp-flow-dot);
+	height: var(--dxp-flow-dot);
+	transform: translateX(-50%);
+	border: var(--dxp-flow-dot-w) solid var(--dxp-flow-dot-color);
+	border-radius: 50%;
+}
+
+/* 436:159 / 439:851。いま読んでいるステップのドットは塗る。 */
+.p-dxflow__item.is-active .p-dxflow__dot {
+	border-color: var(--dxp-flow-active-color);
+	background: var(--dxp-flow-active-color);
+}
+
+/* 436:160 / 439:856。アクティブのドットにだけ付く外輪。 */
+.p-dxflow__item.is-active .p-dxflow__dot::after {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: var(--dxp-flow-ring);
+	height: var(--dxp-flow-ring);
+	transform: translate(-50%, -50%);
+	border: var(--dxp-flow-dot-w) solid var(--dxp-flow-active-color);
+	border-radius: 50%;
+	content: "";
+}
+
+/* 未到達ラベル（PC #454545 / SP #4d4d4d）。 */
+.p-dxflow__label {
+	display: block;
+	font-size: var(--dxp-flow-label);
+	font-weight: var(--dxp-flow-label-fw);
+	line-height: var(--dxp-flow-label-lh);
+	letter-spacing: var(--dxp-flow-label-ls);
+	white-space: nowrap;
+	color: var(--dxp-flow-muted-color);
+}
+
+/* 両端は工程の起点と終点なので、どのステップでも白のまま。 */
+.p-dxflow__item:first-child .p-dxflow__label,
+.p-dxflow__item:last-child .p-dxflow__label {
+	font-weight: var(--dxp-flow-end-fw);
+	color: var(--dxp-flow-end-color);
+}
+
+.p-dxflow__item.is-active .p-dxflow__label {
+	font-weight: var(--fw-bold);
+	color: var(--dxp-flow-active-color);
+}
+
+/* フローバーの線に重ねる、今のステップまでの進み（js/dx-steps.js が
+   --dxp-flow-progress に線の長さに対する割合を入れる） */
+.p-dxflow__fill {
+	position: absolute;
+	top: calc(-1 * var(--dxp-flow-line-w));
+	left: 0;
+	width: 100%;
+	height: var(--dxp-flow-line-w);
+	background: var(--dxp-flow-active-color);
+	transform: scaleX(var(--dxp-flow-progress, 0));
+	transform-origin: left center;
+	transition: transform var(--dxp-steps-slide) var(--dxp-steps-ease);
+}
+
+/* --- ステップのスクロール切り替え（js/dx-steps.js が .is-enhanced を付ける） ---
+   TOP の DX セクションと同じく、ステップ数 + 1 画面ぶんのスクロール量を取り、
+   その間は 1 画面を固定して 01〜04 を重ねて置く。フローバーは画面下に 1 本。
+   JS が動かないときは 01〜04 が縦に並び、フローバーは最後に 1 本出る。 */
+.p-dxsteps__rail.is-enhanced {
+	height: calc((var(--dxp-steps-count) + 1) * 100vh);
+}
+
+.p-dxsteps__rail.is-enhanced .p-dxsteps__stage {
+	position: sticky;
+	top: var(--dx-pin-top);
+	display: flex;
+	flex-direction: column;
+	height: var(--dx-pin-height);
+	overflow: hidden;
+}
+
+.is-enhanced .p-dxsteps__track {
+	position: relative;
+	flex: 1 1 auto;
+	min-height: 0;
+}
+
+/* 待機中のステップは右（戻り用は左）に控えさせて見せない */
+.is-enhanced .p-dxstep {
+	position: absolute;
+	inset: 0;
+	min-height: 0;
+	padding-bottom: 0;
+	visibility: hidden;
+	opacity: 0;
+	transform: translateX(var(--dxp-steps-shift));
+}
+
+.is-enhanced .p-dxstep.is-before {
+	transform: translateX(calc(-1 * var(--dxp-steps-shift)));
+}
+
+.is-enhanced .p-dxstep.is-active {
+	visibility: visible;
+	opacity: 1;
+	transform: none;
+}
+
+/* 入れ替わる 2 枚だけを流す（飛ばしたステップは見えないまま位置だけ移る） */
+.is-enhanced .p-dxstep.is-moving {
+	transition:
+		transform var(--dxp-steps-slide) var(--dxp-steps-ease),
+		opacity var(--dxp-steps-slide) var(--dxp-steps-ease),
+		visibility var(--dxp-steps-slide);
+}
+
+/* フローバーは画面下に置く（下余白はステップの下余白と同じ） */
+.is-enhanced .p-dxflow {
+	flex-shrink: 0;
+	margin-block: 0;
+	padding-bottom: var(--dxp-step-pad-bottom);
+}
+
+/* 動きを減らす設定では流さずに切り替える */
+@media (prefers-reduced-motion: reduce) {
+	.is-enhanced .p-dxstep.is-moving,
+	.p-dxflow__fill {
+		transition: none;
+	}
+}
+
+/* ============================================================
+   summary（437:450 / 439:937-968）
+   夕景写真の上にコピー 2 行と本文 3 行を置き、その下に円環図を敷く。
+   写真はセクションの上部だけで、上端は背景色から始まり下端は背景色へ抜ける。
+   円環図は TOP 理念セクションの .p-diagram をそのまま使い（マークアップ・
+   出現順の JS も共通）、差分だけを .p-diagram--dx で上書きする。
+   共通部分は style.css の「円環図」ブロックが持つ（ここで複製しない）。
+   ============================================================ */
+.p-dxsum {
+	position: relative;
+	overflow: hidden;
+	padding-block: var(--dxp-sum-pad-top) var(--dxp-sum-pad-bottom);
+	background: var(--color-bg-dark);
+	color: var(--color-white2);
+}
+
+/* 436:241 / 439:939 */
+.p-dxsum__bg {
+	position: absolute;
+	inset: 0 0 auto;
+	height: var(--dxp-sum-photo-h);
+}
+
+.p-dxsum__bg img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+/* 436:242 / 439:940。上端の黒 → 写真。 */
+.p-dxsum__gradation {
+	position: absolute;
+	inset: 0 0 auto;
+	height: var(--dxp-sum-gradation-h);
+	background: linear-gradient(180deg, var(--dxp-sum-fade-from) 0, var(--dxp-sum-fade-to) 100%);
+}
+
+/* 436:246 / 439:938。写真 → 下の背景色。 */
+.p-dxsum__fade {
+	position: absolute;
+	inset: auto 0 0;
+	height: var(--dxp-sum-fade-h);
+	background: linear-gradient(180deg, var(--dxp-sum-fade-to) 0, var(--dxp-sum-fade-from) 100%);
+}
+
+/* 背景が position: absolute なので、本文側も重ね順を上げる。 */
+.p-dxsum__inner {
+	position: relative;
+	z-index: 1;
+}
+
+/* 436:245 / 439:941 */
+.p-dxsum__copy {
+	margin: 0;
+	font-size: var(--dxp-sum-copy);
+	font-weight: var(--fw-bold);
+	line-height: var(--dxp-sum-copy-lh);
+	letter-spacing: var(--dxp-sum-copy-ls);
+	text-align: center;
+	color: var(--dxp-sum-copy-color);
+}
+
+.p-dxsum__copy-line {
+	display: block;
+}
+
+/* 436:244 / 439:943。PC は 1 段落 = 1 行、SP は幅なりに折り返して 6 行。 */
+.p-dxsum__body {
+	/* 折り返しても長音記号や閉じ括弧が行頭に落ちないようにする */
+	line-break: strict;
+	max-width: var(--dxp-sum-body-w);
+	margin: var(--dxp-sum-body-gap) auto 0;
+	font-size: var(--dxp-sum-body);
+	line-height: var(--dxp-sum-body-lh);
+	letter-spacing: var(--dxp-sum-body-ls);
+	text-align: center;
+	color: var(--color-gray2);
+}
+
+.p-dxsum__body-line {
+	display: block;
+}
+
+/* 437:452 / 439:944。枠はラベルの張り出しで左右非対称なので、PC は中央寄せから
+   --dxp-sum-diagram-shift 分ずらして円環の中心を画面の中心に合わせる。 */
+.p-dxsum__diagram {
+	width: var(--dxp-sum-diagram-w);
+	margin: var(--dxp-sum-diagram-gap) auto 0;
+	translate: var(--dxp-sum-diagram-shift) 0;
+}
+
+/* --- 円環図の DX 差分（位置と大きさは PC / SP の上書きブロック） --- */
+.p-diagram--dx {
+	color: var(--dxp-sum-label-color);
+}
+
+/* ラベルはカンプでは「見える保証」だけ Bold だが、作図ブレとみなして揃える。 */
+.p-diagram--dx .p-diagram__copy {
+	font-weight: var(--fw-medium);
+}
+
+/* アイコンはカンプの枠に固定し、描画部分を枠の中に収める（素材ごとに
+   描画の縦横比がカンプの枠と少しずれるため）。 */
+.p-diagram--dx .p-diagram__icon {
+	height: var(--h);
+}
+
+.p-diagram--dx .p-diagram__icon img {
+	height: 100%;
+	object-fit: contain;
+}
+
+/* 436:290 / 439:967。カンプは opacity .8。 */
+.p-diagram--dx .p-diagram__art {
+	opacity: 0.8;
+}
+
+/* 436:249 / 439:942。PC は円の中の上部、SP は円の下（--y だけで位置を変える）。 */
+.p-diagram--dx .p-diagram__lead {
+	display: block;
+	font-weight: var(--fw-bold);
+	line-height: var(--dxp-sum-lead-lh);
+	text-align: center;
+	white-space: nowrap;
+	color: var(--color-white3);
+}
+
+/* 436:260 / 436:259（SP 439:968 / 439:962）。Antonio の行高は c-display の
+   normal（約 1.29）がカンプの行箱（120px で 155）と合う。 */
+.p-diagram--dx .p-diagram__display,
+.p-diagram--dx .p-diagram__tagline {
+	text-align: center;
+	white-space: nowrap;
+}
+
+.p-diagram--dx .p-diagram__display {
+	color: var(--dxp-sum-display-color);
+}
+
+.p-diagram--dx .p-diagram__tagline {
+	color: var(--dxp-sum-tagline-color);
+}
+
+/* ============================================================
+   PC（1025px 以上）: カンプ 436:95 の配置
+   ------------------------------------------------------------
+   長さはすべて --dxp-vu（下の比例ブロックで定義）に載せ、
+   数値はカンプ 1920 の実測値そのままを書く。
+   ============================================================ */
+@media (min-width: 1025px) {
+	/* 436:104: 幅 980.6 の帯。左端がベタの黒で、29% を過ぎると右へ抜ける。 */
+	.p-dxfv__shade {
+		inset: 0 auto 0 0;
+		width: var(--dxp-fv-shade-width);
+		background: linear-gradient(
+			90deg,
+			var(--dxp-fv-shade-color) 0,
+			var(--dxp-fv-shade-color) var(--dxp-fv-shade-stop),
+			var(--dxp-fv-shade-end) 100%
+		);
+	}
+
+	/* 436:161 / 436:216: 02・04 はテキスト列が右・ビジュアルが左（左右交互） */
+	.p-dxstep--02 .p-dxstep__inner,
+	.p-dxstep--04 .p-dxstep__inner {
+		flex-direction: row-reverse;
+	}
+
+	/* 436:218: 04 の英字名だけカンプが 2 行（CLIENT / PORTAL）。SP は 1 行。 */
+	.p-dxstep--04 .p-dxstep__en-word {
+		display: block;
+	}
+
+	/* 02・03 の本文は PC の文言を出す */
+	.p-dxstep__body--pc {
+		display: block;
+	}
+
+	.p-dxstep__body--sp {
+		display: none;
+	}
+
+	/* --- summary の円環図 437:452（枠 1364.5x1200 at x297.5 y14172） ---
+	   枠に対する % は Figma の実測値をそのまま割ったもの。--x はラベル・
+	   アイコンの中心、--y は上端（枠の左上が原点）。 */
+	.p-diagram--dx {
+		--diagram-ratio: 1364.5 / 1200;
+		--diagram-ring-x: 4.566%; /* 円環 436:261 の左端 62.3 / 1364.5 */
+		--diagram-ring-w: 87.944%; /* 1200 / 1364.5 */
+		--diagram-copy-size: 2.345cqw; /* 32px / 1364.5 */
+		--diagram-copy-ls: 0.031em; /* 1px / 32px */
+	}
+
+	.p-diagram--dx .p-diagram__logo {
+		--x: 48.534%;
+		--y: 11.4%;
+		--w: 13.185%; /* 179.9 / 1364.5 */
+	}
+
+	.p-diagram--dx .p-diagram__lead {
+		--x: 48.538%;
+		--y: 17.192%;
+		--w: 38.11%;
+
+		font-size: 2.639cqw; /* 36px / 1364.5 */
+		letter-spacing: 0.0278em; /* 1px / 36px */
+	}
+
+	/* カンプの枠は 835x437 だが、線画 SVG 自体の縦横比（737:348）が優先されるので
+	   幅を合わせ、余る高さのぶん枠の中で上下中央に置く */
+	.p-diagram--dx .p-diagram__art {
+		--x: 48.442%;
+		--y: 33.113%;
+		--w: 61.195%; /* 835 / 1364.5 */
+	}
+
+	.p-diagram--dx .p-diagram__display {
+		--x: 48.552%;
+		--y: 72%;
+		--w: 50%;
+
+		font-size: 8.795cqw; /* 120px / 1364.5 */
+		letter-spacing: -0.025em; /* -3px / 120px */
+	}
+
+	.p-diagram--dx .p-diagram__tagline {
+		--x: 48.552%;
+		--y: 84.917%;
+		--w: 50%;
+
+		font-size: 3.445cqw; /* 47px / 1364.5 */
+		letter-spacing: -0.0213em; /* -1px / 47px */
+	}
+
+	.p-diagram--dx .p-diagram__copy {
+		--w: 12.019%; /* 164 / 1364.5 */
+	}
+
+	.p-diagram--dx .p-diagram__icon--1 {
+		--x: 15.412%;
+		--y: 11.133%;
+		--w: 12.547%;
+		--h: 7.492%;
+	}
+
+	.p-diagram--dx .p-diagram__copy--1 {
+		--x: 15.412%;
+		--y: 20.675%;
+	}
+
+	.p-diagram--dx .p-diagram__icon--2 {
+		--x: 83.142%;
+		--y: 11.4%;
+		--w: 10.583%;
+		--h: 7.55%;
+	}
+
+	.p-diagram--dx .p-diagram__copy--2 {
+		--x: 83.142%;
+		--y: 20.675%;
+	}
+
+	.p-diagram--dx .p-diagram__icon--3 {
+		--x: 6.01%;
+		--y: 38.608%;
+		--w: 9.732%;
+		--h: 9.958%;
+	}
+
+	.p-diagram--dx .p-diagram__copy--3 {
+		--x: 6.01%;
+		--y: 49.567%;
+	}
+
+	.p-diagram--dx .p-diagram__icon--4 {
+		--x: 93.995%;
+		--y: 39.125%;
+		--w: 8.406%;
+		--h: 8.383%;
+	}
+
+	.p-diagram--dx .p-diagram__copy--4 {
+		--x: 93.991%;
+		--y: 49.567%;
+	}
+
+	.p-diagram--dx .p-diagram__icon--5 {
+		--x: 15.408%;
+		--y: 70.092%;
+		--w: 6.53%;
+		--h: 8.7%;
+	}
+
+	.p-diagram--dx .p-diagram__copy--5 {
+		--x: 15.412%;
+		--y: 80.833%;
+	}
+
+	.p-diagram--dx .p-diagram__icon--6 {
+		--x: 83.142%;
+		--y: 69.175%;
+		--w: 7.05%;
+		--h: 8.525%;
+	}
+
+	.p-diagram--dx .p-diagram__copy--6 {
+		--x: 83.142%;
+		--y: 79.75%;
+	}
+}
+
+/* ============================================================
+   SP（1024px 以下）: カンプ 439:752 の配置
+   ------------------------------------------------------------
+   長さはすべて --dxp-su（下の比例ブロックで定義）に載せ、
+   数値はカンプ 375 の実測値そのままを書く。
+   ============================================================ */
+@media (max-width: 1024px) {
+	/* summary 本文は SP カンプ（439:943）では左揃え（PC 436:244 は中央揃え） */
+	.p-dxsum__body {
+		text-align: left;
+	}
+
+	/* 439:778: 高さ 432 の帯。下端がベタの黒で、29% を過ぎると上へ抜ける。 */
+	.p-dxfv__shade {
+		inset: auto 0 0;
+		height: var(--dxp-fv-shade-height);
+		background: linear-gradient(
+			0deg,
+			var(--dxp-fv-shade-color) 0,
+			var(--dxp-fv-shade-color) var(--dxp-fv-shade-stop),
+			var(--dxp-fv-shade-end) 100%
+		);
+	}
+
+	/* 439:798: SP は 2x2。中間幅（768 など）で 3 個並ばないよう 2 列に抑える */
+	.p-dxwhy__list {
+		max-width: var(--dxp-why-list-w);
+		margin-inline: auto;
+	}
+
+	/* 439:923: SP は左揃えで、左端から 31.3 の位置に置く */
+	.p-dxwhy__closing {
+		width: var(--dxp-why-closing-w);
+		margin-inline: var(--dxp-why-closing-x) auto;
+		text-align: left;
+	}
+
+	/* 439:758 ほか: SP はビジュアルを先に出して縦積みにする */
+	.p-dxstep__inner {
+		flex-direction: column;
+	}
+
+	.p-dxstep__visual {
+		order: -1;
+	}
+
+	/* 固定表示のときは、カンプの上余白（96）の代わりにステップを縦中央に寄せ、
+	   フローバーの下余白も詰めて 1 画面に収める（縮尺は --dxp-steps-fit-h） */
+	.is-enhanced .p-dxstep {
+		justify-content: center;
+		padding-top: 0;
+	}
+
+	.is-enhanced .p-dxflow {
+		padding-bottom: calc(28 * var(--dxp-su));
+	}
+
+	/* --- summary の円環図 Group 499 439:944（枠 346x281 at x15 y5572） ---
+	   PC と同じ組みで、位置と大きさだけカンプの SP 実測値に差し替える。
+	   「私たちが届けたいのは、〜」（439:942）は円の下なので --y が 100% を超える
+	   （枠の外に置くぶんはセクションの下余白で空けてある）。 */
+	.p-diagram--dx {
+		--diagram-ratio: 346 / 281;
+		--diagram-ring-x: 8.382%; /* 円環 439:956 の左端 29 / 346 */
+		--diagram-ring-w: 81.214%; /* 281 / 346 */
+		--diagram-copy-size: 2.89cqw; /* 10px / 346 */
+		--diagram-copy-ls: 0.1em; /* 1px / 10px */
+	}
+
+	.p-diagram--dx .p-diagram__logo {
+		--x: 48.699%;
+		--y: 19.217%;
+		--w: 26.879%; /* 93 / 346 */
+	}
+
+	.p-diagram--dx .p-diagram__lead {
+		--x: 49.855%;
+		--y: 108.897%; /* 円環図の下端から 25（y5878） */
+		--w: 63%;
+
+		font-size: 4.624cqw; /* 16px / 346 */
+		letter-spacing: 0.0625em; /* 1px / 16px */
+	}
+
+	.p-diagram--dx .p-diagram__art {
+		--x: 44.798%;
+		--y: 27.99%;
+		--w: 65.896%; /* 228 / 346 */
+	}
+
+	.p-diagram--dx .p-diagram__display {
+		--x: 48.699%;
+		--y: 69.039%;
+		--w: 60%;
+
+		font-size: 9.249cqw; /* 32px / 346 */
+		letter-spacing: -0.031em; /* -1px / 32px */
+	}
+
+	.p-diagram--dx .p-diagram__tagline {
+		--x: 48.699%;
+		--y: 83.986%;
+		--w: 70%;
+
+		font-size: 4.046cqw; /* 14px / 346 */
+		letter-spacing: -0.0714em; /* -1px / 14px */
+	}
+
+	.p-diagram--dx .p-diagram__copy {
+		--w: 18.786%; /* 65 / 346 */
+	}
+
+	.p-diagram--dx .p-diagram__icon--1 {
+		--x: 18.497%;
+		--y: 11.032%;
+		--w: 11.561%;
+		--h: 7.473%;
+	}
+
+	.p-diagram--dx .p-diagram__copy--1 {
+		--x: 18.064%;
+		--y: 20.641%;
+	}
+
+	.p-diagram--dx .p-diagram__icon--2 {
+		--x: 80.925%;
+		--y: 11.388%;
+		--w: 9.827%;
+		--h: 7.473%;
+	}
+
+	.p-diagram--dx .p-diagram__copy--2 {
+		--x: 80.491%;
+		--y: 20.641%;
+	}
+
+	.p-diagram--dx .p-diagram__icon--3 {
+		--x: 9.393%;
+		--y: 39.146%;
+		--w: 8.96%;
+		--h: 9.964%;
+	}
+
+	.p-diagram--dx .p-diagram__copy--3 {
+		--x: 9.393%;
+		--y: 50.89%;
+	}
+
+	.p-diagram--dx .p-diagram__icon--4 {
+		--x: 90.896%;
+		--y: 40.569%;
+		--w: 7.803%;
+		--h: 8.185%;
+	}
+
+	.p-diagram--dx .p-diagram__copy--4 {
+		--x: 90.607%;
+		--y: 50.89%;
+	}
+
+	.p-diagram--dx .p-diagram__icon--5 {
+		--x: 18.353%;
+		--y: 70.107%;
+		--w: 6.069%;
+		--h: 8.541%;
+	}
+
+	.p-diagram--dx .p-diagram__copy--5 {
+		--x: 18.064%;
+		--y: 80.783%;
+	}
+
+	.p-diagram--dx .p-diagram__icon--6 {
+		--x: 80.925%;
+		--y: 69.039%;
+		--w: 6.358%;
+		--h: 8.541%;
+	}
+
+	.p-diagram--dx .p-diagram__copy--6 {
+		--x: 80.491%;
+		--y: 79.716%;
+	}
+}
+
+/* ============================================================
+   PC（1025px 以上）: 1920px カンプの縮小拡大コピー化
+   ------------------------------------------------------------
+   1 単位 --dxp-vu は「カンプ 1920 の 1px の実寸」。1920px 以上では 1px で
+   固定され、それ以下では画面幅に比例して縮む。文字・余白をこの単位に
+   載せることで、どの幅でも 1920px と同じ改行位置・比率を保つ。
+   ============================================================ */
+@media (min-width: 1025px) {
+	:root {
+		--dxp-vu: min(1px, calc(100vw / 1920));
+
+		/* clamp（375→1920 の補間）だった FV のトークンを 1920 比例に置き換える */
+		--dxp-fv-height: calc(1080 * var(--dxp-vu));
+		--dxp-fv-dx: calc(230 * var(--dxp-vu));
+		--dxp-fv-en: calc(128 * var(--dxp-vu));
+		--dxp-fv-display-ls: calc(-3 * var(--dxp-vu));
+		--dxp-fv-heading: calc(36 * var(--dxp-vu));
+		--dxp-fv-heading-ls: calc(3 * var(--dxp-vu));
+		--dxp-fv-body: calc(20 * var(--dxp-vu));
+		--dxp-fv-body-ls: calc(2 * var(--dxp-vu));
+		--dxp-fv-body-color: var(--color-gray1); /* 436:118 は #dadada */
+		--dxp-fv-copy-left: calc(131 * var(--dxp-vu));
+		--dxp-fv-copy-top: calc(251 * var(--dxp-vu));
+		--dxp-fv-title-height: calc(317.7 * var(--dxp-vu)); /* EXPERIENCE 下端 174.7 + 143 */
+		--dxp-fv-dx-width: calc(260 * var(--dxp-vu)); /* 436:114 のテキストボックス幅 */
+		--dxp-fv-en-width: calc(492 * var(--dxp-vu)); /* 436:117 のテキストボックス幅 */
+		--dxp-fv-en-x: calc(72.7 * var(--dxp-vu)); /* x203.7（中心 449.7 − 492/2）− x131 */
+		--dxp-fv-en-y: calc(174.7 * var(--dxp-vu)); /* y425.7 − y251 */
+		--dxp-fv-text-x: calc(47 * var(--dxp-vu)); /* x178 − x131 */
+		--dxp-fv-heading-gap: calc(37.8 * var(--dxp-vu)); /* y606.5 − (y425.7 + 143) */
+		--dxp-fv-lead-gap: calc(19.4 * var(--dxp-vu)); /* y679.9 − (y606.5 + 54) */
+
+		/* --- why dx 436:384（y1080〜2154。以下の y はセクション上端から） --- */
+		--dxp-why-pad-top: calc(143 * var(--dxp-vu)); /* 飾り文字 y1223 */
+		--dxp-why-deco: calc(170 * var(--dxp-vu)); /* 436:97 */
+		--dxp-why-deco-ls: calc(-6 * var(--dxp-vu));
+		--dxp-why-heading: calc(36 * var(--dxp-vu)); /* 436:289 */
+		--dxp-why-heading-ls: calc(2 * var(--dxp-vu));
+		--dxp-why-heading-offset: calc(-114.6 * var(--dxp-vu)); /* 飾り文字の下端 333.4 → 見出し 218.8（重ねる） */
+		--dxp-why-heading-shadow: 0 calc(12 * var(--dxp-vu)) calc(32 * var(--dxp-vu)) rgba(0, 0, 0, 0.12);
+		--dxp-why-list-gap: calc(132 * var(--dxp-vu)); /* 見出しの下端 276.4 → 円 408.4 */
+		--dxp-why-circle: calc(317.25 * var(--dxp-vu)); /* 436:272 の円 */
+		--dxp-why-col-gap: calc(42.05 * var(--dxp-vu)); /* ピッチ 359.3 − 円 317.25 */
+		--dxp-why-row-gap: 0px; /* PC は横 1 列なので折り返さない */
+		--dxp-why-label: calc(20 * var(--dxp-vu));
+		--dxp-why-label-ls: calc(1 * var(--dxp-vu));
+		--dxp-why-label-top: calc(227.7 * var(--dxp-vu)); /* 円の上端 1488.4 → ラベル 1716.1 */
+		--dxp-why-icon-bottom: calc(105.95 * var(--dxp-vu)); /* 円の下端から（アイコンの下端は円上端 +211.3 で揃う） */
+		--dxp-why-icon1-w: calc(244.4 * var(--dxp-vu));
+		--dxp-why-icon1-h: calc(164 * var(--dxp-vu));
+		--dxp-why-icon2-w: calc(241.7 * var(--dxp-vu));
+		--dxp-why-icon2-h: calc(207.6 * var(--dxp-vu));
+		--dxp-why-icon3-w: calc(255.7 * var(--dxp-vu));
+		--dxp-why-icon3-h: calc(206.9 * var(--dxp-vu));
+		--dxp-why-icon4-w: calc(225.6 * var(--dxp-vu));
+		--dxp-why-icon4-h: calc(150.5 * var(--dxp-vu));
+		--dxp-why-closing-gap: calc(80.35 * var(--dxp-vu)); /* 円の下端 725.65 → 本文 806 */
+		--dxp-why-closing: calc(20 * var(--dxp-vu)); /* 436:101 */
+		--dxp-why-closing-ls: calc(2 * var(--dxp-vu));
+		--dxp-why-pad-bottom: calc(148 * var(--dxp-vu)); /* 本文の下端 926 → セクション下端 1074 */
+
+		/* --- 3D section 436:388（y2154〜3677。以下の y はセクション上端から）
+		   → Exterior Explorer の固定コピー --- */
+		--dxp-ex-pad-top: calc(160.6 * var(--dxp-vu)); /* ラベル y2314.6 */
+		--dxp-ex-label: calc(32 * var(--dxp-vu)); /* 436:119 */
+		--dxp-ex-label-ls: calc(1 * var(--dxp-vu));
+		--dxp-ex-copy: calc(40 * var(--dxp-vu)); /* 436:121 */
+		--dxp-ex-copy-ls: calc(2 * var(--dxp-vu));
+		--dxp-ex-copy-gap: calc(19.96 * var(--dxp-vu)); /* ラベルの下端 196.44 → コピー 216.4 */
+		--dxp-ex-pad-bottom: calc(148 * var(--dxp-vu)); /* 静止画フォールバック時のコピー下の余白 */
+
+		/* --- 3D sample 436:390-393 の右下ラベル Group 460（1920x1080 内 x1325.4〜1776.5 /
+		   y785.6〜969.6）→ Exterior Explorer の章ラベル。右端・下端からの距離で置く --- */
+		--dxp-sample-ja: calc(36 * var(--dxp-vu));
+		--dxp-sample-ja-ls: calc(3 * var(--dxp-vu));
+		--dxp-sample-en: calc(128 * var(--dxp-vu));
+		--dxp-sample-en-ls: calc(-3 * var(--dxp-vu));
+		--dxp-sample-en-offset: calc(-13.1 * var(--dxp-vu)); /* 和文の下端 839.6 → 英字 826.5（重ねる） */
+		--dxp-ex-chapter-right: calc(143.5 * var(--dxp-vu)); /* 1920 − 1776.5 */
+		--dxp-ex-chapter-bottom: calc(110.4 * var(--dxp-vu)); /* 1080 − 969.6 */
+
+		/* --- DX タイトル帯 436:395（DX section 436:394 は y7997〜12901） --- */
+		--dxp-steps-pad-top: calc(160.4 * var(--dxp-vu)); /* ラベル y8157.4 */
+		--dxp-steps-label: calc(32 * var(--dxp-vu)); /* 436:120 */
+		--dxp-steps-label-ls: calc(1 * var(--dxp-vu));
+		--dxp-steps-copy: calc(40 * var(--dxp-vu)); /* 436:122 */
+		--dxp-steps-copy-ls: calc(2 * var(--dxp-vu));
+		--dxp-steps-copy-gap: calc(20.06 * var(--dxp-vu)); /* ラベルの下端 8193.24 → コピー 8213.3 */
+		--dxp-steps-head-gap: calc(81 * var(--dxp-vu)); /* タイトル下端 8341 → 01 上端 8422 */
+		--dxp-steps-pad-bottom: calc(160 * var(--dxp-vu)); /* 04 下端 12741 → セクション下端 12901 */
+
+	}
+
+	/* ステップ部分は画面に固定して 1 画面 1 ステップで見せるため、1 画面ぶん
+	   （1920x1080）が幅と高さの両方に収まる縮尺を取り直す。トークンはこの箱の中で
+	   計算し直させるため、:root ではなくここに置く */
+	.p-dxsteps__stage {
+		--dxp-vu: min(1px, calc(100vw / 1920), calc(100vh / 1080));
+
+		/* --- ステップ共通（各 1920x1080。y はステップ上端から） ---
+		   既定値は 02 の実測値。他のステップとの差だけを下の修飾子で上書きする。
+		   1〜6px のずれ（テキスト列 76/82/77、04 の写真 x164.4）は作図ブレとみなし、
+		   77 / 内容幅 1600 の左右いっぱいに揃えた（決定事項 2026-09-19）。 */
+		--dxp-step-h: calc(1080 * var(--dxp-vu));
+		--dxp-step-pad-top: calc(77 * var(--dxp-vu)); /* テキスト列・写真の上端 */
+		--dxp-step-pad-bottom: calc(58.8 * var(--dxp-vu)); /* フローバー下端 9443.2 → 01 下端 9502 */
+		--dxp-step-inner-w: calc(1600 * var(--dxp-vu)); /* x159.4〜1759.4 */
+		--dxp-step-inner-gap: 0px; /* 左右いっぱいに寄せるので space-between に任せる */
+		--dxp-step-text-w: calc(482 * var(--dxp-vu));
+		--dxp-step-num: calc(88 * var(--dxp-vu));
+		--dxp-step-num-ls: calc(-3 * var(--dxp-vu));
+		--dxp-step-name: calc(18 * var(--dxp-vu));
+		--dxp-step-name-ls: calc(2 * var(--dxp-vu));
+		--dxp-step-name-gap: calc(158.14 * var(--dxp-vu)); /* 番号の上端 +256.7 − 番号の行箱 98.56 */
+		--dxp-step-en: calc(88 * var(--dxp-vu));
+		--dxp-step-en-ls: calc(-3 * var(--dxp-vu));
+		--dxp-step-en-gap: calc(-6 * var(--dxp-vu)); /* 和文名の上端 +30 に置く = 行箱 36 に 6 重ねる */
+		--dxp-step-line-gap: calc(33.2 * var(--dxp-vu)); /* 英字の下端 → 区切り線 */
+		--dxp-step-heading-gap: calc(12 * var(--dxp-vu)); /* 区切り線 → 見出し */
+		--dxp-step-heading: calc(36 * var(--dxp-vu));
+		--dxp-step-heading-ls: calc(2 * var(--dxp-vu));
+		--dxp-step-body-gap: calc(12.2 * var(--dxp-vu)); /* 見出しの下端 → 本文 */
+		--dxp-step-body: calc(18 * var(--dxp-vu));
+		--dxp-step-body-ls: calc(2 * var(--dxp-vu));
+		--dxp-step-visual-w: calc(1033.5 * var(--dxp-vu));
+		--dxp-step-visual-h: calc(747.9 * var(--dxp-vu));
+		--dxp-step-visual-offset: 0px;
+		--dxp-step-radius: calc(20 * var(--dxp-vu));
+		--dxp-step-shadow: calc(8 * var(--dxp-vu)) calc(12 * var(--dxp-vu)) calc(8 * var(--dxp-vu))
+			calc(4 * var(--dxp-vu)) rgba(0, 0, 0, 0.25); /* 436:164 */
+		--dxp-step-device-w: calc(203.6 * var(--dxp-vu)); /* 436:166（02〜04 共通のスマホ画面） */
+		--dxp-step-device-h: calc(384.9 * var(--dxp-vu));
+		--dxp-step-device-x: calc(262.3 * var(--dxp-vu)); /* テキスト列の左端から */
+		--dxp-step-device-y: calc(1.1 * var(--dxp-vu));
+		--dxp-step-btn-w: calc(390.1 * var(--dxp-vu)); /* 436:396 */
+		--dxp-step-btn-h: calc(84.5 * var(--dxp-vu));
+		--dxp-step-btn-bottom: calc(82.7 * var(--dxp-vu)); /* 動画枠の下端から */
+		--dxp-step-btn-font: calc(24 * var(--dxp-vu));
+		--dxp-step-btn-ls: calc(1 * var(--dxp-vu));
+		--dxp-step-btn-border: 1px; /* 436:396 は #f5f5f5 の 1px 枠 */
+		--dxp-step-btn-radius: calc(100 * var(--dxp-vu)); /* 高さの半分を超えるので丸端 */
+		--dxp-step-btn-color: var(--dxp-color-white1);
+
+		/* --- フローバー 436:399（x219.7 y9313.4 1506.6x129.8） ---
+		   ドット中心のピッチ 280 を 6 等分の列幅にして中央に置く
+		   （カンプの左右非対称 x219.7 / 右 193.7 は作図ブレとみなす） */
+		--dxp-flow-w: calc(1680 * var(--dxp-vu));
+		--dxp-flow-gap: auto; /* 1 画面の余りを吸わせて下端に寄せる */
+		--dxp-flow-marker-h: calc(86.8 * var(--dxp-vu)); /* バー上端 → ラベル上端 */
+		--dxp-flow-line-y: calc(43.6 * var(--dxp-vu)); /* バー上端 → 横線（ドットの中心） */
+		--dxp-flow-line-inset: calc(222 * var(--dxp-vu)); /* 横線 1235.6 幅ぶんの左右の余り */
+		--dxp-flow-dot: calc(34.4 * var(--dxp-vu));
+		--dxp-flow-dot-w: calc(2 * var(--dxp-vu));
+		--dxp-flow-dot-top: calc(26.4 * var(--dxp-vu)); /* 43.6 − 34.4/2 */
+		--dxp-flow-ring: calc(50.3 * var(--dxp-vu)); /* 436:160 */
+		--dxp-flow-label: calc(24 * var(--dxp-vu));
+		--dxp-flow-label-ls: calc(2 * var(--dxp-vu));
+		--dxp-flow-label-fw: var(--fw-bold);
+		--dxp-flow-end-fw: var(--fw-bold);
+		--dxp-flow-muted-color: var(--color-gray3); /* 未到達 #454545 */
+		--dxp-flow-end-color: var(--color-white2); /* ご相談・完成 #fefefe */
+		--dxp-flow-icon-start-w: calc(95.5 * var(--dxp-vu)); /* 436:151 */
+		--dxp-flow-icon-start-h: calc(70.2 * var(--dxp-vu));
+		--dxp-flow-icon-start-top: 0px;
+		--dxp-flow-icon-end-w: calc(117.7 * var(--dxp-vu)); /* 436:138 */
+		--dxp-flow-icon-end-h: calc(61.8 * var(--dxp-vu));
+		--dxp-flow-icon-end-top: calc(7 * var(--dxp-vu));
+
+	}
+
+	:root {
+		/* --- summary 437:450（y12901〜15532。以下の y はセクション上端から） --- */
+		--dxp-sum-pad-top: calc(163.3 * var(--dxp-vu)); /* コピー y13064.3 */
+		--dxp-sum-pad-bottom: calc(159.7 * var(--dxp-vu)); /* 円環図の下端 2471 → セクション下端 2630.7 */
+		--dxp-sum-photo-h: calc(1532 * var(--dxp-vu)); /* 436:241 */
+		--dxp-sum-gradation-h: calc(656.6 * var(--dxp-vu)); /* 436:242 */
+		--dxp-sum-fade-h: calc(365.9 * var(--dxp-vu)); /* 436:246（写真の下端で終わる） */
+		--dxp-sum-copy: calc(40 * var(--dxp-vu)); /* 436:245 */
+		--dxp-sum-copy-ls: calc(5 * var(--dxp-vu));
+		--dxp-sum-copy-color: var(--color-white2); /* #fefefe */
+		--dxp-sum-body: calc(20 * var(--dxp-vu)); /* 436:244 */
+		--dxp-sum-body-ls: calc(1 * var(--dxp-vu));
+		--dxp-sum-body-lh: 2.5;
+		--dxp-sum-body-w: calc(1600 * var(--dxp-vu));
+		--dxp-sum-body-gap: calc(23.5 * var(--dxp-vu)); /* コピーの下端 283.3 → 本文 306.8 */
+		--dxp-sum-diagram-w: calc(1364.5 * var(--dxp-vu)); /* 437:452 */
+		--dxp-sum-diagram-gap: calc(814.2 * var(--dxp-vu)); /* 本文の下端 456.8 → 円環図 1271 */
+		--dxp-sum-diagram-shift: calc(19.75 * var(--dxp-vu)); /* 枠 x297.5 − 中央寄せの x277.75 */
+		--dxp-sum-label-color: var(--color-gray2); /* 436:250 ほか #d9d9d9 */
+		--dxp-sum-display-color: var(--color-white2); /* 436:260 #fefefe */
+		--dxp-sum-tagline-color: var(--color-white2); /* 436:259 #fefefe */
+	}
+
+	/* 436:125。番号の右にモニター+スマホのモックアップが入るぶん、和文名が下がる。 */
+	.p-dxstep--01 {
+		--dxp-step-name-gap: calc(258.34 * var(--dxp-vu)); /* +356.9 − 98.56 */
+		--dxp-step-visual-h: calc(751.6 * var(--dxp-vu)); /* 436:134 */
+		--dxp-step-device-w: calc(489.5 * var(--dxp-vu)); /* 436:133 */
+		--dxp-step-device-h: calc(326.3 * var(--dxp-vu));
+		--dxp-step-device-x: calc(44.5 * var(--dxp-vu));
+		--dxp-step-device-y: calc(49.5 * var(--dxp-vu));
+	}
+
+	/* 436:189。3D モデルは他より小さく、少し下げて置く。 */
+	.p-dxstep--03 {
+		--dxp-step-name-gap: calc(169.64 * var(--dxp-vu)); /* +268.2 − 98.56 */
+		--dxp-step-visual-w: calc(1029.5 * var(--dxp-vu)); /* 436:191 */
+		--dxp-step-visual-h: calc(662.9 * var(--dxp-vu));
+		--dxp-step-visual-offset: calc(27.9 * var(--dxp-vu)); /* y10685.9 − テキスト列 10658 */
+		--dxp-step-device-w: calc(207.4 * var(--dxp-vu)); /* 436:206 */
+		--dxp-step-device-h: calc(392.1 * var(--dxp-vu));
+		--dxp-step-device-x: calc(215.9 * var(--dxp-vu));
+		--dxp-step-device-y: calc(5 * var(--dxp-vu));
+	}
+
+	/* 436:216。英字名が 2 行（CLIENT / PORTAL）で、スマホも下寄り。 */
+	.p-dxstep--04 {
+		--dxp-step-name-gap: calc(228.94 * var(--dxp-vu)); /* +327.5 − 98.56 */
+		--dxp-step-device-x: calc(246.5 * var(--dxp-vu)); /* 436:239 */
+		--dxp-step-device-y: calc(168.9 * var(--dxp-vu));
+	}
+}
+
+/* ============================================================
+   SP（1024px 以下）: 375px カンプの縮小拡大コピー化
+   ------------------------------------------------------------
+   1 単位 --dxp-su は「375px 幅での 1px の実寸」。PC の --dxp-vu と同じ
+   考え方で、どの幅でも 375px と同じ比率を保つ
+   （上限は style.css の --sp-scale-max）。
+   ============================================================ */
+@media (max-width: 1024px) {
+	:root {
+		--dxp-su: min(calc(100vw / 375), var(--sp-scale-max));
+
+		--dxp-fv-height: calc(678 * var(--dxp-su)); /* 723 − ヘッダー 45 */
+		--dxp-fv-dx: calc(110 * var(--dxp-su));
+		--dxp-fv-en: calc(74 * var(--dxp-su));
+		--dxp-fv-display-ls: calc(-3 * var(--dxp-su));
+		--dxp-fv-heading: calc(20 * var(--dxp-su));
+		--dxp-fv-heading-ls: calc(1 * var(--dxp-su));
+		--dxp-fv-body: calc(12 * var(--dxp-su));
+		--dxp-fv-body-ls: calc(1 * var(--dxp-su));
+		--dxp-fv-copy-left: calc(25 * var(--dxp-su));
+		--dxp-fv-copy-top: calc(327.6 * var(--dxp-su)); /* 372.6 − ヘッダー 45（画面上はカンプと同じ y372.6） */
+		--dxp-fv-title-height: calc(151.1 * var(--dxp-su)); /* EXPERIENCE 下端 68.1 + 83 */
+		--dxp-fv-dx-width: calc(94 * var(--dxp-su)); /* 439:792 のテキストボックス幅 */
+		--dxp-fv-en-width: calc(274 * var(--dxp-su)); /* 439:793 のテキストボックス幅 */
+		--dxp-fv-en-x: calc(42.3 * var(--dxp-su)); /* x67.3（中心 204.3 − 274/2）− x25 */
+		--dxp-fv-en-y: calc(68.1 * var(--dxp-su)); /* y440.7 − y372.6 */
+		--dxp-fv-text-x: calc(8.3 * var(--dxp-su)); /* x33.3 − x25 */
+		--dxp-fv-heading-gap: calc(16.9 * var(--dxp-su)); /* y540.6 − (y440.7 + 83) */
+		--dxp-fv-lead-gap: calc(8.4 * var(--dxp-su)); /* y579 − (y540.6 + 30) */
+
+		/* --- why dx 439:797-923（y723〜1416。以下の y はセクション上端から） --- */
+		--dxp-why-pad-top: calc(59.8 * var(--dxp-su)); /* 飾り文字 y782.8 */
+		--dxp-why-deco: calc(58 * var(--dxp-su)); /* 439:799 */
+		--dxp-why-deco-ls: calc(-3 * var(--dxp-su));
+		--dxp-why-heading: calc(16 * var(--dxp-su)); /* 439:800-801（2 行） */
+		--dxp-why-heading-ls: calc(2 * var(--dxp-su));
+		--dxp-why-heading-offset: calc(8.14 * var(--dxp-su)); /* 飾り文字の下端 124.76 → 見出し 132.9（SP は重ねない） */
+		--dxp-why-heading-shadow: none; /* SP カンプに影は無い */
+		--dxp-why-heading-color: var(--color-black1); /* 439:800 は #4d4d4d */
+		--dxp-why-list-gap: calc(31.5 * var(--dxp-su)); /* 見出しの下端 184.1 → 円 215.6 */
+		--dxp-why-circle: calc(148.93 * var(--dxp-su)); /* 439:798 の円 */
+		--dxp-why-col-gap: calc(14.97 * var(--dxp-su)); /* ピッチ 163.9 − 円 148.93 */
+		--dxp-why-row-gap: calc(15.97 * var(--dxp-su)); /* 2 行目 380.5 − (215.6 + 148.93) */
+		--dxp-why-list-w: calc(312.83 * var(--dxp-su)); /* 円 148.93 x2 + 間 14.97（2 列に固定） */
+		--dxp-why-label: calc(12 * var(--dxp-su));
+		--dxp-why-label-ls: calc(1 * var(--dxp-su));
+		--dxp-why-label-top: calc(90.8 * var(--dxp-su)); /* 円の上端 938.6 → ラベル 1029.4 */
+		--dxp-why-label-color: var(--dxp-color-white1); /* 439:803 は #ffffff */
+		--dxp-why-icon-bottom: calc(66.93 * var(--dxp-su)); /* 円の下端から（アイコンの下端は円上端 +82 で揃う） */
+		--dxp-why-icon1-w: calc(89.7 * var(--dxp-su));
+		--dxp-why-icon1-h: calc(60.2 * var(--dxp-su));
+		--dxp-why-icon2-w: calc(91.3 * var(--dxp-su));
+		--dxp-why-icon2-h: calc(78.4 * var(--dxp-su));
+		--dxp-why-icon3-w: calc(92.1 * var(--dxp-su));
+		--dxp-why-icon3-h: calc(74.5 * var(--dxp-su));
+		--dxp-why-icon4-w: calc(76.7 * var(--dxp-su));
+		--dxp-why-icon4-h: calc(51.2 * var(--dxp-su));
+		--dxp-why-closing-gap: calc(24.57 * var(--dxp-su)); /* 円の下端 529.43 → 本文 554 */
+		--dxp-why-closing: calc(12 * var(--dxp-su)); /* 439:923 */
+		--dxp-why-closing-ls: calc(1 * var(--dxp-su));
+		--dxp-why-closing-color: var(--color-black1); /* 439:923 は #4d4d4d */
+		--dxp-why-closing-x: calc(31.3 * var(--dxp-su)); /* 左端からの位置 */
+		--dxp-why-closing-w: calc(312.4 * var(--dxp-su)); /* 375 − 31.3 x2 */
+		--dxp-why-pad-bottom: calc(67 * var(--dxp-su)); /* 本文の下端 626 → セクション下端 693 */
+
+		/* --- 3D section 439:753・439:988-989（y1416〜2139）→ Exterior Explorer の固定コピー --- */
+		--dxp-ex-pad-top: calc(106.8 * var(--dxp-su)); /* ラベル y1522.8 */
+		--dxp-ex-label: calc(16 * var(--dxp-su)); /* 439:988 */
+		--dxp-ex-label-ls: calc(1 * var(--dxp-su));
+		--dxp-ex-copy: calc(16 * var(--dxp-su)); /* 439:989 */
+		--dxp-ex-copy-ls: calc(1 * var(--dxp-su));
+		--dxp-ex-copy-gap: calc(6.28 * var(--dxp-su)); /* ラベルの下端 124.72 → コピー 131 */
+		--dxp-ex-pad-bottom: calc(60 * var(--dxp-su)); /* 静止画フォールバック時のコピー下の余白 */
+
+		/* --- 3D sample のカード 439:749-751 の右下ラベル Group 460（375x722 内
+		   x213.2〜347.2 / y393〜452）→ Exterior Explorer の章ラベル。右端はカンプどおり
+		   27.8、下端は映像が全画面になるためカードの下余白 60 に合わせる --- */
+		--dxp-sample-ja: calc(12 * var(--dxp-su));
+		--dxp-sample-ja-ls: calc(1 * var(--dxp-su));
+		--dxp-sample-en: calc(40 * var(--dxp-su));
+		--dxp-sample-en-ls: calc(-2 * var(--dxp-su));
+		--dxp-sample-en-offset: calc(-5.2 * var(--dxp-su)); /* PC と同じ重なり量（英字 40px 比） */
+		--dxp-ex-chapter-right: calc(27.8 * var(--dxp-su)); /* 375 − 347.2 */
+		--dxp-ex-chapter-bottom: calc(60 * var(--dxp-su));
+
+		/* --- DX タイトル帯 439:765（y2139〜2275、375x136） --- */
+		--dxp-steps-pad-top: calc(59.6 * var(--dxp-su)); /* ラベル y2198.6 */
+		--dxp-steps-label: calc(14 * var(--dxp-su)); /* 439:774 */
+		--dxp-steps-label-ls: calc(1 * var(--dxp-su));
+		--dxp-steps-copy: calc(16 * var(--dxp-su)); /* 439:775 */
+		--dxp-steps-copy-ls: calc(1 * var(--dxp-su));
+		--dxp-steps-copy-gap: calc(8.52 * var(--dxp-su)); /* ラベルの下端 75.28 → コピー 83.8 */
+		--dxp-steps-head-gap: calc(1 * var(--dxp-su)); /* コピーの下端 135 → 帯の下端 136 */
+		--dxp-steps-pad-bottom: 0px; /* 04 の下端がそのまま summary の上端 */
+
+	}
+
+	/* PC と同じく、固定した 1 画面（ヘッダーの下）に 1 ステップが収まる縮尺を
+	   取り直す。--dxp-steps-fit-h は固定表示のときに 1 ステップが要る高さ（375 基準） */
+	.p-dxsteps__stage {
+		--dxp-su: min(
+			calc(100vw / 375),
+			calc((100svh - var(--header-height)) / var(--dxp-steps-fit-h)),
+			var(--sp-scale-max)
+		);
+
+		/* --- ステップ 439:758/756/759/760（各 #1a1a1a、左右 18 余白、内容幅 336.7） ---
+		   既定値は 02・04 の実測値。SP は高さを決め打ちせず内容なりに積む
+		   （カンプに無いフローバーを 02〜04 にも足すため、そのぶんだけ背が伸びる）。 */
+		--dxp-step-h: 0px;
+		--dxp-step-pad-top: calc(96 * var(--dxp-su)); /* ステップ上端 → 写真 */
+		--dxp-step-pad-bottom: calc(52 * var(--dxp-su)); /* フローバー下端 626 → 01 下端 678 */
+		--dxp-step-inner-w: calc(336.7 * var(--dxp-su));
+		--dxp-step-inner-gap: calc(16.8 * var(--dxp-su)); /* 写真の下端 → 番号 */
+		--dxp-step-text-w: 100%;
+		--dxp-step-num: calc(48 * var(--dxp-su));
+		--dxp-step-num-ls: calc(-3 * var(--dxp-su));
+		--dxp-step-name: calc(12 * var(--dxp-su));
+		--dxp-step-name-ls: calc(2 * var(--dxp-su));
+		--dxp-step-name-gap: calc(23.94 * var(--dxp-su)); /* 番号の上端 +77.7 − 番号の行箱 53.76 */
+		--dxp-step-en: calc(33 * var(--dxp-su));
+		--dxp-step-en-ls: calc(-1 * var(--dxp-su));
+		--dxp-step-en-gap: 0px; /* 和文名の行箱 24 のすぐ下（439:820 ほか） */
+		--dxp-step-line-gap: calc(11.84 * var(--dxp-su)); /* 英字の下端 → 区切り線 */
+		--dxp-step-heading-gap: calc(7.8 * var(--dxp-su)); /* 区切り線 → 見出し */
+		--dxp-step-heading: calc(16 * var(--dxp-su));
+		--dxp-step-heading-ls: calc(2 * var(--dxp-su));
+		--dxp-step-body-gap: calc(0.2 * var(--dxp-su)); /* 見出しの下端 → 本文 */
+		--dxp-step-body: calc(12 * var(--dxp-su));
+		--dxp-step-body-ls: calc(1 * var(--dxp-su));
+		--dxp-step-visual-w: 100%;
+		--dxp-step-visual-h: calc(217 * var(--dxp-su));
+		--dxp-step-visual-offset: 0px;
+		--dxp-step-radius: calc(5 * var(--dxp-su));
+		--dxp-step-shadow: calc(8 * var(--dxp-su)) calc(12 * var(--dxp-su)) calc(8 * var(--dxp-su))
+			calc(4 * var(--dxp-su)) rgba(0, 0, 0, 0.25); /* 439:757 */
+		--dxp-step-device-w: calc(69.2 * var(--dxp-su)); /* 02〜04 共通のスマホ画面 */
+		--dxp-step-device-h: calc(130.9 * var(--dxp-su));
+		--dxp-step-device-x: calc(203 * var(--dxp-su)); /* x221 − テキスト列の左端 18 */
+		--dxp-step-device-y: calc(5.8 * var(--dxp-su));
+		--dxp-step-btn-w: calc(175.9 * var(--dxp-su)); /* 439:772 */
+		--dxp-step-btn-h: calc(33.4 * var(--dxp-su));
+		--dxp-step-btn-bottom: calc(45.3 * var(--dxp-su));
+		--dxp-step-btn-font: calc(12 * var(--dxp-su));
+		--dxp-step-btn-ls: calc(1 * var(--dxp-su));
+		--dxp-step-btn-border: 0px; /* SP は枠線なし */
+		--dxp-step-btn-radius: calc(100 * var(--dxp-su)); /* 高さの半分を超えるので丸端 */
+		--dxp-step-btn-color: var(--color-white2);
+
+		/* --- フローバー 439:839（x34.9 y2859.5 313.7x41.5） ---
+		   PC と同じくドット中心のピッチ（≒55.2）を 6 等分の列幅にして中央に置く */
+		--dxp-flow-w: calc(331.2 * var(--dxp-su));
+		--dxp-flow-gap: calc(40.2 * var(--dxp-su)); /* 本文の下端 → フローバー */
+		--dxp-flow-marker-h: calc(23.5 * var(--dxp-su)); /* バー上端 → ラベル上端 */
+		--dxp-flow-line-y: calc(13.3 * var(--dxp-su)); /* ドットの中心 */
+		--dxp-flow-line-inset: calc(52.5 * var(--dxp-su)); /* 横線 226.3 幅ぶんの左右の余り */
+		--dxp-flow-dot: calc(12 * var(--dxp-su));
+		/* ドットの輪郭は罫線ではなく図形の一部なので、中間幅でも他と同じ比率で伸ばす
+		   （375 では 1px のまま） */
+		--dxp-flow-dot-w: calc(1 * var(--dxp-su));
+		--dxp-flow-dot-top: calc(7.3 * var(--dxp-su)); /* 13.3 − 12/2 */
+		--dxp-flow-ring: calc(17.6 * var(--dxp-su)); /* 439:856 */
+		--dxp-flow-label: calc(10 * var(--dxp-su));
+		--dxp-flow-label-ls: calc(1 * var(--dxp-su));
+		--dxp-flow-label-fw: var(--fw-regular);
+		--dxp-flow-end-fw: var(--fw-medium);
+		--dxp-flow-muted-color: var(--color-black1); /* 未到達 #4d4d4d */
+		--dxp-flow-end-color: var(--color-white3); /* ご相談・完成 #f5f5f5 */
+		--dxp-flow-icon-start-w: calc(27.9 * var(--dxp-su)); /* 439:848 */
+		--dxp-flow-icon-start-h: calc(20.5 * var(--dxp-su));
+		--dxp-flow-icon-start-top: 0px;
+		--dxp-flow-icon-end-w: calc(39.1 * var(--dxp-su)); /* 439:849 */
+		--dxp-flow-icon-end-h: calc(20.5 * var(--dxp-su));
+		--dxp-flow-icon-end-top: 0px;
+
+	}
+
+	:root {
+		/* --- summary 439:937-968（y5121〜5998。以下の y はセクション上端から） --- */
+		--dxp-sum-pad-top: calc(39 * var(--dxp-su)); /* コピー y5160 */
+		/* 円環図の枠の下端 732 → セクション下端 877。この中に円の下の
+		   「私たちが届けたいのは、〜」（枠の外に置く 439:942）が入る */
+		--dxp-sum-pad-bottom: calc(145 * var(--dxp-su));
+		--dxp-sum-photo-h: calc(300 * var(--dxp-su)); /* 439:939 */
+		--dxp-sum-gradation-h: calc(130 * var(--dxp-su)); /* 439:940 */
+		--dxp-sum-fade-h: calc(72 * var(--dxp-su)); /* 439:938 */
+		--dxp-sum-copy: calc(14 * var(--dxp-su)); /* 439:941 */
+		--dxp-sum-copy-ls: calc(1 * var(--dxp-su));
+		--dxp-sum-copy-color: var(--color-white3); /* #f5f5f5 */
+		--dxp-sum-body: calc(12 * var(--dxp-su)); /* 439:943 */
+		--dxp-sum-body-ls: calc(1 * var(--dxp-su));
+		--dxp-sum-body-lh: 2;
+		--dxp-sum-body-w: calc(320 * var(--dxp-su));
+		--dxp-sum-body-gap: calc(171 * var(--dxp-su)); /* コピーの下端 81 → 本文 252 */
+		--dxp-sum-diagram-w: calc(346 * var(--dxp-su)); /* 439:944 */
+		--dxp-sum-diagram-gap: calc(55 * var(--dxp-su)); /* 本文の下端 396 → 円環図 451 */
+		--dxp-sum-diagram-shift: 0px; /* SP の枠はほぼ画面の中央（x15 / 346） */
+		--dxp-sum-label-color: var(--dxp-color-gray-label); /* 439:946 ほか #dddddd */
+		--dxp-sum-display-color: var(--color-white3); /* 439:968 #f5f5f5 */
+		--dxp-sum-tagline-color: var(--color-gray2); /* 439:962 #d9d9d9 */
+	}
+
+	/* 439:758。動画枠が上に来るぶんステップの上余白が狭く、モックアップも大きい。 */
+	.p-dxstep--01 {
+		--dxp-step-pad-top: calc(51.2 * var(--dxp-su));
+		--dxp-step-device-w: calc(221 * var(--dxp-su)); /* 439:767 */
+		--dxp-step-device-h: calc(158.5 * var(--dxp-su));
+		/* x153.8 − テキスト列の左端 18。内容幅を中央寄せにしたぶん（+1.2）を
+		   引いて、右端が画面をはみ出さないようにする */
+		--dxp-step-device-x: calc(134.6 * var(--dxp-su));
+		--dxp-step-device-y: calc(-8 * var(--dxp-su)); /* 番号より少し上から始まる */
+	}
+
+	/* 439:759。3D モデルは角丸なしで少し低い。 */
+	.p-dxstep--03 {
+		--dxp-step-pad-top: calc(75 * var(--dxp-su));
+		--dxp-step-visual-h: calc(214 * var(--dxp-su)); /* 439:761 */
+	}
+}
+
+/* ============================================================
+   Exterior Explorer（スクロール連動映像）
+   3D section 436:388 / 439:753 と 3D sample 436:390-393 を 1 本の映像で表現する。
+   テンプレート: template-parts/dx/section-explorer.php / 挙動: js/dx-explorer.js
+   ------------------------------------------------------------
+   ・.is-enhanced（JS が映像を使う）: セクションを --dxp-ex-rail の高さにし、
+     .p-dxex__stage を画面に固定。映像は左右に余白を付けず cover で全面に出す
+   ・固定コピー（436:388）は全景のときだけ見せ、章 2〜5 では右下の大ラベル
+     （436:390-393 の Group 460）に切り替える（data-chapter / .is-current）
+   ・静止画フォールバック時は固定コピーを通常フローで出し、その下に静止画 5 枚
+   文字サイズ・余白は上の .p-dxex 系トークン（--dxp-ex-* / --dxp-sample-*）を
+   そのまま使う。
+   ============================================================ */
+.p-dxex.p-dxex--scroll {
+	display: block;
+	overflow: visible;
+	padding: 0;
+	background: var(--dxp-ex-bg);
+}
+
+.p-dxex--scroll [hidden] {
+	display: none !important;
+}
+
+.p-dxex--scroll.is-enhanced {
+	height: var(--dxp-ex-rail);
+	height: var(--dxp-ex-rail-svh);
+}
+
+.p-dxex__stage {
+	position: relative;
+	background: var(--dxp-ex-bg);
+}
+
+.p-dxex--scroll.is-enhanced .p-dxex__stage {
+	position: sticky;
+	top: 0;
+	height: 100vh;
+	height: 100svh;
+	overflow: hidden;
+}
+
+/* --- 映像（左右に余白を付けず全面に敷く） --- */
+.p-dxex__media {
+	position: absolute;
+	inset: 0;
+	display: none;
+	overflow: hidden;
+	background: var(--dxp-ex-bg);
+}
+
+.is-enhanced .p-dxex__media {
+	display: block;
+}
+
+.p-dxex__poster,
+.p-dxex__poster img,
+.p-dxex__video {
+	position: absolute;
+	inset: 0;
+	display: block;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+.p-dxex__video {
+	opacity: 0;
+}
+
+.p-dxex--scroll[data-ready="true"] .p-dxex__video {
+	opacity: 1;
+}
+
+.p-dxex--scroll[data-ready="true"] .p-dxex__poster {
+	visibility: hidden;
+}
+
+/* 436:100 の暗幕を上端に濃く敷いて白文字を読めるようにする（決定事項 2026-09-20） */
+.p-dxex__media::before {
+	position: absolute;
+	inset: 0;
+	content: "";
+	background: var(--dxp-ex-scrim-top);
+	pointer-events: none;
+}
+
+/* --- 固定コピー 436:388 / 439:753（全景のときだけ） --- */
+.p-dxex--scroll .p-dxex__inner {
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	padding-block: var(--dxp-ex-pad-top) var(--dxp-ex-pad-bottom);
+	text-align: center;
+}
+
+.p-dxex--scroll.is-enhanced .p-dxex__inner {
+	position: absolute;
+	inset: 0;
+	box-sizing: border-box;
+	pointer-events: none;
+	transition: opacity var(--dxp-ex-fade) ease;
+}
+
+.p-dxex--scroll.is-enhanced[data-chapter]:not([data-chapter="0"]) .p-dxex__inner {
+	opacity: 0;
+}
+
+/* --- 章 2〜5 の右下ラベル（436:390-393 Group 460 / 439:982・439:978）
+   画面幅によらず右端・下端からの距離で置く（静止画フォールバックでも同じ） --- */
+.p-dxex__chapters {
+	position: absolute;
+	inset: 0;
+	display: none;
+	pointer-events: none;
+}
+
+.is-enhanced .p-dxex__chapters {
+	display: block;
+}
+
+.p-dxex__chapter {
+	position: absolute;
+	right: var(--dxp-ex-chapter-right);
+	bottom: var(--dxp-ex-chapter-bottom);
+	margin: 0;
+	text-align: center; /* カンプどおり和文を英字の中央に */
+	white-space: nowrap;
+	color: var(--color-white2);
+	text-shadow: var(--dxp-ex-chapter-shadow);
+	opacity: 0;
+	transition: opacity var(--dxp-ex-fade) ease;
+}
+
+.p-dxex__chapter.is-current {
+	opacity: 1;
+}
+
+.p-dxex__chapter-ja {
+	display: block;
+	font-size: var(--dxp-sample-ja);
+	font-weight: var(--fw-bold);
+	line-height: var(--dxp-sample-ja-lh);
+	letter-spacing: var(--dxp-sample-ja-ls);
+}
+
+.p-dxex__chapter-en {
+	display: block;
+	margin-top: var(--dxp-sample-en-offset); /* 和文に少し重ねる */
+	font-family: var(--font-display);
+	font-size: var(--dxp-sample-en);
+	font-weight: var(--fw-semibold);
+	line-height: var(--dxp-sample-en-lh);
+	letter-spacing: var(--dxp-sample-en-ls);
+	text-transform: uppercase;
+}
+
+/* --- 支援技術向けテキスト（いまの章 / 映像の状態） --- */
+.p-dxex__sr {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	margin: -1px;
+	padding: 0;
+	overflow: hidden;
+	clip-path: inset(50%);
+	white-space: nowrap;
+}
+
+/* --- 静止画フォールバック（JS 無効・動きを減らす設定・読み込み失敗） --- */
+.p-dxex__fallback {
+	background: var(--dxp-ex-bg);
+}
+
+.p-dxex__still {
+	position: relative;
+	margin: 0;
+}
+
+.p-dxex__still picture,
+.p-dxex__still img {
+	display: block;
+	width: 100%;
+	height: auto;
+}
+
+/* 動きを減らす設定では切り替えを即時にする */
+@media (prefers-reduced-motion: reduce) {
+	.p-dxex--scroll.is-enhanced .p-dxex__inner,
+	.p-dxex__chapter {
+		transition: none;
+	}
+}

@@ -94,13 +94,8 @@
 	--st-plans-copy: clamp(12px, 10.544px + 0.3883vw, 18px); /* 12 → 18 (599:22) */
 	--st-plans-feature: clamp(12px, 10.058px + 0.5178vw, 20px); /* 12 → 20 */
 
-	/* --- WORKS（Group 380 / Group 382 / Group 379） --- */
-	--st-works-box-head: clamp(15px, 12.816px + 0.5825vw, 24px); /* 15 → 24 (698:1327) */
-	--st-works-box-text: clamp(12px, 10.544px + 0.3883vw, 18px); /* 12 → 18（左右とも 18px に統一） */
-	--st-works-render-label: clamp(10px, 9.029px + 0.2589vw, 14px); /* 10 → 14 (698:1329) */
-	--st-works-th: clamp(14px, 11.573px + 0.6472vw, 24px); /* 14 → 24 */
-	--st-works-td: clamp(11px, 9.786px + 0.3236vw, 16px); /* 11 → 16 */
-	--st-works-total: clamp(14px, 11.573px + 0.6472vw, 24px); /* 14 → 24 (698:1217) */
+	/* WORKS（Group 380 / Group 382 / Group 379）は DX ページと共通の部品に
+	   なったため、トークンごと css/works.css へ移した（--cw-*）。 */
 
 	/* --- REVIEWS（Group 369 / 669:960） --- */
 	--st-reviews-score: clamp(14px, 11.573px + 0.6472vw, 24px); /* 14 → 24 */
@@ -170,8 +165,6 @@
 	--st-line-feature: #c4c4c4; /* 特長 4 列の区切り線（602:90） */
 	--st-line-feature-dark: #515151; /* 同・ダーク版（602:102） */
 	--st-line-label: #eeeeee; /* 3D パースのラベル枠（698:1329）・保証バッジの枠（669:969） */
-	--st-line-photo: #ebebeb; /* 写真グリッド 3 枚目の枠（698:1180） */
-	--st-works-panel: #bcbcbc; /* 3D パースの下敷き（1153:104） */
 	--st-ring-light: #e2e2e2; /* 実績数字の外リング（535:895） */
 	--st-photo-shade: rgba(0, 0, 0, 0.3); /* 写真に重ねる黒（535:881 実績数字 / 669:257 Quality） */
 	/* Quality の暗幕。SP / 中間幅は写真の明部に文字が乗るので 30% では足りない */
@@ -1532,180 +1525,8 @@
 	background: linear-gradient(180deg, var(--st-white-0) 0%, var(--st-white) 100%);
 }
 
-/* ============================================================
-   WORKS（698:1134 / 698:1181 / 1153:104 / Group 380 / Group 382 /
-   Group 379）
-   ------------------------------------------------------------
-   写真グリッド（メイン + 右列 4 段）と 2 ボックスは 1 つのグリッドに
-   収める。右列 4 段目はカンプどおり灰色の下敷き + 3D パース。
-   ============================================================ */
-.p-sworks {
-	background: var(--st-bg-light);
-}
-
-.p-sworks__main img,
-.p-sworks__sub img {
-	display: block;
-	width: 100%;
-	height: 100%;
-	border-radius: var(--st-card-radius);
-	object-fit: cover;
-}
-
-.p-sworks__subs {
-	display: grid;
-	margin: 0;
-	padding: 0;
-	list-style: none;
-}
-
-.p-sworks__link {
-	display: block;
-	height: 100%;
-}
-
-/* 698:1180 3 枚目だけ枠線が付く */
-.p-sworks__sub:last-child img {
-	border: var(--border-thin) solid var(--st-line-photo);
-}
-
-.p-sworks__render {
-	position: relative;
-	overflow: hidden;
-	border-radius: var(--st-card-radius);
-	background: var(--st-works-panel);
-}
-
-.p-sworks__render-image {
-	position: absolute;
-	top: var(--st-works-render-top);
-	right: 0;
-	left: 0;
-	width: 100%;
-	height: var(--st-works-render-height);
-	object-fit: contain;
-}
-
-/* Group 381 パースに重なるラベル */
-.p-sworks__render-label {
-	position: absolute;
-	top: var(--st-works-label-top);
-	left: 50%;
-	display: grid;
-	place-items: center;
-	min-width: var(--st-works-label-width);
-	height: var(--st-works-label-height);
-	border: var(--border-thin) solid var(--st-line-label);
-	border-radius: var(--st-works-label-radius);
-	background: var(--st-card-shade);
-	font-size: var(--st-works-render-label);
-	font-weight: var(--fw-medium);
-	line-height: 1.8;
-	letter-spacing: var(--ls-base);
-	color: var(--color-white3);
-	transform: translateX(-50%);
-}
-
-.p-sworks__box {
-	overflow: hidden;
-	border-radius: var(--st-fv-band-radius);
-	background: var(--st-white);
-}
-
-.p-sworks__box-head {
-	display: grid;
-	place-items: center;
-	height: var(--st-works-box-head-height);
-	margin: 0;
-	background: var(--color-black2);
-	font-size: var(--st-works-box-head);
-	font-weight: var(--fw-medium);
-	line-height: 1.4;
-	letter-spacing: var(--ls-wide);
-	text-align: center;
-	color: var(--st-white);
-}
-
-.p-sworks__box-text {
-	margin: 0;
-	font-size: var(--st-works-box-text);
-	font-weight: var(--fw-regular);
-	line-height: 1.8;
-	letter-spacing: var(--ls-base);
-	color: var(--color-black1);
-}
-
-.p-sworks__estimate {
-	background: var(--st-white);
-	border-radius: var(--st-fv-band-radius);
-}
-
-.p-sworks__table {
-	width: 100%;
-	border-collapse: collapse;
-	table-layout: fixed;
-}
-
-.p-sworks__table th,
-.p-sworks__table td {
-	overflow-wrap: anywhere;
-	text-align: left;
-	vertical-align: top;
-}
-
-.p-sworks__table thead th {
-	font-size: var(--st-works-th);
-	font-weight: var(--fw-medium);
-	line-height: 2.5;
-	letter-spacing: var(--ls-wide);
-	color: var(--color-black2);
-}
-
-.p-sworks__table tbody th {
-	font-size: var(--st-works-td);
-	font-weight: var(--fw-regular);
-	line-height: 1.6;
-	letter-spacing: var(--ls-base);
-	color: var(--color-black1);
-}
-
-.p-sworks__table tbody td {
-	border-bottom: var(--border-thin) solid var(--st-line-plans);
-	font-family: var(--font-ui);
-	font-size: var(--st-works-td);
-	font-weight: var(--fw-regular);
-	line-height: 1.6;
-	letter-spacing: var(--ls-base);
-	color: var(--color-black1);
-}
-
-.p-sworks__table tbody th {
-	border-bottom: var(--border-thin) solid var(--st-line-plans);
-}
-
-/* 金額は右端（カンプ x1593.1）でそろえる。
-   列全体の text-align より詳細度を上げておく */
-.p-sworks__table .p-sworks__price {
-	text-align: right;
-	white-space: nowrap;
-}
-
-/* 建材列はカンプ（設計メモ §10）に字間の指定が無い。
-   1px でも 55 文字の行では枠を使い切ってしまう */
-.p-sworks__table tbody .p-sworks__material {
-	letter-spacing: normal;
-}
-
-.p-sworks__total {
-	margin: 0;
-	font-family: var(--font-ui);
-	font-size: var(--st-works-total);
-	font-weight: var(--fw-medium);
-	line-height: 1.6;
-	letter-spacing: var(--ls-base);
-	text-align: right;
-	color: var(--color-black2);
-}
+/* WORKS（698:1134 ほか）は DX ページと共通の部品になったため、
+   css/works.css（.p-cworks*）へ移した。 */
 
 /* ============================================================
    REVIEWS（620:289 / Group 369 / 669:223）
@@ -2950,8 +2771,7 @@
 		padding-top: calc(162.2 * var(--st-vu));
 	}
 
-	.p-splans__lead,
-	.p-sworks__lead {
+	.p-splans__lead {
 		width: calc(782.8 * var(--st-vu));
 		margin-inline: auto;
 	}
@@ -3043,92 +2863,6 @@
 
 	.p-splans__features--dark {
 		margin-top: calc(79.6 * var(--st-vu));
-	}
-
-	/* --- WORKS（y13912.3〜16414.8） --- */
-	.p-sworks {
-		--st-works-render-top: calc(31.6 * var(--st-vu));
-		--st-works-render-height: calc(205.8 * var(--st-vu));
-		--st-works-label-top: calc(114.2 * var(--st-vu));
-		--st-works-label-width: calc(152.7 * var(--st-vu));
-		--st-works-label-height: calc(42 * var(--st-vu));
-		--st-works-label-radius: calc(3 * var(--st-vu));
-		--st-works-box-head-height: calc(60 * var(--st-vu));
-
-		padding: calc(162.2 * var(--st-vu)) 0 calc(160 * var(--st-vu));
-	}
-
-	/* 1 段目 = メイン + 右列 3 枚、2 段目 = 2 ボックス + 3D パース */
-	.p-sworks__grid {
-		display: grid;
-		grid-template-columns: calc(1199.6 * var(--st-vu)) calc(380 * var(--st-vu));
-		justify-content: center;
-		column-gap: calc(20.4 * var(--st-vu));
-		row-gap: calc(19.9 * var(--st-vu));
-		margin-top: calc(80 * var(--st-vu));
-	}
-
-	.p-sworks__main {
-		grid-area: 1 / 1;
-		height: calc(836 * var(--st-vu));
-	}
-
-	.p-sworks__subs {
-		grid-area: 1 / 2;
-		grid-template-rows: calc(264.8 * var(--st-vu)) calc(265.6 * var(--st-vu)) calc(265.6 * var(--st-vu));
-		row-gap: calc(19.95 * var(--st-vu));
-	}
-
-	.p-sworks__render {
-		grid-area: 2 / 2;
-		height: calc(270.4 * var(--st-vu));
-	}
-
-	.p-sworks__boxes {
-		grid-area: 2 / 1;
-		display: grid;
-		grid-template-columns: repeat(2, calc(590.1 * var(--st-vu)));
-		column-gap: calc(19.4 * var(--st-vu));
-	}
-
-	.p-sworks__box {
-		height: 100%;
-	}
-
-	.p-sworks__box-body {
-		padding: calc(25.2 * var(--st-vu)) calc(47.5 * var(--st-vu)) calc(32 * var(--st-vu));
-	}
-
-	.p-sworks__estimate {
-		width: calc(1600 * var(--st-vu));
-		margin: calc(20 * var(--st-vu)) auto 0;
-		padding: calc(69.6 * var(--st-vu)) calc(167.5 * var(--st-vu)) calc(79.6 * var(--st-vu)) calc(134 * var(--st-vu));
-	}
-
-	/* 列幅は先頭行（列見出し）で決まる。施工内容 227.45 / 使用建材 884 / 残りが概算見積 */
-	.p-sworks__table thead th:first-child {
-		width: calc(227.45 * var(--st-vu));
-	}
-
-	.p-sworks__table thead th:nth-child(2) {
-		width: calc(884 * var(--st-vu));
-	}
-
-	.p-sworks__table thead th {
-		padding-bottom: calc(23.6 * var(--st-vu));
-	}
-
-	.p-sworks__table tbody th,
-	.p-sworks__table tbody td {
-		padding-bottom: calc(5.4 * var(--st-vu)); /* 区切り線は行の上端から 31 */
-	}
-
-	.p-sworks__table tbody tr + tr > * {
-		padding-top: calc(16.5 * var(--st-vu)); /* 行ピッチ 48.5（25.6 + 5.4 + 罫線 1） */
-	}
-
-	.p-sworks__total {
-		margin-top: calc(17 * var(--st-vu));
 	}
 
 	/* --- REVIEWS（y16414.8〜17569.5） --- */
@@ -3813,8 +3547,7 @@
 		padding: calc(56 * var(--st-su)) 0 0;
 	}
 
-	.p-splans__lead,
-	.p-sworks__lead {
+	.p-splans__lead {
 		padding-inline: var(--gutter);
 	}
 
@@ -3881,83 +3614,6 @@
 	.p-splans__highend {
 		margin-top: calc(40 * var(--st-su));
 		padding: calc(40 * var(--st-su)) 0;
-	}
-
-	/* --- WORKS: 写真グリッド・2 ボックス・テーブルを縦積み --- */
-	.p-sworks {
-		--st-works-render-top: calc(16 * var(--st-su));
-		--st-works-render-height: calc(110 * var(--st-su));
-		--st-works-label-top: calc(58 * var(--st-su));
-		--st-works-label-width: calc(104 * var(--st-su));
-		--st-works-label-height: calc(26 * var(--st-su));
-		--st-works-label-radius: calc(3 * var(--st-su));
-		--st-works-box-head-height: calc(40 * var(--st-su));
-
-		padding: calc(56 * var(--st-su)) var(--gutter) calc(64 * var(--st-su));
-	}
-
-	.p-sworks__grid {
-		display: grid;
-		row-gap: calc(12 * var(--st-su));
-		margin-top: calc(32 * var(--st-su));
-	}
-
-	.p-sworks__main {
-		height: calc(200 * var(--st-su));
-	}
-
-	.p-sworks__subs {
-		grid-template-columns: repeat(3, 1fr);
-		column-gap: calc(8 * var(--st-su));
-		height: calc(72 * var(--st-su));
-	}
-
-	.p-sworks__render {
-		height: calc(150 * var(--st-su));
-	}
-
-	.p-sworks__boxes {
-		display: grid;
-		row-gap: calc(12 * var(--st-su));
-	}
-
-	.p-sworks__box-body {
-		padding: calc(16 * var(--st-su));
-	}
-
-	.p-sworks__estimate {
-		margin-top: calc(12 * var(--st-su));
-		padding: calc(20 * var(--st-su)) calc(16 * var(--st-su));
-	}
-
-	.p-sworks__table thead th {
-		padding-bottom: calc(10 * var(--st-su));
-	}
-
-	.p-sworks__table thead th:first-child {
-		width: 24%;
-	}
-
-	.p-sworks__table thead th:nth-child(2) {
-		width: 46%;
-	}
-
-	.p-sworks__table tbody th,
-	.p-sworks__table tbody td {
-		padding-bottom: calc(8 * var(--st-su));
-	}
-
-	.p-sworks__table tbody tr + tr > * {
-		padding-top: calc(10 * var(--st-su));
-	}
-
-	.p-sworks__table tbody th,
-	.p-sworks__material {
-		padding-right: calc(8 * var(--st-su));
-	}
-
-	.p-sworks__total {
-		margin-top: calc(12 * var(--st-su));
 	}
 
 	/* --- REVIEWS: カード 3 枚を縦積み --- */
@@ -4377,12 +4033,6 @@
 		--st-plans-eng: calc(76 * var(--st-vu));
 		--st-plans-copy: calc(18 * var(--st-vu));
 		--st-plans-feature: calc(20 * var(--st-vu));
-		--st-works-box-head: calc(24 * var(--st-vu));
-		--st-works-box-text: calc(18 * var(--st-vu));
-		--st-works-render-label: calc(14 * var(--st-vu));
-		--st-works-th: calc(24 * var(--st-vu));
-		--st-works-td: calc(16 * var(--st-vu));
-		--st-works-total: calc(24 * var(--st-vu));
 		--st-reviews-score: calc(24 * var(--st-vu));
 		--st-reviews-title: calc(20 * var(--st-vu));
 		--st-reviews-text: calc(16 * var(--st-vu));
@@ -4432,7 +4082,6 @@
 	.p-svisible,
 	.p-sdx,
 	.p-splans,
-	.p-sworks,
 	.p-sreviews,
 	.p-sflow,
 	.p-squality,
@@ -4541,12 +4190,6 @@
 		--st-plans-eng: calc(34 * var(--st-su));
 		--st-plans-copy: calc(12 * var(--st-su));
 		--st-plans-feature: calc(12 * var(--st-su));
-		--st-works-box-head: calc(15 * var(--st-su));
-		--st-works-box-text: calc(12 * var(--st-su));
-		--st-works-render-label: calc(10 * var(--st-su));
-		--st-works-th: calc(14 * var(--st-su));
-		--st-works-td: calc(11 * var(--st-su));
-		--st-works-total: calc(14 * var(--st-su));
 		--st-reviews-score: calc(14 * var(--st-su));
 		--st-reviews-title: calc(14 * var(--st-su));
 		--st-reviews-text: calc(12 * var(--st-su));
@@ -4595,7 +4238,6 @@
 	.p-svisible,
 	.p-sdx,
 	.p-splans,
-	.p-sworks,
 	.p-sreviews,
 	.p-sflow,
 	.p-squality,

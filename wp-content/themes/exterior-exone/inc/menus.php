@@ -22,7 +22,7 @@ function exterior_exone_global_menu_items() {
 	return array(
 		array(
 			'label' => 'DX EXPERIENCE',
-			'url'   => '#',
+			'url'   => home_url( '/dx/' ),
 		),
 		array(
 			'label' => 'PLANS',
@@ -85,7 +85,7 @@ function exterior_exone_drawer_menu_items() {
 		),
 		array(
 			'label' => '新しい外構体験',
-			'url'   => '#',
+			'url'   => home_url( '/dx/' ),
 		),
 		array(
 			'label' => 'プラン一覧',
