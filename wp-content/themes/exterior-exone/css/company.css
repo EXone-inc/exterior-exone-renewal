@@ -1307,12 +1307,14 @@
 		grid-column: 1 / 2;
 	}
 
-	/* 線画 x817.83 y153.03 915.3x431.6（917:1536） */
+	/* 線画 line_animation02（483:14）x1038 y1204 733x489。セクション上端 1080 から
+	   124、見出し（inner 上端）y1240 より 36 上。右端 1771 は内容の右端 1760 より
+	   11 外に出る */
 	.p-cwhy__feature {
 		position: absolute;
-		top: -0.363vw;
-		right: 0;
-		width: 47.66%;
+		top: calc(-36 * var(--co-vu));
+		right: calc(-11 * var(--co-vu));
+		width: calc(733 * var(--co-vu));
 		max-width: none;
 		margin: 0;
 	}
@@ -2026,12 +2028,17 @@
 		margin-top: calc(45 * var(--co-su));
 	}
 
-	/* 線画（34:1065）はリードの右に重なる。inner 上端（= 見出し上端）基準 */
+	/* 線画はカンプどおりリードの右に重ねる（34:1065: x172.3 y894.3 175.15x82.6、
+	   inner 上端 = 見出し y782.8 から 111.5）。カンプの枠は旧い画像のままなので、
+	   新しい線画（1536x1024）を枠の高さ 82.6 に合わせ、枠の中で左右中央に置く:
+	   幅 82.6 x 1.5 = 123.9、右端は 347.5 − (175.15 − 123.9) / 2 = 321.9 → 右から 25.6。
+	   長さは文字と同じ --co-su（内容幅の % だと iPad で線画だけ大きくなる） */
 	.p-cwhy__feature {
 		position: absolute;
-		top: calc(111 * var(--co-su));
-		right: 0;
-		width: 54.73%; /* 175.15 / 320 */
+		top: calc(120 * var(--co-su));
+		right: calc(25.6 * var(--co-su));
+		width: calc(123.9 * var(--co-su));
+		max-width: none;
 		margin: 0;
 	}
 

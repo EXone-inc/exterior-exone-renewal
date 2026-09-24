@@ -33,14 +33,15 @@ $exterior_exone_why_cards = exterior_exone_company_why_cards();
 			<h2 class="c-company-eng p-cwhy__eng">Why We Exist</h2>
 			<p class="c-company-jp p-cwhy__jp">私たちの存在意義</p>
 			<p class="p-cwhy__lead">エクステリア業界の古い常識を刷新し、<br>新たなスタンダードを<br class="u-br-sp">創造する。</p>
+			<?php
+			// 外構の線画（PC 483:14 / SP 34:1065）。images/company/line_animation02.svg（2026-09-24
+			// 差し替え。TOP とは別の絵）をインラインで置き、画面に入ったら線描画する（js/line-draw.js。
+			// 時間は style.css の --diagram-draw-*）。PC・SP ともカンプどおり inner 基準の絶対配置で、
+			// PC は右上、SP はリード文の右に重ねる（css/company.css）。
+			echo exterior_exone_inline_line_svg( 'images/company/line_animation02.svg', 'p-cwhy__feature' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- テーマ同梱の SVG をヘルパー内で整形済み。
+			?>
 			<p class="p-cwhy__text">私たちは、不透明な価格、属人的な提案、地域による品質格差といった業界課題に向き合い、テクノロジーとデザインの力で新しい顧客体験の仕組みを構築しています。</p>
 		</div>
-
-		<?php
-		// 外構の線画（917:1536 / 917:941）。TOP の円環図と同じ line_animation.svg をインラインで置き、
-		// 画面に入ったら線描画する（js/line-draw.js。時間は style.css の --diagram-draw-*）。
-		echo exterior_exone_inline_line_svg( 'images/top/line_animation.svg', 'p-cwhy__feature' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- テーマ同梱の SVG をヘルパー内で整形済み。
-		?>
 
 		<ul class="p-cwhy__cards">
 			<?php foreach ( $exterior_exone_why_cards as $exterior_exone_card ) : ?>

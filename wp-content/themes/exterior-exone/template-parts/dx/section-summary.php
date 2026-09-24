@@ -48,7 +48,7 @@ $exterior_exone_dx_summary = exterior_exone_dx_summary();
 		</p>
 
 		<?php
-		// 画面に入ったら中央のライン画（line_animation.svg）を描き、描き終わってから
+		// 画面に入ったら中央のライン画（images/dx/line_animation03.svg。TOP とは別の絵）を描き、描き終わってから
 		// リング・ロゴ・文言・6 項目がフェードインし、その後に浮遊が始まる。
 		// data-philosophy-diagram は js/philosophy-diagram.js が探す目印、
 		// data-reveal="stage" は器を動かさず合図だけ受け取る指定（TOP と同じ）。
@@ -92,7 +92,7 @@ $exterior_exone_dx_summary = exterior_exone_dx_summary();
 				<?php
 				// 436:290 / 439:967「SVG animation」。線描画アニメーションのため画像では
 				// なくインライン SVG で出す（TOP 理念セクションと同一アセット）。
-				echo exterior_exone_inline_line_svg( 'images/top/line_animation.svg', 'p-diagram__art' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- テーマ同梱の SVG をヘルパー内で整形済み。
+				echo exterior_exone_inline_line_svg( 'images/dx/line_animation03.svg', 'p-diagram__art' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- テーマ同梱の SVG をヘルパー内で整形済み。
 				?>
 
 				<?php foreach ( $exterior_exone_dx_summary['items'] as $exterior_exone_index => $exterior_exone_item ) : ?>
