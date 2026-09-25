@@ -37,10 +37,10 @@ function exterior_exone_company_why_cards() {
 }
 
 /**
- * 私たちが作る体験の 4 カード（PC のみ）。カンプ 917:1593-1605。
+ * 私たちが作る体験の 4 カード。カンプ PC 436:37（左から card 4 → card 1 の順に並ぶ）。
  *
- * TODO: カンプは 4 枚とも別画像だが、支給は price.jpg の 1 枚のみ。
- *       残り 3 枚が支給されたら image を差し替える。
+ * 画像は Figma 436:39 / 436:45 / 436:51 / 436:57 を、カンプの枠（378x481）に
+ * 見えている範囲で切り出したもの（2026-09-25 差し替え）。
  *
  * @return array<int, array<string, string>>
  */
@@ -50,25 +50,25 @@ function exterior_exone_company_visible_cards() {
 			'eng'   => 'Visible Value',
 			'jp'    => '見える価格',
 			'desc'  => "項目ごとの内訳まで\nすべて見える、安心の価格設計。",
-			'image' => 'price.jpg',
+			'image' => 'visible-value.jpg',
 		),
 		array(
 			'eng'   => 'Visible Design',
 			'jp'    => '見える提案',
 			'desc'  => "3DパースやAIパースで、\n完成後のイメージを事前に可視化。",
-			'image' => 'price.jpg',
+			'image' => 'visible-design.jpg',
 		),
 		array(
 			'eng'   => 'Visible Process',
 			'jp'    => '見える施工管理',
 			'desc'  => "行程・進捗・職人の作業まで、\nリアルタイムで見える施工管理。",
-			'image' => 'price.jpg',
+			'image' => 'visible-process.jpg',
 		),
 		array(
 			'eng'   => 'Visible Quality',
 			'jp'    => '見える品質基準',
 			'desc'  => "独自の品質基準とチェック体制で、\n高品質な仕上がりを保証。",
-			'image' => 'price.jpg',
+			'image' => 'visible-quality.jpg',
 		),
 	);
 }

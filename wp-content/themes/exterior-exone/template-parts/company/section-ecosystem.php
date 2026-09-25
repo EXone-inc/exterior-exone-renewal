@@ -103,6 +103,16 @@ $exterior_exone_eco_lead  = 'EXoneは、デザイン・施工・テクノロジ�
 					loading="lazy"
 				>
 
+				<?php
+				// 中央の写真を囲む輪（22:699-701）。台紙の画像からは外してあり、写真の縁から
+				// 外へ広がりながら消える波として繰り返す（css/company.css の p-ceco-ripple）。
+				?>
+				<span class="p-ceco__ripples">
+					<span class="p-ceco__ripple"></span>
+					<span class="p-ceco__ripple"></span>
+					<span class="p-ceco__ripple"></span>
+				</span>
+
 				<?php for ( $exterior_exone_index = 1; $exterior_exone_index <= 6; $exterior_exone_index++ ) : ?>
 					<img
 						class="p-ceco__figure-item p-ceco__figure-item--<?php echo esc_attr( (string) $exterior_exone_index ); ?>"

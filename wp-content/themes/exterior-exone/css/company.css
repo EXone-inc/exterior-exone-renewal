@@ -15,6 +15,7 @@
 	--co-outro-size: clamp(12px, 10.06px + 0.5178vw, 20px); /* 12 → 20 (917:926 / 917:1541) */
 	--co-fv-sub: clamp(16px, 14.058px + 0.5178vw, 24px); /* 16 → 24 (917:940 / 917:1440) */
 	--co-card-eng: clamp(20px, 9.32px + 2.8479vw, 64px); /* 20 → 64 (917:948 / 917:1546) */
+	--co-card-eng-overlap: clamp(19.7px, 10.186px + 2.5372vw, 58.9px); /* 英字が写真の下端に重なる量 19.7 → 58.9（34:1072 / 31:978） */
 	--co-story-eng: clamp(24px, 14.29px + 2.589vw, 64px); /* 24 → 64 : Brand Story (917:966 / 917:1556) */
 	--co-story-text: clamp(10px, 8.544px + 0.3883vw, 16px); /* 10 → 16 : 本文 (917:967 / 917:1557) */
 	--co-sign-size: clamp(10px, 9.515px + 0.1294vw, 12px); /* 10 → 12 : 署名 (917:1559) */
@@ -77,6 +78,13 @@
 
 	/* --- 円環図の浮遊（TOP の円環図と同じ作り） --- */
 	--co-eco-float: 1.6cqw; /* 振れ幅（上下それぞれ）。図の幅に対する比 */
+	/* 写真を囲む輪の波（.p-ceco__ripple） */
+	--co-eco-ripple-duration: 7.5s; /* 1 本が広がって消えるまで（2026-09-25 ゆっくりに変更: 4.5s → 7.5s） */
+	--co-eco-ripple-ease: cubic-bezier(0.3, 0.3, 0.45, 1); /* 出だしも急がず、外でさらにゆっくり消える */
+	--co-eco-ripple-scale: 1.55; /* 最も外の輪（半径 435）より少し先まで広げる */
+	--co-eco-ripple-opacity: 0.66; /* 最も内側の輪の濃さ（白 66%） */
+	--co-eco-ripple-color: var(--color-white3);
+	--co-eco-ripple-width: 0.3cqw; /* 輪の線幅。元画像の 3〜7px（図の幅 1813）の中ほど。1920 で約 2.7px */
 	--co-eco-float-ease: ease-in-out;
 
 	/* --- 会社概要の朝 → 夜 --- */
@@ -283,10 +291,11 @@
 	margin-top: var(--space-2xl);
 }
 
+/* カンプ（PC 31:978 / SP 34:1066-1074）は「写真の下に文字」の組み。英字は写真の
+   下端をまたいで重なり、和文（PC のみ）は写真の外の下に来る。英字が写真から
+   はみ出すため、角丸はカードではなく写真に付ける */
 .p-cwhy__card {
 	position: relative;
-	overflow: hidden;
-	border-radius: var(--co-card-radius);
 }
 
 .p-cwhy__card-image {
@@ -294,28 +303,28 @@
 	width: 100%;
 	height: auto;
 	aspect-ratio: 510.94 / 340.63;
+	border-radius: var(--co-card-radius);
 	object-fit: cover;
 }
 
-/* 下部のテキスト帯（917:1545 / 917:944） */
+/* 英字を写真の下端に重なるぶんだけ引き上げる（量は PC / SP ブロック） */
 .p-cwhy__card-body {
-	position: absolute;
-	inset: auto 0 0;
-	padding: var(--space-sm);
-	background: linear-gradient(180deg, rgba(26, 26, 26, 0) 0%, rgba(26, 26, 26, 0.85) 45%);
+	position: relative;
+	margin-top: calc(-1 * var(--co-card-eng-overlap));
 	text-align: center;
 }
 
 .p-cwhy__card-eng {
 	font-size: var(--co-card-eng);
+	line-height: 1.6;
 	letter-spacing: 1px;
 	color: var(--color-white3);
 }
 
-/* 和文の添字は SP カンプには無い（917:948-952 は英字のみ） */
+/* 和文の添字は SP カンプには無い（34:1072-1074 は英字のみ） */
 .p-cwhy__card-jp {
 	display: none;
-	margin-top: 2px;
+	margin-top: 0; /* PC 22:752 は英字の行箱の下端にそのまま続く */
 	font-size: var(--co-jp-size);
 	font-weight: var(--fw-medium);
 	line-height: 2;
@@ -501,6 +510,38 @@
    ============================================================ */
 .p-cvisible {
 	display: none;
+}
+
+/* 私たちが作る体験のカード（PC 436:38 ほか / SP 436:65-69・35:1384-1385）。
+   英字は写真の下部に白で重ね、写真の下端にグラデーション（透明 → 黒 60%）を敷く。
+   写真・グラデーション・英字を同じグリッドのセルに重ねる */
+.p-cvisible__card {
+	display: grid;
+	grid-template-columns: 100%;
+}
+
+.p-cvisible__card-image,
+.p-cvisible__card::before,
+.p-cvisible__card-eng {
+	grid-area: 1 / 1;
+}
+
+.p-cvisible__card::before {
+	z-index: 1;
+	align-self: end;
+	height: var(--co-vis-fade-h);
+	border-radius: 0 0 var(--co-vis-radius) var(--co-vis-radius);
+	background: linear-gradient(180deg, rgba(26, 26, 26, 0), rgba(26, 26, 26, 0.6));
+	content: "";
+}
+
+.p-cvisible__card-eng {
+	z-index: 2;
+	align-self: end;
+	margin: 0 0 var(--co-vis-eng-bottom);
+	text-align: center;
+	white-space: nowrap;
+	color: var(--color-white2);
 }
 
 /* ============================================================
@@ -1343,10 +1384,10 @@
 		display: none;
 	}
 
-	/* アウトロ y1296.56（カード下端 1045.96 から 250.6） */
+	/* アウトロ 22:746 y2376.56（カード下端 = 和文の下端 2217.06 から 159.5） */
 	.p-cwhy__outro {
 		grid-column: 1 / -1;
-		margin-top: 13.0521vw;
+		margin-top: calc(159.5 * var(--co-vu));
 		font-weight: var(--fw-medium);
 		letter-spacing: var(--ls-wide);
 	}
@@ -1447,30 +1488,34 @@
 		text-align: center;
 	}
 
+	/* 436:37: 英字・和文・説明文ともカードの中央揃え */
 	.p-cvisible__cards {
 		display: grid;
 		grid-template-columns: repeat(4, 1fr);
 		gap: var(--space-md);
 		margin-top: var(--space-xl);
-		text-align: left;
+		text-align: center;
 	}
 
+	/* 436:39 ほか 378x481、角丸 10・影 0 12 32 12% */
 	.p-cvisible__card-image {
 		width: 100%;
 		height: auto;
 		aspect-ratio: 377.8 / 481;
+		border-radius: var(--co-vis-radius);
+		box-shadow: 0 calc(12 * var(--co-vu)) calc(32 * var(--co-vu)) rgba(0, 0, 0, 0.12);
 		object-fit: cover;
 	}
 
 	.p-cvisible__card-eng {
-		margin-top: var(--space-sm);
 		font-size: 40px;
 		line-height: 1.6;
 		letter-spacing: 1px;
-		color: var(--color-off-white);
 	}
 
+	/* 436:42 は写真の下端 481 から 12 下（y493） */
 	.p-cvisible__card-jp {
+		margin-top: calc(12 * var(--co-vu));
 		font-size: var(--co-jp-size);
 		font-weight: var(--fw-medium);
 		line-height: 2.5;
@@ -1478,7 +1523,9 @@
 		color: var(--color-black2);
 	}
 
+	/* 436:41 は和文の下端 553 から 5 下（y558） */
 	.p-cvisible__card-desc {
+		margin-top: calc(5 * var(--co-vu));
 		font-size: 18px;
 		line-height: 1.8;
 		letter-spacing: var(--ls-wide);
@@ -1680,6 +1727,73 @@
 		display: block;
 		width: 100%;
 		height: auto;
+	}
+
+	/* 中央の写真を囲む輪（22:699-701）。台紙 ecosystem-feature-base.png（1813x1502）
+	   からは外し、写真の縁（中心 921,733・外径の半径 299）から外へ広がりながら
+	   消える波にする。3 本を 1/3 周期ずつずらして途切れなく流す（2026-09-25）。
+	   大きさはすべて図の幅（コンテナ）に対する比 */
+	.p-ceco__ripples {
+		position: absolute;
+		top: 48.802%; /* 733 / 1502 */
+		left: 50.8%; /* 921 / 1813 */
+		width: 32.984%; /* 写真の縁の直径 598 / 1813 */
+		aspect-ratio: 1;
+		translate: -50% -50%;
+		pointer-events: none;
+	}
+
+	.p-ceco__ripple {
+		position: absolute;
+		inset: 0;
+		border: var(--co-eco-ripple-width) solid var(--co-eco-ripple-color);
+		border-radius: 50%;
+		opacity: 0;
+		animation: p-ceco-ripple var(--co-eco-ripple-duration) var(--co-eco-ripple-ease) infinite;
+	}
+
+	.p-ceco__ripple:nth-child(2) {
+		animation-delay: calc(var(--co-eco-ripple-duration) / -3);
+	}
+
+	.p-ceco__ripple:nth-child(3) {
+		animation-delay: calc(var(--co-eco-ripple-duration) / -1.5);
+	}
+
+	/* 元の輪（半径 335 → 372 → 435 で白 66% → 33% → 10%）と同じく、外へ行くほど
+	   薄くなって消える */
+	@keyframes p-ceco-ripple {
+		0% {
+			opacity: var(--co-eco-ripple-opacity);
+			transform: scale(1);
+		}
+
+		100% {
+			opacity: 0;
+			transform: scale(var(--co-eco-ripple-scale));
+		}
+	}
+
+	/* 動きを減らす設定では、元の画像と同じ 3 本の輪を止めて置く */
+	@media (prefers-reduced-motion: reduce) {
+		.p-ceco__ripple {
+			animation: none;
+		}
+
+		.p-ceco__ripple:nth-child(1) {
+			opacity: 0.66;
+			transform: scale(1.12); /* 335 / 299 */
+		}
+
+		.p-ceco__ripple:nth-child(2) {
+			opacity: 0.33;
+			transform: scale(1.244); /* 372 / 299 */
+		}
+
+		.p-ceco__ripple:nth-child(3) {
+			opacity: 0.1;
+			transform: scale(1.455); /* 435 / 299 */
+		}
 	}
 
 	.p-ceco__figure-item {
@@ -2047,22 +2161,30 @@
 		margin-top: calc(30 * var(--co-su));
 	}
 
-	.p-cwhy__card {
+	.p-cwhy__card-image {
 		border-radius: calc(3 * var(--co-su));
 	}
 
-	/* ラベル帯（34:1068）: 高さ 35.16 / 透明 → 黒 50% */
-	.p-cwhy__card-body {
-		padding: calc(2 * var(--co-su)) calc(4 * var(--co-su));
+	/* ラベル帯（34:1068）: 写真の下端 35.16 に透明 → 黒 50%。写真の下端は英字の
+	   上端から 19.7 下なので、英字の箱を基準に置く（34:1068 y1141.17 / 英字 y1156.6） */
+	.p-cwhy__card-body::before {
+		position: absolute;
+		top: calc(-15.45 * var(--co-su));
+		right: 0;
+		left: 0;
+		height: calc(35.16 * var(--co-su));
+		border-radius: 0 0 calc(3 * var(--co-su)) calc(3 * var(--co-su));
 		background: linear-gradient(180deg, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.5));
+		content: "";
 	}
 
 	.p-cwhy__card-eng {
-		line-height: 1.6;
+		position: relative; /* 帯より手前 */
 	}
 
+	/* 34:1075 y1207.4。カード下端 = 英字の下端 1188.6 から 18.8 */
 	.p-cwhy__catch {
-		margin-top: calc(31 * var(--co-su));
+		margin-top: calc(18.8 * var(--co-su));
 	}
 
 	.p-cwhy__outro {
@@ -2179,21 +2301,19 @@
 		height: auto;
 		aspect-ratio: 238 / 303;
 		object-fit: cover;
-		border-radius: calc(5 * var(--co-su));
+		border-radius: var(--co-vis-radius);
 	}
 
-	/* 大英字（35:1386）は写真の下端に 32 重なり、左へ 14 はみ出す */
+	/* 436:69: 英字 28px は写真の中で中央揃え（和文・説明文は左揃えのまま） */
 	.p-cvisible__card-eng {
-		margin: calc(-32 * var(--co-su)) 0 0 calc(-10 * var(--co-su));
-		font-size: calc(40 * var(--co-su));
+		font-size: calc(28 * var(--co-su));
 		line-height: 1.6;
-		letter-spacing: 0;
-		white-space: nowrap; /* カンプ 35:1386。カード幅からはみ出してよい */
-		color: var(--color-gray2);
+		letter-spacing: calc(1 * var(--co-su));
 	}
 
+	/* 35:1385 は写真の下端 303 から 6 下（y309） */
 	.p-cvisible__card-jp {
-		margin-top: calc(-12 * var(--co-su));
+		margin-top: calc(6 * var(--co-su));
 		font-size: calc(14 * var(--co-su));
 		font-weight: var(--fw-medium);
 		line-height: 2.5;
@@ -2737,6 +2857,10 @@
 		--co-outro-size: calc(20 * var(--co-vu));
 		--co-fv-sub: calc(24 * var(--co-vu));
 		--co-card-eng: calc(64 * var(--co-vu));
+		--co-card-eng-overlap: calc(58.9 * var(--co-vu)); /* 写真の下端 340.63 − 英字の上端 281.73（31:978） */
+		--co-vis-radius: calc(10 * var(--co-vu)); /* 436:39 */
+		--co-vis-fade-h: calc(149 * var(--co-vu)); /* 436:40 */
+		--co-vis-eng-bottom: calc(28 * var(--co-vu)); /* 写真の下端 481 − 英字の下端 453（436:43） */
 		--co-story-eng: calc(64 * var(--co-vu));
 		--co-story-text: calc(16 * var(--co-vu));
 		--co-sign-size: calc(12 * var(--co-vu));
@@ -2779,10 +2903,6 @@
 		column-gap: calc(64 * var(--co-vu));
 	}
 
-	.p-cwhy__card-body {
-		padding: calc(24 * var(--co-vu));
-	}
-
 	/* --- ブランドストーリー --- */
 	.p-cstory__panel-eng {
 		letter-spacing: calc(1 * var(--co-vu));
@@ -2795,7 +2915,6 @@
 	}
 
 	.p-cvisible__card-eng {
-		margin-top: calc(24 * var(--co-vu));
 		font-size: calc(40 * var(--co-vu));
 		letter-spacing: calc(1 * var(--co-vu));
 	}
@@ -2881,6 +3000,10 @@
 		--co-outro-size: calc(12 * var(--co-su));
 		--co-fv-sub: calc(16 * var(--co-su));
 		--co-card-eng: calc(20 * var(--co-su));
+		--co-card-eng-overlap: calc(19.7 * var(--co-su)); /* 写真の下端 67.8 − 英字の上端 48.1（34:1072） */
+		--co-vis-radius: calc(5 * var(--co-su)); /* 436:65 */
+		--co-vis-fade-h: calc(97 * var(--co-su)); /* 436:66 */
+		--co-vis-eng-bottom: calc(15 * var(--co-su)); /* 写真の下端 303 − 英字の下端 288（436:69） */
 		--co-story-eng: calc(24 * var(--co-su));
 		--co-story-text: calc(10 * var(--co-su));
 		--co-sign-size: calc(10 * var(--co-su));
