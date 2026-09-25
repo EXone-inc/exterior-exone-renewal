@@ -164,6 +164,15 @@ function exterior_exone_enqueue_assets() {
 			exterior_exone_asset_version( 'js/works-estimate-modal.js' ),
 			true
 		);
+
+		// WORKS の写真の切り替え（DX ページの gallery のときだけ効く）。
+		wp_enqueue_script(
+			'exterior-exone-works-gallery',
+			get_theme_file_uri( 'js/works-gallery.js' ),
+			array(),
+			exterior_exone_asset_version( 'js/works-gallery.js' ),
+			true
+		);
 	}
 
 	// DX EXPERIENCE ページ専用アセット（CSS はテーマ本体の後に読む）。
@@ -191,6 +200,16 @@ function exterior_exone_enqueue_assets() {
 			get_theme_file_uri( 'js/dx-steps.js' ),
 			array(),
 			exterior_exone_asset_version( 'js/dx-steps.js' ),
+			true
+		);
+
+		// DX のステップ 03: 3D モデルの読み込みと回転。ライブラリ（model-viewer）と
+		// モデルは 03 に近づいてからこの JS が読み込むので、ここでは小さな JS だけ。
+		wp_enqueue_script(
+			'exterior-exone-dx-bimx',
+			get_theme_file_uri( 'js/dx-bimx.js' ),
+			array(),
+			exterior_exone_asset_version( 'js/dx-bimx.js' ),
 			true
 		);
 

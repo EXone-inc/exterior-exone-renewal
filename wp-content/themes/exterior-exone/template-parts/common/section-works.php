@@ -15,6 +15,10 @@
  * 出さない（TOP の NEWS / WORKS と同じ作法。決定事項 Q6）。3D パースと
  * 要望・提案・見積はカンプの 1 事例ぶんの固定値（inc/works-data.php）。
  *
+ * gallery => true（DX ページ）のときは CPT を使わず、渡された写真（1 枚目がメイン、
+ * 1〜3 枚目が右列）をカンプどおりに出し、右列の 3 枚と 3D パースを押すと
+ * 左のメインがその画像に切り替わる（js/works-gallery.js。2026-09-25）。
+ *
  * 見積は PC ではそのまま表で出し、SP（1024px 以下）では
  * 「施工内容・内訳を見る」ボタン → モーダルで出す（js/works-estimate-modal.js）。
  * 表の DOM は 1 つだけで、モーダルの器ごと位置と配色を変えている。
@@ -30,12 +34,14 @@ $exterior_exone_works = wp_parse_args(
 	( isset( $args ) && is_array( $args ) ) ? $args : array(),
 	array(
 		'variant'  => 'store',
+		'gallery'  => false,
 		'section'  => 'works',
 		'title'    => '',
 		'jp'       => '',
 		'lead'     => array(),
 		'lead_sp'  => array(),
 		'photos'   => array(),
+		'thumbs'   => array(), // gallery のとき、右列だけ別の切り抜きを出す写真（添字は photos と同じ）
 		'render'   => array(),
 		'request'  => array(
 			'title' => '',
@@ -54,7 +60,31 @@ $exterior_exone_works = wp_parse_args(
 	)
 );
 
-$exterior_exone_works_slots = exterior_exone_works_slots( $exterior_exone_works['photos'] );
+$exterior_exone_works_gallery = (bool) $exterior_exone_works['gallery'];
+
+if ( $exterior_exone_works_gallery ) {
+	// 1 枚目はメインと右列の先頭を兼ねる（カンプ 436:324）。
+	$exterior_exone_works_slots = array();
+
+	$exterior_exone_works_order = array_merge( array( 0 ), array_keys( array_slice( $exterior_exone_works['photos'], 0, 3 ) ) );
+
+	foreach ( $exterior_exone_works_order as $exterior_exone_works_slot_index => $exterior_exone_works_key ) {
+		$exterior_exone_works_full = $exterior_exone_works['photos'][ $exterior_exone_works_key ];
+		$exterior_exone_works_thumb = ( $exterior_exone_works_slot_index > 0 && ! empty( $exterior_exone_works['thumbs'][ $exterior_exone_works_key ] ) )
+			? $exterior_exone_works['thumbs'][ $exterior_exone_works_key ]
+			: $exterior_exone_works_full;
+
+		$exterior_exone_works_slots[] = array(
+			'image_id' => 0,
+			'url'      => '',
+			'src'      => $exterior_exone_works_thumb,
+			'full'     => $exterior_exone_works_full,
+			'title'    => '',
+		);
+	}
+} else {
+	$exterior_exone_works_slots = exterior_exone_works_slots( $exterior_exone_works['photos'] );
+}
 
 if ( ! $exterior_exone_works_slots ) {
 	return;
@@ -66,6 +96,7 @@ $exterior_exone_works_render = wp_parse_args(
 		'image'    => '',
 		'label'    => '',
 		'backdrop' => '',
+		'model'    => array(),
 	)
 );
 
@@ -79,7 +110,7 @@ $exterior_exone_works_modal = wp_parse_args(
 	)
 );
 ?>
-<section class="p-cworks p-cworks--<?php echo esc_attr( $exterior_exone_works['variant'] ); ?>" data-section="<?php echo esc_attr( $exterior_exone_works['section'] ); ?>" data-works>
+<section class="p-cworks p-cworks--<?php echo esc_attr( $exterior_exone_works['variant'] ); ?>" data-section="<?php echo esc_attr( $exterior_exone_works['section'] ); ?>" data-works<?php echo $exterior_exone_works_gallery ? ' data-works-gallery' : ''; ?>>
 	<h2 class="p-cworks__title"><?php echo esc_html( $exterior_exone_works['title'] ); ?></h2>
 	<p class="p-cworks__jp"><?php echo esc_html( $exterior_exone_works['jp'] ); ?></p>
 
@@ -98,20 +129,54 @@ $exterior_exone_works_modal = wp_parse_args(
 	</p>
 
 	<div class="p-cworks__grid">
-		<div class="p-cworks__main">
+		<div class="p-cworks__main" data-works-main>
 			<?php exterior_exone_works_photo( $exterior_exone_works_slots[0] ); ?>
 		</div>
 
 		<ul class="p-cworks__subs">
-			<?php foreach ( array_slice( $exterior_exone_works_slots, 1 ) as $exterior_exone_works_slot ) : ?>
+			<?php foreach ( array_slice( $exterior_exone_works_slots, 1 ) as $exterior_exone_works_index => $exterior_exone_works_slot ) : ?>
 				<li class="p-cworks__sub">
-					<?php exterior_exone_works_photo( $exterior_exone_works_slot ); ?>
+					<?php if ( $exterior_exone_works_gallery ) : ?>
+						<?php // 押すと左のメインがこの写真に切り替わる。 ?>
+						<button
+							type="button"
+							class="p-cworks__thumb<?php echo 0 === $exterior_exone_works_index ? ' is-current' : ''; ?>"
+							data-works-thumb="<?php echo esc_url( $exterior_exone_works_slot['full'] ); ?>"
+							aria-pressed="<?php echo 0 === $exterior_exone_works_index ? 'true' : 'false'; ?>"
+							aria-label="<?php echo esc_attr( sprintf( '写真%dを大きく表示', $exterior_exone_works_index + 1 ) ); ?>"
+						>
+							<?php exterior_exone_works_photo( $exterior_exone_works_slot ); ?>
+						</button>
+					<?php else : ?>
+						<?php exterior_exone_works_photo( $exterior_exone_works_slot ); ?>
+					<?php endif; ?>
 				</li>
 			<?php endforeach; ?>
 		</ul>
 
-		<?php // 1153:104 灰色パネル / 437:463 空写真 + パース + ラベル。 ?>
-		<div class="p-cworks__render">
+		<?php
+		// 1153:104 灰色パネル / 437:463 空写真 + パース + ラベル。
+		// gallery のときはボタンにして、押すとメインに 3D パース（空写真の上）を出す。
+		$exterior_exone_works_render_tag = $exterior_exone_works_gallery ? 'button' : 'div';
+		?>
+		<<?php echo esc_html( $exterior_exone_works_render_tag ); ?>
+			class="p-cworks__render<?php echo $exterior_exone_works_gallery ? ' p-cworks__thumb' : ''; ?>"
+			<?php if ( $exterior_exone_works_gallery ) : ?>
+				type="button"
+				data-works-thumb="<?php echo esc_url( $exterior_exone_works_render['image'] ); ?>"
+				data-works-thumb-backdrop="<?php echo esc_url( $exterior_exone_works_render['backdrop'] ); ?>"
+				<?php if ( ! empty( $exterior_exone_works_render['model']['file'] ) ) : ?>
+					data-works-model="<?php echo esc_url( $exterior_exone_works_render['model']['file'] ); ?>"
+					data-works-model-viewer="<?php echo esc_url( $exterior_exone_works_render['model']['viewer'] ); ?>"
+					data-works-model-draco="<?php echo esc_url( $exterior_exone_works_render['model']['draco'] ); ?>"
+					data-works-model-orbit="<?php echo esc_attr( $exterior_exone_works_render['model']['orbit'] ); ?>"
+					data-works-model-fov="<?php echo esc_attr( $exterior_exone_works_render['model']['fov'] ); ?>"
+					data-works-model-target="<?php echo esc_attr( $exterior_exone_works_render['model']['target'] ); ?>"
+				<?php endif; ?>
+				aria-pressed="false"
+				aria-label="<?php echo esc_attr( $exterior_exone_works_render['label'] . 'を大きく表示' ); ?>"
+			<?php endif; ?>
+		>
 			<?php if ( $exterior_exone_works_render['backdrop'] ) : ?>
 				<img
 					class="p-cworks__render-backdrop"
@@ -132,7 +197,7 @@ $exterior_exone_works_modal = wp_parse_args(
 				loading="lazy"
 			>
 			<span class="p-cworks__render-label"><?php echo esc_html( $exterior_exone_works_render['label'] ); ?></span>
-		</div>
+		</<?php echo esc_html( $exterior_exone_works_render_tag ); ?>>
 
 		<div class="p-cworks__boxes">
 			<div class="p-cworks__box">

@@ -7,8 +7,7 @@
  * ・切り替わるときは今のステップが左へ流れ、次のステップが右から入る
  *   （上へ戻るときは逆向き）。流すのは入れ替わる 2 枚だけで、速くスクロールして
  *   飛ばしたステップは見えないまま位置だけ移す
- * ・フローバーは 1 本だけ。今のステップに当たる点をアクティブにし、オレンジの線を
- *   その点まで伸ばす
+ * ・フローバーは 1 本だけ。今のステップに当たる点をアクティブにする（線は伸ばさない）
  * ・見えていないステップは inert にして、中のボタンにフォーカスが入らないようにする
  * ・JS が動かないときは .is-enhanced が付かず、01〜04 が縦に並ぶ
  *
@@ -26,8 +25,6 @@
 	var stage = rail.querySelector('.p-dxsteps__stage');
 	var steps = Array.prototype.slice.call(rail.querySelectorAll('[data-dx-step]'));
 	var items = Array.prototype.slice.call(rail.querySelectorAll('[data-dx-flow-item]'));
-	var line = rail.querySelector('.p-dxflow__line');
-	var fill = rail.querySelector('[data-dx-flow-fill]');
 
 	if (!stage || steps.length < 2) {
 		return;
@@ -36,32 +33,8 @@
 	var total = steps.length;
 	var current = -1;
 	var ticking = false;
-	var flowIndex = -1;
-
-	/**
-	 * フローバーの線を、アクティブな点の中心まで伸ばす（線の長さに対する割合）。
-	 */
-	function drawFill() {
-		if (!line || !fill || flowIndex < 0 || !items[flowIndex]) {
-			return;
-		}
-
-		var lineRect = line.getBoundingClientRect();
-		var itemRect = items[flowIndex].getBoundingClientRect();
-
-		if (lineRect.width <= 0) {
-			return;
-		}
-
-		var center = itemRect.left + itemRect.width / 2;
-		var ratio = (center - lineRect.left) / lineRect.width;
-
-		fill.style.setProperty('--dxp-flow-progress', String(Math.max(0, Math.min(1, ratio))));
-	}
 
 	function setFlow(index) {
-		flowIndex = index;
-
 		items.forEach(function (item, i) {
 			var active = i === index;
 
@@ -73,8 +46,6 @@
 				item.removeAttribute('aria-current');
 			}
 		});
-
-		drawFill();
 	}
 
 	/**
@@ -156,11 +127,5 @@
 	readScroll();
 
 	window.addEventListener('scroll', request, { passive: true });
-	window.addEventListener('resize', function () {
-		drawFill();
-		request();
-	});
-
-	// アイコン画像が読み込まれて点の位置が決まってから線を合わせ直す。
-	window.addEventListener('load', drawFill);
+	window.addEventListener('resize', request);
 })();

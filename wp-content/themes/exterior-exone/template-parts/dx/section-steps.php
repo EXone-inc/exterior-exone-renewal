@@ -14,8 +14,8 @@
  * TOP の DX セクションと同じく、ステップ部分（.p-dxsteps__rail）を画面に固定し、
  * スクロール量で 01 → 04 を 1 画面ずつ切り替える（2026-09-24 ユーザー指示）。
  * 切り替わるときは今のステップが左へ流れ、次のステップが右から入る（戻るときは逆）。
- * フローバーは 1 本だけ画面下に置き、今のステップに当たる点をアクティブにして
- * 線がそこまで伸びる。挙動は js/dx-steps.js。JS が動かないときは 01〜04 を縦に
+ * フローバーは 1 本だけ画面下に置き、今のステップに当たる点をアクティブにする
+ * （線は伸ばさない。2026-09-25 ユーザー指示）。挙動は js/dx-steps.js。JS が動かないときは 01〜04 を縦に
  * 並べ、フローバーは最後に 1 本出す。
  *
  * 写真・動画枠・3D モデルはすべて差し替え前提の仮素材。文言・画像は
@@ -110,7 +110,23 @@ $exterior_exone_first    = $exterior_exone_dx_steps['items'][0]['flow_active'];
 								<?php endforeach; ?>
 							</div>
 
-							<div class="p-dxstep__visual">
+							<?php
+							// 03 だけは 3D モデルを重ねる（js/dx-bimx.js）。モデル・ライブラリの URL と
+							// 初期の画角を data 属性で渡し、近づいてから読み込む。
+							$exterior_exone_model = isset( $exterior_exone_step['model'] ) ? $exterior_exone_step['model'] : null;
+							?>
+							<div
+								class="p-dxstep__visual<?php echo $exterior_exone_model ? ' p-dxstep__visual--model' : ''; ?>"
+								<?php if ( $exterior_exone_model ) : ?>
+									data-dx-model="<?php echo esc_url( exterior_exone_asset_url( $exterior_exone_model['file'] ) ); ?>"
+									data-dx-model-viewer="<?php echo esc_url( exterior_exone_asset_url( 'js/vendor/model-viewer/model-viewer-umd.min.js' ) ); ?>"
+									data-dx-model-draco="<?php echo esc_url( trailingslashit( get_theme_file_uri( 'js/vendor/draco' ) ) ); ?>"
+									data-dx-model-orbit="<?php echo esc_attr( $exterior_exone_model['orbit'] ); ?>"
+									data-dx-model-fov="<?php echo esc_attr( $exterior_exone_model['fov'] ); ?>"
+									data-dx-model-target="<?php echo esc_attr( $exterior_exone_model['target'] ); ?>"
+									data-dx-model-rotation="<?php echo esc_attr( $exterior_exone_model['rotation'] ); ?>"
+								<?php endif; ?>
+							>
 								<img
 									src="<?php echo esc_url( exterior_exone_dx_image( $exterior_exone_step['visual']['image'] ) ); ?>"
 									alt="<?php echo esc_attr( $exterior_exone_step['visual']['alt'] ); ?>"
@@ -130,13 +146,11 @@ $exterior_exone_first    = $exterior_exone_dx_steps['items'][0]['flow_active'];
 			</div>
 
 			<?php
-			// 436:399 / 439:839。1 本だけ置き、今のステップに当たる点をアクティブにして
-			// 線をそこまで伸ばす（初期値は 01。切り替えは js/dx-steps.js）。
+			// 436:399 / 439:839。1 本だけ置き、今のステップに当たる点をアクティブにする
+			// （初期値は 01。切り替えは js/dx-steps.js）。
 			?>
 			<div class="p-dxflow" data-dx-flow>
-				<span class="p-dxflow__line" aria-hidden="true">
-					<span class="p-dxflow__fill" data-dx-flow-fill></span>
-				</span>
+				<span class="p-dxflow__line" aria-hidden="true"></span>
 
 				<ol class="p-dxflow__list" aria-label="外構づくりの流れ">
 					<?php foreach ( $exterior_exone_dx_flow as $exterior_exone_index => $exterior_exone_point ) : ?>

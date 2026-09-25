@@ -108,6 +108,8 @@
 	   カンプに動きの指定は無いため、TOP の DX セクションと同じ「固定して 1 画面
 	   1 ステップ」で、今のステップが左へ流れて次が右から入る */
 	--dxp-steps-slide: 0.9s; /* 流れる速さ */
+	--dxp-model-fade: 0.8s; /* 03 の 3D モデルが出るときのフェード */
+	--dxp-model-bleed: 15%; /* 03 の 3D の描画枠を左右に広げる量（枠の幅に対する %）。回って横に広がっても切れない量 */
 	--dxp-steps-ease: cubic-bezier(0.65, 0, 0.35, 1); /* 動き出しと止まりをなめらかに */
 	--dxp-steps-shift: 100%; /* 流れる距離（画面幅いっぱい） */
 	/* SP: 固定表示で 1 ステップ + フローバーが要る高さ（375 基準）。いちばん背の高い
@@ -581,6 +583,49 @@
 	object-fit: contain;
 }
 
+/* 03 の 3D モデル（js/dx-bimx.js が読み込んで重ねる）。建物は静止画と同じ
+   大きさ・位置で始まるよう画角を合わせてあり（inc/dx-data.php）、回って横に
+   広がる角度で切れないよう、描画の枠だけ左右に広げてある（--dxp-model-bleed）。
+   背景は透過（カンプの静止画も透過 PNG） */
+.p-dxstep__visual--model {
+	overflow: visible;
+}
+
+.p-dxstep__model {
+	position: absolute;
+	top: 0;
+	left: calc(-1 * var(--dxp-model-bleed));
+	pointer-events: none;
+	display: block;
+	width: calc(100% + var(--dxp-model-bleed) * 2);
+	height: 100%;
+	background: transparent;
+	opacity: 0;
+	transition: opacity var(--dxp-model-fade) ease;
+	--poster-color: transparent;
+	--progress-bar-height: 0; /* 読み込み中のバーは出さない（静止画が見えている） */
+}
+
+.p-dxstep__visual.is-model-ready .p-dxstep__model {
+	opacity: 1;
+}
+
+/* 3D を出すときは静止画を最初から隠す（読み込み失敗時だけ JS が戻す） */
+.p-dxstep__visual.is-model-mode > img {
+	visibility: hidden;
+}
+
+/* PC は 03 の左に本文の列がある（間は約 88/1920）。回って左へ広がった建物が
+   本文に重ならないよう、描画枠の左端だけ本文の手前でふわっと消す。
+   % は描画枠（ビジュアルの幅 + 左右 15%）に対する位置:
+   本文の右端から 1.5% 手前で消えきり（6.2%）、ビジュアルの左端（11.5%）で元どおり */
+@media (min-width: 1025px) {
+	.p-dxstep__model {
+		-webkit-mask-image: linear-gradient(90deg, transparent 6.2%, #000 11.5%);
+		mask-image: linear-gradient(90deg, transparent 6.2%, #000 11.5%);
+	}
+}
+
 /* 436:396 / 439:772。動画枠の中央下に重ねるボタン。遷移先は未定のため # */
 .p-dxstep__button {
 	position: absolute;
@@ -718,20 +763,6 @@
 	color: var(--dxp-flow-active-color);
 }
 
-/* フローバーの線に重ねる、今のステップまでの進み（js/dx-steps.js が
-   --dxp-flow-progress に線の長さに対する割合を入れる） */
-.p-dxflow__fill {
-	position: absolute;
-	top: calc(-1 * var(--dxp-flow-line-w));
-	left: 0;
-	width: 100%;
-	height: var(--dxp-flow-line-w);
-	background: var(--dxp-flow-active-color);
-	transform: scaleX(var(--dxp-flow-progress, 0));
-	transform-origin: left center;
-	transition: transform var(--dxp-steps-slide) var(--dxp-steps-ease);
-}
-
 /* --- ステップのスクロール切り替え（js/dx-steps.js が .is-enhanced を付ける） ---
    TOP の DX セクションと同じく、ステップ数 + 1 画面ぶんのスクロール量を取り、
    その間は 1 画面を固定して 01〜04 を重ねて置く。フローバーは画面下に 1 本。
@@ -793,8 +824,7 @@
 
 /* 動きを減らす設定では流さずに切り替える */
 @media (prefers-reduced-motion: reduce) {
-	.is-enhanced .p-dxstep.is-moving,
-	.p-dxflow__fill {
+	.is-enhanced .p-dxstep.is-moving {
 		transition: none;
 	}
 }

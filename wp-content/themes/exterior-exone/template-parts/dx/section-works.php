@@ -23,16 +23,28 @@ get_template_part(
 	'works',
 	array(
 		'variant'  => 'dx',
+		// カンプの写真を固定で出し、右列を押すとメインが切り替わる（2026-09-25）。
+		'gallery'  => true,
 		'section'  => 'dx-works',
 		'title'    => $exterior_exone_dx_works['title'],
 		'jp'       => $exterior_exone_dx_works['jp'],
 		'lead'     => $exterior_exone_dx_works['lead'],
 		'lead_sp'  => $exterior_exone_dx_works['lead_sp'],
 		'photos'   => array_map( 'exterior_exone_dx_image', $exterior_exone_dx_works['photos'] ),
+		'thumbs'   => array_map( 'exterior_exone_dx_image', $exterior_exone_dx_works['thumbs'] ),
 		'render'   => array(
 			'image'    => exterior_exone_dx_image( $exterior_exone_dx_works['render']['image'] ),
 			'label'    => $exterior_exone_dx_works['render']['label'],
 			'backdrop' => exterior_exone_dx_image( $exterior_exone_dx_works['render']['backdrop'] ),
+			// 押したときにメインでドラッグして回せる 3D（js/works-gallery.js が読み込む）。
+			'model'    => array_merge(
+				$exterior_exone_dx_works['render']['model'],
+				array(
+					'file'   => exterior_exone_asset_url( $exterior_exone_dx_works['render']['model']['file'] ),
+					'viewer' => exterior_exone_asset_url( 'js/vendor/model-viewer/model-viewer-umd.min.js' ),
+					'draco'  => trailingslashit( get_theme_file_uri( 'js/vendor/draco' ) ),
+				)
+			),
 		),
 		'request'  => $exterior_exone_dx_works['request'],
 		'proposal' => $exterior_exone_dx_works['proposal'],

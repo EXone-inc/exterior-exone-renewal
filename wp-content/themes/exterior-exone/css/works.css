@@ -31,6 +31,12 @@
 	--cw-scrim-blur: 8px;
 	--cw-modal-rule: var(--color-black1); /* 439:1028 モーダル内の罫線 */
 	--cw-sheet-z: calc(var(--z-header) - 1); /* カンプどおりヘッダーは暗幕の上 */
+	--cw-switch-fade: 0.3s; /* DX: メイン写真の切り替え */
+	/* DX: 3D モデルの読み込み中の表示（カンプに無いため控えめに） */
+	--cw-loading-size: clamp(32px, 28px + 1vw, 48px);
+	--cw-loading-line: 3px;
+	--cw-loading-track: rgba(255, 255, 255, 0.35);
+	--cw-loading-dim: rgba(26, 26, 26, 0.25);
 
 	/* --- 文字サイズ・余白（下の PC / SP の比例ブロックが上書きする保険） --- */
 	--cw-heading-gap: clamp(32px, 28.893px + 3.1068vw, 80px); /* 32 → 80 */
@@ -160,10 +166,144 @@
 	object-fit: contain;
 }
 
-/* 436:376 は枠（380x205.8）と同じ比率に切り出した画像なので枠を埋める */
+/* DX は 3D モデルの初期画角の画像（メインと同じ縦横比）なので、枠いっぱいに敷いて
+   メインの縮小版に見せる（押して 3D に切り替わっても絵が変わらない） */
 .p-cworks--dx .p-cworks__render-image {
+	top: 0;
+	height: 100%;
 	object-fit: cover;
 }
+
+/* --- DX: 右列を押すとメインが切り替わる（js/works-gallery.js） ---
+   右列の写真と 3D パースはボタン。見た目はカンプのまま、押せることだけ
+   カーソルとホバーで示す（選択中の見た目はカンプに無いので付けない） */
+.p-cworks__thumb {
+	display: block;
+	width: 100%;
+	height: 100%;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	background: none;
+	font: inherit;
+	color: inherit;
+	cursor: pointer;
+	transition: opacity var(--transition-base);
+}
+
+.p-cworks__render.p-cworks__thumb {
+	background: var(--cw-render-bg);
+}
+
+.p-cworks__thumb:hover {
+	opacity: 0.8;
+}
+
+.p-cworks__thumb:focus-visible {
+	outline: 2px solid var(--color-orange1);
+	outline-offset: 2px;
+}
+
+.p-cworks__main {
+	background-position: center;
+	background-size: cover;
+	border-radius: var(--cw-photo-radius);
+}
+
+.p-cworks__main img {
+	transition: opacity var(--cw-switch-fade) ease;
+}
+
+.p-cworks__main.is-switching img {
+	opacity: 0;
+}
+
+/* 3D パースを押したときにメインに重ねる 3D モデル（js/works-gallery.js）。
+   背景は透過にして、メインの背景の空写真を見せる。読み込めたらパース画像と入れ替える。
+   ドラッグで回せることをカーソルで示す */
+.p-cworks__main {
+	position: relative;
+	overflow: hidden;
+}
+
+.p-cworks__model {
+	position: absolute;
+	inset: 0;
+	display: none;
+	width: 100%;
+	height: 100%;
+	background: transparent;
+	opacity: 0;
+	cursor: grab;
+	transition: opacity var(--cw-switch-fade) ease;
+	--poster-color: transparent;
+	--progress-bar-height: 0;
+}
+
+.p-cworks__model:active {
+	cursor: grabbing;
+}
+
+.p-cworks__main.is-model .p-cworks__model {
+	display: block;
+}
+
+.p-cworks__main.is-model.is-model-ready .p-cworks__model {
+	opacity: 1;
+}
+
+.p-cworks__main.is-model.is-model-ready img {
+	opacity: 0;
+}
+
+/* 3D モデルの読み込み中（.is-model だけ付いていて .is-model-ready がまだ）は、
+   パース画像を少し暗くして中央にローディングを出す */
+.p-cworks__main::before,
+.p-cworks__main::after {
+	position: absolute;
+	z-index: 1;
+	pointer-events: none;
+	opacity: 0;
+	transition: opacity var(--cw-switch-fade) ease;
+	content: "";
+}
+
+.p-cworks__main::before {
+	inset: 0;
+	background: var(--cw-loading-dim);
+}
+
+.p-cworks__main::after {
+	top: 50%;
+	left: 50%;
+	width: var(--cw-loading-size);
+	height: var(--cw-loading-size);
+	margin: calc(var(--cw-loading-size) / -2) 0 0 calc(var(--cw-loading-size) / -2);
+	border: var(--cw-loading-line) solid var(--cw-loading-track);
+	border-top-color: var(--color-white2);
+	border-radius: 50%;
+	animation: cw-loading 0.9s linear infinite;
+}
+
+.p-cworks__main.is-model:not(.is-model-ready)::before,
+.p-cworks__main.is-model:not(.is-model-ready)::after {
+	opacity: 1;
+}
+
+@keyframes cw-loading {
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.p-cworks__main::after {
+		animation-duration: 2.4s;
+	}
+}
+
+/* 3D パースは透過部分があるので、メインの背景に空写真を敷く（js/works-gallery.js）。
+   大きさは写真と同じく枠いっぱい（cover） */
 
 /* Group 381 / 436:378 パースに重なるラベル */
 .p-cworks__render-label {
