@@ -59,6 +59,7 @@
 	--dxp-ex-rail: 500vh; /* 映像 1 本ぶんのスクロール量（画面 4 つぶん進む） */
 	--dxp-ex-rail-svh: 500svh;
 	--dxp-ex-fade: 0.4s; /* 章の切り替わりのフェード */
+	--dxp-ex-still-fade: 0.8s; /* 映像の代わりの静止画の切り替え（動きを減らす設定など） */
 	/* 上端は 436:100（15%）より濃くして白文字を保つ（映像の上端が rgb(184,198,211)
 	   の淡いグレーのため。決定事項 2026-09-20）。下端は本文 #4d4d4d 用の薄い白幕 */
 	--dxp-ex-scrim-top: linear-gradient(180deg, rgba(0, 0, 0, 0.45) 0, rgba(0, 0, 0, 0.3) 32%, rgba(0, 0, 0, 0) 55%);
@@ -608,6 +609,17 @@
 
 .p-dxstep__visual.is-model-ready .p-dxstep__model {
 	opacity: 1;
+}
+
+/* 動きを減らす設定では自動で回さず、ドラッグで回せる（js/dx-bimx.js）。
+   押せることをカーソルで示す */
+.p-dxstep__visual.is-model-interactive .p-dxstep__model {
+	pointer-events: auto;
+	cursor: grab;
+}
+
+.p-dxstep__visual.is-model-interactive .p-dxstep__model:active {
+	cursor: grabbing;
 }
 
 /* 3D を出すときは静止画を最初から隠す（読み込み失敗時だけ JS が戻す） */
@@ -1181,6 +1193,12 @@
 		text-align: left;
 	}
 
+	/* 439:791: FV の高さが画面に合わせて変わるので、コピーは下端からの距離で置く */
+	.p-dxfv__copy {
+		top: auto;
+		bottom: var(--dxp-fv-copy-bottom);
+	}
+
 	/* 439:758 ほか: SP はビジュアルを先に出して縦積みにする */
 	.p-dxstep__inner {
 		flex-direction: column;
@@ -1566,7 +1584,12 @@
 	:root {
 		--dxp-su: min(calc(100vw / 375), var(--sp-scale-max));
 
-		--dxp-fv-height: calc(678 * var(--dxp-su)); /* 723 − ヘッダー 45 */
+		/* SP は画面いっぱい（ヘッダーの下から画面の下端まで）。カンプ 375x723 では
+		   ちょうど 678（723 − ヘッダー 45）になる。縦長の機種で下に次のセクションが
+		   のぞかないよう画面の高さに合わせる（2026-09-28）。アドレスバーの出入りで
+		   伸び縮みしないよう svh。極端に低い画面でもコピーが収まる下限を持つ */
+		--dxp-fv-height: max(calc(100svh - var(--header-height)), calc(420 * var(--dxp-su)));
+		--dxp-fv-copy-bottom: calc(48 * var(--dxp-su)); /* コピーの下端 → FV の下端（カンプ 675 → 723） */
 		--dxp-fv-dx: calc(110 * var(--dxp-su));
 		--dxp-fv-en: calc(74 * var(--dxp-su));
 		--dxp-fv-display-ls: calc(-3 * var(--dxp-su));
@@ -1851,6 +1874,35 @@
 
 .p-dxex--scroll[data-ready="true"] .p-dxex__poster {
 	visibility: hidden;
+}
+
+/* 映像の代わりの静止画（動きを減らす設定・映像を読めないとき。js/dx-explorer.js が作る）。
+   章ごとの静止画を重ねておき、いまの章だけフェードで見せる */
+.p-dxex--scroll[data-mode="stills"] .p-dxex__video,
+.p-dxex--scroll[data-mode="stills"] .p-dxex__poster {
+	visibility: hidden;
+}
+
+.p-dxex__stills,
+.p-dxex__stills picture {
+	position: absolute;
+	inset: 0;
+}
+
+.p-dxex__stills picture {
+	opacity: 0;
+	transition: opacity var(--dxp-ex-still-fade) ease;
+}
+
+.p-dxex__stills picture.is-current {
+	opacity: 1;
+}
+
+.p-dxex__stills img {
+	display: block;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
 }
 
 /* 436:100 の暗幕を上端に濃く敷いて白文字を読めるようにする（決定事項 2026-09-20） */

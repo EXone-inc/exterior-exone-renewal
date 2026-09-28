@@ -9,7 +9,9 @@
  *   枠の左右からはみ出して見えてよい（枠で切らない。css/dx.css）
  * ・初期の画角は静止画と同じ。そこからゆっくり回し続ける（操作は受け付けない）
  * ・03 を表示していない間（ステップ切り替えで隠れている間）は回転を止める
- * ・動きを減らす設定の端末と、読み込みに失敗したときは静止画のまま
+ * ・動きを減らす設定の端末では、3D は表示したまま自動では回さず、指やマウスで
+ *   ドラッグすれば回せるようにする（勝手に動くものだけ止める。2026-09-25）
+ * ・読み込みに失敗したときは静止画に戻す
  *
  * 画角・回転の速さ・ファイルの場所は inc/dx-data.php が出典で、
  * template-parts/dx/section-steps.php の data-dx-model-* から受け取る。
@@ -25,7 +27,7 @@
 
 	var reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
 
-	if (reduced.matches || typeof window.IntersectionObserver !== 'function') {
+	if (typeof window.IntersectionObserver !== 'function') {
 		return;
 	}
 
@@ -76,6 +78,20 @@
 		}
 	}
 
+	/**
+	 * 動きを減らす設定なら自動回転をやめ、ドラッグで回せるようにする（ズーム・平行移動は
+	 * させない。縦スクロールは奪わない）。通常は自動回転のみで操作は受け付けない。
+	 */
+	function applyMotionPreference() {
+		if (!viewer) {
+			return;
+		}
+
+		viewer.cameraControls = reduced.matches;
+		visual.classList.toggle('is-model-interactive', reduced.matches);
+		syncRotation();
+	}
+
 	function start() {
 		if (started) {
 			return;
@@ -110,6 +126,7 @@
 			viewer.setAttribute('rotation-per-second', visual.getAttribute('data-dx-model-rotation'));
 			viewer.setAttribute('auto-rotate-delay', '0');
 			viewer.setAttribute('auto-rotate', '');
+			viewer.setAttribute('touch-action', 'pan-y');
 
 			// 読み込み直後はカメラが指定の画角へ寄っていくので、先に飛ばしてから見せる。
 			viewer.addEventListener('load', function () {
@@ -118,7 +135,7 @@
 					viewer.jumpCameraToGoal();
 					window.requestAnimationFrame(function () {
 						visual.classList.add('is-model-ready');
-						syncRotation();
+						applyMotionPreference();
 					});
 				});
 			});
@@ -135,7 +152,7 @@
 
 			viewer.src = visual.getAttribute('data-dx-model');
 			visual.appendChild(viewer);
-			syncRotation();
+			applyMotionPreference();
 		}).catch(function () {
 			// ライブラリを読めなければ静止画に戻す。
 			fallback();
@@ -162,8 +179,8 @@
 		});
 	}
 
-	// 動きを減らす設定に切り替わったら止める。
+	// 動きを減らす設定が切り替わったら、自動回転とドラッグ操作を入れ替える。
 	if (typeof reduced.addEventListener === 'function') {
-		reduced.addEventListener('change', syncRotation);
+		reduced.addEventListener('change', applyMotionPreference);
 	}
 })();

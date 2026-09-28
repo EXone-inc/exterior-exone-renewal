@@ -175,6 +175,16 @@ function exterior_exone_enqueue_assets() {
 		);
 	}
 
+	// VR 展示場（/dx/vr/。page-vr.php）。iframe を 1 画面いっぱいに広げるだけ。
+	if ( is_page( 'vr' ) ) {
+		wp_enqueue_style(
+			'exterior-exone-dx-vr',
+			get_theme_file_uri( 'css/dx-vr.css' ),
+			array( 'exterior-exone-style' ),
+			exterior_exone_asset_version( 'css/dx-vr.css' )
+		);
+	}
+
 	// DX EXPERIENCE ページ専用アセット（CSS はテーマ本体の後に読む）。
 	if ( is_page( 'dx' ) ) {
 		wp_enqueue_style(
@@ -481,7 +491,7 @@ add_filter( 'show_admin_bar', 'exterior_exone_hide_admin_bar' );
  * @return bool
  */
 function exterior_exone_has_fv_header() {
-	return is_front_page() || is_page( 'company' ) || is_page( 'dx' ) || exterior_exone_is_store_page();
+	return is_front_page() || is_page( 'company' ) || is_page( 'dx' ) || is_page( 'vr' ) || exterior_exone_is_store_page();
 }
 
 /**
@@ -501,6 +511,10 @@ function exterior_exone_body_class( $classes ) {
 
 	if ( is_page( 'dx' ) ) {
 		$classes[] = 'is-dx-page';
+	}
+
+	if ( is_page( 'vr' ) ) {
+		$classes[] = 'is-vr-page';
 	}
 
 	if ( exterior_exone_has_fv_header() ) {

@@ -201,9 +201,11 @@ function exterior_exone_dx_page_steps() {
 					'alt'   => 'VRコンテンツを表示したモニターとスマートフォン',
 				),
 				// 436:396 / 439:772。遷移先が未定のため # （決定事項 Q8）。
+				// 押すと別タブで VR 展示場のページ（/dx/vr/、page-vr.php）を開く（2026-09-28）。
 				'button'      => array(
-					'label' => 'VR展示場を体験する',
-					'url'   => '#',
+					'label'   => 'VR展示場を体験する',
+					'url'     => home_url( '/dx/vr/' ),
+					'new_tab' => true,
 				),
 				'flow_active' => 1,
 			),
@@ -484,6 +486,24 @@ function exterior_exone_dx_works() {
 				array( 'image' => 'pc-works-thumb4-3d-436-376.png' )
 			),
 		)
+	);
+}
+
+/**
+ * VR 展示場のページ（固定ページ vr、DX の子ページ /dx/vr/。page-vr.php）。
+ *
+ * VR は Shapespark のビューア。exone-package.com/vr/stylishmodern もこの S3 上の
+ * ビューアを iframe で読んでいるだけなので、ビューアを直接埋め込む（向こうのサイトの
+ * ヘッダーが付かず、右上の地点一覧も切れない。2026-09-28）。S3 は埋め込みを禁止していない。
+ * 右下のオートツアー（放置すると自動で巡回）はシーン設定（autoTour）で決まり、
+ * URL などでは切れない。止めるには Shapespark 側で設定して書き出し直す。
+ *
+ * @return array{title:string, src:string}
+ */
+function exterior_exone_dx_vr() {
+	return array(
+		'title' => 'VR展示場 スタイリッシュモダン',
+		'src'   => 'https://exone-bucket.s3.ap-northeast-1.amazonaws.com/vr/exone_stylishmodern/index.html',
 	);
 }
 

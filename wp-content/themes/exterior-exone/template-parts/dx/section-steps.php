@@ -135,7 +135,14 @@ $exterior_exone_first    = $exterior_exone_dx_steps['items'][0]['flow_active'];
 
 								<?php // 436:396 / 439:772。01 だけ動画枠の中央下にボタンを重ねる。 ?>
 								<?php if ( ! empty( $exterior_exone_step['button'] ) ) : ?>
-									<a class="p-dxstep__button" href="<?php echo esc_url( $exterior_exone_step['button']['url'] ); ?>">
+									<a
+										class="p-dxstep__button"
+										href="<?php echo esc_url( $exterior_exone_step['button']['url'] ); ?>"
+										<?php if ( ! empty( $exterior_exone_step['button']['new_tab'] ) ) : ?>
+											target="_blank"
+											rel="noopener"
+										<?php endif; ?>
+									>
 										<?php echo esc_html( $exterior_exone_step['button']['label'] ); ?>
 									</a>
 								<?php endif; ?>

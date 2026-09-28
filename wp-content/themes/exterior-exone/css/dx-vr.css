@@ -1,0 +1,56 @@
+/* ============================================================
+   VR 展示場（/dx/vr/。page-vr.php）
+   外部の VR を iframe で表示する。カンプ無し（2026-09-28 ユーザー決定）。
+   ・ヘッダーは他のページと同じく VR の上に透明で重ねる（has-fv-header）
+   ・PC は 1 画面いっぱい。SP は VR の上を指でなぞると VR が動いてページが
+     スクロールしにくいため、下に余白を残して、そこを触ればスクロールできるようにする
+   ・スクロールするとフッターが出る
+   ============================================================ */
+:root {
+	--dxvr-height: 100vh;
+	--dxvr-height-svh: 100svh;
+	--dxvr-bg: var(--color-black2); /* 読み込み中に見える地・SP の下の余白 */
+	--dxvr-list-space: 90px; /* PC: VR 右上の地点一覧のぶんメニューを左へ寄せる量 */
+}
+
+@media (max-width: 1024px) {
+	:root {
+		/* SP: 画面の 8 割を VR に、残りはページをスクロールするための余白 */
+		--dxvr-height: 80vh;
+		--dxvr-height-svh: 80svh;
+	}
+}
+
+.p-dxvr {
+	overflow: hidden;
+	background: var(--dxvr-bg);
+}
+
+.p-dxvr__frame {
+	display: block;
+	width: 100%;
+	height: var(--dxvr-height);
+	height: var(--dxvr-height-svh);
+	border: 0;
+}
+
+/* PC はヘッダーを VR に重ねるので、ヘッダーの透明な部分では VR を操作できるようにする
+   （右上の地点一覧など）。ロゴ・メニューのリンクだけは押せるまま */
+@media (min-width: 1025px) {
+	/* VR の右上に出る地点一覧（全体1・1・2…、右端から約 70px・幅 60px）と
+	   ヘッダーのメニュー（CONTACT）が重ならないよう、このページだけメニューの右端を
+	   左へ寄せる。ヘッダーは他ページと同じく VR の上に透明で重ねる（2026-09-28）。
+	   一覧の幅は VR 側の固定 px なので、寄せる量も px で持つ */
+	.is-vr-page .p-header__inner {
+		padding-right: calc(var(--header-pad-right) + var(--dxvr-list-space));
+	}
+
+	.is-vr-page .p-header {
+		pointer-events: none;
+	}
+
+	.is-vr-page .p-header a,
+	.is-vr-page .p-header button {
+		pointer-events: auto;
+	}
+}

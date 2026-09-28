@@ -63,6 +63,9 @@
 	const portrait = window.matchMedia('(max-aspect-ratio: 1/1)');
 	const fps = Number(config.fps) || 30;
 	let active = false, failed = false, near = false;
+	// 映像の代わりに章ごとの静止画をフェードで切り替える表示（動きを減らす設定・映像を読めないとき）。
+	// 画面固定とスクロールでの章の進み方は映像と同じ。
+	let stillMode = false, stillLayer = null;
 	let progress = 0, start = 0, distance = 1, headerHeight = 0, chapter = -1;
 	let frame = 0, generation = 0, loadTimer = 0, sourceKey = '', posterKey = '', queue = null, resizeAnchor = null;
 	let sourceCleanup = () => {};
@@ -85,17 +88,40 @@
 		labels.forEach((label) => {
 			label.classList.toggle('is-current', Number(label.getAttribute('data-ex-chapter')) === next);
 		});
+		if (stillMode) showStill(next);
 	}
-	function jump(target, focus) {
-		if (!target) return;
-		resizeAnchor = null;
-		window.scrollTo({ top: window.scrollY + target.getBoundingClientRect().top - headerHeight - 16, behavior: 'instant' });
-		if (focus) {
-			if (!target.hasAttribute('tabindex')) target.setAttribute('tabindex', '-1');
-			target.focus({ preventScroll: true });
-		}
+	// 静止画の層は、JS 無効時用の静止画（.p-dxex__fallback の picture）を複製して作る。
+	function buildStills() {
+		if (stillLayer) return;
+		stillLayer = document.createElement('div');
+		stillLayer.className = 'p-dxex__stills';
+		stillLayer.setAttribute('aria-hidden', 'true');
+		fallback.querySelectorAll('picture').forEach((picture) => {
+			const copy = picture.cloneNode(true);
+			const img = copy.querySelector('img');
+			if (img) { img.removeAttribute('loading'); img.alt = ''; }
+			stillLayer.appendChild(copy);
+		});
+		const media = root.querySelector('.p-dxex__media');
+		(media || stage).appendChild(stillLayer);
 	}
-	const article = (index) => document.getElementById('dx-view-' + config.chapters[index].id);
+	function showStill(index) {
+		if (!stillLayer) return;
+		Array.from(stillLayer.children).forEach((item, i) => item.classList.toggle('is-current', i === index));
+	}
+	function enterStillMode(message) {
+		stillMode = true;
+		stopSource();
+		buildStills();
+		root.dataset.mode = 'stills'; root.dataset.ready = 'false';
+		showStill(Math.max(0, chapter));
+		say(message); schedule();
+	}
+	function leaveStillMode() {
+		stillMode = false;
+		root.dataset.mode = 'loading'; root.dataset.ready = 'false';
+		schedule();
+	}
 	function setPoster(key) {
 		if (poster && posterKey !== key) poster.src = config.sources[key].poster;
 		posterKey = key;
@@ -110,21 +136,10 @@
 		if (video.hasAttribute('src')) { video.removeAttribute('src'); video.load(); }
 		sourceKey = '';
 	}
-	// 静止画フォールバックへ切り替える（JS 無効・動きを減らす設定・読み込み失敗のときだけ）。
-	function useStills(message) {
-		const preserve = inside();
-		const index = Math.max(0, chapter);
-		resizeAnchor = null;
-		stopSource(); active = false;
-		root.classList.remove('is-enhanced');
-		root.dataset.mode = 'static'; root.dataset.ready = 'false';
-		fallback.hidden = false;
-		say(message); measure();
-		if (preserve) jump(article(index), false);
-	}
+	// 映像を読み込めなかったときは、静止画の切り替え表示にする（画面固定はそのまま）。
 	function failMedia() {
 		failed = true;
-		useStills('映像を読み込めなかったため、五つの見せ場を静止画で表示しています。');
+		enterStillMode('映像を読み込めなかったため、五つの見せ場を静止画で表示しています。');
 	}
 	function requestFrame() {
 		if (queue && Number.isFinite(video.duration) && video.duration > 0)
@@ -173,6 +188,24 @@
 			video.removeEventListener('error', error);
 		};
 		video.src = source.url; video.load(); watchLoad();
+		armUnlock(token);
+	}
+	// iOS の低電力モードでは、画面に触れるまで動画のデータを読み込まない（metadata 止まりで
+	// シークしても絵が出ず、30 秒後に静止画へ落ちる）。最初に触れた・押した直後に
+	// 再生 → 即停止して読み込みを始めさせ、今のスクロール位置の絵を出し直す。
+	// 仕組みは TOP の FV（js/fv-slider.js の armRetry）と同じ。
+	function armUnlock(token) {
+		const unlock = () => {
+			window.removeEventListener('touchstart', unlock);
+			window.removeEventListener('pointerdown', unlock);
+			if (token !== generation || !active || stillMode || root.dataset.ready === 'true') return;
+			const played = video.play();
+			const settle = () => { video.pause(); watchLoad(); requestFrame(); };
+			if (played && played.then) played.then(settle).catch(settle);
+			else settle();
+		};
+		window.addEventListener('touchstart', unlock, { passive: true });
+		window.addEventListener('pointerdown', unlock);
 	}
 	function schedule() {
 		if (!frame && !document.hidden) frame = requestAnimationFrame(update);
@@ -188,6 +221,7 @@
 		}
 		progress = scrollProgress(window.scrollY, start, distance);
 		showChapter(progress);
+		if (stillMode) return;
 		const key = portrait.matches ? 'sp' : 'pc';
 		if (sourceKey && sourceKey !== key) {
 			stopSource(); root.dataset.ready = 'false'; root.dataset.mode = 'loading';
@@ -197,16 +231,11 @@
 		requestFrame();
 	}
 	function enable() {
-		const wasStatic = !active;
-		const rect = root.getBoundingClientRect();
-		const preserve = rect.top <= 0 && rect.bottom > 0;
-		active = true; failed = false;
+		active = true;
 		// Reserve the entire rail before IntersectionObserver or media loading can run.
 		root.classList.add('is-enhanced'); fallback.hidden = true;
 		root.dataset.mode = 'loading'; root.dataset.ready = 'false';
 		measure();
-		// 静止画を見ている途中で映像に戻ったときは、同じ章の位置に合わせる。
-		if (preserve && wasStatic) window.scrollTo({ top: start + distance * config.chapters[Math.max(0, chapter)].position, behavior: 'instant' });
 		say('スクロールで五つの見せ場を巡ります。'); schedule();
 	}
 	function resized() {
@@ -232,15 +261,17 @@
 			watchLoad(); schedule();
 		}
 	});
+	// 動きを減らす設定では、映像（スクロールに合わせて絵が流れる）の代わりに静止画の切り替えにする。
+	const REDUCED_MESSAGE = '動きを抑える設定に合わせて、五つの見せ場を静止画で切り替えています。';
 	reduced.addEventListener('change', () => {
-		if (reduced.matches) useStills('動きを抑える設定に合わせて、静止画で表示しています。');
-		else if (!failed) enable();
+		if (reduced.matches) enterStillMode(REDUCED_MESSAGE);
+		else if (!failed) leaveStillMode();
 	});
 	if ('IntersectionObserver' in window) new IntersectionObserver((entries) => {
 		near = entries.some((entry) => entry.isIntersecting); schedule();
 	}, { rootMargin: '500px 0px' }).observe(root);
 	else near = true;
-	if (reduced.matches) useStills('動きを抑える設定に合わせて、静止画で表示しています。');
-	else enable();
+	enable();
+	if (reduced.matches) enterStillMode(REDUCED_MESSAGE);
 	showChapter(0);
 })();
