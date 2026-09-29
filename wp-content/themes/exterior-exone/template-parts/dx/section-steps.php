@@ -127,11 +127,47 @@ $exterior_exone_first    = $exterior_exone_dx_steps['items'][0]['flow_active'];
 									data-dx-model-rotation="<?php echo esc_attr( $exterior_exone_model['rotation'] ); ?>"
 								<?php endif; ?>
 							>
-								<img
-									src="<?php echo esc_url( exterior_exone_dx_image( $exterior_exone_step['visual']['image'] ) ); ?>"
-									alt="<?php echo esc_attr( $exterior_exone_step['visual']['alt'] ); ?>"
-									loading="lazy"
-								>
+								<?php if ( ! empty( $exterior_exone_step['visual']['ai_pers'] ) ) : ?>
+									<?php
+									// 02: 更地 → 線画 → 完成写真のアニメーション（js/dx-ai-pers.js）。
+									// JS が動かないとき・動きを減らす設定では完成写真を出したまま。
+									$exterior_exone_ai = $exterior_exone_step['visual']['ai_pers'];
+									?>
+									<div class="p-dxai" role="img" aria-label="<?php echo esc_attr( $exterior_exone_ai['alt'] ); ?>" data-dx-ai-pers>
+										<img class="p-dxai__photo p-dxai__before" src="<?php echo esc_url( exterior_exone_dx_image( $exterior_exone_ai['before'] ) ); ?>" width="1033" height="748" alt="" loading="lazy">
+										<?php
+										// 線画はテーマ同梱の SVG をインラインで置く。summary の線画（js/line-draw.js）と
+										// 動きを分けるため data-line-draw は外す。写真と同じく枠いっぱいに切り抜く。
+										$exterior_exone_ai_svg = exterior_exone_inline_line_svg( $exterior_exone_ai['line'], 'p-dxai__lines' );
+										$exterior_exone_ai_svg = str_replace( ' data-line-draw', '', $exterior_exone_ai_svg );
+										$exterior_exone_ai_svg = preg_replace( '/<svg\b/', '<svg preserveAspectRatio="xMidYMid slice"', $exterior_exone_ai_svg, 1 );
+										echo $exterior_exone_ai_svg; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- テーマ同梱の SVG をヘルパー内で整形済み。
+										?>
+										<img class="p-dxai__photo p-dxai__after" src="<?php echo esc_url( exterior_exone_dx_image( $exterior_exone_ai['after'] ) ); ?>" width="1033" height="748" alt="" loading="lazy">
+									</div>
+								<?php elseif ( ! empty( $exterior_exone_step['visual']['video'] ) ) : ?>
+									<?php
+									// 01: 動画（音声なし・繰り返し）。表示中のステップのときだけ再生する
+									// （js/dx-steps.js）。再生できないときはポスターの静止画が見える。
+									?>
+									<video
+										class="p-dxstep__video"
+										src="<?php echo esc_url( exterior_exone_asset_url( $exterior_exone_step['visual']['video'] ) ); ?>"
+										poster="<?php echo esc_url( exterior_exone_dx_image( $exterior_exone_step['visual']['image'] ) ); ?>"
+										aria-label="<?php echo esc_attr( $exterior_exone_step['visual']['alt'] ); ?>"
+										muted
+										loop
+										playsinline
+										preload="metadata"
+										data-dx-step-video
+									></video>
+								<?php else : ?>
+									<img
+										src="<?php echo esc_url( exterior_exone_dx_image( $exterior_exone_step['visual']['image'] ) ); ?>"
+										alt="<?php echo esc_attr( $exterior_exone_step['visual']['alt'] ); ?>"
+										loading="lazy"
+									>
+								<?php endif; ?>
 
 								<?php // 436:396 / 439:772。01 だけ動画枠の中央下にボタンを重ねる。 ?>
 								<?php if ( ! empty( $exterior_exone_step['button'] ) ) : ?>

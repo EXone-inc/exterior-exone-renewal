@@ -109,6 +109,10 @@
 	   カンプに動きの指定は無いため、TOP の DX セクションと同じ「固定して 1 画面
 	   1 ステップ」で、今のステップが左へ流れて次が右から入る */
 	--dxp-steps-slide: 0.9s; /* 流れる速さ */
+	--dxp-ai-before-dim: 0.66; /* 02 AI パース: 描いている間の更地の暗さ（サンプルどおり） */
+	--dxp-ai-after-blur: 10px; /* 完成写真が浮かぶ前のぼかし */
+	--dxp-ai-line: #ecfcff; /* 光る線の色 */
+	--dxp-ai-glow: drop-shadow(0 0 3px #a9efff) drop-shadow(0 0 9px #16aaff) drop-shadow(0 0 16px #0877ff);
 	--dxp-model-fade: 0.8s; /* 03 の 3D モデルが出るときのフェード */
 	--dxp-model-bleed: 15%; /* 03 の 3D の描画枠を左右に広げる量（枠の幅に対する %）。回って横に広がっても切れない量 */
 	--dxp-steps-ease: cubic-bezier(0.65, 0, 0.35, 1); /* 動き出しと止まりをなめらかに */
@@ -564,10 +568,96 @@
 	border-radius: var(--dxp-step-radius);
 }
 
-.p-dxstep__visual img {
+.p-dxstep__visual img,
+.p-dxstep__video {
 	width: 100%;
 	height: 100%;
 	object-fit: cover;
+}
+
+/* --- 02 AI パースのアニメーション（js/dx-ai-pers.js。支給 sample.html の再現） ---
+   更地の写真・光る線画・完成写真を重ねる。JS が動く前・動きを減らす設定では
+   完成写真を出したまま（.is-playing が付いてから更地に戻して動かす） */
+.p-dxai {
+	position: absolute;
+	inset: 0;
+	overflow: hidden;
+	background: var(--color-black2);
+	isolation: isolate;
+}
+
+.p-dxai__photo,
+.p-dxai__lines {
+	position: absolute;
+	inset: 0;
+	display: block;
+	width: 100%;
+	height: 100%;
+}
+
+.p-dxai__photo {
+	object-fit: cover;
+}
+
+.p-dxai__before {
+	z-index: 0;
+	filter: brightness(var(--dxp-ai-before-dim));
+	transition: filter 0.9s ease;
+}
+
+.p-dxai__lines {
+	z-index: 1;
+	overflow: visible;
+	pointer-events: none;
+	opacity: 0;
+	transition: opacity 0.7s ease;
+}
+
+.p-dxai__after {
+	z-index: 2;
+	transition: opacity 1.4s ease, filter 1.4s ease;
+}
+
+/* 02 に切り替わった直後は、フェードせずに更地から始める（js/dx-ai-pers.js） */
+.p-dxai.is-instant :is(.p-dxai__photo, .p-dxai__lines) {
+	transition: none;
+}
+
+/* 描いている間（完成写真は隠し、線画を見せる） */
+.p-dxai.is-playing .p-dxai__after {
+	opacity: 0;
+	filter: blur(var(--dxp-ai-after-blur));
+}
+
+.p-dxai.is-playing .p-dxai__lines {
+	opacity: 1;
+}
+
+/* 描き終わり: 完成写真を浮かべ、線画を消し、更地を明るくする */
+.p-dxai.is-playing.is-complete .p-dxai__after {
+	opacity: 1;
+	filter: blur(0);
+}
+
+.p-dxai.is-playing.is-complete .p-dxai__lines {
+	opacity: 0;
+}
+
+.p-dxai.is-playing.is-complete .p-dxai__before {
+	filter: brightness(1);
+}
+
+/* 線画は光る白線（サンプルの色と光彩）。描く前は dashoffset で隠す
+   （pathLength="1" は functions.php の exterior_exone_inline_line_svg() が付ける） */
+.p-dxai__lines :is(path, line, polyline, polygon, rect) {
+	fill: none;
+	stroke: var(--dxp-ai-line);
+	stroke-width: 2.1;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+	stroke-dasharray: 1;
+	stroke-dashoffset: 0;
+	filter: var(--dxp-ai-glow);
 }
 
 /* 436:164 / 439:757。影が付くのは 02 の写真だけ。 */

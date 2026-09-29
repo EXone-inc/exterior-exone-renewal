@@ -213,6 +213,15 @@ function exterior_exone_enqueue_assets() {
 			true
 		);
 
+		// DX のステップ 02: AI パースのアニメーション（更地 → 線画 → 完成写真）。
+		wp_enqueue_script(
+			'exterior-exone-dx-ai-pers',
+			get_theme_file_uri( 'js/dx-ai-pers.js' ),
+			array(),
+			exterior_exone_asset_version( 'js/dx-ai-pers.js' ),
+			true
+		);
+
 		// DX のステップ 03: 3D モデルの読み込みと回転。ライブラリ（model-viewer）と
 		// モデルは 03 に近づいてからこの JS が読み込むので、ここでは小さな JS だけ。
 		wp_enqueue_script(

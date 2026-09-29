@@ -192,8 +192,11 @@ function exterior_exone_dx_page_steps() {
 				),
 				// 436:134 / 439:769。カンプでは「video」枠なので、動画が届いたらここを差し替える。
 				'visual'      => array(
-					'image' => 'pc-dx01-video-poster-436-134.jpg',
+					'image' => 'vr-showroom-poster.jpg',
 					'alt'   => 'VR展示場で歩いて確かめられる街並み',
+					// 支給動画 vr_video.mp4（1032x750・5 秒）を音声なし・H.264 に再エンコード
+					// （6.3MB → 1.6MB）。ポスターは 1 フレーム目（2026-09-29）。
+					'video' => 'videos/dx/vr-showroom.mp4',
 				),
 				// 436:133 / 439:767。番号の右に重ねるモックアップ。
 				'device'      => array(
@@ -229,6 +232,15 @@ function exterior_exone_dx_page_steps() {
 				'visual'      => array(
 					'image' => 'pc-dx02-left-img-436-164.jpg',
 					'alt'   => 'AIパースで作成した外構の完成イメージ',
+					// 更地の写真に AI パースの線画を描き、完成写真に切り替えるアニメーション
+					// （支給 sample.html の再現。2026-09-29）。02 を表示している間だけ繰り返す
+					// （js/dx-ai-pers.js）。線画 SVG のグループ line_01〜03 を順に描く。
+					'ai_pers' => array(
+						'before' => 'ai-pers-before.jpg',
+						'after'  => 'ai-pers-after.jpg',
+						'line'   => 'images/dx/ai-pers-line.svg',
+						'alt'    => '更地の写真にAIパースの線が描かれ、外構の完成イメージに変わる様子',
+					),
 				),
 				'device'      => $exterior_exone_phone,
 				'button'      => null,

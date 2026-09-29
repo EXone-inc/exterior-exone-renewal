@@ -74,6 +74,44 @@
 		});
 
 		setFlow(Number(steps[index].getAttribute('data-flow-active')));
+		syncVideos();
+	}
+
+	// ステップ内の動画（01 の VR 展示場）は、表示中のステップで、かつセクションが
+	// 画面に入っているときだけ再生する。動きを減らす設定では再生しない（ポスターのまま）。
+	var videos = Array.prototype.slice.call(rail.querySelectorAll('[data-dx-step-video]'));
+	var reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+	var railVisible = false;
+
+	function syncVideos() {
+		videos.forEach(function (video) {
+			var step = video.closest('[data-dx-step]');
+			var play = railVisible && !reduced.matches && step && step.classList.contains('is-active');
+
+			if (play) {
+				var played = video.play();
+
+				if (played && played.catch) {
+					// 低電力モード等で拒否されたらポスターのまま。
+					played.catch(function () {});
+				}
+			} else {
+				video.pause();
+			}
+		});
+	}
+
+	if (videos.length && typeof window.IntersectionObserver === 'function') {
+		new window.IntersectionObserver(function (entries) {
+			railVisible = entries[0].isIntersecting;
+			syncVideos();
+		}).observe(rail);
+	} else {
+		railVisible = true;
+	}
+
+	if (typeof reduced.addEventListener === 'function') {
+		reduced.addEventListener('change', syncVideos);
 	}
 
 	/**
