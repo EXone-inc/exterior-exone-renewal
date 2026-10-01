@@ -1,0 +1,2336 @@
+/* ============================================================
+   PLANS ページ（固定ページ plans / page-plans.php）
+   カンプ: PC 586:390（1920x10871）/ SP 586:850（375x5949）/ guide 586:620
+   設計メモ: docs/figma-plans-page.md
+   PC・SP ともカンプが揃っているため、両方を忠実再現の対象にする。
+   数値・色はすべて Figma の実測値（コメントの node-id が出典）。
+   style.css の共通トークンはここで再定義しない。カンプに無い新規色は
+   :root へトークンとして足してから使う。
+   プレフィックスは --plp- / .p-plp（--plans- / .p-plans は TOP の PLANS、
+   .p-splans は支店が使用中）。
+   ------------------------------------------------------------
+   ここの :root には幅で変わらない値（色・行高・太さ）だけを置き、
+   長さはすべてファイル末尾の比例ブロックが決める:
+   - PC（1025px 以上）… --plp-vu（カンプ 1920 の 1px の実寸）
+   - SP（1024px 以下）… --plp-su（カンプ 375 の 1px の実寸。上限 --sp-scale-max）
+   ============================================================ */
+:root {
+	/* --- カンプのトークン外の色（設計メモ §1 末尾。Figma 変数に無いもの・style.css に無いもの） --- */
+	--plp-color-white1: #ffffff; /* Figma white 1。style list のカード地 / PACKAGE の円内文字 */
+	--plp-color-white4: #f3f3f4; /* Figma white 4。PLAN select 左 / PACKAGE / Design Process の背景 */
+	--plp-color-band: #272727; /* HIGH-END box の帯 586:392 */
+	--plp-color-process-num: #b1b1b1; /* Design Process の番号 */
+	--plp-tab-off-bg: rgba(0, 0, 0, 0.3); /* 非選択タブの地 611:17 */
+	--plp-shadow-color: rgba(0, 0, 0, 0.12); /* 影 0 12 32（カード・写真共通） */
+
+	/* --- FV（586:552 / 586:1018・586:1025・586:1023） --- */
+	--plp-fv-bg: var(--color-black2); /* 画像が出るまでのつなぎ */
+	--plp-fv-title-color: var(--color-white2); /* 586:423 #fefefe */
+	--plp-fv-title-lh: 1.29; /* lh normal の実測（PC 155/120・SP 83/64） */
+	--plp-fv-heading-color: var(--color-white3); /* 586:416 #f5f5f5 */
+	--plp-fv-heading-fw: var(--fw-medium); /* SP Medium / PC は Bold に差し替え */
+	--plp-fv-heading-lh: 2; /* SP 2 / PC 1.5 */
+	--plp-fv-image-x: 39.58%; /* SP の切り抜き（586:1018: 1285 幅に拡大して左から 360 = 360 / (1285 − 375)） */
+
+	/* --- グラデの始点（終端色の透明版。終端は背景色に合わせる = 決定 C） --- */
+	--plp-color-white4-0: rgba(243, 243, 244, 0);
+	--plp-color-white1-0: rgba(255, 255, 255, 0);
+	--plp-color-black2-0: rgba(26, 26, 26, 0);
+
+	/* --- 共通の行高 --- */
+	--plp-display-lh: 1.29; /* Antonio の lh normal の実測（76px → 98 / 28px → 36） */
+	--plp-copy-lh: 1.5; /* 和文コピー（586:418 / 586:433 ほか） */
+	--plp-body-lh: 1.5; /* SP 本文 / PC は行高 40 に差し替え */
+
+	/* --- PLAN select（586:555 / 586:1029・586:1036） --- */
+	--plp-select-hi-body-color: var(--color-gray2); /* SP 586:1041 #d9d9d9 / PC は #dadada */
+
+	/* --- PACKAGE PLAN（586:561 / 586:1054） --- */
+	--plp-point-lh: 1.5; /* SP 12px / PC は行高 40 に差し替え */
+	--plp-points-wrap: wrap; /* SP 3 + 2 の 2 段 / PC は 1 列 */
+
+	/* --- HIGH-END PLAN（586:569 / 586:1227）。SP の値 / PC は比例ブロックで差し替え --- */
+	--plp-he-body-color: var(--color-gray2); /* SP 586:1240 #d9d9d9 / PC 586:458 #f5f5f5 */
+	--plp-he-point-color: var(--plp-color-white1); /* SP 586:1258 #ffffff / PC 586:474〜 #fefefe */
+	--plp-he-price-color: var(--color-gray2); /* SP 586:1292 #d9d9d9 / PC 586:446 #fefefe */
+	--plp-he-plan-media-ratio: 164 / 92; /* SP 586:1278 / PC 790 / 441 */
+
+	/* --- 共通 2 セクション（Design Process / Beyond the Plan）。SP の値 / PC は比例ブロックで差し替え --- */
+	--plp-sec-eng-fw: var(--fw-regular); /* SP 586:1307・586:1386 Regular / PC 586:506・586:523 Medium(510) */
+	--plp-sec-eng-lh: 1.17; /* SP lh normal（14 / 12）/ PC 1.12 */
+	--plp-by-eng-color: var(--color-gray2); /* SP 586:1386 #d9d9d9 / PC 586:523 #fefefe */
+	--plp-by-point-eng-opacity: 0.5; /* 586:527〜586:530 / 586:1410 ほか */
+	--plp-by-body-lh: 1.5; /* SP 586:1393 / PC は行高 40 に差し替え */
+	--plp-by-label-lh: calc(40 / 12); /* SP 行高 40 / PC は 40 / 18 */
+
+	/* --- プラン選択の演出・タブ（F-09・F-10。js/plans-select.js） --- */
+	--plp-select-duration: 1.5s; /* ①②③ 共通。決定 A（現行サイト FV の輪と同じ） */
+	--plp-select-ease: cubic-bezier(0.33, 1, 0.68, 1); /* easeOutCubic */
+	--plp-hover-scale: 1.05; /* PLAN select の画像のホバー（決定 B） */
+	--plp-hover-duration: 0.6s;
+	--plp-hover-ease: ease;
+	--plp-tab-on-bg: var(--plp-color-white1); /* 611:37 #ffffff */
+	--plp-tab-on-color: var(--color-black2); /* 611:19 #1a1a1a */
+	--plp-tab-off-color: var(--color-white3); /* 611:20 #f5f5f5（地は --plp-tab-off-bg） */
+
+	/* --- 残りの動き（F-12〜F-15） --- */
+	--plp-imglist-screen-time: 40s; /* img list が画面幅 1 つ分を流れる時間（PC で 5 枚一巡 ≒ 40 秒。決定 A） */
+	--plp-style-fade: var(--transition-base); /* style view の切り替え（TOP の PLANS と同じ） */
+	--plp-card-transition: var(--transition-base); /* カードの持ち上げ（TOP の .p-plans__card と同じ） */
+	--plp-shadow-color-hover: rgba(0, 0, 0, 0.18); /* ホバーの影（TOP の --plans-card-shadow-hover と同じ濃さ） */
+}
+
+/* ============================================================
+   FV（586:552 / 586:1018）
+   静止画を全面に敷き、中央に「PLANS」+ 和文コピー。暗幕は無い。
+   PC はヘッダーが写真に重なる（has-fv-header）。SP は黒のヘッダー（45）の
+   下から始まり、カンプ 375x723 のうちヘッダーに隠れる上 45 ぶんの写真は
+   ヘッダーの裏へ逃がして切り抜き位置をカンプに合わせる。
+   ============================================================ */
+.p-plpfv {
+	position: relative;
+	height: var(--plp-fv-height);
+	overflow: hidden;
+	background-color: var(--plp-fv-bg);
+}
+
+.p-plpfv__bg {
+	position: absolute;
+	inset: var(--plp-fv-bg-top) 0 0;
+}
+
+.p-plpfv__bg img {
+	width: 100%;
+	height: 100%;
+	max-width: none;
+	object-fit: cover;
+	object-position: var(--plp-fv-image-position);
+}
+
+/* 586:422 / 586:1025 + 586:1023。2 行とも画面の左右中央。 */
+.p-plpfv__copy {
+	position: absolute;
+	top: var(--plp-fv-copy-top);
+	left: 0;
+	right: 0;
+	z-index: 1;
+	text-align: center;
+}
+
+/* 586:423 / 586:1025 */
+.p-plpfv__title {
+	margin: 0;
+	font-family: var(--font-display);
+	font-size: var(--plp-fv-title);
+	font-weight: var(--fw-semibold);
+	line-height: var(--plp-fv-title-lh);
+	letter-spacing: var(--plp-fv-title-ls);
+	color: var(--plp-fv-title-color);
+	white-space: nowrap;
+}
+
+/* 586:416 / 586:1023 */
+.p-plpfv__heading {
+	margin: var(--plp-fv-heading-gap) 0 0;
+	font-size: var(--plp-fv-heading);
+	font-weight: var(--plp-fv-heading-fw);
+	line-height: var(--plp-fv-heading-lh);
+	letter-spacing: var(--plp-fv-heading-ls);
+	color: var(--plp-fv-heading-color);
+	white-space: nowrap;
+}
+
+/* ============================================================
+   PLAN select（586:555 / 586:1029・586:1036）
+   左 PACKAGE（#f3f3f4）/ 右 HIGH-END（#1a1a1a）の左右 2 分割。
+   各半分の中身は 1 枚の舞台（PC 960x1080 / SP 半分 x723）にカンプの位置で置く。
+   PC は画面の高さいっぱいで、舞台は 1920x1080 が幅と高さの両方に収まる
+   縮尺（--plp-vu の取り直し）で中央に置く。SP はカンプ比（決定事項 B-2 Q1）。
+   ============================================================ */
+.p-plpselect {
+	display: flex;
+}
+
+/* 半分全体が 1 つの操作要素（JS が無いときは #package / #high-end へのリンク） */
+.p-plpselect__half {
+	position: relative;
+	display: flex;
+	flex: 1 1 50%;
+	align-items: center;
+	justify-content: center;
+	min-width: 0;
+	height: var(--plp-select-h);
+	overflow: hidden;
+	color: inherit;
+	text-decoration: none;
+}
+
+/* リンク共通のホバー（不透明度 .7）は掛けない。ホバーの見た目は画像の拡大のみ（決定 B） */
+.p-plpselect__half:hover {
+	opacity: 1;
+}
+
+.p-plpselect__half--package {
+	--plp-select-fade-from: var(--plp-color-white4-0);
+	--plp-select-fade-to: var(--plp-color-white4);
+	--plp-select-fade-w: 100%; /* 586:1097 は半分の幅いっぱい */
+	--plp-select-body-color: var(--color-black1); /* 586:420 / 586:1031 */
+
+	background-color: var(--plp-color-white4);
+	color: var(--color-black2);
+}
+
+.p-plpselect__half--high-end {
+	--plp-select-fade-from: var(--plp-color-black2-0);
+	--plp-select-fade-to: var(--color-black2);
+	--plp-select-fade-w: var(--plp-select-media-w); /* 586:578 は画像の幅だけ */
+	--plp-select-body-color: var(--plp-select-hi-body-color);
+
+	background-color: var(--color-black2);
+	color: var(--color-white2); /* 英名も #fefefe に統一（決定 C） */
+}
+
+.p-plpselect__stage {
+	position: relative;
+	flex: 0 0 auto;
+	width: var(--plp-select-stage-w);
+	height: var(--plp-select-stage-h);
+}
+
+/* 586:421・586:419 / 586:1066・586:1065（和名 → 英名） */
+.p-plpselect__name {
+	position: absolute;
+	top: var(--plp-select-name-top);
+	left: 0;
+	right: 0;
+	text-align: center;
+}
+
+.p-plpselect__jp {
+	margin: 0;
+	font-size: var(--plp-select-jp);
+	font-weight: var(--fw-medium);
+	line-height: var(--lh-base);
+	letter-spacing: var(--plp-select-jp-ls);
+	white-space: nowrap;
+}
+
+.p-plpselect__eng {
+	margin: var(--plp-select-eng-gap) 0 0;
+	font-family: var(--font-display);
+	font-size: var(--plp-select-eng);
+	font-weight: var(--fw-semibold);
+	line-height: var(--plp-display-lh);
+	letter-spacing: var(--plp-select-eng-ls);
+	white-space: nowrap;
+}
+
+/* 586:406 / 586:1030（左）・586:579 / 586:1038（右） */
+.p-plpselect__media {
+	position: absolute;
+	top: var(--plp-select-media-top);
+	left: 0;
+	right: 0;
+	width: var(--plp-select-media-w);
+	height: var(--plp-select-media-h);
+	margin-inline: auto;
+}
+
+.p-plpselect__media img {
+	position: absolute;
+	max-width: none;
+	height: auto;
+}
+
+/* 左: 3D パースを Figma の切り抜き（121.75% / 左 -11.1% / 上 -30.58%）で枠に収める */
+.p-plpselect__half--package .p-plpselect__media {
+	overflow: hidden;
+}
+
+.p-plpselect__half--package .p-plpselect__media img {
+	top: -30.58%;
+	left: -11.1%;
+	width: 121.75%;
+}
+
+/* 右: 書き出しが影のぶん枠より上 20 / 左右 32 / 下 44 大きい */
+.p-plpselect__half--high-end .p-plpselect__media img {
+	top: calc(-1 * var(--plp-select-shadow-top));
+	left: calc(-1 * var(--plp-select-shadow-side));
+	width: calc(100% + 2 * var(--plp-select-shadow-side));
+}
+
+/* 586:1097 / 586:578 画像の足元を背景に溶かす（SP は無い） */
+.p-plpselect__fade {
+	position: absolute;
+	top: var(--plp-select-fade-top);
+	left: 0;
+	right: 0;
+	width: var(--plp-select-fade-w);
+	height: var(--plp-select-fade-h);
+	margin-inline: auto;
+	background: linear-gradient(180deg, var(--plp-select-fade-from) 0%, var(--plp-select-fade-to) 100%);
+	pointer-events: none;
+}
+
+.p-plpselect__half--high-end .p-plpselect__fade {
+	top: var(--plp-select-hi-fade-top);
+}
+
+/* 586:418・586:439 / 586:1032・586:1040 */
+.p-plpselect__copy {
+	position: absolute;
+	top: var(--plp-select-copy-top);
+	left: 0;
+	right: 0;
+	margin: 0;
+	font-size: var(--plp-select-copy);
+	font-weight: var(--fw-bold);
+	line-height: var(--plp-copy-lh);
+	letter-spacing: var(--plp-select-copy-ls);
+	text-align: center;
+	white-space: nowrap;
+}
+
+/* 586:420・586:442（PC 3 行・中央）/ 586:1031・586:1041（SP 2 段落・左揃え） */
+.p-plpselect__body {
+	position: absolute;
+	top: var(--plp-select-body-top);
+	left: 0;
+	right: 0;
+	width: var(--plp-select-body-w);
+	margin-inline: auto;
+	font-size: var(--plp-select-body);
+	line-height: var(--plp-select-body-lh);
+	letter-spacing: var(--plp-select-body-ls);
+	color: var(--plp-select-body-color);
+	text-align: var(--plp-select-body-align);
+	white-space: var(--plp-select-body-ws);
+}
+
+.p-plpselect__body p {
+	margin: 0;
+}
+
+/* 586:1050・586:1043（SP のみ。見た目だけ） */
+.p-plpselect__more {
+	position: absolute;
+	top: var(--plp-select-more-top);
+	left: 0;
+	right: 0;
+	margin-inline: auto;
+}
+
+/* ============================================================
+   PACKAGE PLAN（586:561 / 586:1054）
+   plan name → img list → copy → point → style view → style list → VIEW MORE。
+   カンプ上端の header（612:56）は共通ヘッダー、タブ（611:16）は別スプリント。
+   1920 を超える画面では中身を 1920 幅（--plp-pkg-canvas-w）で中央に置く。
+   img list（流れる帯）と style list（右は画面端まで続く列）は画面幅いっぱい。
+   ============================================================ */
+.p-plppkg {
+	padding: var(--plp-pkg-pad-top) 0 var(--plp-pkg-pad-bottom);
+	overflow-x: clip;
+	background-color: var(--plp-color-white4);
+	color: var(--color-black2);
+}
+
+/* 586:556（586:437・586:434）/ 586:1034・586:1033 */
+.p-plppkg__name {
+	text-align: center;
+}
+
+.p-plppkg__jp {
+	margin: 0;
+	font-size: var(--plp-pkg-jp);
+	font-weight: var(--fw-medium);
+	line-height: var(--lh-base);
+	letter-spacing: var(--plp-pkg-jp-ls);
+}
+
+.p-plppkg__eng {
+	margin: var(--plp-pkg-eng-gap) 0 0;
+	font-family: var(--font-display);
+	font-size: var(--plp-pkg-eng);
+	font-weight: var(--fw-semibold);
+	line-height: var(--plp-display-lh);
+	letter-spacing: var(--plp-pkg-eng-ls);
+	white-space: nowrap;
+}
+
+/* --- img list 586:409 / 586:1055 ---
+   5 枚の帯。幅はカンプ 1920 での枠寸法（--w / --h）に単位を掛ける。
+   SP は同じ帯の縮小（3 枚目が右端で見切れる）。 */
+.p-plppkg__imglist {
+	position: relative;
+	margin-top: var(--plp-imglist-gap-top);
+	overflow: hidden;
+}
+
+.p-plppkg__imglist-row {
+	display: flex;
+	align-items: flex-end;
+	gap: var(--plp-imglist-gap);
+	width: max-content;
+	margin: 0 auto; /* 流さないとき（動きを減らす設定・JS 無効）は中央。流れる列は画面より長いので左端から */
+	padding: 0;
+	list-style: none;
+}
+
+.p-plppkg__imglist-item {
+	position: relative;
+	flex: 0 0 auto;
+	width: calc(var(--w) * var(--plp-imglist-unit));
+	height: calc(var(--h) * var(--plp-imglist-unit));
+	overflow: hidden;
+}
+
+/* Figma の画像塗りの切り抜き（幅 % / 左 % / 上 %） */
+.p-plppkg__imglist-item img {
+	position: absolute;
+	top: var(--crop-y);
+	left: var(--crop-x);
+	width: var(--crop-w);
+	max-width: none;
+	height: auto;
+}
+
+/* 586:410 だけ下角が丸い（列を複製しても 5 枚ごとの 4 枚目に当たる） */
+.p-plppkg__imglist-item:nth-child(5n + 4) {
+	border-end-start-radius: var(--plp-imglist-radius);
+	border-end-end-radius: var(--plp-imglist-radius);
+}
+
+/* 586:415 下端を背景に溶かす（SP は無い） */
+.p-plppkg__imglist::after {
+	content: "";
+	position: absolute;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	height: var(--plp-imglist-fade-h);
+	background: linear-gradient(180deg, var(--plp-color-white4-0) 0%, var(--plp-color-white4) 100%);
+	pointer-events: none;
+}
+
+/* --- copy 586:557 / 586:1063・586:1064 --- */
+.p-plppkg__copy {
+	margin-top: var(--plp-pkg-copy-gap);
+	padding: 0 var(--plp-pkg-copy-pad-x);
+	text-align: center;
+}
+
+.p-plppkg__heading {
+	margin: 0;
+	font-size: var(--plp-pkg-heading);
+	font-weight: var(--fw-bold);
+	line-height: var(--plp-copy-lh);
+	letter-spacing: var(--plp-pkg-heading-ls);
+}
+
+.p-plppkg__body {
+	margin: var(--plp-pkg-body-gap) 0 0;
+	font-size: var(--plp-pkg-body);
+	line-height: var(--plp-pkg-body-lh);
+	letter-spacing: var(--plp-pkg-body-ls);
+	color: var(--color-black1);
+}
+
+.p-plppkg__body p {
+	margin: 0;
+}
+
+/* PC は 3 行・中央揃え（586:435）、SP は別文 2 段落・左揃え（586:1064） */
+.p-plppkg__body--pc {
+	white-space: nowrap;
+}
+
+.p-plppkg__body--sp {
+	text-align: left;
+}
+
+/* --- point 586:558 / 586:1084（黒い円 5 個。PC 1 列 / SP 3 + 2） --- */
+.p-plppkg__points {
+	display: flex;
+	flex-wrap: var(--plp-points-wrap);
+	justify-content: center;
+	gap: 0 var(--plp-point-gap);
+	width: var(--plp-points-w);
+	margin: var(--plp-points-gap-top) auto 0;
+	padding: 0;
+	list-style: none;
+}
+
+.p-plppkg__point {
+	display: flex;
+	flex: 0 0 auto;
+	align-items: center;
+	justify-content: center;
+	width: var(--plp-point);
+	height: var(--plp-point);
+	border-radius: 50%;
+	background-color: var(--color-black2);
+	color: var(--plp-color-white1);
+	font-size: var(--plp-point-text);
+	font-weight: var(--fw-bold);
+	line-height: var(--plp-point-lh);
+	letter-spacing: var(--plp-point-ls);
+	text-align: center;
+	white-space: nowrap;
+}
+
+/* --- style view 586:560 / 586:1090〜586:1095・586:1103 ---
+   PC は左に文字・右に画像（文字が画像に 84 重なる）。SP は画像 → 名称 → 本文。 */
+.p-plppkg__view {
+	position: relative;
+	max-width: var(--plp-pkg-canvas-w);
+	margin: var(--plp-view-gap-top) auto 0;
+}
+
+.p-plppkg__view-media {
+	position: relative;
+	width: var(--plp-view-media-w);
+	height: var(--plp-view-media-h);
+	margin-inline: auto;
+	overflow: hidden;
+	border-end-start-radius: var(--plp-view-radius);
+	border-end-end-radius: var(--plp-view-radius);
+}
+
+/* テイスト画像（TOP と同じ 1800x909 の透過）を枠に収め、足元を揃える */
+.p-plppkg__view-media img {
+	width: 100%;
+	height: 100%;
+	max-width: none;
+	object-fit: contain;
+	object-position: 50% 100%;
+}
+
+/* 586:1099 / 586:1103 画像の足元を背景に溶かす */
+.p-plppkg__view-media::after {
+	content: "";
+	position: absolute;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	height: var(--plp-view-fade-h);
+	background: linear-gradient(180deg, var(--plp-color-white4-0) 0%, var(--plp-color-white4) 100%);
+	pointer-events: none;
+}
+
+.p-plppkg__view-text {
+	position: relative;
+	z-index: 1;
+	padding: var(--plp-view-text-top) var(--plp-view-text-pad-x) 0;
+}
+
+.p-plppkg__view-jp {
+	margin: 0;
+	font-size: var(--plp-view-jp);
+	font-weight: var(--fw-medium);
+	line-height: var(--lh-base);
+	letter-spacing: var(--plp-view-jp-ls);
+	text-align: var(--plp-view-name-align);
+}
+
+.p-plppkg__view-eng {
+	margin: var(--plp-view-eng-gap) 0 0;
+	font-family: var(--font-display);
+	font-size: var(--plp-view-eng);
+	font-weight: var(--fw-semibold);
+	line-height: var(--plp-display-lh);
+	letter-spacing: var(--plp-view-eng-ls);
+	text-align: var(--plp-view-name-align);
+	white-space: nowrap;
+}
+
+.p-plppkg__view-desc {
+	width: var(--plp-view-desc-w);
+	margin-top: var(--plp-view-desc-gap);
+	font-size: var(--plp-view-desc);
+	line-height: var(--plp-view-desc-lh);
+	letter-spacing: var(--plp-view-desc-ls);
+}
+
+.p-plppkg__view-desc p {
+	margin: 0;
+}
+
+/* --- style list 586:559 / 586:1210・586:1216 ---
+   白カード 5 件の横スクロール列（右端は画面外へ続く）。番号と画像がカードの
+   上へはみ出すぶんと影のぶんを上下の余白で逃がす。 */
+.p-plppkg__list {
+	display: flex;
+	gap: var(--plp-card-gap);
+	margin: var(--plp-list-gap-top) 0 0;
+	padding: var(--plp-list-pad-top) var(--plp-list-pad-x) var(--plp-list-pad-bottom);
+	padding-left: calc(max(0px, (100% - var(--plp-pkg-canvas-w)) / 2) + var(--plp-list-pad-x)); /* 1 枚目は中身の幅の左端から */
+	overflow-x: auto;
+	overflow-y: hidden;
+	list-style: none;
+	scrollbar-width: none;
+	overscroll-behavior-x: contain;
+}
+
+.p-plppkg__list::-webkit-scrollbar {
+	display: none;
+}
+
+.p-plppkg__card {
+	position: relative;
+	flex: 0 0 var(--plp-card-w);
+	height: var(--plp-card-h);
+	border-radius: var(--plp-card-radius);
+	background-color: var(--plp-color-white1);
+	box-shadow: var(--plp-card-shadow);
+}
+
+/* 選択中はカードごと少し持ち上げる（TOP の --plans-card-lift と同じ作法） */
+.p-plppkg__card.is-active {
+	transform: translateY(var(--plp-card-lift));
+}
+
+/* カード全体が style view を切り替えるボタン */
+.p-plppkg__card-button {
+	position: absolute;
+	inset: 0;
+	display: block;
+	width: 100%;
+	height: 100%;
+	border-radius: inherit;
+	text-align: center;
+}
+
+/* 画像の足元をカードの白に溶かす */
+.p-plppkg__card-button::after {
+	content: "";
+	position: absolute;
+	top: var(--plp-card-fade-top);
+	left: 0;
+	right: 0;
+	height: var(--plp-card-fade-h);
+	background: linear-gradient(180deg, var(--plp-color-white1-0) 0%, var(--plp-color-white1) 100%);
+	pointer-events: none;
+}
+
+/* 番号 01〜05（Antonio Regular 400） */
+.p-plppkg__card-num {
+	position: absolute;
+	top: var(--plp-card-num-top);
+	left: var(--plp-card-num-left);
+	z-index: 1;
+	font-family: var(--font-display);
+	font-size: var(--plp-card-num);
+	font-weight: var(--fw-regular);
+	line-height: var(--plp-display-lh);
+	letter-spacing: var(--plp-card-num-ls);
+	color: var(--color-gray1);
+}
+
+/* 画像はカード上端からはみ出し、下端をカードの中に揃える */
+.p-plppkg__card-image {
+	position: absolute;
+	bottom: var(--plp-card-image-bottom);
+	left: 0;
+	right: 0;
+	width: var(--plp-card-image-w);
+	max-width: none;
+	height: auto;
+	margin-inline: auto;
+}
+
+.p-plppkg__card-name {
+	position: absolute;
+	top: var(--plp-card-name-top);
+	left: 0;
+	right: 0;
+	z-index: 1;
+	font-size: var(--plp-card-name);
+	font-weight: var(--fw-medium);
+	line-height: var(--lh-base);
+	letter-spacing: var(--plp-card-name-ls);
+	white-space: nowrap;
+}
+
+/* btn black 586:481 / 586:1219 */
+.p-plppkg__more {
+	margin-top: var(--plp-more-gap-top);
+	text-align: center;
+}
+
+/* --- PC / SP で組みが変わるところ --- */
+@media (min-width: 1025px) {
+	.p-plpselect__more,
+	.p-plppkg__body--sp {
+		display: none;
+	}
+
+	/* style view: 画像は右（右端から 160）、文字は左で画像に重ねる */
+	.p-plppkg__view {
+		height: var(--plp-view-media-h);
+	}
+
+	.p-plppkg__view-media {
+		position: absolute;
+		top: 0;
+		right: var(--plp-view-media-right);
+	}
+}
+
+@media (max-width: 1024px) {
+	.p-plpselect__fade,
+	.p-plppkg__body--pc {
+		display: none;
+	}
+
+	/* SP カンプのボタンは黒の文字が #4d4d4d、白は線・文字とも #ffffff */
+	.p-plpselect__more.c-btn--black:not(:hover),
+	.p-plppkg__more .c-btn--black:not(:hover) {
+		color: var(--color-black1);
+	}
+
+	.p-plpselect__more.c-btn--white:not(:hover) {
+		border-color: var(--plp-color-white1);
+		color: var(--plp-color-white1);
+	}
+}
+
+/* ============================================================
+   HIGH-END PLAN（586:569 / 586:1227）
+   plan name → box → point → designer plan → top designer plan → VIEW MORE。
+   プラン名は PACKAGE と同じ +270 / +294（決定 B）。以下はカンプの相対位置のまま。
+   SP は main img と帯が無く、デザイナープランは価格がプラン名の直下。
+   ============================================================ */
+.p-plphe {
+	padding: var(--plp-he-pad-top) 0 var(--plp-he-pad-bottom);
+	overflow-x: clip;
+	background-color: var(--color-black2);
+	color: var(--color-white2);
+}
+
+/* 586:562（586:456・586:444）/ 586:1229・586:1228。大きさは PACKAGE と同じ */
+.p-plphe__name {
+	text-align: center;
+}
+
+.p-plphe__jp {
+	margin: 0;
+	font-size: var(--plp-pkg-jp);
+	font-weight: var(--fw-medium);
+	line-height: var(--lh-base);
+	letter-spacing: var(--plp-pkg-jp-ls);
+}
+
+.p-plphe__eng {
+	margin: var(--plp-pkg-eng-gap) 0 0;
+	font-family: var(--font-display);
+	font-size: var(--plp-pkg-eng);
+	font-weight: var(--fw-semibold);
+	line-height: var(--plp-display-lh);
+	letter-spacing: var(--plp-pkg-eng-ls);
+	white-space: nowrap;
+}
+
+/* --- box 586:563 / 586:1233・586:1239・586:1240 --- */
+.p-plphe__box {
+	position: relative;
+	max-width: var(--plp-he-canvas-w);
+	height: var(--plp-he-box-h);
+	margin: var(--plp-he-box-gap-top) auto 0;
+}
+
+/* 586:392 写真の下半分の背後に画面幅いっぱい（PC のみ） */
+.p-plphe__band {
+	position: absolute;
+	top: var(--plp-he-band-top);
+	right: calc(50% - 50vw);
+	left: calc(50% - 50vw);
+	height: var(--plp-he-band-h);
+	background-color: var(--plp-color-band);
+}
+
+/* 586:505 Figma の切り抜き（幅 106.56% / 左 0 / 上 -2.15%） */
+.p-plphe__main {
+	position: absolute;
+	top: 0;
+	left: var(--plp-he-main-left);
+	width: var(--plp-he-main-w);
+	height: var(--plp-he-main-h);
+	overflow: hidden;
+	border-radius: var(--plp-he-photo-radius);
+	box-shadow: var(--plp-he-photo-shadow);
+}
+
+.p-plphe__main img {
+	position: absolute;
+	top: -2.15%;
+	left: 0;
+	width: 106.56%;
+	max-width: none;
+	height: auto;
+}
+
+/* 586:542 / 586:1233 透過の 3D パース */
+.p-plphe__sub {
+	position: var(--plp-he-box-item-position);
+	top: var(--plp-he-sub-top);
+	left: var(--plp-he-sub-left);
+	width: var(--plp-he-sub-w);
+	margin: 0 auto;
+}
+
+.p-plphe__sub img {
+	display: block;
+	width: 100%;
+	height: auto;
+}
+
+.p-plphe__copy {
+	position: var(--plp-he-box-item-position);
+	top: var(--plp-he-copy-top);
+	left: var(--plp-he-copy-left);
+	margin-top: var(--plp-he-copy-gap);
+	padding: 0 var(--plp-he-copy-pad-x);
+}
+
+.p-plphe__heading {
+	margin: 0;
+	font-size: var(--plp-he-heading);
+	font-weight: var(--fw-bold);
+	line-height: var(--plp-copy-lh);
+	letter-spacing: var(--plp-he-heading-ls);
+	text-align: var(--plp-he-heading-align);
+}
+
+.p-plphe__body {
+	margin: var(--plp-he-body-gap) 0 0;
+	font-size: var(--plp-he-body);
+	line-height: var(--plp-he-body-lh);
+	letter-spacing: var(--plp-he-body-ls);
+	color: var(--plp-he-body-color);
+	white-space: var(--plp-he-body-ws);
+}
+
+/* --- point 586:564 / 586:1258（白線の円 5 個。並びと大きさは PACKAGE と同じ） --- */
+.p-plphe__points {
+	display: flex;
+	flex-wrap: var(--plp-points-wrap);
+	justify-content: center;
+	gap: 0 var(--plp-point-gap);
+	width: var(--plp-points-w);
+	margin: var(--plp-he-points-gap-top) auto 0;
+	padding: 0;
+	list-style: none;
+}
+
+.p-plphe__point {
+	display: flex;
+	flex: 0 0 auto;
+	align-items: center;
+	justify-content: center;
+	width: var(--plp-point);
+	height: var(--plp-point);
+	border: var(--border-thin) solid var(--color-gray2);
+	border-radius: 50%;
+	color: var(--plp-he-point-color);
+	font-size: var(--plp-point-text);
+	font-weight: var(--fw-bold);
+	line-height: var(--plp-point-lh);
+	letter-spacing: var(--plp-point-ls);
+	text-align: center;
+	white-space: nowrap;
+}
+
+/* --- designer plan 586:566 / top designer plan 586:568（SP 586:1278〜・586:1284〜） ---
+   写真・プラン名・区切り線・本文・価格をグリッドに置き、PC / SP で並びを変える */
+.p-plphe__plans {
+	display: flex;
+	flex-direction: column;
+	gap: var(--plp-he-plans-gap);
+	max-width: var(--plp-he-canvas-w);
+	margin: var(--plp-he-plans-gap-top) auto 0;
+	padding: 0 var(--plp-he-plans-pad-x);
+}
+
+.p-plphe__plan {
+	display: grid;
+	align-items: start;
+}
+
+.p-plphe__plan-media {
+	grid-area: media;
+	width: 100%;
+	aspect-ratio: var(--plp-he-plan-media-ratio);
+	overflow: hidden;
+	border-radius: var(--plp-he-plan-radius);
+	box-shadow: var(--plp-he-photo-shadow);
+}
+
+.p-plphe__plan-media img {
+	display: block;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+.p-plphe__plan-head {
+	grid-area: head;
+	margin-top: var(--plp-he-plan-head-top);
+}
+
+.p-plphe__plan-jp {
+	margin: 0;
+	font-size: var(--plp-pkg-jp);
+	font-weight: var(--fw-medium);
+	line-height: var(--lh-base);
+	letter-spacing: var(--plp-pkg-jp-ls);
+}
+
+.p-plphe__plan-eng {
+	margin: var(--plp-he-plan-eng-gap) 0 0 var(--plp-he-plan-eng-shift);
+	font-family: var(--font-display);
+	font-size: var(--plp-he-plan-eng);
+	font-weight: var(--fw-semibold);
+	line-height: var(--plp-display-lh);
+	letter-spacing: var(--plp-he-plan-eng-ls);
+	white-space: nowrap;
+}
+
+/* 586:500・586:504（SP は無い） */
+.p-plphe__plan-line {
+	grid-area: line;
+	margin-top: var(--plp-he-plan-line-gap);
+	border-top: var(--border-thin) solid var(--color-gray2);
+}
+
+.p-plphe__plan-body {
+	grid-area: body;
+	margin-top: var(--plp-he-plan-body-gap);
+	font-size: var(--plp-he-body);
+	line-height: var(--plp-he-body-lh);
+	letter-spacing: var(--plp-he-body-ls);
+	color: var(--color-gray2);
+}
+
+.p-plphe__plan-body p {
+	margin: 0;
+}
+
+/* 価格: 円記号 + 数字 + ～（PC は本文の下で右寄せ / SP はプラン名の直下） */
+.p-plphe__price {
+	display: flex;
+	grid-area: price;
+	align-items: flex-start;
+	gap: var(--plp-he-price-gap);
+	margin: var(--plp-he-price-gap-top) 0 0;
+	color: var(--plp-he-price-color);
+	white-space: nowrap;
+}
+
+.p-plphe__yen {
+	flex: 0 0 auto;
+	width: var(--plp-he-yen-w);
+	height: var(--plp-he-yen-h);
+	margin-top: var(--plp-he-yen-top);
+}
+
+.p-plphe__price-num {
+	font-family: var(--font-display);
+	font-size: var(--plp-he-price);
+	font-weight: var(--fw-semibold);
+	line-height: var(--plp-display-lh);
+	letter-spacing: var(--plp-he-price-ls);
+}
+
+.p-plphe__price-from {
+	margin-top: var(--plp-he-from-top);
+	font-size: var(--plp-he-from);
+	font-weight: var(--fw-medium);
+	line-height: var(--lh-base);
+	letter-spacing: var(--plp-he-from-ls);
+}
+
+/* btn white 586:402 / 586:1300 */
+.p-plphe__more {
+	margin-top: var(--plp-he-more-gap-top);
+	text-align: center;
+}
+
+/* --- PC / SP で組みが変わるところ（HIGH-END） --- */
+@media (min-width: 1025px) {
+	.p-plphe__br-sp,
+	.p-plphe__yen--sp {
+		display: none;
+	}
+
+	/* 写真左・文字右（本文の下に価格を右寄せ） */
+	.p-plphe__plan--designer {
+		grid-template-areas:
+			"media head"
+			"media line"
+			"media body"
+			"media price";
+		grid-template-rows: auto auto auto 1fr;
+		grid-template-columns: var(--plp-he-plan-media-w) 1fr;
+		column-gap: var(--plp-he-plan-gap-designer);
+	}
+
+	/* 文字左・写真右 */
+	.p-plphe__plan--top-designer {
+		grid-template-areas:
+			"head media"
+			"line media"
+			"body media"
+			"price media";
+		grid-template-rows: auto auto auto 1fr;
+		grid-template-columns: var(--plp-he-plan-text-w) var(--plp-he-plan-media-w);
+		column-gap: var(--plp-he-plan-gap-top-designer);
+		padding-left: var(--plp-he-plan-text-inset);
+	}
+
+	.p-plphe__price {
+		justify-self: end;
+	}
+
+	/* 586:451〜586:449 は本文の右端より 28 内側で終わる（top designer は右端揃え） */
+	.p-plphe__plan--designer .p-plphe__price {
+		margin-right: var(--plp-he-price-inset);
+	}
+}
+
+@media (max-width: 1024px) {
+	.p-plphe__band,
+	.p-plphe__main,
+	.p-plphe__plan-line,
+	.p-plphe__yen--pc {
+		display: none;
+	}
+
+	/* 写真（164x92）左・プラン名と価格右、本文は下に全幅 */
+	.p-plphe__plan--designer {
+		grid-template-areas:
+			"media head"
+			"media price"
+			"body  body";
+		grid-template-rows: auto 1fr auto;
+		grid-template-columns: var(--plp-he-plan-media-w) 1fr;
+		column-gap: var(--plp-he-plan-gap-designer);
+	}
+
+	/* プラン名と価格左・写真右。英名（1 行）と重ならないよう写真側を縮める（決定 C） */
+	.p-plphe__plan--top-designer {
+		grid-template-areas:
+			"head media"
+			"price media"
+			"body  body";
+		grid-template-rows: auto 1fr auto;
+		grid-template-columns: max-content minmax(0, var(--plp-he-plan-media-w));
+		justify-content: space-between;
+		column-gap: var(--plp-he-plan-gap-designer);
+	}
+
+	/* 2 列にまたがる本文が文字列の列幅を広げないようにする */
+	.p-plphe__plan-body {
+		width: 0;
+		min-width: 100%;
+	}
+
+	/* SP カンプの白ボタンは線・文字とも #ffffff */
+	.p-plphe__more .c-btn--white:not(:hover) {
+		border-color: var(--plp-color-white1);
+		color: var(--plp-color-white1);
+	}
+}
+
+/* ============================================================
+   共通 2 セクションの見出し（Design Process 586:570 / Beyond the Plan 586:574）
+   英字（SF Pro）+ 和文。PC と SP で英字の太さ・行高、Beyond は色と和文の字間が違う（§4）。
+   ============================================================ */
+.p-plpprocess__title,
+.p-plpbeyond__title {
+	text-align: center;
+}
+
+.p-plpprocess__eng,
+.p-plpbeyond__eng {
+	margin: 0;
+	font-family: var(--font-ui);
+	font-size: var(--plp-sec-eng);
+	font-weight: var(--plp-sec-eng-fw);
+	line-height: var(--plp-sec-eng-lh);
+	letter-spacing: var(--plp-sec-eng-ls);
+	white-space: nowrap;
+}
+
+.p-plpprocess__heading,
+.p-plpbeyond__heading {
+	margin: var(--plp-sec-heading-gap) 0 0;
+	font-size: var(--plp-sec-heading);
+	font-weight: var(--fw-bold);
+	line-height: var(--lh-base);
+	letter-spacing: var(--plp-sec-heading-ls);
+	white-space: nowrap;
+}
+
+/* ============================================================
+   Design Process（586:573 / 586:1304）
+   title → 住宅パース → 工程 4 つ（番号・工程名・写真カード・矢印）。動きは無い。
+   PC は横 4 列（番号の中心 = カードの中心）、SP は縦 4 段（左カード・右に番号）。
+   1920 を超える画面では中身を 1920 幅で中央に置き、背景だけ画面幅いっぱい。
+   ============================================================ */
+.p-plpprocess {
+	padding: var(--plp-proc-pad-top) 0 var(--plp-proc-pad-bottom);
+	overflow-x: clip;
+	background-color: var(--plp-color-white4);
+	color: var(--color-black2);
+}
+
+.p-plpprocess__inner {
+	max-width: var(--plp-sec-canvas-w);
+	margin: 0 auto;
+}
+
+/* 586:397 / 586:1309 Figma の切り抜き（幅 100% / 上 -24.03%） */
+.p-plpprocess__image {
+	position: relative;
+	width: var(--plp-proc-img-w);
+	height: var(--plp-proc-img-h);
+	margin: var(--plp-proc-img-gap-top) auto 0;
+	overflow: hidden;
+}
+
+.p-plpprocess__image img {
+	position: absolute;
+	top: -24.03%;
+	left: 0;
+	width: 100%;
+	max-width: none;
+	height: auto;
+}
+
+/* 586:520 / 586:1310 足元を背景に溶かす（終端は背景色。決定 C） */
+.p-plpprocess__image::after {
+	position: absolute;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	height: var(--plp-proc-img-fade-h);
+	background: linear-gradient(to bottom, var(--plp-color-white4-0), var(--plp-color-white4));
+	content: "";
+}
+
+.p-plpprocess__steps {
+	display: grid;
+	grid-template-columns: var(--plp-proc-cols);
+	justify-content: var(--plp-proc-justify);
+	gap: var(--plp-proc-row-gap) var(--plp-proc-col-gap);
+	margin: var(--plp-proc-steps-gap-top) 0 0;
+	padding: 0 var(--plp-proc-steps-pad-x);
+	list-style: none;
+}
+
+.p-plpprocess__step {
+	position: relative;
+	display: grid;
+	align-content: start;
+}
+
+/* 586:512 ほか 01〜04（Antonio Regular） */
+.p-plpprocess__num {
+	grid-area: num;
+	margin-top: var(--plp-proc-num-top);
+	font-family: var(--font-display);
+	font-size: var(--plp-proc-num);
+	font-weight: var(--fw-regular);
+	line-height: var(--plp-display-lh);
+	letter-spacing: var(--plp-proc-num-ls);
+	color: var(--plp-color-process-num);
+}
+
+.p-plpprocess__label {
+	grid-area: label;
+	margin: var(--plp-proc-label-gap) 0 0;
+	font-size: var(--plp-proc-label);
+	font-weight: var(--fw-bold);
+	line-height: var(--lh-base);
+	letter-spacing: var(--plp-proc-label-ls);
+	white-space: nowrap;
+}
+
+/* 写真カード（4 枚とも同じ寸法・同じ影。カード 02 の影の欠けは揃える） */
+.p-plpprocess__card {
+	position: relative;
+	grid-area: card;
+	width: var(--plp-proc-card-w);
+	height: var(--plp-proc-card-h);
+	margin-top: var(--plp-proc-card-gap);
+	overflow: hidden;
+	border-radius: var(--plp-proc-card-radius);
+	box-shadow: var(--plp-proc-card-shadow);
+}
+
+.p-plpprocess__card img {
+	display: block;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+/* 次の工程への矢印。SP は PC の横向きを時計回りに 90° 回して下向きにする
+   （回転の軸は左上。箱は軸から下へ伸び、左へ高さぶんはみ出す） */
+.p-plpprocess__arrow {
+	position: absolute;
+	top: var(--plp-proc-arrow-top);
+	left: var(--plp-proc-arrow-left);
+	width: var(--plp-proc-arrow-len);
+	height: var(--plp-proc-arrow-h);
+	transform: rotate(var(--plp-proc-arrow-rotate));
+	transform-origin: 0 0;
+}
+
+.p-plpprocess__arrow-img {
+	display: block;
+	width: 100%;
+	height: 100%;
+}
+
+/* --- PC / SP で組みが変わるところ（Design Process） --- */
+@media (min-width: 1025px) {
+	.p-plpprocess__arrow-img--sp {
+		display: none;
+	}
+
+	/* 番号 → 工程名 → カードの縦積みを中央揃え */
+	.p-plpprocess__step {
+		grid-template-areas:
+			"num"
+			"label"
+			"card";
+		justify-items: center;
+	}
+}
+
+@media (max-width: 1024px) {
+	.p-plpprocess__arrow-img--pc {
+		display: none;
+	}
+
+	/* 左にカード、右に番号 → 工程名 */
+	.p-plpprocess__step {
+		grid-template-areas:
+			"card num"
+			"card label";
+		grid-template-rows: auto 1fr;
+		grid-template-columns: var(--plp-proc-card-w) 1fr;
+		column-gap: var(--plp-proc-step-gap);
+		justify-items: start;
+	}
+
+	/* SP は同じ画像を縦に切り抜く（Figma の画像塗りの幅 % / 左 % / 上 %） */
+	.p-plpprocess__card img {
+		position: absolute;
+		top: var(--crop-y);
+		left: var(--crop-x);
+		width: var(--crop-w);
+		max-width: none;
+		height: auto;
+	}
+}
+
+/* ============================================================
+   Beyond the Plan（586:576 / 586:1423）
+   背景写真（PC 横構図 / SP 縦構図）の上に title → 本文 → point 4 項目。
+   point はリスト全体が 1 要素（S6 で下からフェードイン）。下は既存フッター。
+   1920 を超える画面では中身を 1920 幅で中央に置き、写真だけ画面幅いっぱい。
+   ============================================================ */
+.p-plpbeyond {
+	position: relative;
+	min-height: var(--plp-by-min-h);
+	padding: var(--plp-by-pad-top) 0 var(--plp-by-pad-bottom);
+	overflow: hidden;
+	background-color: var(--color-black2); /* 写真が出るまでのつなぎ */
+	color: var(--color-white2);
+}
+
+.p-plpbeyond__bg {
+	position: absolute;
+	inset: 0;
+}
+
+/* 586:393 は枠と同比率（1920 を超える画面でも min-height で比率を保ち、写真を削らない）。
+   586:1423 は幅 100% で下端揃え（上 -16.89%） */
+.p-plpbeyond__bg img {
+	display: block;
+	width: 100%;
+	height: 100%;
+	max-width: none;
+	object-fit: cover;
+	object-position: 50% 100%;
+}
+
+.p-plpbeyond__inner {
+	position: relative;
+	max-width: var(--plp-sec-canvas-w);
+	margin: 0 auto;
+}
+
+.p-plpbeyond__eng {
+	color: var(--plp-by-eng-color);
+}
+
+.p-plpbeyond__heading {
+	letter-spacing: var(--plp-by-heading-ls);
+}
+
+/* 586:525（PC 4 行・中央）/ 586:1393（SP 段落 + 空行・左揃え） */
+.p-plpbeyond__body {
+	margin-top: var(--plp-by-body-gap);
+	padding: 0 var(--plp-by-body-pad-x);
+	font-size: var(--plp-by-body);
+	line-height: var(--plp-by-body-lh);
+	letter-spacing: var(--plp-by-body-ls);
+	color: var(--color-gray2);
+	text-align: var(--plp-by-body-align);
+	white-space: var(--plp-by-body-ws);
+}
+
+.p-plpbeyond__body p {
+	margin: 0;
+}
+
+.p-plpbeyond__body p + p {
+	margin-top: var(--plp-by-para-gap);
+}
+
+/* --- point 586:575 / 586:1399〜586:1421（PC 4 列 / SP 縦リスト） --- */
+.p-plpbeyond__points {
+	display: grid;
+	grid-template-columns: var(--plp-by-cols);
+	justify-content: center;
+	row-gap: var(--plp-by-row-gap);
+	margin: var(--plp-by-points-gap-top) 0 0;
+	padding: 0 var(--plp-by-points-pad-x);
+	list-style: none;
+}
+
+.p-plpbeyond__point {
+	display: grid;
+	align-content: start;
+}
+
+/* 線画の置き場。大きさの違う 4 点を同じ中心線に揃える */
+.p-plpbeyond__art {
+	display: flex;
+	grid-area: art;
+	align-items: center;
+	justify-content: center;
+	height: var(--plp-by-art-h);
+	margin-bottom: var(--plp-by-art-gap);
+}
+
+/* 線画（不透明度はカンプどおり .5 / .8 / .74 / .9。決定 C） */
+.p-plpbeyond__art-frame {
+	position: relative;
+	flex: 0 0 auto;
+	width: calc(var(--art-w) * var(--plp-by-unit));
+	height: calc(var(--art-h) * var(--plp-by-unit));
+	overflow: hidden;
+	opacity: var(--art-opacity);
+}
+
+.p-plpbeyond__art-frame img {
+	display: block;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+/* Figma の画像塗りの切り抜き（幅 % / 左 % / 上 %） */
+.p-plpbeyond__art-frame.is-crop img {
+	position: absolute;
+	top: var(--cy);
+	left: var(--cx);
+	width: var(--cw);
+	max-width: none;
+	height: auto;
+}
+
+.p-plpbeyond__point-eng {
+	grid-area: eng;
+	margin: 0;
+	font-family: var(--font-display);
+	font-size: var(--plp-by-point-eng);
+	font-weight: var(--fw-semibold);
+	line-height: var(--plp-display-lh);
+	letter-spacing: var(--plp-by-point-eng-ls);
+	color: var(--color-gray2);
+	white-space: nowrap;
+	opacity: var(--plp-by-point-eng-opacity);
+}
+
+.p-plpbeyond__point-label {
+	grid-area: label;
+	margin: var(--plp-by-label-gap) 0 0;
+	font-size: var(--plp-by-label);
+	font-weight: var(--fw-bold);
+	line-height: var(--plp-by-label-lh);
+	letter-spacing: var(--plp-by-label-ls);
+	white-space: nowrap;
+}
+
+/* --- PC / SP で組みが変わるところ（Beyond the Plan） --- */
+@media (min-width: 1025px) {
+	/* 線画 → 英字 → 和文の縦積みを中央揃え */
+	.p-plpbeyond__point {
+		grid-template-areas:
+			"art"
+			"eng"
+			"label";
+		justify-items: center;
+		text-align: center;
+	}
+
+	.p-plpbeyond__art {
+		width: 100%;
+	}
+
+	.p-plpbeyond__art-frame {
+		--art-w: var(--pc-w);
+		--art-h: var(--pc-h);
+		--cw: var(--crop-w);
+		--cx: var(--crop-x);
+		--cy: var(--crop-y);
+	}
+}
+
+@media (max-width: 1024px) {
+	/* 左に線画、右に英字 → 和文 */
+	.p-plpbeyond__point {
+		grid-template-areas:
+			"art eng"
+			"art label";
+		grid-template-rows: auto 1fr;
+		grid-template-columns: var(--plp-by-art-w) 1fr;
+		column-gap: var(--plp-by-art-gap-x);
+		justify-items: start;
+	}
+
+	.p-plpbeyond__art {
+		width: 100%;
+	}
+
+	.p-plpbeyond__art-frame {
+		--art-w: var(--sp-w);
+		--art-h: var(--sp-h);
+		--cw: var(--crop-w-sp);
+		--cx: var(--crop-x-sp);
+		--cy: var(--crop-y-sp);
+	}
+}
+
+/* ============================================================
+   プランの出し分け・選択の演出・タブ（F-09・F-10・F-11。js/plans-select.js）
+   JS が動くときだけ body に .is-plp-enhanced が付き、body[data-plp-selected]
+   （none / package / high-end）で出し分ける。JS が動かないときは何も隠さない。
+   ============================================================ */
+
+/* 上端合わせ（JS の scrollIntoView・ページ内リンク）。SP は追従ヘッダーの下に揃える */
+.p-plpselect,
+[data-plp-plan] {
+	scroll-margin-top: var(--plp-scroll-offset);
+}
+
+.is-plp-enhanced[data-plp-selected="none"] [data-plp-plan],
+.is-plp-enhanced[data-plp-selected="package"] .p-plpselect,
+.is-plp-enhanced[data-plp-selected="package"] [data-plp-plan="high-end"],
+.is-plp-enhanced[data-plp-selected="high-end"] .p-plpselect,
+.is-plp-enhanced[data-plp-selected="high-end"] [data-plp-plan="package"] {
+	display: none;
+}
+
+/* まだ選んでいない間は PLAN select でページを終える（共通セクションとフッターを出さない =
+   それより下へスクロールできない。プランを選ばせる。決定 2026-09-30）。選ぶと現れる */
+.is-plp-enhanced[data-plp-selected="none"] .p-plpprocess,
+.is-plp-enhanced[data-plp-selected="none"] .p-plpbeyond,
+.is-plp-enhanced[data-plp-selected="none"] .p-footer {
+	display: none;
+}
+
+/* SP も PLAN select を画面いっぱい（ヘッダーの下〜画面の下端）にする。中身はカンプの寸法のまま
+   上下中央に置く。JS が動かないときはカンプ比のまま */
+@media (max-width: 1024px) {
+	.is-plp-enhanced {
+		--plp-select-h: calc(100dvh - var(--header-height));
+	}
+}
+
+/* 詳細は JS がフォーカスを移す先（tabindex="-1"）。操作対象ではないので枠は出さない */
+[data-plp-plan]:focus {
+	outline: none;
+}
+
+/* --- ホバー: その側の画像だけ少し拡大（決定 B） --- */
+.p-plpselect__media img {
+	transition: transform var(--plp-hover-duration) var(--plp-hover-ease);
+}
+
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+	.p-plpselect__half:hover .p-plpselect__media img {
+		transform: scale(var(--plp-hover-scale));
+	}
+}
+
+/* --- 選択の演出（.is-plp-selecting → 次のフレームで .is-plp-selecting-run） ---
+   詳細は PLAN select と同じ上端から始まるので、PLAN select は流れの中の高さを消して
+   詳細と重ねる。重なり順は 選んだ半分 → 詳細 → もう一方の半分 → 動くプラン名。
+   ① もう一方の半分に、選んだ半分の中心から円い穴が広がり、その下の詳細（選んだ側の色）が
+     見えてくる = 円が広がって覆う。半径・中心は JS が --plp-circle-* に書く
+   ② プラン名は JS が作る写し（.p-plpselect__flyer）を動かし、終わったら詳細側に戻す
+   ③ 選んだ半分の画像・コピー・本文（SP は VIEW MORE も）が消え、詳細の中身が出る */
+@property --plp-circle-r {
+	syntax: "<length>";
+	inherits: false;
+	initial-value: 0px;
+}
+
+.is-plp-enhanced.is-plp-selecting .p-plpselect {
+	position: relative;
+	top: var(--plp-snap, 0px); /* 上端を画素ちょうどに（JS。端数の縁から下の色が線で覗くのを防ぐ） */
+	display: flex;
+	margin-bottom: calc(-1 * var(--plp-select-h));
+}
+
+.is-plp-selecting .p-plpselect__half.is-picked {
+	z-index: 0;
+}
+
+.is-plp-selecting .p-plpselect__half.is-covered {
+	z-index: 2;
+	-webkit-mask-image: radial-gradient(circle var(--plp-circle-r) at var(--plp-circle-x) var(--plp-circle-y), transparent 100%, #000 100%);
+	mask-image: radial-gradient(circle var(--plp-circle-r) at var(--plp-circle-x) var(--plp-circle-y), transparent 100%, #000 100%);
+}
+
+.is-plp-selecting-run .p-plpselect__half.is-covered {
+	transition: --plp-circle-r var(--plp-select-duration) var(--plp-select-ease);
+}
+
+.is-plp-enhanced.is-plp-selecting [data-plp-plan] {
+	position: relative;
+	top: var(--plp-snap, 0px);
+	z-index: 1;
+}
+
+/* PLAN select より下（SP で画面が PLAN select より縦長のときに見える帯）は、円が届くまで
+   それまでの共通セクションを見せる。詳細は「PLAN select の範囲 + 円」の中だけを見せ、
+   共通セクションは詳細の下へ、詳細が伸びたぶん（--plp-shift。JS）引き上げておく */
+.is-plp-selecting [data-plp-plan] {
+	-webkit-mask-image: linear-gradient(#000, #000), radial-gradient(circle var(--plp-circle-r) at var(--plp-circle-x) var(--plp-circle-y), #000 100%, transparent 100%);
+	mask-image: linear-gradient(#000, #000), radial-gradient(circle var(--plp-circle-r) at var(--plp-circle-x) var(--plp-circle-y), #000 100%, transparent 100%);
+	-webkit-mask-size: 100% var(--plp-select-h), auto;
+	mask-size: 100% var(--plp-select-h), auto;
+	-webkit-mask-repeat: no-repeat;
+	mask-repeat: no-repeat;
+}
+
+.is-plp-selecting-run [data-plp-plan] {
+	transition: --plp-circle-r var(--plp-select-duration) var(--plp-select-ease);
+}
+
+.is-plp-selecting .p-plpprocess,
+.is-plp-selecting .p-plpbeyond {
+	transform: translateY(var(--plp-shift, 0px));
+}
+
+/* 詳細の地は、選んだ半分の上だけ透かす（その下で選んだ側の中身が消えていく）。
+   境目は半端な画素で下地が覗かないよう、色の側を 1px 選んだ半分へ食い込ませる。
+   PLAN select の下端（端数の画素）も同じく、下の地を 1px 上から始めて重ねる（選んだ半分と同じ色） */
+.is-plp-selecting .p-plppkg {
+	background:
+		linear-gradient(90deg, var(--plp-color-white4-0) calc(50% - 1px), var(--plp-color-white4) calc(50% - 1px)) 0 0 / 100% var(--plp-select-h) no-repeat,
+		linear-gradient(var(--plp-color-white4-0) calc(var(--plp-select-h) - 1px), var(--plp-color-white4) calc(var(--plp-select-h) - 1px));
+}
+
+.is-plp-selecting .p-plphe {
+	background:
+		linear-gradient(90deg, var(--color-black2) calc(50% + 1px), var(--plp-color-black2-0) calc(50% + 1px)) 0 0 / 100% var(--plp-select-h) no-repeat,
+		linear-gradient(var(--plp-color-black2-0) calc(var(--plp-select-h) - 1px), var(--color-black2) calc(var(--plp-select-h) - 1px));
+}
+
+/* ② 見えるプラン名は写しの 1 つだけ */
+.is-plp-selecting .p-plpselect__half.is-picked [data-plp-select-part="name"],
+.is-plp-selecting [data-plp-plan-name] {
+	opacity: 0;
+}
+
+.p-plpselect__flyer {
+	position: absolute;
+	z-index: 3;
+	width: max-content;
+	margin: 0;
+	transform-origin: 50% 0;
+	pointer-events: none;
+}
+
+.is-plp-selecting-run .p-plpselect__flyer {
+	transition: transform var(--plp-select-duration) var(--plp-select-ease);
+}
+
+/* ③ */
+.is-plp-selecting [data-plp-plan] > :not([data-plp-plan-name]) {
+	opacity: 0;
+}
+
+.is-plp-selecting-run .p-plpselect__half.is-picked [data-plp-select-part]:not([data-plp-select-part="name"]) {
+	opacity: 0;
+	transition: opacity var(--plp-select-duration) var(--plp-select-ease);
+}
+
+.is-plp-selecting-run [data-plp-plan] > :not([data-plp-plan-name]) {
+	opacity: 1;
+	transition: opacity var(--plp-select-duration) var(--plp-select-ease);
+}
+
+/* --- タブでの切り替え: 切り替え先を今の詳細の上端に重ねてふわっと出す（top は JS） --- */
+.is-plp-enhanced [data-plp-plan].is-plp-incoming {
+	position: absolute;
+	right: 0;
+	left: 0;
+	z-index: 1;
+	display: block;
+	opacity: 0;
+}
+
+.is-plp-enhanced [data-plp-plan].is-plp-incoming-run {
+	opacity: 1;
+	transition: opacity var(--transition-base);
+}
+
+/* --- タブ（PC 611:16 / SP は決定事項 A） ---
+   ヘッダーと同じ層でヘッダーの下に固定（SP のドロワー --z-overlay より下）。
+   選ぶまでは出さない（visibility で支援技術からも隠す） */
+.p-plptabs {
+	position: fixed;
+	top: var(--plp-tab-top);
+	right: var(--plp-tabs-right);
+	left: var(--plp-tabs-left);
+	z-index: var(--z-header);
+	display: flex;
+	gap: var(--plp-tab-gap);
+	visibility: hidden;
+	opacity: 0;
+	transition: opacity var(--transition-base), visibility 0s var(--transition-base);
+}
+
+.p-plptabs[hidden] {
+	display: none;
+}
+
+.p-plptabs.is-visible {
+	visibility: visible;
+	opacity: 1;
+	transition: opacity var(--transition-base), visibility 0s;
+}
+
+.p-plptabs.is-instant {
+	transition: none;
+}
+
+/* ホバーで色は変えない（カーソルだけ指）。フォーカス表示は共通の :focus-visible */
+.p-plptabs__tab {
+	display: flex;
+	flex: var(--plp-tab-flex);
+	align-items: center;
+	justify-content: center;
+	height: var(--plp-tab-h);
+	background-color: var(--plp-tab-off-bg);
+	color: var(--plp-tab-off-color);
+	font-size: var(--plp-tab-text);
+	font-weight: var(--fw-medium);
+	line-height: var(--lh-base);
+	letter-spacing: var(--plp-tab-ls);
+	white-space: nowrap;
+	transition: background-color var(--transition-base), color var(--transition-base);
+}
+
+.p-plptabs__tab[aria-pressed="true"] {
+	background-color: var(--plp-tab-on-bg);
+	color: var(--plp-tab-on-color);
+}
+
+/* --- 動きを減らす設定: 即時に切り替える（演出そのものは JS が行わない） --- */
+@media (prefers-reduced-motion: reduce) {
+	.p-plptabs,
+	.p-plptabs.is-visible,
+	.p-plptabs__tab {
+		transition: none;
+	}
+}
+
+/* ============================================================
+   残りの動き（F-12〜F-15）
+   img list の自動スクロール（js/plans-imglist.js）/ style list のドラッグと
+   style view の切り替え（js/scroll-row.js・js/plans-style.js）。
+   designer plan・top designer plan・Beyond の point のフェードインは
+   style.css の [data-reveal]（right / left / 下から）をテンプレートに付けるだけ。
+   ============================================================ */
+
+/* --- img list: 複製した列を 1 巡ぶん（--plp-imglist-shift。JS）左へ流し続ける --- */
+@keyframes plp-imglist-flow {
+	to {
+		transform: translateX(calc(-1 * var(--plp-imglist-shift, 0px)));
+	}
+}
+
+.p-plppkg__imglist-row.is-running {
+	animation: plp-imglist-flow var(--plp-imglist-duration, var(--plp-imglist-screen-time)) linear infinite;
+	will-change: transform;
+}
+
+/* --- style list: 選択中は少し、ホバーはさらに持ち上げて影を濃く（TOP の PLANS と同じ作法） --- */
+.p-plppkg__list[data-scroll-row] {
+	cursor: grab;
+}
+
+.p-plppkg__card {
+	transition: transform var(--plp-card-transition), box-shadow var(--plp-card-transition);
+}
+
+.p-plppkg__card-button {
+	cursor: pointer;
+}
+
+@media (hover: hover) {
+	.p-plppkg__card:hover {
+		transform: translateY(var(--plp-card-lift-hover));
+		box-shadow: var(--plp-card-shadow-hover);
+	}
+}
+
+/* ドラッグ中は掴んでいる見た目にし、ホバーの持ち上げは出さない（選択中の持ち上げは残す） */
+.p-plppkg__list.is-dragging {
+	cursor: grabbing;
+}
+
+.p-plppkg__list.is-dragging .p-plppkg__card-button {
+	cursor: grabbing;
+}
+
+.p-plppkg__list.is-dragging .p-plppkg__card {
+	transition: none;
+}
+
+.p-plppkg__list.is-dragging .p-plppkg__card:hover {
+	transform: none;
+	box-shadow: var(--plp-card-shadow);
+}
+
+.p-plppkg__list.is-dragging .p-plppkg__card.is-active:hover {
+	transform: translateY(var(--plp-card-lift));
+}
+
+/* --- style view: 一度消えてから差し替えて出る（JS が .is-switching を付け外し） --- */
+.p-plppkg__view [data-plp-view] {
+	transition: opacity var(--plp-style-fade);
+}
+
+.p-plppkg__view.is-switching [data-plp-view] {
+	opacity: 0;
+}
+
+/* --- JS 無効時: [data-reveal] は JS が合図を出すまで透明なので、最初から最終状態にする（AC-11-4） --- */
+@media (scripting: none) {
+	.is-plans-page [data-reveal] {
+		opacity: 1;
+		transform: none;
+		transition: none;
+	}
+}
+
+/* --- 動きを減らす設定: 流さない・即時に切り替える --- */
+@media (prefers-reduced-motion: reduce) {
+	.p-plppkg__imglist-row.is-running {
+		animation: none;
+	}
+
+	.p-plppkg__card,
+	.p-plppkg__view [data-plp-view] {
+		transition: none;
+	}
+}
+
+/* ============================================================
+   PC（1025px 以上）: 1920px カンプの縮小拡大コピー化
+   ------------------------------------------------------------
+   1 単位 --plp-vu は「カンプ 1920 の 1px の実寸」。1920px 以上では 1px で
+   固定され、それ以下では画面幅に比例して縮む（DX の --dxp-vu と同じ）。
+   ============================================================ */
+@media (min-width: 1025px) {
+	:root {
+		--plp-vu: min(1px, calc(100vw / 1920));
+
+		/* --- 出し分け・タブ（F-09・F-10） --- */
+		--plp-scroll-offset: 0px; /* ヘッダーは重なるので画面上端に揃える */
+		--plp-select-h: 100vh; /* PLAN select の高さ（.p-plpselect と同じ。演出中の詳細の透かし） */
+		--plp-tab-top: calc(var(--header-height) - var(--plp-tab-h)); /* 下端をヘッダーの下端 154 に */
+		--plp-tabs-right: calc(78 * var(--plp-vu)); /* 右端 x1842 */
+		--plp-tabs-left: auto;
+		--plp-tab-flex: 0 0 calc(307 * var(--plp-vu)); /* 611:37・611:38 307x55 */
+		--plp-tab-h: calc(55 * var(--plp-vu));
+		--plp-tab-gap: calc(13 * var(--plp-vu));
+		--plp-tab-radius: calc(5 * var(--plp-vu));
+		--plp-tab-text: calc(20 * var(--plp-vu)); /* 611:19 Medium 20px lh1.6 ls2 */
+		--plp-tab-ls: calc(2 * var(--plp-vu));
+
+		/* --- FV 586:552（1920x1080） --- */
+		--plp-fv-height: calc(1080 * var(--plp-vu));
+		--plp-fv-bg-top: 0px; /* ヘッダーは写真に重なる */
+		--plp-fv-image-position: 50% 50%; /* 枠と同比率（切り抜き指定なし） */
+		--plp-fv-copy-top: calc(428 * var(--plp-vu)); /* 586:422 y428 */
+		--plp-fv-title: calc(120 * var(--plp-vu)); /* 586:423 */
+		--plp-fv-title-ls: calc(-3 * var(--plp-vu));
+		--plp-fv-heading: calc(36 * var(--plp-vu)); /* 586:416 */
+		--plp-fv-heading-fw: var(--fw-bold);
+		--plp-fv-heading-lh: 1.5;
+		--plp-fv-heading-ls: calc(3 * var(--plp-vu));
+		--plp-fv-heading-gap: calc(11 * var(--plp-vu)); /* PLANS の下端 583 → y594 */
+
+		/* --- PLAN select（本文の色・行高・折り返し） --- */
+		--plp-select-hi-body-color: var(--color-gray1); /* 586:442 #dadada */
+		--plp-select-body-lh: calc(40 / 18); /* 行高 40 */
+		--plp-select-body-align: center;
+		--plp-select-body-ws: nowrap; /* 改行はカンプの 3 行どおり */
+
+		/* --- PACKAGE PLAN 586:561（y はセクション上端から） --- */
+		--plp-pkg-canvas-w: calc(1920 * var(--plp-vu)); /* 1920 を超える画面では中央に置く */
+		--plp-pkg-pad-top: calc(270 * var(--plp-vu)); /* ヘッダー 154 の下。和名 586:437 +270 */
+		--plp-pkg-pad-bottom: calc(160 * var(--plp-vu)); /* ボタン下端 +2509 → 下端 2669 */
+		--plp-pkg-jp: calc(20 * var(--plp-vu));
+		--plp-pkg-jp-ls: calc(2 * var(--plp-vu));
+		--plp-pkg-eng: calc(76 * var(--plp-vu)); /* 586:434 +294 */
+		--plp-pkg-eng-ls: calc(-3 * var(--plp-vu));
+		--plp-pkg-eng-gap: calc(-8 * var(--plp-vu)); /* 和名 top → 英名 top = 24（和名の行箱 32 に 8 重なる） */
+
+		--plp-imglist-unit: var(--plp-vu);
+		--plp-imglist-gap-top: calc(78 * var(--plp-vu)); /* 英名下端 +392 → +470 */
+		--plp-imglist-gap: calc(22.525 * var(--plp-vu)); /* 間隔の不揃い（10.6〜31.2）を揃えて 5 枚で 1920 */
+		--plp-imglist-radius: calc(10 * var(--plp-vu));
+		--plp-imglist-fade-h: calc(28 * var(--plp-vu)); /* 586:415 */
+
+		--plp-pkg-copy-gap: calc(78 * var(--plp-vu)); /* 帯の下端 +679 → 見出し +757 */
+		--plp-pkg-copy-pad-x: 0px;
+		--plp-pkg-heading: calc(32 * var(--plp-vu)); /* 586:433 */
+		--plp-pkg-heading-ls: calc(3 * var(--plp-vu));
+		--plp-pkg-body-gap: calc(12 * var(--plp-vu)); /* 見出し下端 +805 → 本文 +817 */
+		--plp-pkg-body: calc(18 * var(--plp-vu)); /* 586:435 */
+		--plp-pkg-body-lh: calc(40 / 18);
+		--plp-pkg-body-ls: calc(1 * var(--plp-vu));
+
+		--plp-points-wrap: nowrap;
+		--plp-points-gap-top: calc(90 * var(--plp-vu)); /* 本文下端 +937 → 円 +1027 */
+		--plp-points-w: calc(1280 * var(--plp-vu)); /* 232 x 5 + 30 x 4 */
+		--plp-point: calc(232 * var(--plp-vu)); /* 586:463 */
+		--plp-point-gap: calc(30 * var(--plp-vu));
+		--plp-point-text: calc(28 * var(--plp-vu));
+		--plp-point-lh: calc(40 / 28); /* 行高 40 */
+		--plp-point-ls: calc(1 * var(--plp-vu));
+
+		--plp-view-gap-top: calc(118 * var(--plp-vu)); /* 円の下端 +1259 → +1377 */
+		--plp-view-media-w: calc(1206 * var(--plp-vu)); /* 586:407 */
+		--plp-view-media-h: calc(593 * var(--plp-vu));
+		--plp-view-media-right: calc(160 * var(--plp-vu)); /* 右端 x1760 */
+		--plp-view-radius: calc(10 * var(--plp-vu));
+		--plp-view-fade-h: calc(44 * var(--plp-vu)); /* 586:1099 */
+		--plp-view-text-top: calc(89 * var(--plp-vu)); /* 和名 586:480 +1466 */
+		--plp-view-text-pad-x: calc(184 * var(--plp-vu)); /* x184（内容幅の左端 160 から 24 内側） */
+		--plp-view-name-align: left;
+		--plp-view-jp: calc(20 * var(--plp-vu));
+		--plp-view-jp-ls: calc(2 * var(--plp-vu));
+		--plp-view-eng: calc(76 * var(--plp-vu)); /* 586:479 +1498 */
+		--plp-view-eng-ls: calc(-3 * var(--plp-vu));
+		--plp-view-eng-gap: 0px;
+		--plp-view-desc-gap: calc(28 * var(--plp-vu)); /* 英名下端 +1596 → 586:436 +1624 */
+		--plp-view-desc-w: calc(454 * var(--plp-vu));
+		--plp-view-desc: calc(18 * var(--plp-vu));
+		--plp-view-desc-lh: calc(40 / 18);
+		--plp-view-desc-ls: calc(1 * var(--plp-vu));
+
+		/* style list 586:559。カード上端 +2091 = 画像下端 +1970 から 121 */
+		--plp-list-pad-top: calc(60 * var(--plp-vu)); /* 番号のはみ出し 42 + 持ち上げの逃げ */
+		--plp-list-gap-top: calc(61 * var(--plp-vu));
+		--plp-list-pad-x: calc(160 * var(--plp-vu)); /* カード 01 x160 */
+		--plp-list-pad-bottom: calc(48 * var(--plp-vu)); /* 影 0 12 32 の逃げ */
+		--plp-card-w: calc(516 * var(--plp-vu));
+		--plp-card-h: calc(234 * var(--plp-vu));
+		--plp-card-gap: calc(20 * var(--plp-vu)); /* ピッチ 536 */
+		--plp-card-radius: calc(10 * var(--plp-vu));
+		--plp-card-shadow: 0 calc(12 * var(--plp-vu)) calc(32 * var(--plp-vu)) var(--plp-shadow-color);
+		--plp-card-lift: calc(-6 * var(--plp-vu)); /* TOP の --plans-card-lift と同量 */
+		--plp-card-lift-hover: calc(-12 * var(--plp-vu)); /* TOP の --plans-card-lift-hover と同量 */
+		--plp-card-shadow-hover: 0 calc(16 * var(--plp-vu)) calc(40 * var(--plp-vu)) var(--plp-shadow-color-hover); /* 持ち上げ 12 + 16 + 40 = 下の逃げ 48 に収まる */
+		--plp-card-num: calc(64 * var(--plp-vu)); /* 586:485 ほか */
+		--plp-card-num-ls: calc(-1 * var(--plp-vu));
+		--plp-card-num-top: calc(-42 * var(--plp-vu)); /* y4209 − カード上端 4251 */
+		--plp-card-num-left: calc(31 * var(--plp-vu));
+		--plp-card-image-w: calc(354 * var(--plp-vu)); /* 586:538 */
+		--plp-card-image-bottom: calc(88 * var(--plp-vu)); /* 画像下端はカード上端 +146 */
+		--plp-card-fade-top: calc(121 * var(--plp-vu));
+		--plp-card-fade-h: calc(25 * var(--plp-vu));
+		--plp-card-name: calc(24 * var(--plp-vu)); /* 586:484 */
+		--plp-card-name-ls: calc(1 * var(--plp-vu));
+		--plp-card-name-top: calc(168 * var(--plp-vu)); /* y4419 − 4251 */
+		--plp-more-gap-top: calc(72 * var(--plp-vu)); /* カード下端 +2325 → ボタン +2445（余白 48 を引く） */
+
+		/* --- HIGH-END PLAN 586:569（y はセクション上端から。プラン名以下はカンプ +110） --- */
+		--plp-he-canvas-w: calc(1920 * var(--plp-vu)); /* 1920 を超える画面では中央に置く */
+		--plp-he-pad-top: calc(270 * var(--plp-vu)); /* PACKAGE と同じ +270 / +294（カンプは +160。決定 B） */
+		--plp-he-pad-bottom: calc(160 * var(--plp-vu)); /* ボタン下端 +2678 → 下端 2838 */
+		--plp-he-box-gap-top: calc(101 * var(--plp-vu)); /* 英名下端 +392 → box 586:563 +493 */
+		--plp-he-box-h: calc(638 * var(--plp-vu)); /* 上端 = main img 上端、下端 = 帯の下端 */
+		--plp-he-box-item-position: absolute;
+		--plp-he-band-top: calc(267 * var(--plp-vu)); /* 586:392 */
+		--plp-he-band-h: calc(371 * var(--plp-vu));
+		--plp-he-main-left: calc(160 * var(--plp-vu)); /* 586:505 */
+		--plp-he-main-w: calc(1017 * var(--plp-vu));
+		--plp-he-main-h: calc(572 * var(--plp-vu));
+		--plp-he-photo-radius: calc(20 * var(--plp-vu));
+		--plp-he-photo-shadow: 0 calc(12 * var(--plp-vu)) calc(32 * var(--plp-vu)) var(--plp-shadow-color);
+		--plp-he-sub-top: calc(81 * var(--plp-vu)); /* 586:542 */
+		--plp-he-sub-left: calc(1264 * var(--plp-vu));
+		--plp-he-sub-w: calc(436.33 * var(--plp-vu));
+		--plp-he-copy-top: calc(392 * var(--plp-vu)); /* 586:443 */
+		--plp-he-copy-left: calc(1254 * var(--plp-vu));
+		--plp-he-copy-gap: 0px;
+		--plp-he-copy-pad-x: 0px;
+		--plp-he-heading: calc(32 * var(--plp-vu));
+		--plp-he-heading-ls: calc(3 * var(--plp-vu));
+		--plp-he-heading-align: left;
+		--plp-he-body-gap: calc(12 * var(--plp-vu)); /* 見出し下端 → 586:458 */
+		--plp-he-body: calc(18 * var(--plp-vu));
+		--plp-he-body-lh: calc(40 / 18);
+		--plp-he-body-ls: calc(1 * var(--plp-vu));
+		--plp-he-body-color: var(--color-white3);
+		--plp-he-body-ws: nowrap; /* 改行はカンプの 3 行どおり */
+
+		--plp-he-points-gap-top: calc(80 * var(--plp-vu)); /* 帯の下端 +1131 → 586:564 +1211 */
+		--plp-he-point-color: var(--color-white2);
+
+		--plp-he-plans-gap-top: calc(120 * var(--plp-vu)); /* 円の下端 +1443 → 586:566 +1563 */
+		--plp-he-plans-gap: calc(49 * var(--plp-vu)); /* designer 下端 → top designer 586:568 */
+		--plp-he-plans-pad-x: calc(160 * var(--plp-vu)); /* 写真 x160（designer の x163 は揃える） */
+		--plp-he-plan-media-w: calc(790 * var(--plp-vu));
+		--plp-he-plan-media-ratio: 790 / 441;
+		--plp-he-plan-radius: calc(20 * var(--plp-vu));
+		--plp-he-plan-text-w: calc(729 * var(--plp-vu)); /* 区切り線 586:500 の幅 */
+		--plp-he-plan-gap-designer: calc(81 * var(--plp-vu)); /* 写真右端 950 → 文字 x1031 */
+		--plp-he-plan-gap-top-designer: calc(78 * var(--plp-vu)); /* 文字右端 892 → 写真 x970 */
+		--plp-he-plan-text-inset: calc(3 * var(--plp-vu)); /* top designer の文字 x163 */
+		--plp-he-plan-head-top: 0px;
+		--plp-he-plan-eng: calc(64 * var(--plp-vu)); /* 586:445 */
+		--plp-he-plan-eng-ls: calc(-3 * var(--plp-vu));
+		--plp-he-plan-eng-gap: calc(-8 * var(--plp-vu)); /* 和名 top → 英名 top = 24 */
+		--plp-he-plan-eng-shift: calc(-3 * var(--plp-vu)); /* 英名は和名より 3 左（x1028 / x160） */
+		--plp-he-plan-line-gap: calc(26 * var(--plp-vu)); /* 英名下端 +107 → 線 +133 */
+		--plp-he-plan-body-gap: calc(27 * var(--plp-vu)); /* 線 → 本文 +161（x1036 / x168 は見出しに揃える） */
+		--plp-he-price-gap-top: calc(10 * var(--plp-vu)); /* 本文下端 +281 → 数字 +291 */
+		--plp-he-price-gap: calc(7 * var(--plp-vu));
+		--plp-he-price-inset: calc(28 * var(--plp-vu)); /* designer の「～」右端 x1732 */
+		--plp-he-price-color: var(--color-white2);
+		--plp-he-yen-w: calc(25 * var(--plp-vu)); /* 586:451 */
+		--plp-he-yen-h: calc(28 * var(--plp-vu));
+		--plp-he-yen-top: calc(27 * var(--plp-vu));
+		--plp-he-price: calc(48 * var(--plp-vu)); /* 586:446 */
+		--plp-he-price-ls: calc(-2 * var(--plp-vu));
+		--plp-he-from: calc(20 * var(--plp-vu)); /* 586:449 */
+		--plp-he-from-ls: calc(2 * var(--plp-vu));
+		--plp-he-from-top: calc(18 * var(--plp-vu));
+		--plp-he-more-gap-top: calc(120 * var(--plp-vu)); /* top designer 下端 +2494 → 586:402 +2614 */
+
+		/* --- 共通 2 セクション（Design Process 586:573 / Beyond the Plan 586:576。y はセクション上端から） --- */
+		--plp-sec-canvas-w: calc(1920 * var(--plp-vu)); /* 1920 を超える画面では中身を中央に置く */
+		--plp-sec-eng: calc(32 * var(--plp-vu)); /* 586:506 / 586:523 +160 */
+		--plp-sec-eng-fw: var(--fw-medium);
+		--plp-sec-eng-lh: 1.12;
+		--plp-sec-eng-ls: calc(1 * var(--plp-vu));
+		--plp-sec-heading: calc(40 * var(--plp-vu)); /* 586:507 / 586:524 +215.86 */
+		--plp-sec-heading-ls: calc(2 * var(--plp-vu));
+		--plp-sec-heading-gap: calc(20 * var(--plp-vu)); /* 英字下端 +195.84 → +215.86 */
+
+		--plp-proc-pad-top: calc(160 * var(--plp-vu));
+		--plp-proc-pad-bottom: calc(160 * var(--plp-vu)); /* カード下端 +1310 → 下端 1470 */
+		--plp-proc-img-gap-top: calc(61 * var(--plp-vu)); /* 和文下端 +279.86 → 586:397 +341 */
+		--plp-proc-img-w: calc(610 * var(--plp-vu)); /* 586:397（x665 は中央に揃える） */
+		--plp-proc-img-h: calc(266 * var(--plp-vu));
+		--plp-proc-img-fade-h: calc(25 * var(--plp-vu)); /* 586:520 */
+		--plp-proc-steps-gap-top: calc(41 * var(--plp-vu)); /* パース下端 +607 → 番号 +648 */
+		--plp-proc-steps-pad-x: 0px;
+		--plp-proc-cols: repeat(4, var(--plp-proc-card-w));
+		--plp-proc-justify: center; /* カード列 x160〜1760（カンプの x170 は揃える） */
+		--plp-proc-col-gap: calc(20 * var(--plp-vu)); /* 20 / 19 / 20 を揃える */
+		--plp-proc-row-gap: 0px;
+		--plp-proc-step-gap: 0px;
+		--plp-proc-num-top: 0px;
+		--plp-proc-num: calc(64 * var(--plp-vu));
+		--plp-proc-num-ls: calc(-1 * var(--plp-vu));
+		--plp-proc-label-gap: calc(24 * var(--plp-vu)); /* 番号下端 +731 → 工程名 +755 */
+		--plp-proc-label: calc(24 * var(--plp-vu));
+		--plp-proc-label-ls: calc(2 * var(--plp-vu));
+		--plp-proc-card-gap: calc(35 * var(--plp-vu)); /* 工程名下端 +793 → 586:572 +828 */
+		--plp-proc-card-w: calc(385 * var(--plp-vu)); /* 4 枚とも 385x482 に揃える */
+		--plp-proc-card-h: calc(482 * var(--plp-vu));
+		--plp-proc-card-radius: calc(20 * var(--plp-vu));
+		--plp-proc-card-shadow: 0 calc(12 * var(--plp-vu)) calc(32 * var(--plp-vu)) var(--plp-shadow-color);
+		--plp-proc-arrow-top: calc(48 * var(--plp-vu)); /* 番号上端 +648 → 586:517 +696 */
+		--plp-proc-arrow-left: calc(50% + 46.5 * var(--plp-vu)); /* 番号の中心から 46.5 右（両端は番号から 20 空く） */
+		--plp-proc-arrow-len: calc(312 * var(--plp-vu));
+		--plp-proc-arrow-h: calc(14.73 * var(--plp-vu));
+		--plp-proc-arrow-rotate: 0deg;
+
+		--plp-by-pad-top: calc(160 * var(--plp-vu));
+		--plp-by-pad-bottom: calc(1052 * var(--plp-vu)); /* 和文下端 +792 → 下端 1844（写真のみ） */
+		--plp-by-min-h: calc(100vw * 1844 / 1920); /* 1920 を超える画面では写真の比率のまま高さを伸ばす */
+		--plp-by-eng-color: var(--color-white2);
+		--plp-by-heading-ls: calc(2 * var(--plp-vu));
+		--plp-by-body-gap: calc(50 * var(--plp-vu)); /* 和文下端 +279.86 → 586:525 +330 */
+		--plp-by-body-pad-x: 0px;
+		--plp-by-body: calc(18 * var(--plp-vu));
+		--plp-by-body-lh: calc(40 / 18);
+		--plp-by-body-ls: calc(1 * var(--plp-vu));
+		--plp-by-body-align: center;
+		--plp-by-body-ws: nowrap; /* 改行はカンプの 4 行どおり */
+		--plp-by-para-gap: 0px;
+		--plp-by-points-gap-top: calc(40 * var(--plp-vu)); /* 本文下端 +490 → 586:575 +530 */
+		--plp-by-points-pad-x: 0px;
+		--plp-by-cols: repeat(4, calc(368 * var(--plp-vu))); /* 中心間隔 367 / 354 / 383 を 368 に揃えて中央へ */
+		--plp-by-row-gap: 0px;
+		--plp-by-unit: var(--plp-vu);
+		--plp-by-art-h: calc(152 * var(--plp-vu)); /* 線画 4 点の中心（平均 +76）を揃える */
+		--plp-by-art-gap: calc(8 * var(--plp-vu)); /* → 英字 +160 */
+		--plp-by-art-w: auto;
+		--plp-by-art-gap-x: 0px;
+		--plp-by-point-eng: calc(48 * var(--plp-vu)); /* 586:527 +160 */
+		--plp-by-point-eng-ls: calc(-2 * var(--plp-vu));
+		--plp-by-label: calc(18 * var(--plp-vu)); /* 586:531 +222 */
+		--plp-by-label-lh: calc(40 / 18);
+		--plp-by-label-ls: calc(1 * var(--plp-vu));
+		--plp-by-label-gap: 0px;
+	}
+
+	/* PLAN select は画面の高さいっぱい。中身の舞台（1920x1080 の半分）は幅と高さの
+	   両方に収まる縮尺を取り直して置く（DX の .p-dxsteps__stage と同じ考え方）。
+	   トークンはこの箱の中で計算し直させるため、:root ではなくここに置く */
+	.p-plpselect {
+		--plp-vu: min(1px, calc(100vw / 1920), calc(100vh / 1080));
+
+		--plp-select-h: 100vh;
+		--plp-select-stage-w: calc(960 * var(--plp-vu));
+		--plp-select-stage-h: calc(1080 * var(--plp-vu));
+		--plp-select-name-top: calc(218 * var(--plp-vu)); /* 586:421 +218 */
+		--plp-select-jp: calc(20 * var(--plp-vu));
+		--plp-select-jp-ls: calc(2 * var(--plp-vu));
+		--plp-select-eng: calc(76 * var(--plp-vu)); /* 586:419 +242 */
+		--plp-select-eng-ls: calc(-3 * var(--plp-vu));
+		--plp-select-eng-gap: calc(-8 * var(--plp-vu)); /* 和名 top → 英名 top = 24 */
+		--plp-select-media-top: calc(384 * var(--plp-vu)); /* 586:406 */
+		--plp-select-media-w: calc(558 * var(--plp-vu));
+		--plp-select-media-h: calc(283 * var(--plp-vu));
+		--plp-select-shadow-top: calc(20 * var(--plp-vu));
+		--plp-select-shadow-side: calc(32 * var(--plp-vu));
+		--plp-select-fade-top: calc(646 * var(--plp-vu)); /* 586:1097 */
+		--plp-select-hi-fade-top: calc(649 * var(--plp-vu)); /* 586:578 */
+		--plp-select-fade-h: calc(25 * var(--plp-vu));
+		--plp-select-copy-top: calc(719 * var(--plp-vu)); /* 586:418 */
+		--plp-select-copy: calc(32 * var(--plp-vu));
+		--plp-select-copy-ls: calc(3 * var(--plp-vu));
+		--plp-select-body-top: calc(779 * var(--plp-vu)); /* 586:420 */
+		--plp-select-body-w: 100%;
+		--plp-select-body: calc(18 * var(--plp-vu));
+		--plp-select-body-ls: calc(1 * var(--plp-vu));
+		--plp-select-more-top: 0px; /* PC はボタン無し */
+	}
+
+	/* 586:579 枠 615x318 at +349（下端は左と同じ +667） */
+	.p-plpselect__half--high-end {
+		--plp-select-media-top: calc(349 * var(--plp-vu));
+		--plp-select-media-w: calc(615 * var(--plp-vu));
+		--plp-select-media-h: calc(318 * var(--plp-vu));
+		--plp-select-fade-h: calc(20 * var(--plp-vu));
+	}
+}
+
+/* ============================================================
+   SP（1024px 以下）: 375px カンプの縮小拡大コピー化
+   ------------------------------------------------------------
+   1 単位 --plp-su は「375px 幅での 1px の実寸」
+   （上限は style.css の --sp-scale-max。タブレットの縮尺方針）。
+   ============================================================ */
+@media (max-width: 1024px) {
+	:root {
+		--plp-su: min(calc(100vw / 375), var(--sp-scale-max));
+
+		/* --- 出し分け・タブ（F-09・F-10。SP のタブはカンプ無し = 決定事項 A） --- */
+		--plp-scroll-offset: var(--header-height); /* 追従ヘッダー 45 の下に揃える */
+		--plp-tab-top: var(--header-height); /* ヘッダーの直下 */
+		--plp-tabs-right: 0px; /* 画面幅いっぱいで半分ずつ */
+		--plp-tabs-left: 0px;
+		--plp-tab-flex: 1 1 0%;
+		--plp-tab-h: calc(32 * var(--plp-su));
+		--plp-tab-gap: 0px;
+		--plp-tab-radius: calc(5 * var(--plp-su));
+		--plp-tab-text: calc(12 * var(--plp-su));
+		--plp-tab-ls: calc(1 * var(--plp-su)); /* PC の 2 / 20 を 12px に比例 */
+
+		/* --- FV 586:1018（375x723。上 45 はヘッダー） ---
+		   ヘッダー + FV でカンプの 723 になるよう、ヘッダーのぶんを引く */
+		--plp-fv-height: calc(723 * var(--plp-su) - var(--header-height));
+		--plp-fv-bg-top: calc(-1 * var(--header-height)); /* 写真の上端はヘッダーの裏 */
+		--plp-fv-image-position: var(--plp-fv-image-x) 50%;
+		--plp-fv-copy-top: calc(304 * var(--plp-su) - var(--header-height)); /* 586:1025 y304 */
+		--plp-fv-title: calc(64 * var(--plp-su)); /* 586:1025 */
+		--plp-fv-title-ls: calc(-3 * var(--plp-su));
+		--plp-fv-heading: calc(16 * var(--plp-su)); /* 586:1023 */
+		--plp-fv-heading-ls: calc(1 * var(--plp-su));
+		--plp-fv-heading-gap: 0px; /* PLANS の下端 387 = コピー y387 */
+
+		/* --- PLAN select 586:1029・586:1036（375x723。y はセクション上端から） --- */
+		--plp-select-h: calc(723 * var(--plp-su));
+		--plp-select-stage-w: 100%;
+		--plp-select-stage-h: calc(723 * var(--plp-su));
+		--plp-select-name-top: calc(189 * var(--plp-su)); /* 586:1066 +189 */
+		--plp-select-jp: calc(10 * var(--plp-su));
+		--plp-select-jp-ls: calc(1 * var(--plp-su));
+		--plp-select-eng: calc(28 * var(--plp-su)); /* 586:1065 +205 */
+		--plp-select-eng-ls: calc(-1 * var(--plp-su));
+		--plp-select-eng-gap: 0px; /* 和名の行箱 16 の直下 */
+		--plp-select-media-top: calc(261 * var(--plp-su)); /* 586:1030 */
+		--plp-select-media-w: calc(169 * var(--plp-su));
+		--plp-select-media-h: calc(85 * var(--plp-su));
+		--plp-select-shadow-top: calc(20 * var(--plp-su));
+		--plp-select-shadow-side: calc(32 * var(--plp-su));
+		--plp-select-fade-top: 0px; /* SP はグラデ無し */
+		--plp-select-hi-fade-top: 0px;
+		--plp-select-fade-h: 0px;
+		--plp-select-copy-top: calc(370 * var(--plp-su)); /* 586:1032 */
+		--plp-select-copy: calc(14 * var(--plp-su));
+		--plp-select-copy-ls: calc(1 * var(--plp-su));
+		--plp-select-body-top: calc(425 * var(--plp-su)); /* 586:1031 x14 w160 */
+		--plp-select-body-w: calc(160 * var(--plp-su));
+		--plp-select-body: calc(11 * var(--plp-su));
+		--plp-select-body-lh: var(--plp-body-lh);
+		--plp-select-body-ls: calc(1 * var(--plp-su));
+		--plp-select-body-align: left;
+		--plp-select-body-ws: normal;
+		--plp-select-more-top: calc(568 * var(--plp-su)); /* 586:1050 */
+
+		/* --- PACKAGE 586:1054（375x1406。y はセクション上端から） --- */
+		--plp-pkg-canvas-w: 100%;
+		--plp-pkg-pad-top: calc(190 * var(--plp-su)); /* 586:1034 +190 */
+		--plp-pkg-pad-bottom: calc(80 * var(--plp-su)); /* ボタン下端 → 下端 */
+		--plp-pkg-jp: calc(10 * var(--plp-su));
+		--plp-pkg-jp-ls: calc(1 * var(--plp-su));
+		--plp-pkg-eng: calc(28 * var(--plp-su)); /* 586:1033 +206 */
+		--plp-pkg-eng-ls: calc(-1 * var(--plp-su));
+		--plp-pkg-eng-gap: 0px;
+
+		--plp-imglist-unit: calc(var(--plp-su) * 94 / 209); /* SP の 3 枚は PC の帯の 0.4498 倍 */
+		--plp-imglist-gap-top: calc(30 * var(--plp-su)); /* 英名下端 +242 → +272 */
+		--plp-imglist-gap: calc(22.525 * var(--plp-imglist-unit));
+		--plp-imglist-radius: calc(10 * var(--plp-imglist-unit));
+		--plp-imglist-fade-h: 0px; /* SP はグラデ無し */
+
+		--plp-pkg-copy-gap: calc(37 * var(--plp-su)); /* 帯の下端 +366 → 586:1063 +403 */
+		--plp-pkg-copy-pad-x: calc(24 * var(--plp-su)); /* 586:1064 x24 w328 */
+		--plp-pkg-heading: calc(14 * var(--plp-su));
+		--plp-pkg-heading-ls: calc(1 * var(--plp-su));
+		--plp-pkg-body-gap: calc(11 * var(--plp-su)); /* 見出し下端 +424 → +435 */
+		--plp-pkg-body: calc(12 * var(--plp-su));
+		--plp-pkg-body-lh: var(--plp-body-lh);
+		--plp-pkg-body-ls: calc(1 * var(--plp-su));
+
+		--plp-points-gap-top: calc(38 * var(--plp-su)); /* 本文下端 +507 → 586:1084 +545 */
+		--plp-points-w: calc(327 * var(--plp-su)); /* 104 x 3 + 7 x 2 = 326。端数で 3 個目が落ちないよう 1 の余裕 */
+		--plp-point: calc(104 * var(--plp-su)); /* 586:1081 */
+		--plp-point-gap: calc(7 * var(--plp-su));
+		--plp-point-text: calc(12 * var(--plp-su));
+		--plp-point-ls: calc(1 * var(--plp-su));
+
+		--plp-view-gap-top: calc(38 * var(--plp-su)); /* 円の下端 +753 → 586:1095 +791 */
+		--plp-view-media-w: calc(325 * var(--plp-su));
+		--plp-view-media-h: calc(160 * var(--plp-su));
+		--plp-view-radius: calc(10 * var(--plp-su));
+		--plp-view-fade-h: calc(14 * var(--plp-su)); /* 586:1103 */
+		--plp-view-text-top: calc(22 * var(--plp-su)); /* 画像下端 +951 → 586:1092 +973 */
+		--plp-view-text-pad-x: calc(25 * var(--plp-su)); /* 586:1090 x25 w325 */
+		--plp-view-name-align: center;
+		--plp-view-jp: calc(10 * var(--plp-su));
+		--plp-view-jp-ls: calc(1 * var(--plp-su));
+		--plp-view-eng: calc(24 * var(--plp-su)); /* 586:1091 +985 */
+		--plp-view-eng-ls: calc(-1 * var(--plp-su));
+		--plp-view-eng-gap: calc(-4 * var(--plp-su)); /* 和名 top → 英名 top = 12 */
+		--plp-view-desc-gap: calc(10 * var(--plp-su)); /* 英名下端 +1016 → +1026 */
+		--plp-view-desc-w: auto;
+		--plp-view-desc: calc(11 * var(--plp-su));
+		--plp-view-desc-lh: var(--plp-body-lh);
+		--plp-view-desc-ls: calc(1 * var(--plp-su));
+
+		/* style list 586:1210。カード上端 +1133 = 本文下端 +1094 から 39 */
+		--plp-list-pad-top: calc(32 * var(--plp-su)); /* 番号のはみ出し 24 + 持ち上げの逃げ */
+		--plp-list-gap-top: calc(7 * var(--plp-su));
+		--plp-list-pad-x: calc(22 * var(--plp-su)); /* カード 01 x22 */
+		--plp-list-pad-bottom: calc(44 * var(--plp-su)); /* 影 0 12 32 の逃げ */
+		--plp-card-w: calc(279 * var(--plp-su));
+		--plp-card-h: calc(120 * var(--plp-su));
+		--plp-card-gap: calc(14 * var(--plp-su)); /* ピッチ 293 */
+		--plp-card-radius: calc(10 * var(--plp-su));
+		--plp-card-shadow: 0 calc(12 * var(--plp-su)) calc(32 * var(--plp-su)) var(--plp-shadow-color);
+		--plp-card-lift: calc(-6 * var(--plp-su));
+		--plp-card-lift-hover: calc(-12 * var(--plp-su));
+		--plp-card-shadow-hover: 0 calc(16 * var(--plp-su)) calc(40 * var(--plp-su)) var(--plp-shadow-color-hover); /* 持ち上げ 12 + 16 + 40 = 下の逃げ 44 に収まる */
+		--plp-card-num: calc(36 * var(--plp-su)); /* 586:1213 */
+		--plp-card-num-ls: calc(-1 * var(--plp-su));
+		--plp-card-num-top: calc(-24 * var(--plp-su)); /* y2555 − カード上端 2579 */
+		--plp-card-num-left: calc(16.76 * var(--plp-su));
+		--plp-card-image-w: calc(191.41 * var(--plp-su)); /* 586:1214 */
+		--plp-card-image-bottom: calc(40.6 * var(--plp-su)); /* 画像下端はカード上端 +79.4 */
+		--plp-card-fade-top: calc(65.9 * var(--plp-su)); /* 586:1215 */
+		--plp-card-fade-h: calc(13.5 * var(--plp-su));
+		--plp-card-name: calc(14 * var(--plp-su)); /* 586:1212 */
+		--plp-card-name-ls: calc(1 * var(--plp-su));
+		--plp-card-name-top: calc(85 * var(--plp-su));
+		--plp-more-gap-top: calc(-4 * var(--plp-su)); /* カード下端 +1253 → 586:1219 +1293（余白 44 を引く） */
+
+		/* --- HIGH-END 586:1227（375x1364。プラン名を PACKAGE と同じ +190 に揃え、以下 +8） --- */
+		--plp-he-canvas-w: none;
+		--plp-he-pad-top: calc(190 * var(--plp-su)); /* 586:1229 は +182 */
+		--plp-he-pad-bottom: calc(80 * var(--plp-su)); /* ボタン下端 → 下端 */
+		--plp-he-box-gap-top: calc(22 * var(--plp-su)); /* 英名下端 +234 → 586:1233 +256 */
+		--plp-he-box-h: auto;
+		--plp-he-box-item-position: static;
+		--plp-he-band-top: 0px; /* SP は帯・main img 無し */
+		--plp-he-band-h: 0px;
+		--plp-he-main-left: 0px;
+		--plp-he-main-w: 0px;
+		--plp-he-main-h: 0px;
+		--plp-he-photo-radius: calc(5 * var(--plp-su));
+		--plp-he-photo-shadow: 0 calc(12 * var(--plp-su)) calc(32 * var(--plp-su)) var(--plp-shadow-color);
+		--plp-he-sub-top: auto;
+		--plp-he-sub-left: auto;
+		--plp-he-sub-w: calc(316 * var(--plp-su)); /* 586:1233 316x205 */
+		--plp-he-copy-top: auto;
+		--plp-he-copy-left: auto;
+		--plp-he-copy-gap: calc(28 * var(--plp-su)); /* 画像下端 +461 → 586:1239 +489 */
+		--plp-he-copy-pad-x: calc(24 * var(--plp-su)); /* 586:1240 x24 w328 */
+		--plp-he-heading: calc(14 * var(--plp-su));
+		--plp-he-heading-ls: calc(1 * var(--plp-su));
+		--plp-he-heading-align: center;
+		--plp-he-body-gap: calc(11 * var(--plp-su)); /* 見出し下端 +510 → +521 */
+		--plp-he-body: calc(12 * var(--plp-su));
+		--plp-he-body-lh: var(--plp-body-lh);
+		--plp-he-body-ls: calc(1 * var(--plp-su));
+		--plp-he-body-ws: normal;
+
+		--plp-he-points-gap-top: calc(36 * var(--plp-su)); /* 本文下端 +575 → 586:1258 +611 */
+
+		--plp-he-plans-gap-top: calc(35 * var(--plp-su)); /* 円の下端 +819 → 586:1278 +854 */
+		--plp-he-plans-gap: calc(29 * var(--plp-su)); /* 本文下端 → top designer 写真上端 */
+		--plp-he-plans-pad-x: calc(24 * var(--plp-su));
+		--plp-he-plan-media-w: calc(164 * var(--plp-su)); /* 586:1278 164x92 */
+		--plp-he-plan-radius: calc(5 * var(--plp-su));
+		--plp-he-plan-text-w: auto;
+		--plp-he-plan-gap-designer: calc(14 * var(--plp-su)); /* 写真右端 188 → 文字 x202 */
+		--plp-he-plan-gap-top-designer: calc(14 * var(--plp-su));
+		--plp-he-plan-text-inset: 0px;
+		--plp-he-plan-head-top: calc(6 * var(--plp-su)); /* 写真上端 → 586:1281 */
+		--plp-he-plan-eng: calc(28 * var(--plp-su)); /* 586:1280 */
+		--plp-he-plan-eng-ls: calc(-1 * var(--plp-su));
+		--plp-he-plan-eng-gap: calc(-2 * var(--plp-su)); /* 和名 top → 英名 top = 14 */
+		--plp-he-plan-eng-shift: 0px;
+		--plp-he-plan-line-gap: 0px; /* SP は区切り線無し */
+		--plp-he-plan-body-gap: calc(17 * var(--plp-su)); /* 写真下端 → 586:1282 */
+		--plp-he-price-gap-top: calc(2 * var(--plp-su)); /* 英名下端 → Group 513 */
+		--plp-he-price-gap: calc(2 * var(--plp-su));
+		--plp-he-price-inset: 0px;
+		--plp-he-yen-w: calc(8 * var(--plp-su)); /* 586:1293 */
+		--plp-he-yen-h: calc(10 * var(--plp-su));
+		--plp-he-yen-top: calc(13 * var(--plp-su));
+		--plp-he-price: calc(20 * var(--plp-su)); /* 586:1292 */
+		--plp-he-price-ls: calc(-1 * var(--plp-su));
+		--plp-he-from: calc(13 * var(--plp-su)); /* 586:1291 */
+		--plp-he-from-ls: calc(2 * var(--plp-su));
+		--plp-he-from-top: calc(4 * var(--plp-su));
+		--plp-he-more-gap-top: calc(48 * var(--plp-su)); /* 本文下端 → 586:1300 */
+
+		/* --- 共通 2 セクション（Design Process 586:1304 375x999 / Beyond the Plan 586:1423 375x734） --- */
+		--plp-sec-canvas-w: calc(375 * var(--plp-su)); /* 縮尺の上限を超える幅では中身を中央に置く */
+		--plp-sec-eng: calc(12 * var(--plp-su)); /* 586:1307 / 586:1386 +80 */
+		--plp-sec-eng-ls: calc(1 * var(--plp-su));
+		--plp-sec-heading: calc(16 * var(--plp-su)); /* 586:1306 / 586:1385 +94 */
+		--plp-sec-heading-ls: calc(2 * var(--plp-su));
+		--plp-sec-heading-gap: 0px;
+
+		--plp-proc-pad-top: calc(80 * var(--plp-su));
+		--plp-proc-pad-bottom: calc(80 * var(--plp-su)); /* 04 下端 +919 → 下端 999 */
+		--plp-proc-img-gap-top: calc(32 * var(--plp-su)); /* 和文下端 +120 → 586:1309 +152 */
+		--plp-proc-img-w: calc(300 * var(--plp-su));
+		--plp-proc-img-h: calc(130 * var(--plp-su));
+		--plp-proc-img-fade-h: calc(12 * var(--plp-su)); /* 586:1310 */
+		--plp-proc-steps-gap-top: calc(40 * var(--plp-su)); /* パース下端 +282 → 586:1331 +322 */
+		--plp-proc-steps-pad-x: calc(20 * var(--plp-su)); /* カード x20 */
+		--plp-proc-cols: 1fr;
+		--plp-proc-justify: stretch;
+		--plp-proc-col-gap: 0px;
+		--plp-proc-row-gap: calc(15 * var(--plp-su)); /* ピッチ 153 */
+		--plp-proc-step-gap: calc(15 * var(--plp-su)); /* カード右端 238 → 番号 x253 */
+		--plp-proc-num-top: calc(33 * var(--plp-su)); /* カード上端 → 586:1325 */
+		--plp-proc-num: calc(36 * var(--plp-su));
+		--plp-proc-num-ls: calc(-1 * var(--plp-su));
+		--plp-proc-label-gap: 0px;
+		--plp-proc-label: calc(14 * var(--plp-su));
+		--plp-proc-label-ls: calc(2 * var(--plp-su));
+		--plp-proc-card-gap: 0px;
+		--plp-proc-card-w: calc(218 * var(--plp-su));
+		--plp-proc-card-h: calc(138 * var(--plp-su));
+		--plp-proc-card-radius: calc(5 * var(--plp-su));
+		--plp-proc-card-shadow: 0 calc(12 * var(--plp-su)) calc(32 * var(--plp-su)) var(--plp-shadow-color);
+		--plp-proc-arrow-top: calc(109 * var(--plp-su)); /* 工程名下端 +102 から 7 下 */
+		--plp-proc-arrow-left: calc(255.36 * var(--plp-su)); /* 番号の中心（カード左端 +248）+ 矢印の太さの半分 */
+		--plp-proc-arrow-len: calc(70 * var(--plp-su)); /* 69 / 75 / 74 を揃える（次の番号の 7 上まで） */
+		--plp-proc-arrow-h: calc(14.73 * var(--plp-su));
+		--plp-proc-arrow-rotate: 90deg;
+
+		--plp-by-pad-top: calc(80 * var(--plp-su));
+		/* 04 の和文下端 +526 → 下端 734（写真のみ）。縮尺が頭打ちになる幅（600 超）では写真だけが
+		   画面幅に比例して大きくなり、住宅の屋根が 04 の和文に迫るので、屋根から下（375 で下端から 186）が
+		   大きくなったぶんを足して離す（600 以下は足す量 0） */
+		--plp-by-pad-bottom: calc(208 * var(--plp-su) + 186 * (100vw / 375 - var(--plp-su)));
+		--plp-by-min-h: 0px;
+		--plp-by-heading-ls: calc(1 * var(--plp-su)); /* 586:1385 は ls1（PC は 2） */
+		--plp-by-body-gap: calc(29 * var(--plp-su)); /* 和文下端 +120 → 586:1393 +149 */
+		--plp-by-body-pad-x: calc(24 * var(--plp-su)); /* x24 w328 */
+		--plp-by-body: calc(12 * var(--plp-su));
+		--plp-by-body-ls: calc(1 * var(--plp-su));
+		--plp-by-body-align: left;
+		--plp-by-body-ws: normal;
+		--plp-by-para-gap: calc(18 * var(--plp-su)); /* 空行 1 行（12 x 1.5） */
+		--plp-by-points-gap-top: calc(36 * var(--plp-su)); /* 本文下端 +275 → 586:1410 +311 */
+		--plp-by-points-pad-x: calc(20 * var(--plp-su));
+		--plp-by-cols: 1fr;
+		--plp-by-row-gap: calc(1.4 * var(--plp-su)); /* 行ピッチ 53〜55 を 54 に揃える */
+		--plp-by-unit: var(--plp-su);
+		--plp-by-art-h: calc(44 * var(--plp-su)); /* 線画の中心は英字上端 +22 */
+		--plp-by-art-gap: 0px;
+		--plp-by-art-w: calc(92 * var(--plp-su)); /* 線画の中心 x66 */
+		--plp-by-art-gap-x: calc(7 * var(--plp-su)); /* → 文字 x119 */
+		--plp-by-point-eng: calc(16 * var(--plp-su)); /* 586:1410 */
+		--plp-by-point-eng-ls: 0px; /* 字間指定なし */
+		--plp-by-label: calc(12 * var(--plp-su)); /* 586:1409 */
+		--plp-by-label-ls: calc(1 * var(--plp-su));
+		--plp-by-label-gap: calc(-8 * var(--plp-su)); /* 英字上端 → 和文上端 13（行高 40 の箱が英字に重なる） */
+	}
+
+	/* 586:1038 枠 167x87 at +259（下端は左と同じ +346） */
+	.p-plpselect__half--high-end {
+		--plp-select-media-top: calc(259 * var(--plp-su));
+		--plp-select-media-w: calc(167 * var(--plp-su));
+		--plp-select-media-h: calc(87 * var(--plp-su));
+	}
+}

@@ -26,7 +26,7 @@ function exterior_exone_global_menu_items() {
 		),
 		array(
 			'label' => 'PLANS',
-			'url'   => '#',
+			'url'   => home_url( '/plans/' ),
 		),
 		array(
 			'label' => 'WORKS',
@@ -89,7 +89,7 @@ function exterior_exone_drawer_menu_items() {
 		),
 		array(
 			'label' => 'プラン一覧',
-			'url'   => '#',
+			'url'   => home_url( '/plans/' ),
 		),
 		array(
 			'label' => '事例一覧',

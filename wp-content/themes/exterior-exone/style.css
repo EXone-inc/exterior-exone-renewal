@@ -694,6 +694,11 @@ body.is-drawer-open {
 	transform: translateX(calc(var(--reveal-shift) * -1));
 }
 
+/* 右からフェードイン */
+[data-reveal="right"] {
+	transform: translateX(var(--reveal-shift));
+}
+
 /* 器そのものは動かさず、中身を動かすための合図だけを受け取る。
    chars は 1 文字ずつの見出し、stage は中で複数の要素を順に動かす舞台。
    どちらも .is-inview はこの器に付き、中身は各セクションの CSS が動かす。 */
