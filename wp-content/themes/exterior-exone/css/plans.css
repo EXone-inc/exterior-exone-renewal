@@ -30,7 +30,7 @@
 	--plp-fv-heading-color: var(--color-white3); /* 586:416 #f5f5f5 */
 	--plp-fv-heading-fw: var(--fw-medium); /* SP Medium / PC は Bold に差し替え */
 	--plp-fv-heading-lh: 2; /* SP 2 / PC 1.5 */
-	--plp-fv-image-x: 39.58%; /* SP の切り抜き（586:1018: 1285 幅に拡大して左から 360 = 360 / (1285 − 375)） */
+	--plp-fv-image-x: 39.58%; /* SP の切り抜き位置（玄関まわりが入る。写真は 2026-10-02 に 718:242 へ差し替え。値は旧 SP カンプ 586:1018 の切り抜きを踏襲） */
 
 	/* --- グラデの始点（終端色の透明版。終端は背景色に合わせる = 決定 C） --- */
 	--plp-color-white4-0: rgba(243, 243, 244, 0);
@@ -1619,6 +1619,12 @@
 	visibility: hidden;
 	opacity: 0;
 	transition: opacity var(--transition-base), visibility 0s var(--transition-base);
+}
+
+/* JS がタブをヘッダーの中へ移したあと（js/plans-select.js）。ヘッダーの層の中で、
+   ヘッダーの地より上・STORE のドロップダウン（z-index: 1）より下に置く */
+.p-header .p-plptabs {
+	z-index: 0;
 }
 
 .p-plptabs[hidden] {

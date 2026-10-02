@@ -367,6 +367,14 @@
 	}
 
 	if (tabsNav) {
+		// タブをヘッダーの中へ移す。ヘッダーと同じ重なりの層に入れることで、ヘッダーの地の上・
+		// STORE のドロップダウンの下に来る（別の層のままだと、後から描かれるタブがドロップダウンを隠す）
+		var header = document.querySelector('.p-header');
+
+		if (header) {
+			header.appendChild(tabsNav);
+		}
+
 		tabsNav.hidden = false;
 	}
 
