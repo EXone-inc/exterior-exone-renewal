@@ -55,9 +55,15 @@
 	--dxp-color-gray-label: #dddddd; /* 439:946 ほか。SP の summary ラベル */
 
 	/* --- Exterior Explorer（スクロール連動映像。436:388 + 436:390-393） --- */
-	--dxp-ex-bg: rgb(184, 198, 211); /* 映像の縁の色。ポスターが出るまでのつなぎ */
-	--dxp-ex-rail: 500vh; /* 映像 1 本ぶんのスクロール量（画面 4 つぶん進む） */
-	--dxp-ex-rail-svh: 500svh;
+	--dxp-ex-bg: rgb(181, 195, 210); /* 映像の上端（空）の色。PC でコピーを置く帯の地と、ポスターが出るまでのつなぎ */
+	/* 5 つの見せ場を、画面 1 つぶんのスクロールごとに 1 つ進める（DX のステップと同じ区切り方:
+	   見せ場の数 + 1 画面ぶん。2026-10-02）。区切りを越えたら映像が次の見せ場まで自動で進む */
+	--dxp-ex-rail: 600vh;
+	--dxp-ex-rail-svh: 600svh;
+	--dxp-ex-bg-0: rgba(181, 195, 210, 0); /* 同じ色の透明（帯と映像の継ぎ目をなじませる） */
+	--dxp-ex-band-fade: 8vh; /* 継ぎ目のなじませを、映像の上端からどこまで掛けるか（屋根には掛けない） */
+	--dxp-ex-travel-rate: 2; /* 映像を進める速さ（倍速）。1 つ進むのに約 2.2 秒 */
+	--dxp-ex-travel-max: 2.4; /* 何個も飛ばしたときに、着くまでにかける上限（秒） */
 	--dxp-ex-fade: 0.4s; /* 章の切り替わりのフェード */
 	--dxp-ex-still-fade: 0.8s; /* 映像の代わりの静止画の切り替え（動きを減らす設定など） */
 	/* 上端は 436:100（15%）より濃くして白文字を保つ（映像の上端が rgb(184,198,211)
@@ -1510,6 +1516,7 @@
 		--dxp-ex-copy-ls: calc(2 * var(--dxp-vu));
 		--dxp-ex-copy-gap: calc(19.96 * var(--dxp-vu)); /* ラベルの下端 196.44 → コピー 216.4 */
 		--dxp-ex-pad-bottom: calc(148 * var(--dxp-vu)); /* 静止画フォールバック時のコピー下の余白 */
+		--dxp-ex-intro-gap: calc(64.13 * var(--dxp-vu)); /* コピーの下端 2498.44 → 3D img 2562.57（帯の下の余白） */
 
 		/* --- 3D sample 436:390-393 の右下ラベル Group 460（1920x1080 内 x1325.4〜1776.5 /
 		   y785.6〜969.6）→ Exterior Explorer の章ラベル。右端・下端からの距離で置く --- */
@@ -2101,6 +2108,57 @@
 	display: block;
 	width: 100%;
 	height: auto;
+}
+
+/* --- PC: 全景のコピーを映像に重ねず、映像の上の帯に置く（2026-10-02）
+   映像の 1 枚目では建物の屋根がコピーの位置まで来て文字と被るため、カンプ 436:388 と同じく
+   「コピー → その下に建物」の並びにする。帯はふつうに流れ、映像が画面いっぱいになった位置で
+   固定が始まる（sticky の top を帯の高さだけ負にする。高さは JS が --dxp-ex-intro-h に入れる）。
+   SP は建物がコピーの下に収まるので、これまでどおり映像に重ねる --- */
+@media (min-width: 1025px) {
+	.p-dxex--scroll.is-enhanced {
+		height: calc(var(--dxp-ex-rail) + var(--dxp-ex-intro-h, 0px));
+		height: calc(var(--dxp-ex-rail-svh) + var(--dxp-ex-intro-h, 0px));
+	}
+
+	.p-dxex--scroll.is-enhanced .p-dxex__stage {
+		top: calc(-1 * var(--dxp-ex-intro-h, 0px));
+		height: calc(100vh + var(--dxp-ex-intro-h, 0px));
+		height: calc(100svh + var(--dxp-ex-intro-h, 0px));
+	}
+
+	/* 映像は帯の下の 1 画面ぶん */
+	.is-enhanced .p-dxex__media {
+		inset: var(--dxp-ex-intro-h, 0px) 0 0;
+	}
+
+	/* 帯の中のコピー。固定が始まると画面の上へ出ていくので、章によらず出したままにする */
+	.p-dxex--scroll.is-enhanced .p-dxex__inner {
+		position: relative;
+		inset: auto;
+		display: block;
+		padding-block: var(--dxp-ex-pad-top) var(--dxp-ex-intro-gap);
+	}
+
+	.p-dxex--scroll.is-enhanced[data-chapter]:not([data-chapter="0"]) .p-dxex__inner {
+		opacity: 1;
+	}
+
+	/* 帯は映像の空と同じ色の単色にして、下の映像へそのまま続いて見えるようにする。暗幕は掛けない
+	   （ユーザー決定 2026-10-02。ヘッダーのナビはヘッダー自身の暗幕で読める）。
+	   ::after は帯の色を映像の上端にごく短く重ねて、継ぎ目の線を消すだけ */
+	.p-dxex__media::before {
+		content: none;
+	}
+
+	.p-dxex--scroll.is-enhanced .p-dxex__stage::after {
+		position: absolute;
+		inset: 0 0 auto;
+		height: calc(var(--dxp-ex-intro-h, 0px) + var(--dxp-ex-band-fade));
+		content: "";
+		background: linear-gradient(180deg, var(--dxp-ex-bg-0) calc(var(--dxp-ex-intro-h, 0px) - 1px), var(--dxp-ex-bg) var(--dxp-ex-intro-h, 0px), var(--dxp-ex-bg-0) 100%);
+		pointer-events: none;
+	}
 }
 
 /* 動きを減らす設定では切り替えを即時にする */

@@ -233,7 +233,7 @@ function exterior_exone_enqueue_assets() {
 			true
 		);
 
-		// Exterior Explorer: 全画面ピン留めと本番映像の正逆スクラブ。
+		// Exterior Explorer: 全画面ピン留めと、見せ場ごとに本番映像を自動で進める切り替え。
 		wp_enqueue_script(
 			'exterior-exone-dx-explorer',
 			get_theme_file_uri( 'js/dx-explorer.js' ),
