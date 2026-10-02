@@ -291,22 +291,41 @@ function exterior_exone_enqueue_assets() {
 		}
 	}
 
-	// 支店ページの FV（写真の切り替え）・DX EXPERIENCE（ステップの切り替え）・
-	// FAQ（アコーディオン）。
+	// 支店ページの施工イメージ帯（PLANS の img list と同じエンドレスロール）・
+	// DX EXPERIENCE（TOP と同じピン留めのステップ送り）・選ばれる理由の浮遊・AREA のアーチ状ロール・FAQ（アコーディオン）。
 	if ( exterior_exone_is_store_page() ) {
 		wp_enqueue_script(
-			'exterior-exone-store-fv',
-			get_theme_file_uri( 'js/store-fv.js' ),
+			'exterior-exone-plans-imglist',
+			get_theme_file_uri( 'js/plans-imglist.js' ),
 			array(),
-			exterior_exone_asset_version( 'js/store-fv.js' ),
+			exterior_exone_asset_version( 'js/plans-imglist.js' ),
 			true
 		);
 
+		// TOP と同じハンドル。TOP は Swiper 依存で読み込むが、dx-slider.js 自体は Swiper を使わない。
 		wp_enqueue_script(
-			'exterior-exone-store-dx',
-			get_theme_file_uri( 'js/store-dx.js' ),
+			'exterior-exone-dx-slider',
+			get_theme_file_uri( 'js/dx-slider.js' ),
 			array(),
-			exterior_exone_asset_version( 'js/store-dx.js' ),
+			exterior_exone_asset_version( 'js/dx-slider.js' ),
+			true
+		);
+
+		// 選ばれる理由の 6 項目の浮遊（画面に入っている間だけ動かす）。
+		wp_enqueue_script(
+			'exterior-exone-diagram-float',
+			get_theme_file_uri( 'js/diagram-float.js' ),
+			array(),
+			exterior_exone_asset_version( 'js/diagram-float.js' ),
+			true
+		);
+
+		// AREA の店内写真のアーチ状エンドレスロール（PC は円筒に沿って、SP は直線）。
+		wp_enqueue_script(
+			'exterior-exone-store-arch',
+			get_theme_file_uri( 'js/store-arch.js' ),
+			array(),
+			exterior_exone_asset_version( 'js/store-arch.js' ),
 			true
 		);
 
@@ -589,9 +608,27 @@ function exterior_exone_plans_noscript_style() {
 add_action( 'wp_head', 'exterior_exone_plans_noscript_style' );
 
 /**
+ * 支店ページで JS が動かないとき、[data-reveal] を最初から表示し、見える安心の線画を
+ * 描き終えた状態にし、FAQ の回答を開いた状態で出し、SP の DX の 3 ステップを縦に並べる。
+ * css/store.css の @media (scripting: none) に対応しないブラウザ向けの併用。
+ */
+function exterior_exone_store_noscript_style() {
+	if ( ! exterior_exone_is_store_page() ) {
+		return;
+	}
+	echo '<noscript><style>'
+		. '.is-store-page [data-reveal]{opacity:1;transform:none;transition:none}'
+		. '.is-store-page .p-sfaq__answer[hidden]{display:block;animation:none}.is-store-page .p-sfaq__arrow{transform:none}'
+		. 'svg.p-svisible__sketch[data-line-draw] :is(path,line,polyline,polygon,rect,circle,ellipse){stroke-dashoffset:0}'
+		. '@media (max-width:1024px){.is-store-page .p-dx{height:auto}.is-store-page .p-dx__inner{position:static;height:auto;padding-block:calc(20 * var(--dx-su)) calc(80 * var(--dx-su))}.is-store-page .p-dx__list{row-gap:var(--dx-sp-steps-gap)}.is-store-page .p-dx__step{grid-area:auto;opacity:1;transform:none}.is-store-page .p-dx__steps{padding-left:0}.is-store-page .p-dx__dots{display:none}}'
+		. '</style></noscript>' . "\n";
+}
+add_action( 'wp_head', 'exterior_exone_store_noscript_style' );
+
+/**
  * 支店ページのテンプレートを割り当てる。
  *
- * 7 拠点は固定ページのスラッグ（inc/store-data.php）で判定して page-store.php、
+ * 6 拠点は固定ページのスラッグ（inc/store-data.php）で判定して page-store.php、
  * 親ページ /store/ は page-store-index.php で描画する。管理画面でのテンプレート
  * 指定を必要としないので、固定ページを作り直しても割り当てが外れない。
  *（親は WordPress のテンプレート階層だと page-store.php に吸われてしまうため、

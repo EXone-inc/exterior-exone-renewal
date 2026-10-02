@@ -23,8 +23,6 @@ get_template_part(
 	'works',
 	array(
 		'variant'  => 'dx',
-		// カンプの写真を固定で出し、右列を押すとメインが切り替わる（2026-09-25）。
-		'gallery'  => true,
 		'section'  => 'dx-works',
 		'title'    => $exterior_exone_dx_works['title'],
 		'jp'       => $exterior_exone_dx_works['jp'],

@@ -2,9 +2,13 @@
 /**
  * 支店: REVIEWS。
  *
- * カンプ: PC 620:289（白背景）/ 620:290・658:10・658:9（見出し 3 点セット）/
- *         Group 369（669:960）= カード 3 枚（498.1x515.5・間隔 36）/ 669:223（星 5）
- *         SP カンプなし（カード 3 枚を縦積み）
+ * カンプ: PC 612:819（612:261・612:294・612:290 見出し 3 点セット / カード 612:460
+ *         498.1x515.5・間隔 36）/ SP 641:396〜641:416（280 幅のカードを指で横にスクロール。
+ *         2 枚目が右端で見切れる）
+ *
+ * guide 617:47「カードのみ下からフェードイン」: カード 3 枚にだけ data-reveal を付ける
+ *（見出しは動かさない。js/scroll-reveal.js）。SP の列で画面の外にあるカードは、
+ * 横にスクロールして見えたときにフェードインする。
  *
  * 英字見出しはカンプの「REVIERS」を誤記とみなし REVIEWS で出す。
  * 画像・タイトル・本文はカンプどおりダミー（inc/store-data.php）。
@@ -28,7 +32,7 @@ $exterior_exone_reviews = exterior_exone_store_reviews();
 
 	<ul class="p-sreviews__list">
 		<?php foreach ( $exterior_exone_reviews['cards'] as $exterior_exone_card ) : ?>
-			<li class="p-sreviews__card">
+			<li class="p-sreviews__card" data-reveal>
 				<?php // カンプの画像は灰色のプレースホルダ（写真は未支給）。 ?>
 				<span class="p-sreviews__thumb" aria-hidden="true"></span>
 

@@ -2,10 +2,10 @@
 /**
  * 支店: COLUMN。
  *
- * カンプ: PC 639:417（白背景）/ 639:418「COLUMN」/ 687:997・687:996（見出し 3 点セット）/
- *         Group 479（1153:108）= カード 5 枚（373x226・ピッチ 410。5 枚目は右端で見切れる）/
- *         669:204 VIEW MORE
- *         SP カンプなし（TOP の NEWS と同じ横スクロール）
+ * カンプ: PC 612:869（背景 #fefefe）/ 612:264「COLUMN」/ 612:629・612:628（見出し 3 点セット）/
+ *         612:449 = カード 5 枚（373x226・ピッチ 410。5 枚目は右端で見切れる）/
+ *         612:445 VIEW MORE
+ *         SP 641:1447〜641:1459（背景 #f3f3f4、289x175 のカードを指で横にスクロール、VIEW MORE なし）
  *
  * TOP の NEWS（template-parts/top/section-news.php）と同じ作りで、既存 CPT news の
  * 最新 5 件をそのまま出す（支店での絞り込みはしない）。1 件も無ければ出さない。
@@ -40,8 +40,20 @@ $exterior_exone_archive = get_post_type_archive_link( 'news' );
 	<h2 class="c-store-title"><?php echo esc_html( $exterior_exone_column['title'] ); ?></h2>
 	<p class="c-store-jp"><?php echo esc_html( $exterior_exone_column['jp'] ); ?></p>
 
+	<?php
+	// SP（641:1448）でつなぐ行のあとの改行には印を付けて、SP の CSS で消す。
+	$exterior_exone_lead_html = '';
+
+	foreach ( $exterior_exone_column['lead'] as $exterior_exone_index => $exterior_exone_line ) {
+		if ( $exterior_exone_index > 0 ) {
+			$exterior_exone_lead_html .= in_array( $exterior_exone_index - 1, $exterior_exone_column['lead_sp_join'], true ) ? '<br class="p-scolumn__br-pc">' : '<br>';
+		}
+
+		$exterior_exone_lead_html .= esc_html( $exterior_exone_line );
+	}
+	?>
 	<p class="c-store-lead p-scolumn__lead">
-		<?php echo wp_kses( exterior_exone_store_lines( $exterior_exone_column['lead'] ), array( 'br' => array() ) ); ?>
+		<?php echo wp_kses( $exterior_exone_lead_html, array( 'br' => array( 'class' => array() ) ) ); ?>
 	</p>
 
 	<ul class="p-scolumn__list">

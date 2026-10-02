@@ -2,9 +2,11 @@
 /**
  * 支店: SERVICE。
  *
- * カンプ: PC 572:448（背景）/ 572:456（見出し）/ 691:1036・689:1001（2 枚カード）/
- *         Group 377（691:1009 黒帯 + 白パネル + カテゴリ 4 行）
- *         SP カンプなし（カード・カテゴリ行を縦積み）
+ * カンプ: PC 612:781（メインカード 612:780・サブサービス 612:585）/
+ *         SP 641:59〜641:169（カード横 2 枚・帯見出し 2 行・カテゴリ 4 行）
+ *
+ * メインカード 2 枚とカテゴリの各行は下からフェードイン（guide 617:29 / 617:32。
+ * js/scroll-reveal.js の [data-reveal] の既定）。
  *
  * カテゴリ 1 行目の英字はカンプでは「GAR SPACE」だが、誤記のため「CAR SPACE」で
  * 実装する（docs/spec-20260911-store-page-decisions.md Q1）。
@@ -23,8 +25,8 @@ $exterior_exone_service = exterior_exone_store_service();
 
 	<ul class="p-sservice__cards">
 		<?php foreach ( $exterior_exone_service['cards'] as $exterior_exone_card ) : ?>
-			<li class="p-sservice__card">
-				<?php // 写真の下端に黒 40% のグラデをかけ、その上に英字を置く（691:1016 / 691:1013）。 ?>
+			<li class="p-sservice__card" data-reveal>
+				<?php // 写真の下端に黒のグラデをかけ、その上に英字を置く（612:632 / 612:633）。 ?>
 				<div class="p-sservice__card-media">
 					<img
 						src="<?php echo esc_url( exterior_exone_store_image( $exterior_exone_card['image'] ) ); ?>"
@@ -42,19 +44,14 @@ $exterior_exone_service = exterior_exone_store_service();
 	</ul>
 
 	<div class="p-sservice__panel">
-		<?php // 572:495 / 572:451。パネル上端にかぶる黒帯。 ?>
-		<p class="p-sservice__banner"><?php echo esc_html( $exterior_exone_service['banner'] ); ?></p>
+		<?php // 612:588 / SP 641:97。パネル上端にかぶる黒帯。改行は SP だけ効かせる。 ?>
+		<p class="p-sservice__banner"><?php echo wp_kses( exterior_exone_store_lines( $exterior_exone_service['banner'] ), array( 'br' => array() ) ); ?></p>
 
-		<p class="p-sservice__lead">
-			<?php foreach ( $exterior_exone_service['lead'] as $exterior_exone_index => $exterior_exone_line ) : ?>
-				<?php echo 0 === $exterior_exone_index ? '' : '<br>'; ?>
-				<?php echo esc_html( $exterior_exone_line ); ?>
-			<?php endforeach; ?>
-		</p>
+		<p class="p-sservice__lead"><?php echo wp_kses( exterior_exone_store_lines( $exterior_exone_service['lead'] ), array( 'br' => array() ) ); ?></p>
 
 		<ul class="p-sservice__rows">
 			<?php foreach ( $exterior_exone_service['categories'] as $exterior_exone_category ) : ?>
-				<li class="p-sservice__row">
+				<li class="p-sservice__row" data-reveal>
 					<div class="p-sservice__row-head">
 						<p class="c-display p-sservice__row-eng"><?php echo esc_html( $exterior_exone_category['eng'] ); ?></p>
 						<p class="p-sservice__row-label"><?php echo esc_html( $exterior_exone_category['label'] ); ?></p>
@@ -70,7 +67,15 @@ $exterior_exone_service = exterior_exone_store_service();
 									alt="<?php echo esc_attr( $exterior_exone_photo['label'] ); ?>"
 									loading="lazy"
 								>
-								<span class="p-sservice__photo-label"><?php echo esc_html( $exterior_exone_photo['label'] ); ?></span>
+								<?php if ( ! empty( $exterior_exone_photo['label_sp'] ) ) : ?>
+									<?php // SP だけ短い名前にする（641:131 / 641:167）。 ?>
+									<span class="p-sservice__photo-label">
+										<span class="p-sservice__photo-label-pc"><?php echo esc_html( $exterior_exone_photo['label'] ); ?></span>
+										<span class="p-sservice__photo-label-sp"><?php echo esc_html( $exterior_exone_photo['label_sp'] ); ?></span>
+									</span>
+								<?php else : ?>
+									<span class="p-sservice__photo-label"><?php echo esc_html( $exterior_exone_photo['label'] ); ?></span>
+								<?php endif; ?>
 							</li>
 						<?php endforeach; ?>
 					</ul>

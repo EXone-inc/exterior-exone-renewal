@@ -2,10 +2,11 @@
 /**
  * 支店: Quality（施工保証）。
  *
- * カンプ: PC 669:258（写真 1920x960）+ 669:257（黒 30% オーバーレイ）/
- *         669:261 英字 / 669:255 和文見出し / 669:263 本文 3 行 /
- *         669:969 + 669:967「施工保証 5年」バッジ / 669:265 右下の注記
- *         SP カンプなし（中央寄せのまま縦に詰める）
+ * カンプ: PC 612:839（写真 612:106 1920x960 + 612:107 黒 30%）/ 612:499 英字 /
+ *         612:498 和文見出し / 612:500 本文 3 行 / 612:583「施工保証 5年」バッジ
+ *         SP 641:1251〜641:1261（暗幕も 30%。英字はカンプの「FLOW」を誤記とみなし PC の文言）
+ *
+ * 旧カンプにあった右下の保証注記は新カンプに無いので出さない（決定 A）。
  *
  * FLOW の 7 行目（弧）がこのセクションの写真に食い込むので、上端の余白は
  * その分を見込んである（css/store.css の --st-flow-bleed）。
@@ -44,6 +45,5 @@ $exterior_exone_quality = exterior_exone_store_quality();
 			<span class="p-squality__badge-text"><?php echo esc_html( $exterior_exone_quality['badge']['label'] ); ?> <span class="p-squality__badge-number"><?php echo esc_html( $exterior_exone_quality['badge']['number'] ); ?></span><?php echo esc_html( $exterior_exone_quality['badge']['unit'] ); ?></span>
 		</p>
 
-		<p class="p-squality__note"><?php echo esc_html( $exterior_exone_quality['note'] ); ?></p>
 	</div>
 </section>

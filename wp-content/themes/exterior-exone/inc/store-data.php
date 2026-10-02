@@ -5,7 +5,7 @@
  * カンプ: PC 534:628（青森支店ベース）/ SP カンプなし
  * 設計メモ: docs/figma-store-page.md
  *
- * 7 拠点の単一の出典。フッター・ハンバーガーメニューの STORE もここから導出する
+ * 6 拠点の単一の出典。フッター・ハンバーガーメニューの STORE もここから導出する
  *（inc/menus.php の exterior_exone_store_menu_items()）。
  * セクションごとの表示データはスプリントを進めるたびにここへ足していく。
  *
@@ -17,90 +17,102 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * 7 拠点のデータ。キーは固定ページのスラッグ。
+ * 6 拠点のデータ。キーは固定ページのスラッグ。
  *
  * 並び順はフッター STORE の並び（カンプ 669:836）に合わせる。
  *
- * TODO: 青森支店はカンプ（628:307 の店舗情報テーブル）の実値。
- *       他 6 拠点は住所・電話・営業時間・対応エリアが未支給のため、
- *       当面は青森と同じ値 + 支店名 / 地域名だけ差し替えた仮データ。
- *       実データが届いたらこの配列を差し替える。
+ * 6 拠点とも支給データ（2026-10-01〜02）の実値。駐車場だけ仮で 10 台。
+ * zip が空の拠点は郵便番号を表示しない。
+ * 東京オフィスは不要との指示で外した（2026-10-02。固定ページ /store/tokyo/ は下書きに戻した）。
+ *
+ * areas は店舗情報の「対応エリア」の表示。areas_lead は AREA のリード文
+ * （「…を中心に」）に入れる言い方で、省略時は areas を使う。
  *
  * @return array<string, array<string, string>>
  */
 function exterior_exone_stores() {
-	// 仮データの共通部分（青森支店の値）。実データが届いた拠点から個別に上書きする。
-	$provisional = array(
-		'zip'      => '〒030-0846',
-		'address'  => '青森県青森市青葉３丁目１−８',
-		'tel'      => '017-711-8031',
-		'hours'    => 'AM10:00～PM18:00',
-		'closed'   => '日・祝',
-		'parking'  => '10台',
-		'areas'    => '青森市、五所川原市、平内町、野辺地町、外ヶ浜町',
-		// CTA（§16）の 2 ボタンの遷移先。LINE の友だち追加 URL と発信先が
-		// 未定のため仮置き（決定事項 Q9）。決まったら支店ごとに入れる。
-		'line_url' => '#',
-		'tel_url'  => '#',
-	);
-
 	return array(
-		'sendai'    => array_merge(
-			$provisional,
-			array(
-				'name'   => '仙台支店',
-				'region' => '仙台',
-			)
+		'sendai'    => array(
+			'name'     => '仙台支店',
+			'region'   => '仙台',
+			'zip'      => '〒980-0014',
+			'address'  => '宮城県仙台市青葉区本町二丁目2番7号 トモル広瀬通PhilPark 3階',
+			'tel'      => '022-354-8993',
+			'hours'    => 'AM10:00～PM18:00',
+			'closed'   => '土・日・祝',
+			'parking'  => '10台', // 仮。
+			'areas'    => '仙台市、多賀城市、名取市、塩竈市、岩沼市、富谷市、利府町、川崎町',
+			'line_url' => 'https://lin.ee/Z9M31bf', // @620vhjqe
+			'tel_url'  => 'tel:0223548993',
 		),
-		'totsuka'   => array_merge(
-			$provisional,
-			array(
-				'name'   => '戸塚支店',
-				'region' => '戸塚',
-			)
+		'totsuka'   => array(
+			'name'     => '戸塚支店',
+			'region'   => '戸塚',
+			'zip'      => '〒244-0003',
+			'address'  => '神奈川県横浜市戸塚区戸塚町6001-5 アイズビル1階',
+			'tel'      => '045-443-9592',
+			'hours'    => 'AM10:00～PM18:00',
+			'closed'   => '火・水・祝',
+			'parking'  => '10台', // 仮。
+			'areas'    => '横浜市、藤沢市、大和市、厚木市、海老名市、鎌倉市、茅ヶ崎市、平塚市、綾瀬市、伊勢原市、寒川町、座間市',
+			'line_url' => 'https://lin.ee/wxMNCYU', // @349lnmmg
+			'tel_url'  => 'tel:0454439592',
 		),
-		'morioka'   => array_merge(
-			$provisional,
-			array(
-				'name'   => '盛岡支店',
-				'region' => '盛岡',
-			)
+		'morioka'   => array(
+			'name'     => '盛岡支店',
+			'region'   => '盛岡',
+			'zip'      => '〒020-0857',
+			'address'  => '岩手県盛岡市北飯岡1丁目2-8',
+			'tel'      => '019-613-4067',
+			'hours'    => 'AM10:00～PM18:00',
+			'closed'   => '土・日・祝',
+			'parking'  => '10台', // 仮。
+			'areas'    => '盛岡市、雫石町、八幡平市、矢巾町、滝沢市',
+			'line_url' => 'https://lin.ee/Ys2O5ED', // @472bhbvl
+			'tel_url'  => 'tel:0196134067',
 		),
-		// 青森支店のみカンプの実値。
+		// 支給データ（2026-10-02）。定休日と対応エリアはカンプ（日・祝 / つがる市なし）から更新。
 		'aomori'    => array(
 			'name'     => '青森支店',
 			'region'   => '青森',
 			'zip'      => '〒030-0846',
-			'address'  => '青森県青森市青葉３丁目１−８',
+			'address'  => '青森県青森市青葉3丁目1-8',
 			'tel'      => '017-711-8031',
 			'hours'    => 'AM10:00～PM18:00',
-			'closed'   => '日・祝',
-			'parking'  => '10台',
-			'areas'    => '青森市、五所川原市、平内町、野辺地町、外ヶ浜町',
-			// 上と同じく仮置き。
-			'line_url' => '#',
-			'tel_url'  => '#',
+			'closed'   => '土・日・祝',
+			'parking'  => '10台', // 仮。
+			'areas'    => '青森市、五所川原市、つがる市、平内町、野辺地町、外ヶ浜町',
+			'line_url' => 'https://lin.ee/Tfvjo0k', // @744ivjdd（弘前支店と共通）
+			'tel_url'  => 'tel:0177118031',
 		),
-		'hachinohe' => array_merge(
-			$provisional,
-			array(
-				'name'   => '八戸支店',
-				'region' => '八戸',
-			)
+		'hachinohe' => array(
+			'name'       => '八戸支店',
+			'region'     => '八戸',
+			'zip'        => '〒031-0072',
+			'address'    => '青森県八戸市城下4-16-20',
+			'tel'        => '0178-38-9640',
+			'hours'      => 'AM10:00～PM18:00',
+			'closed'     => '土・日・祝',
+			'parking'    => '10台', // 仮。
+			// 「奥入瀬町」は支給データの表記のまま（自治体名は「おいらせ町」。要確認）。
+			'areas'      => '青森県：八戸市、三沢市、東北町、奥入瀬町、十和田市、階上町、南部町、三戸町、五戸町、七戸町、田子町、新郷村、六ヶ所村／岩手県：久慈市、二戸市',
+			'areas_lead' => '八戸市、三沢市、東北町、奥入瀬町、十和田市、階上町、南部町、三戸町、五戸町、七戸町、田子町、新郷村、六ヶ所村、岩手県久慈市、二戸市',
+			'line_url'   => 'https://lin.ee/7JUyeGN',
+			'tel_url'    => 'tel:0178389640',
 		),
-		'hirosaki'  => array_merge(
-			$provisional,
-			array(
-				'name'   => '弘前支店',
-				'region' => '弘前',
-			)
-		),
-		'tokyo'     => array_merge(
-			$provisional,
-			array(
-				'name'   => '東京オフィス',
-				'region' => '東京',
-			)
+		'hirosaki'  => array(
+			'name'       => '弘前支店',
+			'region'     => '弘前',
+			'zip'        => '〒036-8087',
+			'address'    => '青森県弘前市早稲田4丁目3-2',
+			'tel'        => '0172-55-7478',
+			'hours'      => 'AM10:00～PM18:00',
+			'closed'     => '土・日・祝',
+			'parking'    => '10台', // 仮。
+			'areas'      => '青森県：弘前市、黒石市、平川市、藤崎町、板柳町、大鰐町、田舎館村／秋田県：大館市、鹿角市、小坂町、北秋田市',
+			'areas_lead' => '弘前市、黒石市、平川市、藤崎町、板柳町、大鰐町、田舎館村、秋田県大館市、鹿角市、小坂町、北秋田市',
+			'line_url'   => 'https://lin.ee/Tfvjo0k', // @744ivjdd（青森支店と共通）。青森の支給データの URL に合わせた
+			'tel_url'    => 'tel:0172557478',
 		),
 	);
 }
@@ -143,7 +155,7 @@ function exterior_exone_current_store() {
 }
 
 /**
- * 支店ページ（7 拠点のいずれか）を表示中かどうか。
+ * 支店ページ（6 拠点のいずれか）を表示中かどうか。
  *
  * @return bool
  */
@@ -152,58 +164,23 @@ function exterior_exone_is_store_page() {
 }
 
 /**
- * FV（ヒーロー）の共通コピーと画像。535:838 / 561:3 / 561:46 / 535:844-850。
+ * FV（ヒーロー）の共通コピーと画像。612:761 / 612:166 / 612:760。
  *
- * カンプ上で支店ごとに変わるのはバッジの支店名だけ。写真は全支店共通の仮画像で、
- * 後日同名の高解像度版に差し替える前提。
+ * カンプ上で支店ごとに変わるのはバッジの支店名だけ。背景は全支店共通の
+ * 写真 1 枚で固定（決定事項 A）。写真は後日同名の高解像度版に差し替える前提。
  *
  * @return array<string, mixed>
  */
 function exterior_exone_store_fv() {
 	return array(
 		'eyebrow' => '外構エクステリア施工専門店',
-		// 534:650。2 行組み。
+		// 612:170。2 行組み。
 		'titles'  => array( 'DESIGN', 'YOUR LIFE' ),
-		'lead'    => '理想の暮らしを、カタチに。',
+		'lead'    => '理想の暮らしを、カタチに',
 		'logo'    => 'hero-logo-535-951.png',
-		// 背景写真 5 枚 + 561:46 の円形サムネイル 5 個。サムネイルを押すと背景が
-		// クロスフェードで切り替わり、9 秒で自動送りされる（js/store-fv.js）。
-		// TOP の FV（動画 5 本）と同じ操作感だが、こちらは写真。
-		//
-		// TODO: カンプの背景写真は 535:838 の 1 枚だけなので、2〜5 枚目は TOP の FV の
-		//       静止画（images/top/）を仮で借りている。本番写真 5 枚は後日支給。
-		//       dir は画像の置き場所（store = images/store/ / top = images/top/）。
-		//
-		// 4 個目のサムネイルはカンプが 3 枚のコラージュなので、カンプと同じ配置
-		//（左半分 561:56 + その下に 561:59 / 右半分 561:58）で 1 枚に合成したものを使う。
-		'slides'  => array(
-			array(
-				'image' => 'hero-bg-535-838.jpg',
-				'dir'   => 'store',
-				'thumb' => 'hero-thumb-561-62.jpg',
-			),
-			array(
-				'image' => 'FV02-poster.jpg',
-				'dir'   => 'top',
-				'thumb' => 'hero-thumb-561-65.jpg',
-			),
-			array(
-				'image' => 'FV03-poster.jpg',
-				'dir'   => 'top',
-				'thumb' => 'hero-thumb-561-68.jpg',
-			),
-			array(
-				'image' => 'FV04-poster.jpg',
-				'dir'   => 'top',
-				'thumb' => 'hero-thumb-561-56-58-59.jpg',
-			),
-			array(
-				'image' => 'FV05-poster.jpg',
-				'dir'   => 'top',
-				'thumb' => 'hero-thumb-561-52.jpg',
-			),
-		),
-		// FV 下端をまたぐ写真 4 枚（535:844 / 535:845 / 268:348 / 535:850）。
+		// 612:154（SP 638:72 も同じ写真）。
+		'image'   => 'hero-bg-535-838.jpg',
+		// FV 下端をまたぐ写真 4 枚（612:178 / 612:180 / 612:179 / 612:181）。
 		'photos'  => array(
 			'hero-band-img1-535-844.jpg',
 			'hero-band-img2-535-845.jpg',
@@ -214,9 +191,11 @@ function exterior_exone_store_fv() {
 }
 
 /**
- * 導入コピー。535:853 / 535:855 / 535:966。
+ * 導入コピー。612:227 / 612:182 / 612:183（SP 638:98 / 638:97 / 638:96）。
  *
  * 本文は支店ごとに ［支店名］［地域名］ が入れ替わる。
+ * 見出しは SP だけ 2 行（638:97）なので、改行位置ごとに分けて持つ。
+ * 本文は PC が 3 行、SP は 2 行目と 3 行目を 1 段落につなぐ（638:96）。
  *
  * @param array<string, string> $store 支店データ。
  * @return array<string, mixed>
@@ -224,7 +203,7 @@ function exterior_exone_store_fv() {
 function exterior_exone_store_intro( array $store ) {
 	return array(
 		'icon'    => 'intro-icon-house-535-966.png',
-		'heading' => '新築外構からカーポート、フェンス、庭づくりまで',
+		'heading' => array( '新築外構からカーポート、', 'フェンス、庭づくりまで' ),
 		'lead'    => array(
 			'EXone' . $store['name'] . 'は、デザインと分かりやすい提案で、',
 			'住まいと暮らしに調和する外構・エクステリアをご提案します。',
@@ -239,10 +218,19 @@ function exterior_exone_store_intro( array $store ) {
  * width / height はカンプ 1920 での表示サイズ（大きさが不揃いなので個別に持つ）。
  * CSS 側で --strip-w / --strip-h として受け取り、帯ごと比例縮小する。
  *
- * @return array<int, array{file: string, width: float, height: float}>
+ * PACKAGE 下の帯（$variant = 'plans'。612:803）は 03 だけ別の写真（612:580）。
+ * カンプの 05 が 294 幅なのは画面の右端で切れているだけなので、施工イメージ帯と同じ幅で持つ。
+ *
+ * 04（612:570）は PLANS の img list 04 と同じ画像・切り抜き・枠（inc/plans-data.php）。
+ * url があれば file より優先、crop（幅 % / 左 % / 上 %）があれば枠で切り抜く。
+ *
+ * @param string $variant 'plans' なら PACKAGE 下の帯。
+ * @return array<int, array<string, mixed>>
  */
-function exterior_exone_store_strip_images() {
-	return array(
+function exterior_exone_store_strip_images( $variant = '' ) {
+	$plans_house = exterior_exone_plans_package()['imglist'][3];
+
+	$images = array(
 		array(
 			'file'   => 'strip-house1-535-860.png',
 			'width'  => 413.9,
@@ -259,9 +247,11 @@ function exterior_exone_store_strip_images() {
 			'height' => 209,
 		),
 		array(
-			'file'   => 'strip-house4-669-920.png',
-			'width'  => 366.3,
-			'height' => 180,
+			'url'    => exterior_exone_plans_image( $plans_house['file'] ),
+			'img'    => $plans_house['img'],
+			'width'  => $plans_house['w'],
+			'height' => $plans_house['h'],
+			'crop'   => $plans_house['crop'],
 		),
 		array(
 			'file'   => 'strip-house5-535-871.png',
@@ -269,6 +259,16 @@ function exterior_exone_store_strip_images() {
 			'height' => 209,
 		),
 	);
+
+	if ( 'plans' === $variant ) {
+		$images[2] = array(
+			'file'   => 'plans-strip-669-954.png',
+			'width'  => 342,
+			'height' => 210.4,
+		);
+	}
+
+	return $images;
 }
 
 /**
@@ -308,13 +308,16 @@ function exterior_exone_store_stats() {
 }
 
 /**
- * 不安提示。535:917 / 535:919 / 535:922 / 535:933。全支店共通。
+ * 不安提示。612:223 / 612:176 / 612:175 / 612:153（SP 638:148 / 638:145 / 638:144 / 638:150）。
+ * 全支店共通。
+ *
+ * 見出しは SP だけ 2 行（638:148）なので、改行位置ごとに分けて持つ。
  *
  * @return array<string, mixed>
  */
 function exterior_exone_store_concern() {
 	return array(
-		'heading' => '外構づくりで、こんな不安を感じていませんか',
+		'heading' => array( '外構づくりで、', 'こんな不安を感じていませんか？' ),
 		// カンプは 1 行ごとに「 」で囲っている（535:919）。
 		'worries' => array(
 			'何から決めればいいのか分からない',
@@ -330,9 +333,10 @@ function exterior_exone_store_concern() {
 }
 
 /**
- * 選ばれる理由。535:1009 / 535:1000 / Group 354（669:925）。全支店共通。
+ * 選ばれる理由。PC 612:770 / SP 641:22〜641:52。全支店共通。
  *
  * 6 項目の円周上の配置（座標）は css/store.css 側が持つ（--item-x / --icon-y）。
+ * SP は 2 行ラベルの代わりに 1 語（word）を出し、英字の 2 行目も別文言（eng_sub_sp）。
  *
  * @return array<string, mixed>
  */
@@ -340,7 +344,7 @@ function exterior_exone_store_reasons() {
 	return array(
 		'copy_heading' => array(
 			'外構づくりを、',
-			'もっと分かりやすく、もっと心地よく。',
+			'もっと分かりやすく、もっと心地よく',
 		),
 		'copy_lead'    => array(
 			'EXoneは、デザイン・価格・施工品質のどれか一つだけではなく、相談から完成後までの体験全体を大切にしています。',
@@ -354,10 +358,12 @@ function exterior_exone_store_reasons() {
 		),
 		'eng'          => 'EXTERIOR',
 		'eng_sub'      => 'DESIGN FOR A BETTER LIFE',
+		'eng_sub_sp'   => 'DESIGN, MADE VISIBLE.',
 		'items'        => array(
 			array(
 				'lead'   => '暮らしと建物に調和する',
 				'label'  => 'デザイン',
+				'word'   => 'デザイン',
 				'icon'   => 'reasons-icon-house-535-1014.png',
 				'icon_w' => 171.2,
 				'icon_h' => 89.9,
@@ -365,20 +371,24 @@ function exterior_exone_store_reasons() {
 			array(
 				'lead'   => '完成イメージを確認できる',
 				'label'  => 'ビジュアル提案',
+				'word'   => 'ビジュアル提案',
 				'icon'   => 'reasons-icon-tablet-599-73.png',
 				'icon_w' => 144.4,
 				'icon_h' => 90.6,
 			),
 			array(
-				'lead'   => '地域の気候や住環境に合わせた',
-				'label'  => '提案',
-				'icon'   => 'reasons-icon-weather-602-89.png',
-				'icon_w' => 134.3,
-				'icon_h' => 100.5,
+				'lead'    => '地域の気候や住環境に合わせた',
+				'label'   => '提案',
+				'word'    => '住環境適応',
+				'icon'    => 'reasons-icon-weather-602-89.png',
+				'icon_sp' => 'reasons-icon-weather-sp-641-50.png', // SP は PC と別の絵（641:50）。
+				'icon_w'  => 134.3,
+				'icon_h'  => 100.5,
 			),
 			array(
 				'lead'   => '分かりやすく整理された',
-				'label'  => '見積',
+				'label'  => '見積もり',
+				'word'   => '見積もり',
 				'icon'   => 'reasons-icon-doc-599-69.png',
 				'icon_w' => 114.7,
 				'icon_h' => 100.6,
@@ -386,6 +396,7 @@ function exterior_exone_store_reasons() {
 			array(
 				'lead'   => '工事後も安心できる',
 				'label'  => '5年間の工事保証',
+				'word'   => '長期保証',
 				'icon'   => 'reasons-icon-5years-602-93.png',
 				'icon_w' => 89.1,
 				'icon_h' => 104.4,
@@ -393,6 +404,7 @@ function exterior_exone_store_reasons() {
 			array(
 				'lead'   => '専門スタッフによる',
 				'label'  => '施工・品質管理',
+				'word'   => '施工・品質管理',
 				'icon'   => 'reasons-icon-worker-602-82.png',
 				'icon_w' => 96.2,
 				'icon_h' => 102.3,
@@ -402,7 +414,9 @@ function exterior_exone_store_reasons() {
 }
 
 /**
- * SERVICE。572:456 / 691:1036 / 689:1001 / Group 377（691:1009）。全支店共通。
+ * SERVICE。PC 612:781 / SP 641:59〜641:169。全支店共通。
+ *
+ * SP だけ写真名が短い 2 枚は label_sp を持つ（「デッキ」「ライティング」）。
  *
  * 1 行目の英字はカンプでは「GAR SPACE」だが、誤記のため「CAR SPACE」で実装する
  *（docs/spec-20260911-store-page-decisions.md Q1）。
@@ -426,7 +440,11 @@ function exterior_exone_store_service() {
 				'image' => 'service-renovation-689-1001.jpg',
 			),
 		),
-		'banner'     => '外構・エクステリアを、まとめてご相談いただけます',
+		// SP は 2 行（641:98）。PC は 1 行につなげて出す。
+		'banner'     => array(
+			'外構・エクステリアを、',
+			'まとめてご相談いただけます',
+		),
 		'lead'       => array(
 			'新築住宅のトータル外構から、カーポートやフェンスなどの部分工事、庭のリフォームまで幅広く対応しています。',
 			'複数の商品や工事をまとめて計画することで、デザインの統一感だけでなく、使いやすさや予算のバランスまで考えたご提案が可能です。',
@@ -459,7 +477,8 @@ function exterior_exone_store_service() {
 						'image' => 'service-turf-572-490.jpg',
 					),
 					array(
-						'label' => 'ウッドデッキ・タイルデッキ',
+						'label'    => 'ウッドデッキ・タイルデッキ',
+						'label_sp' => 'デッキ', // SP カンプ 641:131 の短縮名。
 						'image' => 'service-deck-572-484.jpg',
 					),
 					array(
@@ -495,7 +514,8 @@ function exterior_exone_store_service() {
 						'image' => 'service-fence-572-475.jpg',
 					),
 					array(
-						'label' => '照明・ライティング',
+						'label'    => '照明・ライティング',
+						'label_sp' => 'ライティング', // SP カンプ 641:167 の短縮名。
 						'image' => 'service-lighting-685-977.jpg',
 					),
 					array(
@@ -509,9 +529,10 @@ function exterior_exone_store_service() {
 }
 
 /**
- * 見える安心。Group 360（669:931）/ Group 376（685:994）/ 572:617。全支店共通。
+ * 見える安心。PC 612:786 上部 / SP 641:175〜641:208。全支店共通。
  *
- * 写真 4 枚は §1 の帯と同じグリッド（429.3x224.7・ピッチ 454.5）に並ぶ。
+ * 写真 4 枚は PC は横 4 枚（429.3x224.7・ピッチ 454.5）、SP は写真と文字の左右交互 4 段。
+ * 線画は TOP 理念と同じ SVG を線描画する（js/line-draw.js。決定 B「見える安心の線画」）。
  *
  * @return array<string, mixed>
  */
@@ -519,9 +540,9 @@ function exterior_exone_store_visible() {
 	return array(
 		// 572:282 / 572:280。
 		'eyebrow' => 'Clearer Exterior Experience',
-		'heading' => '見えない不安を、見える安心へ。',
-		// 572:567。線画スケッチ（opacity は CSS 側で .3 にする）。
-		'sketch'  => 'visible-sketch-572-567.png',
+		'heading' => '見えない不安を、見える安心へ',
+		// 612:255 / 641:175。線画（テーマ相対パス。opacity は CSS 側で .3 にする）。
+		'line'    => 'images/top/line_animation.svg',
 		'cards'   => array(
 			array(
 				'eng'   => 'Visible Pricing',
@@ -551,59 +572,13 @@ function exterior_exone_store_visible() {
 			'考えていることをうまく言葉にできなくても大丈夫です。',
 			'対話とビジュアルを通じて、理想の暮らしを一緒に形にしていきます。',
 		),
-	);
-}
-
-/**
- * DX EXPERIENCE。Group 331（572:619）。全支店共通。
- *
- * TOP の exterior_exone_dx_steps() と同じ 3 ステップだが、支店はビジュアルが
- * 動画ではなく静止画で、03 のタグが「高精度3Dパース」になる
- *（docs/spec-20260911-store-page-decisions.md Q3）。
- *
- * ビジュアルは 01 がカンプの画像（572:593・images/store/）、02 / 03 は TOP の
- * DX と同じ画像（images/top/）を参照する。dir がその置き場所。
- *
- * @return array<string, mixed>
- */
-function exterior_exone_store_dx() {
-	return array(
-		'title' => 'DX EXPERIENCE',
-		// 572:599。
-		'copy'  => array(
-			'デジタル技術で外構を完成前に可視化し、',
-			'理想の暮らしをカタチに。',
+		// 641:208。SP は 2・3 行目をつないだ 4 段落。
+		'lead_sp' => array(
+			'EXoneが大切にしているのは、完成した外構だけではありません。',
+			'価格、デザイン、工事内容、完成までの流れをできる限り分かりやすくし、お客様が納得しながら外構づくりを進められる体験を提供します。',
+			'考えていることをうまく言葉にできなくても大丈夫です。',
+			'対話とビジュアルを通じて、理想の暮らしを一緒に形にしていきます。',
 		),
-		'steps' => array(
-			array(
-				'number' => '01 / EXPERIENCE',
-				'title'  => '暮らしをその場で体感',
-				'desc'   => '試す・探す・比べることで、暮らしのイメージをより直感的に。',
-				'tags'   => array( 'バーチャル展示場', 'AIラフ再現' ),
-				'image'  => 'dx-main-image-572-593.jpg',
-				'dir'    => 'store',
-			),
-			array(
-				'number' => '02 / VISUALIZE',
-				'title'  => '完成を見える化',
-				'desc'   => '高精度3Dパースで、図面だけでは分かりにくい高さや奥行きまで確認。',
-				'tags'   => array( '高精度3Dパース' ),
-				// TOP の DX 02（dx_video2.mp4）と同じ絵。
-				'image'  => 'dx_video2-poster.jpg',
-				'dir'    => 'top',
-			),
-			array(
-				'number' => '03 / SHARE',
-				'title'  => '確認事項をひとまとめ',
-				'desc'   => '変更点・確認事項・共有内容を一箇所に集約し、認識のズレを防止。',
-				'tags'   => array( '高精度3Dパース' ),
-				// TOP の DX 03 の背景写真。
-				'image'  => 'dx_share.jpg',
-				'dir'    => 'top',
-			),
-		),
-		// 572:602。DX EXPERIENCE ページ（固定ページ dx / page-dx.php）へ。
-		'more'  => home_url( '/dx/' ),
 	);
 }
 
@@ -612,7 +587,8 @@ function exterior_exone_store_dx() {
  * Group 338（610:283）/ Group 374（669:965）。全支店共通。
  *
  * 特長 4 列のアイコンは「選ばれる理由」（§6）と同じ線画ファイルを使う。
- * icon_w / icon_h はカンプ 1920 での表示サイズ（CSS 側で単位を掛ける）。
+ * icon_w / icon_h はカンプ 1920 での表示サイズ、icon_sp は SP カンプ 375 での
+ * 表示サイズ（641:298〜641:306 / 641:332〜641:348。PC との比が 1 枚ずつ違う）。
  *
  * @return array<string, mixed>
  */
@@ -620,6 +596,8 @@ function exterior_exone_store_plans() {
 	return array(
 		'title'   => 'PLANS',
 		'jp'      => '理想に近い外構を、分かりやすいプランから探す',
+		// 641:279。SP は「、」の後で 2 行に折る。
+		'jp_sp'   => array( '理想に近い外構を、', '分かりやすいプランから探す' ),
 		'lead'    => array(
 			'「どんな外構にしたいか、まだ具体的に決まっていない」という方にも、デザインや暮らし方、予算の目安から選べる外構プランをご用意しています。',
 			'気になるプランを起点に、敷地条件や建物、ご希望に合わせて調整することも可能です。',
@@ -631,33 +609,38 @@ function exterior_exone_store_plans() {
 				'人気の外構デザインをベースに、必要な要素をわかりやすく整理。',
 				'予算感をつかみながら、スムーズにお選びいただけます。',
 			),
-			'image'    => 'plans-package-house-599-13.png',
+			// 612:308 / 641:284。PLANS ページと同じ住宅パース（images/plans/。カンプの切り抜きは CSS）。
+			'image'    => 'pc-package-simple-modern-586-406.png',
 			// 599:59。リンク先は未定のため仮置き（決定事項 Q9）。
 			'more'     => '#',
 			'features' => array(
 				array(
-					'icon'   => 'reasons-icon-doc-599-69.png',
-					'icon_w' => 114.7,
-					'icon_h' => 100.6,
-					'lines'  => array( 'ご予算に合わせた', '分かりやすい価格設計' ),
+					'icon'    => 'reasons-icon-doc-599-69.png',
+					'icon_w'  => 114.7,
+					'icon_h'  => 100.6,
+					'icon_sp' => array( 71, 63 ),
+					'lines'   => array( 'ご予算に合わせた', '分かりやすい価格設計' ),
 				),
 				array(
-					'icon'   => 'reasons-icon-tablet-599-73.png',
-					'icon_w' => 144.4,
-					'icon_h' => 90.6,
-					'lines'  => array( '豊富なデザインから', '簡単に選べる' ),
+					'icon'    => 'reasons-icon-tablet-599-73.png',
+					'icon_w'  => 144.4,
+					'icon_h'  => 90.6,
+					'icon_sp' => array( 96, 60 ),
+					'lines'   => array( '豊富なデザインから', '簡単に選べる' ),
 				),
 				array(
-					'icon'   => 'reasons-icon-worker-602-82.png',
-					'icon_w' => 96.2,
-					'icon_h' => 102.3,
-					'lines'  => array( '打ち合わせから着工まで', 'スピーディー' ),
+					'icon'    => 'reasons-icon-worker-602-82.png',
+					'icon_w'  => 96.2,
+					'icon_h'  => 102.3,
+					'icon_sp' => array( 58, 61 ),
+					'lines'   => array( '打ち合わせから着工まで', 'スピーディー' ),
 				),
 				array(
-					'icon'   => 'reasons-icon-house-535-1014.png',
-					'icon_w' => 171.2,
-					'icon_h' => 89.9,
-					'lines'  => array( 'コストとデザインの', 'バランスに優れたプラン' ),
+					'icon'    => 'reasons-icon-house-535-1014.png',
+					'icon_w'  => 171.2,
+					'icon_h'  => 89.9,
+					'icon_sp' => array( 97, 51 ),
+					'lines'   => array( 'コストとデザインの', 'バランスに優れたプラン' ),
 				),
 			),
 		),
@@ -673,28 +656,32 @@ function exterior_exone_store_plans() {
 			'more'     => '#',
 			'features' => array(
 				array(
-					'icon'   => 'reasons-icon-tablet-599-73.png',
-					'icon_w' => 144.4,
-					'icon_h' => 90.6,
-					'lines'  => array( '暮らしに合わせた', 'デザイン提案' ),
+					'icon'    => 'reasons-icon-tablet-599-73.png',
+					'icon_w'  => 144.4,
+					'icon_h'  => 90.6,
+					'icon_sp' => array( 96, 60 ),
+					'lines'   => array( '暮らしに合わせた', 'デザイン提案' ),
 				),
 				array(
-					'icon'   => 'highend-icon-diamond-606-133.png',
-					'icon_w' => 130.6,
-					'icon_h' => 88.2,
-					'lines'  => array( 'ハイグレードな', '素材・商品を採用' ),
+					'icon'    => 'highend-icon-diamond-606-133.png',
+					'icon_w'  => 130.6,
+					'icon_h'  => 88.2,
+					'icon_sp' => array( 78, 53 ),
+					'lines'   => array( 'ハイグレードな', '素材・商品を採用' ),
 				),
 				array(
-					'icon'   => 'highend-icon-blueprint-622-298.png',
-					'icon_w' => 128.4,
-					'icon_h' => 90.5,
-					'lines'  => array( '唯一無二の', 'デザインを実現' ),
+					'icon'    => 'highend-icon-blueprint-622-298.png',
+					'icon_w'  => 128.4,
+					'icon_h'  => 90.5,
+					'icon_sp' => array( 83, 59 ),
+					'lines'   => array( '唯一無二の', 'デザインを実現' ),
 				),
 				array(
-					'icon'   => 'highend-icon-house-606-138.png',
-					'icon_w' => 204.1,
-					'icon_h' => 89.9,
-					'lines'  => array( '細部までこだわる', '自由設計プラン' ),
+					'icon'    => 'highend-icon-house-606-138.png',
+					'icon_w'  => 204.1,
+					'icon_h'  => 89.9,
+					'icon_sp' => array( 114, 50 ),
+					'lines'   => array( '細部までこだわる', '自由設計プラン' ),
 				),
 			),
 		),
@@ -702,41 +689,30 @@ function exterior_exone_store_plans() {
 }
 
 /**
- * WORKS の事例。698:1136 / Group 380 / Group 382 / Group 379。全支店共通。
+ * WORKS。新カンプ 612:813（見出し 612:705 / 612:707 / 612:706）/ SP 641:362〜641:391。全支店共通。
  *
- * 表示は共通部品（template-parts/common/section-works.php）。事例の中身
- *（要望・提案・見積・モーダルの文言）は DX ページと共通なので inc/works-data.php
- * が持ち、ここが持つのは支店の見出し・リード文と、枠を埋めるカンプ写真。
- *
- * 見出し「EXoneからのご提案」はカンプ上で見切れているが全文を出す
- *（docs/spec-20260911-store-page-decisions.md Q4）。左右ボックスの本文も 18px に統一。
+ * guide 617:44「DX下部と同じ（上部テキストのみ違いあり）」のとおり、DX ページの WORKS
+ *（inc/dx-data.php の exterior_exone_dx_works()。カンプ写真固定・右列を押すとメイン切替・
+ * 3D モデル・見積モーダル）をそのまま使い、見出し 3 点の文言だけ支店用に差し替える。
+ * 写真・3D・要望 / 提案・見積を二重に持たない。
  *
  * @return array<string, mixed>
  */
 function exterior_exone_store_works() {
-	// 要望・提案・見積・モーダルの文言は DX ページと共通（inc/works-data.php）。
-	$case = exterior_exone_works_case();
-
 	return array_merge(
-		$case,
+		exterior_exone_dx_works(),
 		array(
-			'title'  => 'WORKS',
-			'jp'     => '暮らしの希望から生まれた、外構のご提案',
-			'lead'   => array(
+			'title'   => 'WORKS',
+			'jp'      => '暮らしの希望から生まれた、外構のご提案',
+			'lead'    => array(
 				'EXoneが紹介するのは、完成写真だけではありません。',
 				'お客様がどのような悩みや希望を持ち、どんな考え方でデザインをご提案したのか。',
 				'完成までの背景とともに、外構づくりの事例をご紹介します。',
 			),
-			// 698:1181 / 698:1178 / 698:1180。CPT の画像が足りないときに使う。
-			'photos' => array(
-				'works-main-698-1181.jpg',
-				'works-sub2-698-1178.jpg',
-				'works-sub3-698-1180.jpg',
-			),
-			// 698:1197 + Group 381（698:1329）。ラベルは共通データのもの。
-			'render' => array_merge(
-				$case['render'],
-				array( 'image' => 'works-3d-698-1197.png' )
+			// SP は 641:391 のとおり左揃え・337 幅で流し、「…ご提案したのか。」で段落を改める（5 行。css/store.css）。
+			'lead_sp' => array(
+				'EXoneが紹介するのは、完成写真だけではありません。お客様がどのような悩みや希望を持ち、どんな考え方でデザインをご提案したのか。',
+				'完成までの背景とともに、外構づくりの事例をご紹介します。',
 			),
 		)
 	);
@@ -815,9 +791,11 @@ function exterior_exone_store_flow() {
 				),
 			),
 			array(
-				'number' => '02',
-				'label'  => 'ヒアリング・現地調査',
-				'lines'  => array(
+				'number'  => '02',
+				'label'   => 'ヒアリング・現地調査',
+				// SP（641:478）は 1 段落（改行しない）。
+				'sp_join' => true,
+				'lines'   => array(
 					'現地調査、もしくは図面を用いたヒアリングを行い、',
 					'実際にかかる費用など具体的にご提示させていただきます。',
 				),
@@ -867,8 +845,9 @@ function exterior_exone_store_flow() {
 }
 
 /**
- * Quality（施工保証）。669:258 / 669:261 / 669:255 / 669:263 / 669:969 / 669:265。
- * 全支店共通。
+ * Quality（施工保証）。PC 612:839 / SP 641:1251〜641:1261。全支店共通。
+ *
+ * 旧カンプの保証注記（669:265）は新カンプに無いので持たない（決定 A）。
  *
  * @return array<string, mixed>
  */
@@ -876,19 +855,18 @@ function exterior_exone_store_quality() {
 	return array(
 		'image'   => 'quality-bg-669-258.jpg',
 		'eng'     => 'Quality You Can Trust',
-		'heading' => '完成したあとも続く、安心の品質。',
+		'heading' => '完成したあとも続く、安心の品質',
 		'lead'    => array(
 			'外構工事は、完成時の見た目だけでなく、長く安心して使えることが大切です。',
 			'EXoneでは、施工基準や工程管理を整備し、担当者だけに依存しない品質管理に取り組んでいます。',
 			'さらに、対象工事には5年間の工事保証を設け、完成後の暮らしも支えます。',
 		),
-		// 669:967。「5」だけ 2px 大きい（--st-quality-badge-num）。
+		// 612:584。「5」だけ 2px 大きい（--st-quality-badge-num。SP は同じ大きさ）。
 		'badge'   => array(
 			'label'  => '施工保証',
 			'number' => '5',
 			'unit'   => '年',
 		),
-		'note'    => '※工事保証は製品メーカーが定める製品保証とは異なります。保証対象・条件についてはスタッフへご確認ください。',
 	);
 }
 
@@ -896,6 +874,9 @@ function exterior_exone_store_quality() {
  * FAQ。669:872-874 / Group 372（669:963）/ 669:906（山形アイコン）。全支店共通。
  *
  * TODO: 回答文はカンプに無いため仮文（決定事項 Q11）。公開前に正文へ差し替える。
+ *
+ * 質問 q は文節ごとの配列。SP で折り返すときに文節の切れ目（<wbr>）でだけ折る
+ *（「…もらえます / か？」のような 1〜2 文字の折り返しを出さない）。
  *
  * @return array<string, mixed>
  */
@@ -909,71 +890,167 @@ function exterior_exone_store_faq() {
 		),
 		'items' => array(
 			array(
-				'q' => '相談や見積りに費用はかかりますか？',
+				'q' => array( '相談や', '見積りに', '費用は', 'かかりますか？' ),
 				'a' => 'ご相談・現地調査・お見積りはすべて無料です。プランのご提案までに費用をいただくことはありませんので、比較検討の段階でもお気軽にご相談ください。',
 			),
 			array(
-				'q' => 'まだ建物の図面しかないのですが、相談できますか？',
+				'q' => array( 'まだ', '建物の', '図面しか', 'ないのですが、', '相談できますか？' ),
 				'a' => '図面の段階からご相談いただけます。むしろ着工前の早い段階のほうが、駐車スペースの位置や高低差を建物の計画と合わせて検討でき、結果として費用も抑えやすくなります。',
 			),
 			array(
-				'q' => '他社との相見積りでも相談できますか？',
+				'q' => array( '他社との', '相見積りでも', '相談できますか？' ),
 				'a' => 'もちろん可能です。お見積りの内容や仕様の違いについてもご説明しますので、比較の材料としてお気軽にご利用ください。',
 			),
 			array(
-				'q' => '外構工事の予算はどのくらい必要ですか？',
+				'q' => array( '外構工事の', '予算は', 'どのくらい', '必要ですか？' ),
 				'a' => '敷地の広さや工事範囲によって異なりますが、新築の外構では100万円〜300万円程度が目安です。ご予算をお伝えいただければ、その範囲で優先順位をつけたプランをご提案します。',
 			),
 			array(
-				'q' => '工事期間はどのくらいかかりますか？',
+				'q' => array( '工事期間は', 'どのくらい', 'かかりますか？' ),
 				'a' => 'カーポート1台分の設置で2日程度、コンクリート工事で1週間〜10日程度が目安です。工事の範囲によって変わりますので、着工前に工程表でご案内します。',
 			),
 			array(
-				'q' => '一部分だけの工事にも対応していますか？',
+				'q' => array( '一部分だけの', '工事にも', '対応していますか？' ),
 				'a' => 'フェンスの設置や物置の追加、駐車スペースの拡張など、一部分のみの工事も承っています。気になる場所からご相談ください。',
 			),
 			array(
-				'q' => '対応エリア外でも相談できますか？',
+				'q' => array( '対応エリア外でも', '相談できますか？' ),
 				'a' => 'まずはご相談ください。エリアによっては出張費を申し受ける場合や、ご対応が難しい場合もありますので、内容をうかがったうえでご案内します。',
 			),
 			array(
-				'q' => '土地や建物に合う商品を提案してもらえますか？',
+				'q' => array( '土地や', '建物に', '合う', '商品を', '提案して', 'もらえますか？' ),
 				'a' => '建物のデザインや周辺環境に加え、雪や風といった地域の条件をふまえて、暮らしに合う商品とプランをご提案します。',
 			),
 		),
-		'arrow' => 'faq-arrow-669-906.svg',
+		// 612:538 / 641:1311（開いた状態）。SP（641:1270 / 641:1306）も同じ形を縮小して使う。
+		'arrow' => 'faq-arrow-612-538.svg',
 	);
 }
 
 /**
- * AREA。620:292 / 628:302 / Group 472（1148:89）/ 628:337 / 628:329 /
- * 628:306 / 1126:34 / 1148:48 / 1148:43 / 1151:93-101。
+ * AREA の支店ごとに差し替える素材（決定事項 A）。キーは支店のスラッグ。
  *
- * 店舗情報テーブルは支店データ（exterior_exone_stores()）をそのまま並べる。
+ * 店内写真（アーチ状ロール。641:1464 の 4 枚）・外観写真（612:639）・
+ * Local Expertise の見出し・本文・写真（612:670 / 612:671 / 612:666）・カード 4 枚（612:673。決定 B-2 Q5）。
+ *
+ * 仮（素材が届いたら差し替え）: 6 拠点とも青森の写真・文章を置いている。
+ * 差し替えるときは該当拠点の配列で $aomori の値を上書きする（例: 'local' => array( ... )）。
+ * 店内写真の position は object-position（カンプの切り抜き位置）。枚数は何枚でもよい。
+ *
+ * @return array<string, array<string, mixed>>
+ */
+function exterior_exone_store_area_media() {
+	$aomori = array(
+		// 641:1467 / 641:1466 / 641:1468 / 641:1465（ギャラリーの左から）。
+		'gallery' => array(
+			array(
+				'file'     => 'area-gallery-photo1-641-1467.jpg',
+				'position' => '50% 50%',
+			),
+			array(
+				'file'     => 'area-gallery-photo2-641-1466.jpg',
+				'position' => '50% 0%',
+			),
+			array(
+				'file'     => 'area-gallery-photo3-641-1468.jpg',
+				'position' => '50% 76.6%',
+			),
+			array(
+				'file'     => 'area-gallery-photo4-641-1465.jpg',
+				'position' => '50% 100%',
+			),
+		),
+		// 612:639 店舗外観。
+		'photo'   => 'area-store-photo-628-306.jpg',
+		'local'   => array(
+			'heading' => array( '雪国だからこそ、', '暮らしやすさを考える' ),
+			'lead'    => array(
+				// {region} は支店の地域名（「青森支店」の「青森」）に置き換える（exterior_exone_store_area()）。
+				'{region}エリアでは、積雪や凍結を前提とした外構設計が欠かせません。',
+				'EXoneでは、雪捨てスペースの確保や落雪対策、耐雪性能、排水計画まで考慮し、冬でも安心して暮らせる外構をご提案します。',
+			),
+			'photo'   => 'area-snow-photo-1148-43.jpg',
+		),
+		// 612:673 / SP 641:1423〜641:1427。SP はラベルの改行位置が違う（label_sp）。
+		'cards'   => array(
+			array(
+				'label'    => array( '雪捨てスペースを考慮した配置' ),
+				'label_sp' => array( '雪捨てスペースを', '考慮した配置' ),
+				'image'    => 'area-card1-1148-49.jpg',
+			),
+			array(
+				'label'    => array( '落雪・雪庇対策' ),
+				'label_sp' => array( '落雪・雪庇対策' ),
+				'image'    => 'area-card2-1148-69.jpg',
+			),
+			array(
+				'label'    => array( '凍結を考えた排水計画' ),
+				'label_sp' => array( '凍結を考えた', '排水計画' ),
+				'image'    => 'area-card3-1148-74.jpg',
+			),
+			array(
+				'label'    => array( '雪に配慮した', 'フェンス・カーポート提案' ),
+				'label_sp' => array( '雪に配慮した', 'フェンス・カーポート提案' ),
+				'image'    => 'area-card4-1151-96.jpg',
+			),
+		),
+	);
+
+	return array(
+		'sendai'    => $aomori, // 仮（素材が届いたら差し替え）。
+		'totsuka'   => $aomori, // 仮（素材が届いたら差し替え）。
+		'morioka'   => $aomori, // 仮（素材が届いたら差し替え）。
+		'aomori'    => $aomori, // 青森支店のカンプの素材。
+		'hachinohe' => $aomori, // 仮（素材が届いたら差し替え）。
+		'hirosaki'  => $aomori, // 仮（素材が届いたら差し替え）。
+	);
+}
+
+/**
+ * AREA。PC 612:855（店舗ボックス 612:637・Local Expertise 612:853・カード 612:673）/
+ * SP 641:1315〜641:1427。
+ *
+ * 店舗情報テーブルは支店データ（exterior_exone_stores()）、写真と Local Expertise は
+ * exterior_exone_store_area_media() の支店ごとの素材を並べる。
  *
  * TODO: リード文の「［主要対応地域］」は未支給のため、対応エリア（areas）を
  *       そのまま入れている。主要対応地域の文言が決まったら差し替える。
- * TODO: Local Expertise は青森固有の雪国コピー（決定事項 Q12）。他 6 支店の
- *       地域コピーが届いたら支店ごとに持たせる。
  *
  * @param array<string, string> $store 支店データ。
  * @return array<string, mixed>
  */
 function exterior_exone_store_area( array $store ) {
+	$media = exterior_exone_store_area_media();
+	$slug  = isset( $store['slug'], $media[ $store['slug'] ] ) ? $store['slug'] : 'aomori';
+	$media = $media[ $slug ];
+
+	// Local Expertise の本文の {region} を、この支店の地域名にする（2026-10-02 の指示）。
+	$media['local']['lead'] = str_replace( '{region}', $store['region'], $media['local']['lead'] );
+
+	$cards = array();
+
+	foreach ( $media['cards'] as $exterior_exone_index => $exterior_exone_card ) {
+		$cards[] = array_merge(
+			array( 'number' => sprintf( '%02d', $exterior_exone_index + 1 ) ),
+			$exterior_exone_card
+		);
+	}
+
 	return array(
 		'title'   => 'AREA',
 		'image'   => 'area-bg-store-620-292.jpg',
-		// 628:338。パネル上端にかぶる黒帯。
-		'banner'  => $store['region'] . 'とその周辺エリアの外構工事に対応しています',
+		// 612:660。PC は 1 行、SP は 2 行（641:1320 の改行位置。文言は PC を正とする: 決定 B）。
+		'banner'  => array( $store['region'] . 'とその周辺エリアの', '外構工事に対応しています' ),
 		'lead'    => array(
-			'EXone' . $store['name'] . 'では、' . $store['areas'] . 'を中心に外構・エクステリア工事を承っています。',
+			'EXone' . $store['name'] . 'では、' . ( ! empty( $store['areas_lead'] ) ? $store['areas_lead'] : $store['areas'] ) . 'を中心に外構・エクステリア工事を承っています。',
 			'地域ごとの積雪、風、敷地条件、道路環境なども考慮し、長く快適に使える外構をご提案します。',
 		),
-		// 628:307。ラベルと値の 6 行（区切り線は CSS 側）。
+		// 612:640。ラベルと値の 6 行（区切り線は CSS 側）。値が配列の行は SP で改行する。
 		'rows'    => array(
 			array(
 				'label' => '所在地',
-				'value' => $store['zip'] . ' ' . $store['address'],
+				// 郵便番号が未確認の拠点（zip が空）は住所だけを出す。
+				'value' => array_values( array_filter( array( $store['zip'], $store['address'] ), 'strlen' ) ),
 			),
 			array(
 				'label' => '電話番号',
@@ -996,44 +1073,13 @@ function exterior_exone_store_area( array $store ) {
 				'value' => $store['areas'],
 			),
 		),
-		'photo'   => 'area-store-photo-628-306.jpg',
-		// 1126:34。店舗内観 5 枚を弧状に並べた合成 1 枚（個別写真は取り出せない）。
-		'gallery' => 'area-gallery-exclude-1126-34.png',
+		'photo'   => $media['photo'],
+		'gallery' => $media['gallery'],
 		'logo'    => 'area-logo-1131-38.png',
 		'branch'  => '[ ' . $store['name'] . ' ]',
-		// Local Expertise（1148:45 / 1148:28 / 1148:29 / 1148:43）。
-		'local'   => array(
-			'eng'     => 'Local Expertise',
-			'heading' => array( '雪国だからこそ、', '暮らしやすさを考える。' ),
-			'lead'    => array(
-				'青森エリアでは、積雪や凍結を前提とした外構設計が欠かせません。',
-				'EXoneでは、雪捨てスペースの確保や落雪対策、耐雪性能、排水計画まで考慮し、冬でも安心して暮らせる外構をご提案します。',
-			),
-			'photo'   => 'area-snow-photo-1148-43.jpg',
-		),
-		// カード 4 枚（1151:93-101）。番号 + 円形写真 + ラベル。
-		'cards'   => array(
-			array(
-				'number' => '01',
-				'label'  => array( '雪捨てスペースを考慮した配置' ),
-				'image'  => 'area-card1-1148-49.jpg',
-			),
-			array(
-				'number' => '02',
-				'label'  => array( '落雪・雪庇対策' ),
-				'image'  => 'area-card2-1148-69.jpg',
-			),
-			array(
-				'number' => '03',
-				'label'  => array( '凍結を考えた排水計画' ),
-				'image'  => 'area-card3-1148-74.jpg',
-			),
-			array(
-				'number' => '04',
-				'label'  => array( '雪に配慮した', 'フェンス・カーポート提案' ),
-				'image'  => 'area-card4-1151-96.jpg',
-			),
-		),
+		// Local Expertise。英字は全支店共通。
+		'local'   => array_merge( array( 'eng' => 'Local Expertise' ), $media['local'] ),
+		'cards'   => $cards,
 	);
 }
 
@@ -1051,7 +1097,8 @@ function exterior_exone_store_cta( array $store ) {
 	return array(
 		'image'   => 'cta-bg-645-3.jpg',
 		'eng'     => 'Start Your Exterior Project',
-		'heading' => '理想の外構について、私たちと話してみませんか。',
+		// 612:366。PC は 1 行、SP は 2 行（641:1433）。
+		'heading' => array( '理想の外構について、', '私たちと話してみませんか' ),
 		'lead'    => array(
 			'まだ具体的なプランが決まっていなくても問題ありません。',
 			'新築外構、カーポート、フェンス、庭づくりなど、気になっていることからお聞かせください。',
@@ -1086,13 +1133,15 @@ function exterior_exone_store_cta( array $store ) {
  */
 function exterior_exone_store_column( array $store ) {
 	return array(
-		'title' => 'COLUMN',
-		'jp'    => $store['region'] . 'の外構づくりに役立つ情報。',
-		'lead'  => array(
+		'title'        => 'COLUMN',
+		'jp'           => $store['region'] . 'の外構づくりに役立つ情報',
+		'lead'         => array(
 			'外構費用の考え方やカーポートの選び方、目隠しフェンス、庭づくりなど、',
 			$store['region'] . 'で外構工事を検討している方に役立つ情報を発信します。',
 			'地域の気候や住宅事情も踏まえながら、後悔しない外構づくりのポイントを分かりやすく解説します。',
 		),
+		// SP（641:1448）は 1 行目と 2 行目を 1 段落につなぐ（この添字の行のあとの改行を SP で消す）。
+		'lead_sp_join' => array( 0 ),
 	);
 }
 

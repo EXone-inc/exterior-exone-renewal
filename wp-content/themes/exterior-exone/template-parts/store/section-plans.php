@@ -1,14 +1,16 @@
 <?php
 /**
- * 支店: PLANS。
+ * 支店: PLANS（PACKAGE + HIGH-END）。
  *
- * カンプ: PC 572:620 / 669:975 / 602:129（背景の 3 段）/ 599:50（見出し 3 点セット）/
- *         Group 362（669:933 パッケージ）/ Group 363（669:934 特長 4 列）/
- *         Group 338（610:283 ハイエンド）/ Group 374（669:965 特長 4 列）
- *         SP カンプなし（テキストと画像を縦積み、特長は 2 列 2 段）
+ * カンプ: PC 612:804（PACKAGE。背景 612:116 #f3f3f4 一色・帯 612:803・特長 612:295）/
+ *         612:807（HIGH-END。写真 612:343・特長 612:355）
+ *         SP 641:274〜641:308（PACKAGE）/ 641:310〜641:360（HIGH-END）
+ *         guide 617:41「上部と同じエンドレスロール」
  *
- * 中ほどの住宅パース帯は §3（section-strip.php）と同じ 5 枚を使い回す
- *（docs/spec-20260911-store-page-decisions.md「施工イメージ帯の写真 5 枚の再利用」）。
+ * 中ほどの住宅パース帯は section-strip.php（variant plans）を施工イメージ帯と同じ
+ * エンドレスロールで流す（js/plans-imglist.js。2 本はそれぞれ独立に動く）。
+ * SP は並び順がカンプで変わる（パースが見出しより上・VIEW MORE が特長の下）ため、
+ * DOM は PC の順のまま CSS（display: contents + order）で並べ替える。
  *
  * @package exterior-exone
  */
@@ -21,13 +23,16 @@ $exterior_exone_plans = exterior_exone_store_plans();
 ?>
 <section class="p-splans" data-section="store-plans">
 	<h2 class="c-store-title"><?php echo esc_html( $exterior_exone_plans['title'] ); ?></h2>
-	<p class="c-store-jp"><?php echo esc_html( $exterior_exone_plans['jp'] ); ?></p>
+	<p class="c-store-jp p-splans__jp">
+		<span class="p-splans__jp-pc"><?php echo esc_html( $exterior_exone_plans['jp'] ); ?></span>
+		<span class="p-splans__jp-sp"><?php echo wp_kses( exterior_exone_store_lines( $exterior_exone_plans['jp_sp'] ), array( 'br' => array() ) ); ?></span>
+	</p>
 
 	<p class="c-store-lead p-splans__lead">
 		<?php echo wp_kses( exterior_exone_store_lines( $exterior_exone_plans['lead'] ), array( 'br' => array() ) ); ?>
 	</p>
 
-	<?php // 620:286。本文とパッケージプランをつなぐ飾り線。 ?>
+	<?php // 612:354。本文とパッケージプランをつなぐ飾り線（SP には無い）。 ?>
 	<span class="p-splans__divider" aria-hidden="true"></span>
 
 	<div class="p-splans__block p-splans__block--package">
@@ -42,25 +47,34 @@ $exterior_exone_plans = exterior_exone_store_plans();
 			<a class="c-btn c-btn--black p-splans__btn" href="<?php echo esc_url( $exterior_exone_plans['package']['more'] ); ?>">VIEW MORE</a>
 		</div>
 
-		<?php // 599:13。下端を白に溶かす（669:958）。 ?>
+		<?php // 612:308。下端を背景色に溶かす（612:582）。 ?>
 		<div class="p-splans__media">
 			<img
-				src="<?php echo esc_url( exterior_exone_store_image( $exterior_exone_plans['package']['image'] ) ); ?>"
-				width="1200"
-				height="626"
+				src="<?php echo esc_url( exterior_exone_plans_image( $exterior_exone_plans['package']['image'] ) ); ?>"
+				width="1536"
+				height="1024"
 				alt=""
 				loading="lazy"
 			>
 		</div>
 	</div>
 
-	<?php get_template_part( 'template-parts/store/section', 'strip', array( 'variant' => 'plans' ) ); ?>
+	<?php
+	get_template_part(
+		'template-parts/store/section',
+		'strip',
+		array(
+			'variant' => 'plans',
+			'roll'    => true,
+		)
+	);
+	?>
 
 	<ul class="p-splans__features">
 		<?php foreach ( $exterior_exone_plans['package']['features'] as $exterior_exone_feature ) : ?>
 			<li
 				class="p-splans__feature"
-				style="--icon-w:<?php echo esc_attr( (string) $exterior_exone_feature['icon_w'] ); ?>;--icon-h:<?php echo esc_attr( (string) $exterior_exone_feature['icon_h'] ); ?>"
+				style="--icon-w:<?php echo esc_attr( (string) $exterior_exone_feature['icon_w'] ); ?>;--icon-h:<?php echo esc_attr( (string) $exterior_exone_feature['icon_h'] ); ?>;--icon-sp-w:<?php echo esc_attr( (string) $exterior_exone_feature['icon_sp'][0] ); ?>;--icon-sp-h:<?php echo esc_attr( (string) $exterior_exone_feature['icon_sp'][1] ); ?>"
 			>
 				<img
 					class="p-splans__icon"
@@ -81,7 +95,7 @@ $exterior_exone_plans = exterior_exone_store_plans();
 
 	<div class="p-splans__highend">
 		<div class="p-splans__block p-splans__block--highend">
-			<?php // 610:273。右端を #1a1a1a に溶かす（610:278）。 ?>
+			<?php // 612:343。新カンプでは右端の黒いフェードは無い。 ?>
 			<div class="p-splans__media">
 				<img
 					src="<?php echo esc_url( exterior_exone_store_image( $exterior_exone_plans['highend']['image'] ) ); ?>"
@@ -104,12 +118,12 @@ $exterior_exone_plans = exterior_exone_store_plans();
 			</div>
 		</div>
 
-		<?php // Group 374。区切り線は 3 本（602:104 は hidden だがカンプの見た目では 3 本見える）。 ?>
+		<?php // 612:355。区切り線は 3 本（PC のみ。SP の 2×2 には無い）。 ?>
 		<ul class="p-splans__features p-splans__features--dark">
 			<?php foreach ( $exterior_exone_plans['highend']['features'] as $exterior_exone_feature ) : ?>
 				<li
 					class="p-splans__feature"
-					style="--icon-w:<?php echo esc_attr( (string) $exterior_exone_feature['icon_w'] ); ?>;--icon-h:<?php echo esc_attr( (string) $exterior_exone_feature['icon_h'] ); ?>"
+					style="--icon-w:<?php echo esc_attr( (string) $exterior_exone_feature['icon_w'] ); ?>;--icon-h:<?php echo esc_attr( (string) $exterior_exone_feature['icon_h'] ); ?>;--icon-sp-w:<?php echo esc_attr( (string) $exterior_exone_feature['icon_sp'][0] ); ?>;--icon-sp-h:<?php echo esc_attr( (string) $exterior_exone_feature['icon_sp'][1] ); ?>"
 				>
 					<img
 						class="p-splans__icon"

@@ -100,57 +100,6 @@ function exterior_exone_works_case() {
 }
 
 /**
- * 写真グリッド 4 枠ぶんのデータを作る。
- *
- * 既存 CPT works の最新（exterior_exone_works_cards()）を先に詰め、足りないぶんは
- * カンプ写真で埋める。同じ画像の投稿が続くとグリッドが同じ写真だらけになるので、
- * 重複した画像は飛ばす。1 件も無いときは空配列を返し、呼び出し側が
- * セクションごと出さない（TOP の NEWS / WORKS と同じ作法）。
- *
- * @param array<int, string> $fallback カンプ写真の URL（解決済み）。
- * @return array<int, array{image_id:int, url:string, src:string, title:string}>
- */
-function exterior_exone_works_slots( array $fallback ) {
-	$cards = exterior_exone_works_cards();
-
-	if ( ! $cards || ! $fallback ) {
-		return array();
-	}
-
-	$slots = array();
-	$seen  = array();
-
-	foreach ( $cards as $card ) {
-		if ( ! $card['image_id'] || in_array( $card['image_id'], $seen, true ) ) {
-			continue;
-		}
-
-		$seen[]  = $card['image_id'];
-		$slots[] = array(
-			'image_id' => $card['image_id'],
-			'url'      => $card['url'],
-			'src'      => '',
-			'title'    => $card['title'],
-		);
-
-		if ( 4 === count( $slots ) ) {
-			break;
-		}
-	}
-
-	while ( count( $slots ) < 4 ) {
-		$slots[] = array(
-			'image_id' => 0,
-			'url'      => '',
-			'src'      => $fallback[ count( $slots ) % count( $fallback ) ],
-			'title'    => '',
-		);
-	}
-
-	return $slots;
-}
-
-/**
  * 複数行のテキストを <br> でつないだ安全な文字列にする。
  *
  * テンプレートで 1 行ずつ echo すると行頭に空白が入り、カンプの幅に
@@ -164,39 +113,13 @@ function exterior_exone_works_lines( array $lines ) {
 }
 
 /**
- * WORKS の写真グリッド 1 枠ぶんを出力する。
+ * WORKS の写真グリッド 1 枠ぶんを出力する（カンプ写真）。
  *
- * CPT works の画像があればそれを投稿へのリンク付きで、無ければカンプ写真を出す。
- *
- * @param array{image_id:int, url:string, src:string, title:string} $slot 枠のデータ。
+ * @param array{src:string, full:string} $slot 枠のデータ。
  */
 function exterior_exone_works_photo( array $slot ) {
-	if ( $slot['image_id'] ) {
-		$image = wp_get_attachment_image(
-			$slot['image_id'],
-			'large',
-			false,
-			array(
-				'alt'     => $slot['title'],
-				'loading' => 'lazy',
-			)
-		);
-	} else {
-		$image = sprintf(
-			'<img src="%s" width="1200" height="844" alt="" loading="lazy">',
-			esc_url( $slot['src'] )
-		);
-	}
-
-	if ( ! $slot['url'] ) {
-		echo wp_kses_post( $image );
-
-		return;
-	}
-
 	printf(
-		'<a class="p-cworks__link" href="%s">%s</a>',
-		esc_url( $slot['url'] ),
-		wp_kses_post( $image )
+		'<img src="%s" width="1200" height="844" alt="" loading="lazy">',
+		esc_url( $slot['src'] )
 	);
 }

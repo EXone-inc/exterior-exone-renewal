@@ -2,13 +2,13 @@
 /**
  * 支店: WORKS。
  *
- * カンプ: PC 698:1134（背景）/ 698:1136-1138（見出し 3 点セット）/
- *         698:1181・698:1178・698:1180・1153:104 + 698:1197（写真グリッド）/
- *         Group 380・Group 382（要望・提案）/ Group 379（見積テーブル）
- *         SP カンプなし（グリッド・2 ボックスを縦積み。見積はモーダル）
+ * カンプ: PC 612:813（見出し 612:705 / 612:707 / 612:706）/ SP 641:362〜641:391 + モーダル 641:421
+ *         guide 617:44「DX下部と同じ（上部テキストのみ違いあり）」
  *
- * 中身は DX ページと同じ共通部品（template-parts/common/section-works.php）。
- * ここは支店側の文言・写真を渡すだけ。
+ * DX ページ（template-parts/dx/section-works.php）と同じモードで共通部品を呼ぶ:
+ * variant dx（配色・寸法も DX と同じ）・カンプ写真固定、右列を押すとメイン切替、
+ * 3D モデル。違うのは見出し 3 点の文言だけ（inc/store-data.php）。
+ * 支店側の上書きは css/store.css の .is-store-page .p-cworks（影・罫線）だけ。
  *
  * @package exterior-exone
  */
@@ -23,15 +23,26 @@ get_template_part(
 	'template-parts/common/section',
 	'works',
 	array(
-		'variant'  => 'store',
+		'variant'  => 'dx',
 		'section'  => 'store-works',
 		'title'    => $exterior_exone_store_works['title'],
 		'jp'       => $exterior_exone_store_works['jp'],
 		'lead'     => $exterior_exone_store_works['lead'],
-		'photos'   => array_map( 'exterior_exone_store_image', $exterior_exone_store_works['photos'] ),
+		'lead_sp'  => $exterior_exone_store_works['lead_sp'],
+		'photos'   => array_map( 'exterior_exone_dx_image', $exterior_exone_store_works['photos'] ),
+		'thumbs'   => array_map( 'exterior_exone_dx_image', $exterior_exone_store_works['thumbs'] ),
 		'render'   => array(
-			'image' => exterior_exone_store_image( $exterior_exone_store_works['render']['image'] ),
-			'label' => $exterior_exone_store_works['render']['label'],
+			'image'    => exterior_exone_dx_image( $exterior_exone_store_works['render']['image'] ),
+			'label'    => $exterior_exone_store_works['render']['label'],
+			'backdrop' => exterior_exone_dx_image( $exterior_exone_store_works['render']['backdrop'] ),
+			'model'    => array_merge(
+				$exterior_exone_store_works['render']['model'],
+				array(
+					'file'   => exterior_exone_asset_url( $exterior_exone_store_works['render']['model']['file'] ),
+					'viewer' => exterior_exone_asset_url( 'js/vendor/model-viewer/model-viewer-umd.min.js' ),
+					'draco'  => trailingslashit( get_theme_file_uri( 'js/vendor/draco' ) ),
+				)
+			),
 		),
 		'request'  => $exterior_exone_store_works['request'],
 		'proposal' => $exterior_exone_store_works['proposal'],
@@ -39,8 +50,7 @@ get_template_part(
 		'total'    => $exterior_exone_store_works['total'],
 		'modal'    => array_merge(
 			$exterior_exone_store_works['modal'],
-			// SP のモーダル上部には 3D パースを出す（支店は SP カンプが無いので DX と同じ組み）。
-			array( 'image' => exterior_exone_store_image( $exterior_exone_store_works['render']['image'] ) )
+			array( 'image' => exterior_exone_dx_image( $exterior_exone_store_works['modal']['image'] ) )
 		),
 	)
 );

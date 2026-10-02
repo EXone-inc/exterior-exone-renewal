@@ -129,7 +129,7 @@ function exterior_exone_contact_item() {
 /**
  * フッター STORE の項目。カンプ 669:836（支店ページ）/ 775:993（TOP）。
  *
- * ラベルと URL の二重管理をしないため、inc/store-data.php の 7 拠点から導出する。
+ * ラベルと URL の二重管理をしないため、inc/store-data.php の 6 拠点から導出する。
  * 並び順もそちらが出典。
  *
  * @return array<int, array{label: string, url: string}>

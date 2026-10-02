@@ -202,6 +202,13 @@ Text Domain: exterior-exone
 	--diagram-copy-ls: 0.1em;
 	--diagram-float: 1.7cqw;       /* 浮遊の振れ幅（上下それぞれ）。2.4 だと揺れが大きすぎた */
 	--diagram-float-ease: ease-in-out;
+	/* 6 項目の浮遊の片道時間。理念・DX summary・支店の選ばれる理由で同じ周期を使う */
+	--diagram-float-duration-1: 3.4s;
+	--diagram-float-duration-2: 4.1s;
+	--diagram-float-duration-3: 3.8s;
+	--diagram-float-duration-4: 4.6s;
+	--diagram-float-duration-5: 3.1s;
+	--diagram-float-duration-6: 4.3s;
 	/* 中央のライン画の線描画（方式は参照実装 test_cp の FV と同じ stroke-dashoffset）。
 	   Illustrator のグループ line_01（敷地）→ 02（建物）→ 03（門柱・塀・フェンス）→ 04（植栽）
 	   の順に描く。グループ内は 1 本ずつ --diagram-draw-step ずつ遅らせ、次のグループは
@@ -1973,7 +1980,7 @@ svg[data-line-draw].is-drawn .st1 {
 
 .p-diagram__icon--1,
 .p-diagram__copy--1 {
-	--diagram-float-duration: 3.4s;
+	--diagram-float-duration: var(--diagram-float-duration-1);
 	--diagram-float-name: p-diagram-float;
 	--fade-delay: calc(var(--diagram-fade-items-start) + 0 * var(--diagram-fade-stagger));
 }
@@ -1992,7 +1999,7 @@ svg[data-line-draw].is-drawn .st1 {
 
 .p-diagram__icon--2,
 .p-diagram__copy--2 {
-	--diagram-float-duration: 4.1s;
+	--diagram-float-duration: var(--diagram-float-duration-2);
 	--diagram-float-name: p-diagram-float-rev;
 	--fade-delay: calc(var(--diagram-fade-items-start) + 1 * var(--diagram-fade-stagger));
 }
@@ -2011,7 +2018,7 @@ svg[data-line-draw].is-drawn .st1 {
 
 .p-diagram__icon--3,
 .p-diagram__copy--3 {
-	--diagram-float-duration: 3.8s;
+	--diagram-float-duration: var(--diagram-float-duration-3);
 	--diagram-float-name: p-diagram-float;
 	--fade-delay: calc(var(--diagram-fade-items-start) + 2 * var(--diagram-fade-stagger));
 }
@@ -2030,7 +2037,7 @@ svg[data-line-draw].is-drawn .st1 {
 
 .p-diagram__icon--4,
 .p-diagram__copy--4 {
-	--diagram-float-duration: 4.6s;
+	--diagram-float-duration: var(--diagram-float-duration-4);
 	--diagram-float-name: p-diagram-float-rev;
 	--fade-delay: calc(var(--diagram-fade-items-start) + 3 * var(--diagram-fade-stagger));
 }
@@ -2049,7 +2056,7 @@ svg[data-line-draw].is-drawn .st1 {
 
 .p-diagram__icon--5,
 .p-diagram__copy--5 {
-	--diagram-float-duration: 3.1s;
+	--diagram-float-duration: var(--diagram-float-duration-5);
 	--diagram-float-name: p-diagram-float;
 	--fade-delay: calc(var(--diagram-fade-items-start) + 4 * var(--diagram-fade-stagger));
 }
@@ -2068,7 +2075,7 @@ svg[data-line-draw].is-drawn .st1 {
 
 .p-diagram__icon--6,
 .p-diagram__copy--6 {
-	--diagram-float-duration: 4.3s;
+	--diagram-float-duration: var(--diagram-float-duration-6);
 	--diagram-float-name: p-diagram-float-rev;
 	--fade-delay: calc(var(--diagram-fade-items-start) + 5 * var(--diagram-fade-stagger));
 }
