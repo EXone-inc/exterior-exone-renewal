@@ -2,8 +2,11 @@
 /**
  * フッター（サイトフッター 〜 ドキュメント末尾）。
  *
- * カンプ: PC 917:2595（1920x850・MENU / STORE 横並び）
- *         SP  917:754〜917:787（375x648・MENU / STORE 縦積み）
+ * カンプ（Figma 670:357「header / footer」）
+ * コーポレート: PC 670:88（1920x850・MENU / STORE 横並び）
+ *               SP 917:754〜917:787（375x648・MENU / STORE 縦積み。670:357 に SP フッターは無い）
+ * 支店モード（inc/store-mode.php）: PC 670:193。ロゴは支店の TOP へ、MENU は支店用（inc/menus.php）。
+ *               SP は既存の SP フッターのまま、MENU の項目だけ支店用。
  *
  * @package exterior-exone
  */
@@ -16,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 <footer class="p-footer" role="contentinfo">
 	<p class="p-footer__logo">
-		<a href="<?php echo esc_url( home_url( '/' ) ); ?>">
+		<a href="<?php echo esc_url( exterior_exone_brand_url() ); ?>">
 			<img
 				src="<?php echo esc_url( exterior_exone_top_image( 'logo.svg' ) ); ?>"
 				width="164"
@@ -48,7 +51,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<nav class="p-footer__block" aria-label="フッターメニュー">
 			<h2 class="p-footer__heading">MENU</h2>
 			<?php
-			wp_nav_menu(
+			exterior_exone_nav_menu(
 				array(
 					'theme_location' => 'footer',
 					'container'      => false,
@@ -63,7 +66,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<nav class="p-footer__block" aria-label="店舗一覧">
 			<h2 class="p-footer__heading">STORE</h2>
 			<?php
-			wp_nav_menu(
+			exterior_exone_nav_menu(
 				array(
 					'theme_location' => 'store',
 					'container'      => false,

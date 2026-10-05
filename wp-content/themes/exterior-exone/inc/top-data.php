@@ -344,7 +344,7 @@ function exterior_exone_works_cards() {
 
 			return array(
 				'title'    => get_the_title( $post ),
-				'url'      => (string) get_permalink( $post ),
+				'url'      => exterior_exone_store_link( (string) get_permalink( $post ) ),
 				// 1 枚目だけ使う。0 なら画像未設定。
 				'image_id' => $images ? (int) $images[0] : 0,
 			);
@@ -377,7 +377,7 @@ function exterior_exone_news_cards() {
 		function ( $post ) {
 			return array(
 				'title'    => get_the_title( $post ),
-				'url'      => (string) get_permalink( $post ),
+				'url'      => exterior_exone_store_link( (string) get_permalink( $post ) ),
 				// 0 なら画像未設定。カンプ 917:111 と同じグレーの塗りを出す。
 				'image_id' => (int) get_post_thumbnail_id( $post ),
 			);

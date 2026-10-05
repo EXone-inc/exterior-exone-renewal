@@ -15,6 +15,7 @@ require_once get_theme_file_path( 'inc/meta-boxes.php' );
 require_once get_theme_file_path( 'inc/top-data.php' );
 require_once get_theme_file_path( 'inc/company-data.php' );
 require_once get_theme_file_path( 'inc/store-data.php' );
+require_once get_theme_file_path( 'inc/store-mode.php' );
 require_once get_theme_file_path( 'inc/dx-data.php' );
 require_once get_theme_file_path( 'inc/plans-data.php' );
 require_once get_theme_file_path( 'inc/works-data.php' );
@@ -573,6 +574,11 @@ function exterior_exone_body_class( $classes ) {
 
 	if ( exterior_exone_is_store_page() ) {
 		$classes[] = 'is-store-page';
+	}
+
+	// 支店モード（支店ページ、または ?store=<slug>）。inc/store-mode.php。
+	if ( exterior_exone_is_store_mode() ) {
+		$classes[] = 'is-store-mode';
 	}
 
 	if ( is_page( 'dx' ) ) {

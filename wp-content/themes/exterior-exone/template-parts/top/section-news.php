@@ -23,7 +23,7 @@ if ( ! $exterior_exone_news ) {
 	return;
 }
 
-$exterior_exone_news_archive = get_post_type_archive_link( 'news' );
+$exterior_exone_news_archive = exterior_exone_store_link( (string) get_post_type_archive_link( 'news' ) );
 ?>
 <section class="p-news" data-section="news">
 	<h2 class="c-section-title p-news__title">NEWS</h2>

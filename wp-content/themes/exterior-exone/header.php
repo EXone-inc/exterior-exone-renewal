@@ -2,8 +2,12 @@
 /**
  * ヘッダー（ドキュメント冒頭 〜 サイトヘッダー）。
  *
- * カンプ: PC 917:2733（1920x154・FV に重なる半透明グラデーション）
- *         SP  917:796（375x45・#1a1a1a のバー + ハンバーガー）
+ * カンプ（Figma 670:357「header / footer」）
+ * コーポレート: PC 670:45（1920x154・FV に重なる半透明グラデーション）
+ *               SP 670:288（375x45・#1a1a1a のバー + ハンバーガー、開いたメニュー）
+ * 支店モード（inc/store-mode.php）: PC 670:58（1920x113・#000000 ベタ・CONTACT はオレンジのボタン）
+ *               SP 670:289。ロゴ・TOP は支店の TOP へ、ロゴの右に「○○支店」、
+ *               メニューは支店用（inc/menus.php）。
  *
  * @package exterior-exone
  */
@@ -21,13 +25,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 </head>
 <body <?php body_class(); ?>>
 <?php wp_body_open(); ?>
+<?php $exterior_exone_store_mode = exterior_exone_store_mode(); ?>
 
 <a class="screen-reader-text" href="#main">本文へスキップ</a>
 
 <header class="p-header" role="banner">
 	<div class="p-header__inner">
 		<p class="p-header__logo">
-			<a href="<?php echo esc_url( home_url( '/' ) ); ?>">
+			<a href="<?php echo esc_url( exterior_exone_brand_url() ); ?>">
 				<img
 					src="<?php echo esc_url( exterior_exone_top_image( 'logo.svg' ) ); ?>"
 					width="164"
@@ -35,11 +40,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 					alt="<?php bloginfo( 'name' ); ?>"
 				>
 			</a>
+<?php if ( $exterior_exone_store_mode ) : ?>
+			<a class="p-header__store" href="<?php echo esc_url( exterior_exone_store_url( $exterior_exone_store_mode['slug'] ) ); ?>"><?php echo esc_html( $exterior_exone_store_mode['name'] ); ?></a>
+<?php endif; ?>
 		</p>
 
 		<nav class="p-gnav" aria-label="グローバルナビ">
 			<?php
-			wp_nav_menu(
+			exterior_exone_nav_menu(
 				array(
 					'theme_location' => 'global',
 					'container'      => false,
@@ -51,7 +59,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			?>
 		</nav>
 
-		<?php // SP のみ表示。押下で下のドロワー（カンプ 1036:395）を開く。 ?>
+		<?php // SP のみ表示。押下で下のドロワー（カンプ 670:288 / 670:289）を開く。 ?>
 		<button
 			type="button"
 			class="p-header__toggle"
@@ -66,11 +74,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 	</div>
 </header>
 
-<?php // ハンバーガーメニュー（カンプ 1036:395・SP のみ）。 ?>
+<?php // ハンバーガーメニュー（カンプ 670:288 / 支店 670:289・SP のみ）。 ?>
 <div class="p-drawer" id="global-drawer" data-drawer tabindex="-1">
 	<div class="p-drawer__bar">
 		<p class="p-drawer__logo">
-			<a href="<?php echo esc_url( home_url( '/' ) ); ?>">
+			<a href="<?php echo esc_url( exterior_exone_brand_url() ); ?>">
 				<img
 					src="<?php echo esc_url( exterior_exone_top_image( 'logo.svg' ) ); ?>"
 					width="164"
@@ -78,6 +86,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 					alt="<?php bloginfo( 'name' ); ?>"
 				>
 			</a>
+<?php if ( $exterior_exone_store_mode ) : ?>
+			<a class="p-drawer__store" href="<?php echo esc_url( exterior_exone_store_url( $exterior_exone_store_mode['slug'] ) ); ?>"><?php echo esc_html( $exterior_exone_store_mode['name'] ); ?></a>
+<?php endif; ?>
 		</p>
 
 		<button type="button" class="p-drawer__close" aria-label="メニューを閉じる" data-drawer-close>
@@ -89,7 +100,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<nav class="p-drawer__block" aria-label="メニュー">
 			<h2 class="p-drawer__heading">MENU</h2>
 			<?php
-			wp_nav_menu(
+			exterior_exone_nav_menu(
 				array(
 					'theme_location' => 'footer',
 					'container'      => false,
@@ -104,7 +115,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<nav class="p-drawer__block" aria-label="店舗一覧">
 			<h2 class="p-drawer__heading">STORE</h2>
 			<?php
-			wp_nav_menu(
+			exterior_exone_nav_menu(
 				array(
 					'theme_location' => 'store',
 					'container'      => false,

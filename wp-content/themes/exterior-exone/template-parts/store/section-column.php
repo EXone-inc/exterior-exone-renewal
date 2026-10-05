@@ -34,7 +34,7 @@ if ( ! $exterior_exone_cards ) {
 }
 
 $exterior_exone_column  = exterior_exone_store_column( $exterior_exone_store );
-$exterior_exone_archive = get_post_type_archive_link( 'news' );
+$exterior_exone_archive = exterior_exone_store_link( (string) get_post_type_archive_link( 'news' ) );
 ?>
 <section class="p-scolumn" data-section="store-column">
 	<h2 class="c-store-title"><?php echo esc_html( $exterior_exone_column['title'] ); ?></h2>

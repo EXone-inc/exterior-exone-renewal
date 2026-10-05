@@ -5,6 +5,8 @@
  * 管理画面でメニューが未設定の間は、ここのカンプ準拠の内容が
  * wp_nav_menu() の fallback_cb として出力される。
  * メニューが登録されればそちらが優先される。
+ * 支店モード（inc/store-mode.php）のときは、割り当ての有無にかかわらず
+ * ここの支店用項目を出す（exterior_exone_nav_menu()）。
  *
  * @package exterior-exone
  */
@@ -14,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * グローバルナビ（PC ヘッダー）の項目。カンプ 917:2733。
+ * グローバルナビ（PC ヘッダー）の項目。カンプ 670:45（支店用は 670:58）。
  *
  * @return array<int, array{label: string, url: string}>
  */
@@ -30,7 +32,7 @@ function exterior_exone_global_menu_items() {
 		),
 		array(
 			'label' => 'WORKS',
-			'url'   => '#',
+			'url'   => home_url( '/works/' ),
 		),
 		array(
 			'label'    => 'STORE',
@@ -54,7 +56,7 @@ function exterior_exone_global_menu_items() {
 }
 
 /**
- * フッター MENU の項目。カンプ 917:2595（PC）/ 917:756-764（SP）。
+ * フッター MENU の項目。カンプ 670:88（PC。支店用は 670:193）/ 917:756-764（SP）。
  *
  * 先頭 5 件が 1 列目、残りが 2 列目に流れる（CSS グリッドの行数と対応）。
  * ハンバーガーメニューでは「お問い合わせ」だけがボタンとして独立するため、
@@ -71,7 +73,7 @@ function exterior_exone_footer_menu_items() {
 }
 
 /**
- * ハンバーガーメニューの MENU 項目。カンプ 1024:188-196。
+ * ハンバーガーメニューの MENU 項目。カンプ 670:288（支店用は 670:289）。
  *
  * 先頭 5 件が 1 列目、残る 3 件が 2 列目に流れる。
  *
@@ -93,7 +95,7 @@ function exterior_exone_drawer_menu_items() {
 		),
 		array(
 			'label' => '事例一覧',
-			'url'   => '#',
+			'url'   => home_url( '/works/' ),
 		),
 		array(
 			'label' => 'お知らせ',
@@ -115,13 +117,98 @@ function exterior_exone_drawer_menu_items() {
 }
 
 /**
- * お問い合わせ。カンプ 1024:238・1024:242（ハンバーガーメニューではボタン）。
+ * 支店モードのグローバルナビ（PC ヘッダー）の項目。カンプ 670:58。
  *
+ * COMPANY・RECRUIT は出さない。STORES は STORE と同じく遷移しないドロップダウン。
+ *
+ * @return array<int, array{label: string, url: string}>
+ */
+function exterior_exone_store_global_menu_items() {
+	return array(
+		array(
+			'label' => 'DX EXPERIENCE',
+			'url'   => exterior_exone_store_link( home_url( '/dx/' ) ),
+		),
+		array(
+			'label' => 'WORKS',
+			'url'   => exterior_exone_store_link( home_url( '/works/' ) ),
+		),
+		array(
+			'label' => 'PLANS',
+			'url'   => exterior_exone_store_link( home_url( '/plans/' ) ),
+		),
+		array(
+			'label'    => 'STORES',
+			'url'      => exterior_exone_store_index_url(),
+			'children' => exterior_exone_store_menu_items(),
+		),
+		// オレンジのボタン（670:337）。
+		array_merge( exterior_exone_contact_item( 'CONTACT' ), array( 'modifier' => 'button' ) ),
+	);
+}
+
+/**
+ * 支店モードのハンバーガーメニュー MENU 項目。カンプ 670:289。
+ *
+ * 先頭 5 件が 1 列目、コラム・コーポレートサイトが 2 列目に流れる。
+ *
+ * @return array<int, array{label: string, url: string}>
+ */
+function exterior_exone_store_drawer_menu_items() {
+	return array(
+		array(
+			'label' => 'TOP',
+			'url'   => exterior_exone_brand_url(),
+		),
+		array(
+			'label' => '新しい外構体験',
+			'url'   => exterior_exone_store_link( home_url( '/dx/' ) ),
+		),
+		array(
+			'label' => 'プラン一覧',
+			'url'   => exterior_exone_store_link( home_url( '/plans/' ) ),
+		),
+		array(
+			'label' => '事例一覧',
+			'url'   => exterior_exone_store_link( home_url( '/works/' ) ),
+		),
+		array(
+			'label' => 'お知らせ',
+			'url'   => '#',
+		),
+		array(
+			'label' => 'コラム',
+			'url'   => '#',
+		),
+		// コーポレートへ戻る唯一の入口なので ?store= を付けない。
+		array(
+			'label' => 'コーポレートサイト',
+			'url'   => home_url( '/' ),
+		),
+	);
+}
+
+/**
+ * 支店モードのフッター MENU の項目。カンプ 670:193。
+ *
+ * @return array<int, array{label: string, url: string}>
+ */
+function exterior_exone_store_footer_menu_items() {
+	return array_merge(
+		exterior_exone_store_drawer_menu_items(),
+		array( exterior_exone_contact_item() )
+	);
+}
+
+/**
+ * お問い合わせ。カンプ 670:244・670:257（ハンバーガーメニューではボタン）。支店用 PC ヘッダーでは CONTACT ボタン（670:337）。
+ *
+ * @param string $label 表示名（PC ヘッダーは CONTACT）。
  * @return array{label: string, url: string}
  */
-function exterior_exone_contact_item() {
+function exterior_exone_contact_item( $label = 'お問い合わせ' ) {
 	return array(
-		'label' => 'お問い合わせ',
+		'label' => $label,
 		'url'   => '#',
 	);
 }
@@ -218,15 +305,36 @@ function exterior_exone_render_menu_list( array $items, $class ) {
 			continue;
 		}
 
+		// modifier を持つ項目は <li> に修飾クラスを足す（支店用ヘッダーの CONTACT ボタン = button）。
+		$modifier = empty( $item['modifier'] ) ? '' : ' ' . $class . '__item--' . sanitize_html_class( $item['modifier'] );
+
 		printf(
-			'<li class="%1$s__item"><a href="%2$s">%3$s</a></li>',
+			'<li class="%1$s__item%4$s"><a href="%2$s">%3$s</a></li>',
 			esc_attr( $class ),
 			esc_url( $item['url'] ),
-			esc_html( $item['label'] )
+			esc_html( $item['label'] ),
+			esc_attr( $modifier )
 		);
 	}
 
 	echo '</ul>';
+}
+
+/**
+ * wp_nav_menu() の代わりに呼ぶ。支店モードでは割り当てメニューを使わず fallback_cb を出す
+ *（割り当てメニューには支店用の差し替えと ?store= の引き継ぎが効かないため）。
+ *
+ * @param array $args wp_nav_menu() の引数。
+ * @return void
+ */
+function exterior_exone_nav_menu( array $args ) {
+	if ( exterior_exone_is_store_mode() && ! empty( $args['fallback_cb'] ) && is_callable( $args['fallback_cb'] ) ) {
+		call_user_func( $args['fallback_cb'] );
+
+		return;
+	}
+
+	wp_nav_menu( $args );
 }
 
 /**
@@ -235,7 +343,9 @@ function exterior_exone_render_menu_list( array $items, $class ) {
  * @return void
  */
 function exterior_exone_global_menu_fallback() {
-	exterior_exone_render_menu_list( exterior_exone_global_menu_items(), 'p-gnav__list' );
+	$items = exterior_exone_is_store_mode() ? exterior_exone_store_global_menu_items() : exterior_exone_global_menu_items();
+
+	exterior_exone_render_menu_list( $items, 'p-gnav__list' );
 }
 
 /**
@@ -244,7 +354,9 @@ function exterior_exone_global_menu_fallback() {
  * @return void
  */
 function exterior_exone_footer_menu_fallback() {
-	exterior_exone_render_menu_list( exterior_exone_footer_menu_items(), 'p-footer__list' );
+	$items = exterior_exone_is_store_mode() ? exterior_exone_store_footer_menu_items() : exterior_exone_footer_menu_items();
+
+	exterior_exone_render_menu_list( $items, 'p-footer__list' );
 }
 
 /**
@@ -253,7 +365,9 @@ function exterior_exone_footer_menu_fallback() {
  * @return void
  */
 function exterior_exone_drawer_menu_fallback() {
-	exterior_exone_render_menu_list( exterior_exone_drawer_menu_items(), 'p-drawer__list' );
+	$items = exterior_exone_is_store_mode() ? exterior_exone_store_drawer_menu_items() : exterior_exone_drawer_menu_items();
+
+	exterior_exone_render_menu_list( $items, 'p-drawer__list' );
 }
 
 /**

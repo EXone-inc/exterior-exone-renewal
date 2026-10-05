@@ -26,7 +26,7 @@ get_header();
 						<?php if ( is_singular() ) : ?>
 							<?php the_title(); ?>
 						<?php else : ?>
-							<a href="<?php the_permalink(); ?>"><?php the_title(); ?></a>
+							<a href="<?php echo esc_url( exterior_exone_store_link( (string) get_permalink() ) ); ?>"><?php the_title(); ?></a>
 						<?php endif; ?>
 					</h1>
 

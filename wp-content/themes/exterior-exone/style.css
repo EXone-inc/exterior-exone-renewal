@@ -24,6 +24,7 @@ Text Domain: exterior-exone
 	--color-gray1: #dadada;
 	--color-gray2: #d9d9d9;
 	--color-gray3: #454545;
+	--color-black0: #000000; /* 支店用 PC ヘッダーの地（670:72） */
 	--color-black1: #4d4d4d;
 	--color-black2: #1a1a1a;
 	--color-orange1: #d2832f;
@@ -101,7 +102,7 @@ Text Domain: exterior-exone
 	--content-narrow: 1240px; /* 中央寄せテキストブロック */
 	--gutter: clamp(1.7188rem, -0.2913rem + 8.5761vw, 10rem); /* 27.5 → 160 : 左右余白 */
 
-	/* --- ヘッダー（917:796 / 917:2733） --- */
+	/* --- ヘッダー（670:288 / 670:45。支店用は下の「支店モードのヘッダー」） --- */
 	--header-height: clamp(45px, 18.544px + 7.055vw, 154px); /* 45 → 154 */
 	--header-pad-x: clamp(15.64px, 0.019px + 4.1657vw, 80px); /* 15.64 → 80 : 左余白 */
 	--header-pad-right: clamp(19.18px, 4.418px + 3.9366vw, 80px); /* 19.18 → 80 : 右余白（左とは非対称） */
@@ -124,8 +125,19 @@ Text Domain: exterior-exone
 	--header-overlay: linear-gradient(180deg, rgba(0, 0, 0, 0.49) 0%, rgba(0, 0, 0, 0) 100%); /* PC ヘッダー背景（黒 49% → 透明） */
 	--toggle-width: 25.6px;
 	--toggle-gap: 5px;
+	/* --- 支店モードのヘッダー（PC 670:58 / SP 670:289）。高さは PC だけ 113（末尾の比例ブロック） --- */
+	--header-store-bg: var(--color-black0); /* PC の地。SP はコーポレートと同じ --color-black2 */
+	--store-name-gap: clamp(6.93px, 4.7285px + 0.5871vw, 16px); /* 6.93 → 16 : ロゴ右端から「○○支店」 */
+	--fs-store-name: 12px; /* SP 12（670:335）。PC はグローバルナビと同じ 20（670:87） */
+	--store-name-color-sp: var(--color-gray2);
+	--store-name-shift: 3px; /* SP: 文字の上下中央 y25.5 = ロゴ中央 22.5 の 3 下。PC は 0（メニューと同じ高さ） */
+	--header-contact-width: 170px;  /* CONTACT ボタン 670:337（170x42・角丸 21） */
+	--header-contact-height: 42px;
+	--header-contact-radius: 21px;
+	--header-contact-gap: 46px;     /* STORES 右端 1624 → ボタン左端 1670 */
+	--header-contact-bg: var(--color-orange1);
 
-	/* --- ハンバーガーメニュー（1036:395・375px のカンプ実測。SP 専用） --- */
+	/* --- ハンバーガーメニュー（670:288・375px のカンプ実測。SP 専用。括弧内は旧カンプの node） --- */
 	--drawer-rule-gap: 5.84px;    /* 見出し下端 159.45 → 区切り線 165.29（1024:204） */
 	--drawer-list-gap: 16.31px;   /* 区切り線 → 1 件目の上端 181.6（1024:192） */
 	--drawer-row-gap: 5.1px;      /* 行送り 24.3 − 行高 19.2 */
@@ -906,7 +918,7 @@ body.is-drawer-open {
    S1 以降、各スプリントでここに追記する。
    ============================================================ */
 
-/* --- ヘッダー（917:796 / 917:2733） ---
+/* --- ヘッダー（670:288 / 670:45） ---
    PC: FV の上に重なる半透明グラデーション。SP: #1a1a1a のバー。
    SP はスクロール中も画面上端に留める。fixed ではなく sticky にしてあるのは、
    流れの中の高さを残したまま追従させたいため（fixed だと本文を押し下げる
@@ -1056,6 +1068,69 @@ body.is-drawer-open {
 	}
 }
 
+/* --- 支店モード（inc/store-mode.php）のヘッダー（PC 670:58 / SP 670:289） ---
+   「○○支店」はロゴと同じ p の中に置き、ロゴの右に並べる。ロゴの位置は動かさず（上揃え）、
+   文字はロゴの上下中央を基準に --store-name-shift だけ下げる。 */
+.is-store-mode .p-header__logo,
+.is-store-mode .p-drawer__logo {
+	display: flex;
+	align-items: flex-start;
+	column-gap: var(--store-name-gap);
+}
+
+.p-header__store,
+.p-drawer__store {
+	font-family: var(--font-ui);
+	font-size: var(--fs-store-name);
+	--store-name-lh: var(--lh-base);
+
+	margin-top: calc((var(--header-logo-height) - var(--fs-store-name) * var(--store-name-lh)) / 2 + var(--store-name-shift));
+	font-weight: var(--fw-regular);
+	line-height: var(--store-name-lh);
+	letter-spacing: var(--ls-base);
+	color: var(--store-name-color-sp);
+	white-space: nowrap;
+}
+
+@media (min-width: 1025px) {
+	/* PC は高さ 113。<html data-store-mode> に付けて、--header-height から導出している
+	   トークン（PLANS のタブ位置など）もこの値で動くようにする */
+	:root[data-store-mode] {
+		--header-height: calc(113 * var(--vu));
+	}
+
+	/* 地は黒ベタ。FV から始まるページでは既存どおり写真に重ねて固定（.has-fv-header） */
+	.is-store-mode .p-header,
+	.is-store-mode.has-fv-header .p-header {
+		background: var(--header-store-bg);
+	}
+
+	.p-header__store {
+		--store-name-lh: var(--lh-heading);
+
+		letter-spacing: normal;
+		color: var(--color-white2);
+	}
+
+	/* CONTACT はオレンジのボタン（670:337）。行の高さはほかの項目と同じに保ち、
+	   ボタンの上下中央をメニュー文字の上下中央に合わせる */
+	.p-gnav__list__item--button {
+		margin-left: calc(var(--header-contact-gap) - var(--nav-gap));
+	}
+
+	.p-gnav__list__item--button a {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: var(--header-contact-width);
+		height: var(--header-contact-height);
+		margin-block: calc((var(--fs-nav) * var(--lh-heading) - var(--header-contact-height)) / 2);
+		border-radius: var(--header-contact-radius);
+		background: var(--header-contact-bg);
+		font-weight: var(--fw-bold);
+	}
+}
+
 @media (min-width: 1025px) {
 	.p-header__toggle {
 		display: none;
@@ -1077,7 +1152,7 @@ body.is-drawer-open {
 	}
 }
 
-/* --- ハンバーガーメニュー（1036:395・SP のみ） ---
+/* --- ハンバーガーメニュー（670:288 / 支店 670:289・SP のみ） ---
    内容はフッターの MENU / STORE / SNS と同じで、
    「お問い合わせ」だけがボタンとして独立する（1024:238）。 */
 .p-drawer {
@@ -4040,6 +4115,13 @@ svg[data-line-draw].is-drawn .st1 {
 		--ls-button: calc(2 * var(--vu));
 		--gutter: calc(160 * var(--vu));
 		--header-height: calc(154 * var(--vu));
+		--store-name-gap: calc(16 * var(--vu));
+		--fs-store-name: var(--fs-nav);
+		--store-name-shift: 0px;
+		--header-contact-width: calc(170 * var(--vu));
+		--header-contact-height: calc(42 * var(--vu));
+		--header-contact-radius: calc(21 * var(--vu));
+		--header-contact-gap: calc(46 * var(--vu));
 		--header-pad-x: calc(80 * var(--vu));
 		--header-pad-right: calc(80 * var(--vu));
 		--header-logo-top: calc(41 * var(--vu));
@@ -4206,6 +4288,9 @@ svg[data-line-draw].is-drawn .st1 {
 		--ls-button: calc(1 * var(--su));
 		--gutter: calc(27.5008 * var(--su));
 		--header-height: calc(45 * var(--su));
+		--store-name-gap: calc(6.93 * var(--su));
+		--fs-store-name: calc(12 * var(--su));
+		--store-name-shift: calc(3 * var(--su));
 		--header-pad-x: calc(15.64 * var(--su));
 		--header-pad-right: calc(19.18 * var(--su));
 		--header-logo-top: calc(14.82 * var(--su));

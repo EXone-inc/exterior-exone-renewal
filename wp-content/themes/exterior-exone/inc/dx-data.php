@@ -207,7 +207,7 @@ function exterior_exone_dx_page_steps() {
 				// 押すと別タブで VR 展示場のページ（/dx/vr/、page-vr.php）を開く（2026-09-28）。
 				'button'      => array(
 					'label'   => 'VR展示場を体験する',
-					'url'     => home_url( '/dx/vr/' ),
+					'url'     => exterior_exone_store_link( home_url( '/dx/vr/' ) ),
 					'new_tab' => true,
 				),
 				'flow_active' => 1,

@@ -117,7 +117,7 @@ $exterior_exone_dx_steps = exterior_exone_dx_steps();
 					</ul>
 
 					<?php // 遷移先は DX EXPERIENCE ページ（固定ページ dx / page-dx.php）。 ?>
-					<a class="c-btn c-btn--white p-dx__btn" href="<?php echo esc_url( home_url( '/dx/' ) ); ?>">VIEW MORE</a>
+					<a class="c-btn c-btn--white p-dx__btn" href="<?php echo esc_url( exterior_exone_store_link( home_url( '/dx/' ) ) ); ?>">VIEW MORE</a>
 				</div>
 			</div>
 
