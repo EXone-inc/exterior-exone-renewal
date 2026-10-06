@@ -33,8 +33,19 @@ $exterior_exone_reviews = exterior_exone_store_reviews();
 	<ul class="p-sreviews__list">
 		<?php foreach ( $exterior_exone_reviews['cards'] as $exterior_exone_card ) : ?>
 			<li class="p-sreviews__card" data-reveal>
-				<?php // カンプの画像は灰色のプレースホルダ（写真は未支給）。 ?>
-				<span class="p-sreviews__thumb" aria-hidden="true"></span>
+				<?php // カンプの画像は灰色のプレースホルダ。写真は仮（inc/store-data.php）。無ければ灰色のまま。 ?>
+				<?php if ( ! empty( $exterior_exone_card['image'] ) ) : ?>
+					<img
+						class="p-sreviews__thumb"
+						src="<?php echo esc_url( exterior_exone_store_image( $exterior_exone_card['image'] ) ); ?>"
+						width="1448"
+						height="814"
+						alt=""
+						loading="lazy"
+					>
+				<?php else : ?>
+					<span class="p-sreviews__thumb" aria-hidden="true"></span>
+				<?php endif; ?>
 
 				<div class="p-sreviews__body">
 					<p class="p-sreviews__rating">

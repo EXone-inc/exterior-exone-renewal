@@ -85,7 +85,10 @@
 		// SP はコピーを映像に重ねたまま（position: absolute）なので 0。
 		const band = intro && window.getComputedStyle(intro).position !== 'absolute' ? intro.offsetHeight : 0;
 		root.style.setProperty('--dxp-ex-intro-h', band + 'px');
-		start = window.scrollY + root.getBoundingClientRect().top + band;
+		// 固定が始まるのは、舞台の上端が sticky の top（PC は -帯の高さ。支店モードは
+		// 追従ヘッダーの下 = ヘッダー高さ - 帯）に達したとき。
+		const stickyTop = parseFloat(window.getComputedStyle(stage).top) || 0;
+		start = window.scrollY + root.getBoundingClientRect().top - stickyTop;
 		distance = Math.max(1, root.offsetHeight - stage.offsetHeight);
 	}
 	// 章の文字（全景の固定コピー / 章 2〜5 の右下ラベル）。index が null のあいだ（映像が移動中）は

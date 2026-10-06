@@ -44,7 +44,7 @@ $exterior_exone_plans = exterior_exone_store_plans();
 				<?php echo wp_kses( exterior_exone_store_lines( $exterior_exone_plans['package']['lead'] ), array( 'br' => array() ) ); ?>
 			</p>
 
-			<a class="c-btn c-btn--black p-splans__btn" href="<?php echo esc_url( $exterior_exone_plans['package']['more'] ); ?>">VIEW MORE</a>
+			<a class="c-btn c-btn--black p-splans__btn" href="<?php echo esc_url( exterior_exone_store_link( $exterior_exone_plans['package']['more'] ) ); ?>">VIEW MORE</a>
 		</div>
 
 		<?php // 612:308。下端を背景色に溶かす（612:582）。 ?>

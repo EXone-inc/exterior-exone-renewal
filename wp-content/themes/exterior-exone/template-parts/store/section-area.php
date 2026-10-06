@@ -151,6 +151,9 @@ $exterior_exone_arch_count = count( $exterior_exone_area['gallery'] );
 				height="1157"
 				alt=""
 				loading="lazy"
+				<?php if ( ! empty( $exterior_exone_area['local']['position'] ) ) : ?>
+				style="<?php echo esc_attr( 'object-position: ' . $exterior_exone_area['local']['position'] . ';' ); ?>"
+				<?php endif; ?>
 			>
 		</div>
 
@@ -166,6 +169,9 @@ $exterior_exone_arch_count = count( $exterior_exone_area['gallery'] );
 						height="729"
 						alt=""
 						loading="lazy"
+						<?php if ( ! empty( $exterior_exone_card['position'] ) ) : ?>
+						style="<?php echo esc_attr( 'object-position: ' . $exterior_exone_card['position'] . ';' ); ?>"
+						<?php endif; ?>
 					>
 
 					<p class="p-sarea__card-label">

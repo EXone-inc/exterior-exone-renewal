@@ -130,7 +130,7 @@ Text Domain: exterior-exone
 	--store-name-gap: clamp(6.93px, 4.7285px + 0.5871vw, 16px); /* 6.93 → 16 : ロゴ右端から「○○支店」 */
 	--fs-store-name: 12px; /* SP 12（670:335）。PC はグローバルナビと同じ 20（670:87） */
 	--store-name-color-sp: var(--color-gray2);
-	--store-name-shift: 3px; /* SP: 文字の上下中央 y25.5 = ロゴ中央 22.5 の 3 下。PC は 0（メニューと同じ高さ） */
+	--store-name-shift: 3px; /* SP: 文字の上下中央 y25.5 = ロゴ中央 22.5 の 3 下。PC は 3.5（ベースラインをロゴの下端に） */
 	--header-contact-width: 170px;  /* CONTACT ボタン 670:337（170x42・角丸 21） */
 	--header-contact-height: 42px;
 	--header-contact-radius: 21px;
@@ -1096,13 +1096,25 @@ body.is-drawer-open {
 	/* PC は高さ 113。<html data-store-mode> に付けて、--header-height から導出している
 	   トークン（PLANS のタブ位置など）もこの値で動くようにする */
 	:root[data-store-mode] {
-		--header-height: calc(113 * var(--vu));
+		--header-height: calc(105 * var(--vu));
 	}
 
-	/* 地は黒ベタ。FV から始まるページでは既存どおり写真に重ねて固定（.has-fv-header） */
+	/* 地は黒ベタ（不透明）。重ねると固定される演出（FV・DX のステップ・Explorer・PLANS の
+	   選択画面）の上部が隠れるため、FV から始まるページでも写真に重ねず、流れの中の
+	   追従ヘッダー（sticky）にして内容をその下から始める。SP と同じ考え方
+	   （ユーザー決定 2026-10-06）。固定される演出の位置・高さは下のトークンで合わせる */
 	.is-store-mode .p-header,
 	.is-store-mode.has-fv-header .p-header {
+		position: sticky;
+		inset: 0 auto auto; /* top: 0（.has-fv-header の inset を戻す） */
 		background: var(--header-store-bg);
+	}
+
+	:root[data-store-mode] {
+		--fv-pin-height: calc(100vh - var(--header-height));
+		--fv-pin-top: var(--header-height);
+		--dx-pin-top: var(--header-height);
+		--dx-pin-height: calc(100vh - var(--header-height));
 	}
 
 	.p-header__store {
@@ -4117,7 +4129,7 @@ svg[data-line-draw].is-drawn .st1 {
 		--header-height: calc(154 * var(--vu));
 		--store-name-gap: calc(16 * var(--vu));
 		--fs-store-name: var(--fs-nav);
-		--store-name-shift: 0px;
+		--store-name-shift: calc(3.5 * var(--vu)); /* 文字枠 y45（670:87）= ロゴ中央 53.5 の 3.5 下。ベースラインがロゴの下端 66 に揃う */
 		--header-contact-width: calc(170 * var(--vu));
 		--header-contact-height: calc(42 * var(--vu));
 		--header-contact-radius: calc(21 * var(--vu));

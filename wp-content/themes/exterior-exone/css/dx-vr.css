@@ -55,14 +55,10 @@
 	}
 }
 
-/* --- 支店モード（PC）: ヘッダーが不透明な黒帯（113）になり、重ねると VR の上部
-   （右上の地点一覧）が隠れて押せなくなる。このページだけ VR をヘッダーの下から始め、
-   ヘッダーと合わせて 1 画面に収める（2026-10-02）。メニューを左へ寄せる必要も無くなる --- */
+/* --- 支店モード（PC）: ヘッダーは不透明な追従ヘッダーで、内容はその下から始まる
+   （style.css の決定 2026-10-06。以前はこのページだけ padding で下げていた）。
+   VR はヘッダーと合わせて 1 画面に収める。メニューを左へ寄せる必要も無い --- */
 @media (min-width: 1025px) {
-	.is-store-mode.is-vr-page .p-dxvr {
-		padding-top: var(--header-height);
-	}
-
 	.is-store-mode.is-vr-page .p-dxvr__frame {
 		height: calc(var(--dxvr-height) - var(--header-height));
 		height: calc(var(--dxvr-height-svh) - var(--header-height));

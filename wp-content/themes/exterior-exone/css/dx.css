@@ -1545,6 +1545,14 @@
 	   計算し直させるため、:root ではなくここに置く */
 	.p-dxsteps__stage {
 		--dxp-vu: min(1px, calc(100vw / 1920), calc(100vh / 1080));
+	}
+
+	/* 支店モード: 追従ヘッダーの下に固定するぶん、収める高さもヘッダーを引く */
+	.is-store-mode .p-dxsteps__stage {
+		--dxp-vu: min(1px, calc(100vw / 1920), calc((100vh - var(--header-height)) / 1080));
+	}
+
+	.p-dxsteps__stage {
 
 		/* --- ステップ共通（各 1920x1080。y はステップ上端から） ---
 		   既定値は 02 の実測値。他のステップとの差だけを下の修飾子で上書きする。
@@ -2125,6 +2133,14 @@
 		top: calc(-1 * var(--dxp-ex-intro-h, 0px));
 		height: calc(100vh + var(--dxp-ex-intro-h, 0px));
 		height: calc(100svh + var(--dxp-ex-intro-h, 0px));
+	}
+
+	/* 支店モード: 追従ヘッダー（不透明）の下に固定し、映像は残りの高さに収める。
+	   固定の始まりは js/dx-explorer.js が sticky の top から読む */
+	.is-store-mode .p-dxex--scroll.is-enhanced .p-dxex__stage {
+		top: calc(var(--header-height) - var(--dxp-ex-intro-h, 0px));
+		height: calc(100vh - var(--header-height) + var(--dxp-ex-intro-h, 0px));
+		height: calc(100svh - var(--header-height) + var(--dxp-ex-intro-h, 0px));
 	}
 
 	/* 映像は帯の下の 1 画面ぶん */

@@ -611,8 +611,9 @@ function exterior_exone_store_plans() {
 			),
 			// 612:308 / 641:284。PLANS ページと同じ住宅パース（images/plans/。カンプの切り抜きは CSS）。
 			'image'    => 'pc-package-simple-modern-586-406.png',
-			// 599:59。リンク先は未定のため仮置き（決定事項 Q9）。
-			'more'     => '#',
+			// 599:59。PLANS ページのパッケージプラン（出力時に exterior_exone_store_link() で ?store= を
+			// 引き継ぐ。例 /plans/?store=sendai#package。ユーザー指示 2026-10-06）。
+			'more'     => home_url( '/plans/#package' ),
 			'features' => array(
 				array(
 					'icon'    => 'reasons-icon-doc-599-69.png',
@@ -652,8 +653,10 @@ function exterior_exone_store_plans() {
 				'理想の外構を一からかたちにします。',
 			),
 			'image'    => 'highend-photo-610-273.jpg',
-			// 610:280。ハイエンドページ（出力時に exterior_exone_store_link() で ?store= を引き継ぐ）。
-			'more'     => home_url( '/plans/high-end/' ),
+			// 610:280。PLANS ページのハイエンドプラン（出力時に exterior_exone_store_link() で ?store= を
+			// 引き継ぐ。例 /plans/?store=sendai#high-end。ユーザー指示 2026-10-06。ハイエンドページ
+			// /plans/high-end/ へは PLANS ページ側の VIEW MORE から）。
+			'more'     => home_url( '/plans/#high-end' ),
 			'features' => array(
 				array(
 					'icon'    => 'reasons-icon-tablet-599-73.png',
@@ -744,21 +747,26 @@ function exterior_exone_store_reviews() {
 			'実際にEXoneへご相談いただいたお客様の声を通じて、外構づくりの過程や完成後の変化をご紹介します。',
 		),
 		'stars' => 'reviews-stars-669-223.svg',
+		// 写真は仮（ユーザー指示 2026-10-06「仮で良いので何か入れて」）。AREA の Local Expertise の
+		// 施工写真を流用している。本物のお客様の写真が届いたら image を差し替える。
 		'cards' => array(
 			array(
 				'score' => '5.0',
 				'title' => 'タイトル',
 				'body'  => $dummy,
+				'image' => 'area-sendai-local-757-137.jpg',
 			),
 			array(
 				'score' => '5.0',
 				'title' => 'タイトル',
 				'body'  => $dummy,
+				'image' => 'area-hachinohe-local-757-217.jpg',
 			),
 			array(
 				'score' => '5.0',
 				'title' => 'タイトル',
 				'body'  => $dummy,
+				'image' => 'area-totsuka-local-769-112.jpg',
 			),
 		),
 	);
@@ -930,79 +938,263 @@ function exterior_exone_store_faq() {
 /**
  * AREA の支店ごとに差し替える素材（決定事項 A）。キーは支店のスラッグ。
  *
- * 店内写真（アーチ状ロール。641:1464 の 4 枚）・外観写真（612:639）・
- * Local Expertise の見出し・本文・写真（612:670 / 612:671 / 612:666）・カード 4 枚（612:673。決定 B-2 Q5）。
+ * 店内写真（アーチ状ロール 4 枚）・外観写真・Local Expertise の見出し・本文・写真・
+ * カード 4 枚（決定 B-2 Q5）。写真と文章は Figma のボード Group 528（641:1464）から
+ * 支店ごとに書き出したもの（2026-10-06）。position は object-position（カンプの切り抜き位置）。
  *
- * 仮（素材が届いたら差し替え）: 6 拠点とも青森の写真・文章を置いている。
- * 差し替えるときは該当拠点の配列で $aomori の値を上書きする（例: 'local' => array( ... )）。
- * 店内写真の position は object-position（カンプの切り抜き位置）。枚数は何枚でもよい。
+ * ・弘前: 外観と店内はボードの写真。Local Expertise とカードは青森と共通（ボードの注記
+ *   「地域セクションのテキストと画像は、青森と共通（エリア名のみ変更）」）
+ *
+ * 差し替えるときは該当拠点の配列を書き換える。店内写真の枚数は何枚でもよい。
  *
  * @return array<string, array<string, mixed>>
  */
 function exterior_exone_store_area_media() {
+	// 青森（ボード 1 行目。Local Expertise とカードは弘前・戸塚でも使う）。
+	$aomori_local = array(
+		'heading' => array( '雪国だからこそ、', '暮らしやすさを考える' ),
+		'lead'    => array(
+			// {region} は支店の地域名（「青森支店」の「青森」）に置き換える（exterior_exone_store_area()）。
+			'{region}エリアでは、積雪や凍結を前提とした外構設計が欠かせません。',
+			'EXoneでは、雪捨てスペースの確保や落雪対策、耐雪性能、排水計画まで考慮し、冬でも安心して暮らせる外構をご提案します。',
+		),
+		'photo'    => 'area-aomori-local-739-121.jpg',
+		'position' => '50% 0%',
+	);
+	$aomori_cards = array(
+		array(
+			'label'    => array( '雪捨てスペースを考慮した配置' ),
+			'label_sp' => array( '雪捨てスペースを', '考慮した配置' ),
+			'image'    => 'area-aomori-card1-739-134.jpg',
+			'position' => '50% 50%',
+		),
+		array(
+			'label'    => array( '落雪・雪庇対策' ),
+			'label_sp' => array( '落雪・雪庇対策' ),
+			'image'    => 'area-aomori-card2-739-131.jpg',
+			'position' => '61% 50%',
+		),
+		array(
+			'label'    => array( '凍結を考えた排水計画' ),
+			'label_sp' => array( '凍結を考えた', '排水計画' ),
+			'image'    => 'area-aomori-card3-739-128.jpg',
+			'position' => '28% 50%',
+		),
+		array(
+			'label'    => array( '雪に配慮した', 'フェンス・カーポート提案' ),
+			'label_sp' => array( '雪に配慮した', 'フェンス・カーポート提案' ),
+			'image'    => 'area-aomori-card4-739-125.jpg',
+			'position' => '56% 100%',
+		),
+	);
 	$aomori = array(
-		// 641:1467 / 641:1466 / 641:1468 / 641:1465（ギャラリーの左から）。
+		'photo'   => 'area-aomori-store-737-44.jpg',
 		'gallery' => array(
-			array(
-				'file'     => 'area-gallery-photo1-641-1467.jpg',
-				'position' => '50% 50%',
-			),
-			array(
-				'file'     => 'area-gallery-photo2-641-1466.jpg',
-				'position' => '50% 0%',
-			),
-			array(
-				'file'     => 'area-gallery-photo3-641-1468.jpg',
-				'position' => '50% 76.6%',
-			),
-			array(
-				'file'     => 'area-gallery-photo4-641-1465.jpg',
-				'position' => '50% 100%',
-			),
+			array( 'file' => 'area-aomori-gallery1-641-1467.jpg', 'position' => '50% 50%' ),
+			array( 'file' => 'area-aomori-gallery2-641-1466.jpg', 'position' => '50% 0%' ),
+			array( 'file' => 'area-aomori-gallery3-641-1468.jpg', 'position' => '50% 76%' ),
+			array( 'file' => 'area-aomori-gallery4-641-1465.jpg', 'position' => '50% 100%' ),
 		),
-		// 612:639 店舗外観。
-		'photo'   => 'area-store-photo-628-306.jpg',
-		'local'   => array(
-			'heading' => array( '雪国だからこそ、', '暮らしやすさを考える' ),
-			'lead'    => array(
-				// {region} は支店の地域名（「青森支店」の「青森」）に置き換える（exterior_exone_store_area()）。
-				'{region}エリアでは、積雪や凍結を前提とした外構設計が欠かせません。',
-				'EXoneでは、雪捨てスペースの確保や落雪対策、耐雪性能、排水計画まで考慮し、冬でも安心して暮らせる外構をご提案します。',
-			),
-			'photo'   => 'area-snow-photo-1148-43.jpg',
-		),
-		// 612:673 / SP 641:1423〜641:1427。SP はラベルの改行位置が違う（label_sp）。
-		'cards'   => array(
-			array(
-				'label'    => array( '雪捨てスペースを考慮した配置' ),
-				'label_sp' => array( '雪捨てスペースを', '考慮した配置' ),
-				'image'    => 'area-card1-1148-49.jpg',
-			),
-			array(
-				'label'    => array( '落雪・雪庇対策' ),
-				'label_sp' => array( '落雪・雪庇対策' ),
-				'image'    => 'area-card2-1148-69.jpg',
-			),
-			array(
-				'label'    => array( '凍結を考えた排水計画' ),
-				'label_sp' => array( '凍結を考えた', '排水計画' ),
-				'image'    => 'area-card3-1148-74.jpg',
-			),
-			array(
-				'label'    => array( '雪に配慮した', 'フェンス・カーポート提案' ),
-				'label_sp' => array( '雪に配慮した', 'フェンス・カーポート提案' ),
-				'image'    => 'area-card4-1151-96.jpg',
-			),
-		),
+		'local'   => $aomori_local,
+		'cards'   => $aomori_cards,
 	);
 
 	return array(
-		'sendai'    => $aomori, // 仮（素材が届いたら差し替え）。
-		'totsuka'   => $aomori, // 仮（素材が届いたら差し替え）。
-		'morioka'   => $aomori, // 仮（素材が届いたら差し替え）。
-		'aomori'    => $aomori, // 青森支店のカンプの素材。
-		'hachinohe' => $aomori, // 仮（素材が届いたら差し替え）。
-		'hirosaki'  => $aomori, // 仮（素材が届いたら差し替え）。
+		// 仙台（ボード 2 行目）。
+		'sendai'    => array(
+			'photo'   => 'area-sendai-store-737-47.jpg',
+			'gallery' => array(
+				array( 'file' => 'area-sendai-gallery1-737-78.jpg', 'position' => '50% 1%' ),
+				array( 'file' => 'area-sendai-gallery2-737-77.jpg', 'position' => '50% 99%' ),
+				array( 'file' => 'area-sendai-gallery3-737-79.jpg', 'position' => '50% 1%' ),
+				array( 'file' => 'area-sendai-gallery4-737-80.jpg', 'position' => '50% 37%' ),
+			),
+			'local'   => array(
+				'heading'  => array( '暮らしに寄り添う', 'デザインと提案力' ),
+				'lead'     => array(
+					'{region}エリアでは、住宅地ごとの敷地条件や街並みに合わせたプランニングが重要です。',
+					'EXoneでは、デザイン性と使いやすさを両立し、一人ひとりの暮らしに合わせたご提案を行います。',
+				),
+				'photo'    => 'area-sendai-local-757-137.jpg',
+				'position' => '79% 50%',
+			),
+			'cards'   => array(
+				array(
+					'label'    => array( '建物と調和するデザイン' ),
+					'label_sp' => array( '建物と調和する', 'デザイン' ),
+					'image'    => 'area-sendai-card1-757-148.jpg',
+					'position' => '44% 0%',
+				),
+				array(
+					// PC は 1 行に収まらないので、青森の 4 枚目と同じく 2 行にする。
+					'label'    => array( 'ライフスタイルに合わせた', 'プランニング' ),
+					'label_sp' => array( 'ライフスタイルに', '合わせたプランニング' ),
+					'image'    => 'area-sendai-card2-757-183.jpg',
+					'position' => '50% 50%',
+				),
+				array(
+					'label'    => array( '敷地条件を活かした設計' ),
+					'label_sp' => array( '敷地条件を', '活かした設計' ),
+					'image'    => 'area-sendai-card3-757-177.jpg',
+					'position' => '18% 50%',
+				),
+				array(
+					'label'    => array( 'AIによる完成イメージの可視化' ),
+					'label_sp' => array( 'AIによる', '完成イメージの可視化' ),
+					'image'    => 'area-sendai-card4-757-180.jpg',
+					'position' => '50% 45%',
+				),
+			),
+		),
+		// 戸塚（ボード 6 行目。2026-10-06 に追加された素材）。
+		'totsuka'   => array(
+			'photo'   => 'area-totsuka-store-769-80.jpg',
+			'gallery' => array(
+				array( 'file' => 'area-totsuka-gallery1-769-83.jpg', 'position' => '50% 73%' ),
+				array( 'file' => 'area-totsuka-gallery2-769-91.jpg', 'position' => '50% 100%' ),
+				array( 'file' => 'area-totsuka-gallery3-769-92.jpg', 'position' => '50% 79%' ),
+				array( 'file' => 'area-totsuka-gallery4-769-93.jpg', 'position' => '50% 58%' ),
+			),
+			'local'   => array(
+				'heading'  => array( 'デザインも、品質も、', '妥協しない外構づくり' ),
+				'lead'     => array(
+					'{region}エリアでは、住宅地ごとの敷地条件や街並みに合わせたプランニングが重要です。',
+					'EXoneでは、デザイン性と使いやすさを両立し、一人ひとりの暮らしに合わせたご提案を行います。',
+				),
+				'photo'    => 'area-totsuka-local-769-112.jpg',
+				'position' => '100% 50%',
+			),
+			'cards'   => array(
+				array(
+					'label'    => array( '建物と調和するデザイン' ),
+					'label_sp' => array( '建物と調和する', 'デザイン' ),
+					'image'    => 'area-totsuka-card1-769-104.jpg',
+					'position' => '44% 0%',
+				),
+				array(
+					// PC は 1 行に収まらないので 2 行にする（仙台と同じ）。
+					'label'    => array( 'ライフスタイルに合わせた', 'プランニング' ),
+					'label_sp' => array( 'ライフスタイルに', '合わせたプランニング' ),
+					'image'    => 'area-totsuka-card2-769-126.jpg',
+					'position' => '50% 50%',
+				),
+				array(
+					'label'    => array( '年間650件以上の施工実績' ),
+					'label_sp' => array( '年間650件以上の', '施工実績' ),
+					'image'    => 'area-totsuka-card3-769-123.jpg',
+					'position' => '50% 50%',
+				),
+				array(
+					'label'    => array( 'AIによる完成イメージの可視化' ),
+					'label_sp' => array( 'AIによる', '完成イメージの可視化' ),
+					'image'    => 'area-totsuka-card4-769-101.jpg',
+					'position' => '0% 45%',
+				),
+			),
+		),
+		// 盛岡（ボード 5 行目）。
+		'morioka'   => array(
+			'photo'   => 'area-morioka-store-739-101.jpg',
+			'gallery' => array(
+				array( 'file' => 'area-morioka-gallery1-739-114.jpg', 'position' => '50% 42%' ),
+				array( 'file' => 'area-morioka-gallery2-739-115.jpg', 'position' => '50% 100%' ),
+				array( 'file' => 'area-morioka-gallery3-739-117.jpg', 'position' => '50% 48%' ),
+				array( 'file' => 'area-morioka-gallery4-739-116.jpg', 'position' => '50% 100%' ),
+			),
+			'local'   => array(
+				'heading'  => array( '四季を通して', '快適な暮らしへ' ),
+				'lead'     => array(
+					'{region}エリアでは、積雪だけでなく、凍害や植栽選びまで考えた外構設計が重要です。',
+					'冬の安全性と一年を通じた美しさを両立するプランをご提案します。',
+				),
+				'photo'    => 'area-morioka-local-759-252.jpg',
+				'position' => '0% 50%',
+			),
+			'cards'   => array(
+				array(
+					'label'    => array( '越冬できる植栽' ),
+					'label_sp' => array( '越冬できる植栽' ),
+					'image'    => 'area-morioka-card1-759-261.jpg',
+					'position' => '93% 0%',
+				),
+				array(
+					'label'    => array( '凍害に強い建材' ),
+					'label_sp' => array( '凍害に強い建材' ),
+					'image'    => 'area-morioka-card2-759-265.jpg',
+					'position' => '0% 100%',
+				),
+				array(
+					'label'    => array( '雪かきしやすい動線' ),
+					'label_sp' => array( '雪かきしやすい動線' ),
+					'image'    => 'area-morioka-card3-759-258.jpg',
+					'position' => '50% 50%',
+				),
+				array(
+					'label'    => array( '排水・凍結対策' ),
+					'label_sp' => array( '排水・凍結対策' ),
+					'image'    => 'area-morioka-card4-759-255.jpg',
+					'position' => '28% 50%',
+				),
+			),
+		),
+		'aomori'    => $aomori,
+		// 八戸（ボード 3 行目）。
+		'hachinohe' => array(
+			'photo'   => 'area-hachinohe-store-737-81.jpg',
+			'gallery' => array(
+				array( 'file' => 'area-hachinohe-gallery1-737-82.jpg', 'position' => '50% 48%' ),
+				array( 'file' => 'area-hachinohe-gallery2-737-83.jpg', 'position' => '50% 100%' ),
+				array( 'file' => 'area-hachinohe-gallery3-737-84.jpg', 'position' => '50% 48%' ),
+				array( 'file' => 'area-hachinohe-gallery4-737-85.jpg', 'position' => '50% 0%' ),
+			),
+			'local'   => array(
+				'heading'  => array( '気候と敷地条件に合わせた、', '安心の外構設計' ),
+				'lead'     => array(
+					'{region}エリアでは、凍上対策や施工条件など、地域特有の環境を考慮することが重要です。',
+					'現地調査をもとに、土地条件や法規も踏まえた最適なプランをご提案します。',
+				),
+				'photo'    => 'area-hachinohe-local-757-217.jpg',
+				'position' => '100% 50%',
+			),
+			'cards'   => array(
+				array(
+					'label'    => array( '凍上対策' ),
+					'label_sp' => array( '凍上対策' ),
+					'image'    => 'area-hachinohe-card1-757-220.jpg',
+					'position' => '30% 87%',
+				),
+				array(
+					'label'    => array( 'カーポート設置条件' ),
+					'label_sp' => array( 'カーポート設置条件' ),
+					'image'    => 'area-hachinohe-card2-757-226.jpg',
+					'position' => '42% 69%',
+				),
+				array(
+					'label'    => array( '敷地条件に合わせた土留め提案' ),
+					'label_sp' => array( '敷地条件に合わせた', '土留め提案' ),
+					'image'    => 'area-hachinohe-card3-757-223.jpg',
+					'position' => '40% 50%',
+				),
+				array(
+					'label'    => array( '排水・凍結対策' ),
+					'label_sp' => array( '排水・凍結対策' ),
+					'image'    => 'area-hachinohe-card4-757-229.jpg',
+					'position' => '5% 50%',
+				),
+			),
+		),
+		// 弘前（ボード 4 行目）。外観と店内だけ差し替え、Local Expertise とカードは青森と共通。
+		'hirosaki'  => array(
+			'photo'   => 'area-hirosaki-store-739-88.jpg',
+			'gallery' => array(
+				array( 'file' => 'area-hirosaki-gallery1-739-91.jpg', 'position' => '50% 48%' ),
+				array( 'file' => 'area-hirosaki-gallery2-739-94.jpg', 'position' => '50% 100%' ),
+				array( 'file' => 'area-hirosaki-gallery3-739-97.jpg', 'position' => '50% 100%' ),
+				array( 'file' => 'area-hirosaki-gallery4-739-119.jpg', 'position' => '50% 48%' ),
+			),
+			'local'   => $aomori_local,
+			'cards'   => $aomori_cards,
+		),
 	);
 }
 

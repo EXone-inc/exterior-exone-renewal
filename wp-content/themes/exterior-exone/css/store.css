@@ -1550,7 +1550,9 @@ svg.p-svisible__sketch[data-line-draw] :is(path, line, polyline, polygon, rect, 
 
 .p-sreviews__thumb {
 	display: block;
-	background: var(--color-gray2);
+	width: 100%;
+	background: var(--color-gray2); /* 写真が無いときの灰色（カンプのプレースホルダ） */
+	object-fit: cover;
 }
 
 .p-sreviews__rating {

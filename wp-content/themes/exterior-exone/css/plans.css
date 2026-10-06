@@ -2352,3 +2352,17 @@
 		--plp-tabs-right: calc(12 * var(--plp-vu)); /* 右端 x1908 */
 	}
 }
+
+/* 支店モード（PC）: ヘッダーが不透明な追従ヘッダーになり、内容はその下から始まる
+   （style.css の決定 2026-10-06）。選択画面と演出中の揃え位置も、ヘッダーの下に合わせる */
+@media (min-width: 1025px) {
+	:root[data-store-mode] {
+		--plp-scroll-offset: var(--header-height);
+		--plp-select-h: calc(100vh - var(--header-height));
+	}
+
+	.is-store-mode .p-plpselect {
+		--plp-vu: min(1px, calc(100vw / 1920), calc((100vh - var(--header-height)) / 1080));
+		--plp-select-h: calc(100vh - var(--header-height));
+	}
+}
