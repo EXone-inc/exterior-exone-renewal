@@ -652,8 +652,8 @@ function exterior_exone_store_plans() {
 				'理想の外構を一からかたちにします。',
 			),
 			'image'    => 'highend-photo-610-273.jpg',
-			// 610:280。リンク先は未定のため仮置き（決定事項 Q9）。
-			'more'     => '#',
+			// 610:280。ハイエンドページ（出力時に exterior_exone_store_link() で ?store= を引き継ぐ）。
+			'more'     => home_url( '/plans/high-end/' ),
 			'features' => array(
 				array(
 					'icon'    => 'reasons-icon-tablet-599-73.png',

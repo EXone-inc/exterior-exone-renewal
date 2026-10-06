@@ -99,6 +99,6 @@ $exterior_exone_plans_highend = exterior_exone_plans_highend();
 	</div>
 
 	<div class="p-plphe__more">
-		<a class="c-btn c-btn--white" href="<?php echo esc_url( $exterior_exone_plans_highend['more'] ); ?>">VIEW MORE</a>
+		<a class="c-btn c-btn--white" href="<?php echo esc_url( exterior_exone_store_link( $exterior_exone_plans_highend['more'] ) ); ?>">VIEW MORE</a>
 	</div>
 </section>

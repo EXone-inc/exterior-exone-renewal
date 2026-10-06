@@ -303,7 +303,7 @@ function exterior_exone_plans_highend() {
 				'price' => '100,000', // 586:447
 			),
 		),
-		'more'    => '#', // btn white 586:402 / 586:1300。遷移先は未定（決定 B）
+		'more'    => home_url( '/plans/high-end/' ), // btn white 586:402 / 586:1300。ハイエンドページ（出力時に exterior_exone_store_link()）
 	);
 }
 

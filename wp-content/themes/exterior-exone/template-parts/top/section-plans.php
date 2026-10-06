@@ -103,7 +103,7 @@ $exterior_exone_plan_cards = exterior_exone_plan_cards();
 			<p class="p-plans__jp">ハイエンドプラン</p>
 			<h3 class="c-display p-plans__eng">HIGH-END PLAN</h3>
 			<p class="p-plans__desc">敷地条件や暮らしに合わせ、<br class="u-br-sp">細部までこだわりたい方向けの自由設計プラン。<br>理想の外構を一からかたちにします。</p>
-			<a class="c-btn c-btn--white p-plans__btn" href="#">VIEW MORE</a>
+			<a class="c-btn c-btn--white p-plans__btn" href="<?php echo esc_url( exterior_exone_store_link( home_url( '/plans/high-end/' ) ) ); ?>">VIEW MORE</a>
 		</div>
 	</div>
 </section>

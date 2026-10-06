@@ -12,6 +12,11 @@
  *
  * 描画自体は CSS 側（.l-pin.is-scroll-mask::after ほか）が持ち、ここは進捗値
  * --fv-mask-progress を書き込むだけ。ピン留めは CSS の sticky で PC / SP とも有効。
+ *
+ * オプトイン: .l-pin に data-fv-mask-span があるとき（ハイエンド … .p-hepfv + 走路）だけ、
+ * 進捗を「1 つ目が留まり始めてからのスクロール量 ÷ 2 つ目（走路）の高さ」にする。
+ * 固定区間を画面 1 つ分より長く取れる。動きを減らす設定では .is-scroll-mask を付けず
+ * 何もしない（CSS 側が完成状態を出す）。属性が無いページ（TOP・企業情報）は従来どおり。
  */
 (function () {
 	'use strict';
@@ -30,14 +35,25 @@
 		return;
 	}
 
+	var spanMode = pin.hasAttribute('data-fv-mask-span');
+
+	if (spanMode && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+		return;
+	}
+
 	var ticking = false;
 	var last = -1;
+	var stickTop = 0;
 
 	/**
 	 * 暗転の進捗（0〜1）。1 画面分スクロールする間に 0 → 1 になる。
 	 * 画像の読み込みでレイアウトがずれても追従するよう、毎回実測する。
 	 */
 	function measure() {
+		if (spanMode) {
+			return measureSpan();
+		}
+
 		var span = window.innerHeight;
 
 		if (span <= 0) {
@@ -47,6 +63,21 @@
 		var ratio = 1 - cover.getBoundingClientRect().top / span;
 
 		// 小数 3 桁で足りる。丸めておくと同値のときの書き込みを飛ばせる。
+		return Math.min(1, Math.max(0, Math.round(ratio * 1000) / 1000));
+	}
+
+	/**
+	 * オプトイン時の進捗（0〜1）。走路の高さぶんスクロールする間に 0 → 1 になる。
+	 */
+	function measureSpan() {
+		var run = cover.getBoundingClientRect().height;
+
+		if (run <= 0) {
+			return 1;
+		}
+
+		var ratio = (stickTop - pin.getBoundingClientRect().top) / run;
+
 		return Math.min(1, Math.max(0, Math.round(ratio * 1000) / 1000));
 	}
 
@@ -79,6 +110,12 @@
 	// 画面の高さが変わると進捗の分母が変わるので取り直す。
 	function sync() {
 		last = -1;
+
+		// 留まる位置（SP はヘッダーの下）。ヘッダーの高さは画面幅で変わる。
+		if (spanMode) {
+			stickTop = parseFloat(window.getComputedStyle(sticky).top) || 0;
+		}
+
 		update();
 	}
 

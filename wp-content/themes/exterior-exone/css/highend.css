@@ -1,0 +1,1824 @@
+/* ============================================================
+   ハイエンドページ（固定ページ high-end / page-high-end.php。/plans/high-end/）
+   カンプ: PC 713:31（1920x13761）/ SP 733:290（375x7164）/ guide 733:415
+   設計メモ: docs/figma-highend-page.md
+   仕様書: docs/spec-20261005-highend-page.md
+   PC・SP ともカンプが揃っているため、両方を忠実再現の対象にする。
+   style.css の共通トークンはここで再定義しない。カンプに無い新規色は
+   :root へトークンとして足してから使う。
+   プレフィックスは --hep- / .p-hep（PLANS の HIGH-END .p-plphe / --plp-he- とは別物）。
+   ------------------------------------------------------------
+   ここの :root には幅で変わらない値（色・行高・時間）だけを置き、
+   長さはすべてファイル末尾の比例ブロックが決める（css/plans.css と同じ方式）:
+   - PC（1025px 以上）… --hep-vu（カンプ 1920 の 1px の実寸）
+   - SP（1024px 以下）… --hep-su（カンプ 375 の 1px の実寸。上限 --sp-scale-max）
+   ============================================================ */
+:root {
+	/* --- 色（設計メモ §1。Figma 変数に無いもの・style.css に無いもの） --- */
+	--hep-color-bg: var(--color-black2); /* ページ地・Gallery 地 713:32・713:165 */
+	--hep-color-bg-0: rgba(26, 26, 26, 0); /* 地へ溶かすグラデの始点 713:119・713:33・733:319 */
+	--hep-color-card: #232323; /* プランカードの地 713:89・733:348 */
+	--hep-color-card-0: rgba(35, 35, 35, 0); /* カード写真下グラデの始点 713:91 */
+	--hep-color-navy: #202d43; /* DX の紺グラデ 713:143・733:373 */
+	--hep-color-navy-0: rgba(32, 45, 67, 0);
+	--hep-color-white1: #ffffff; /* PC「DX体験を見る」・SP CONTACT ボタンの文字 */
+	--hep-color-eng-dim: var(--color-black1); /* 沈んだ英字（DESIGN GALLERY・MATERIALS 等） */
+	--hep-color-btn: var(--color-orange1); /* オレンジのボタン 2 種 */
+	--hep-color-btn-shadow: #734413; /* CONTACT ボタンのオフセット影 713:161 */
+	--hep-mask: rgba(0, 0, 0, 0.5); /* FV の暗幕 713:118・733:305 */
+	--hep-fold-shade: rgba(0, 0, 0, 0.5); /* 綴じ目の影の終端 713:173・713:176 */
+	--hep-contact-overlay: rgba(13, 0, 0, 0.5); /* CONTACT の左暗幕 713:154・733:406 */
+	--hep-contact-overlay-0: rgba(13, 0, 0, 0);
+	--hep-contact-overlay-stop: 85.577%;
+	--hep-shadow-color: rgba(0, 0, 0, 0.8); /* 写真・カードの影の色 */
+	--hep-shadow-color-soft: rgba(0, 0, 0, 0.12); /* カード内の写真の影の色 */
+
+	/* --- 影（0 12 32。比例させない）と、影を切らないための余白 --- */
+	--hep-shadow: 0 12px 32px var(--hep-shadow-color);
+	--hep-shadow-soft: 0 12px 32px var(--hep-shadow-color-soft);
+	--hep-shadow-pad-top: 20px; /* 32 - 12 */
+	--hep-shadow-pad-bottom: 44px; /* 32 + 12 */
+
+	/* --- FV の演出（決定 §3「FV の演出」・仕様書 §6 Q3） --- */
+	--hep-fv-image-x: 39.6%; /* SP の FV 写真の横位置（733:292 left -96%） */
+	--hep-fv-night-end: 0.5; /* 進捗のしきい値: 夜景の完了 */
+	--hep-fv-mask-end: 0.75; /* 進捗のしきい値: 暗幕の完了（以降コピー） */
+	--hep-fv-span: 2; /* 固定区間（走路）= 舞台の高さ x 2（page-high-end.php の data-fv-mask-span と同じ） */
+
+	/* --- 共通の行高 --- */
+	--hep-display-lh: 1.29; /* Antonio の lh normal の実測（155/120・83/64） */
+	--hep-sec-eng-lh: 1.12; /* 英字小見出し 713:42 / 733:320 */
+	--hep-heading-lh: 1.6; /* 和文見出し 713:41 / 733:321 */
+
+	/* --- Gallery の動き（S3） --- */
+	--hep-gal-interval: 5s; /* 自動送りの表示時間（決定） */
+	--hep-gal-flip: 1.2s; /* めくりの所要時間（決定） */
+	--hep-gal-cast: rgba(0, 0, 0, 0.33); /* めくり中に右ページへ落ちる影（参考コード .shadow #0005） */
+	--hep-gal-cast-blur: 12px;
+	--hep-gal-text-lh: 1.6; /* コピー・タブ 713:197・713:182 */
+	--hep-gal-text-fade: 0.4s; /* めくり前後の文字のフェード */
+	--hep-gal-crossfade: 0.4s; /* 動きを減らす設定のクロスフェード */
+
+	/* --- 写真帯の速さ（js/plans-imglist.js が読む名前。PLANS・支店と同値。plans.css は読まれない） --- */
+	--plp-imglist-screen-time: 40s;
+}
+
+/* ページ地（オーバースクロール時・セクションの継ぎ目に白が出ないように） */
+.is-highend-page {
+	background-color: var(--hep-color-bg);
+}
+
+/* ============================================================
+   セクション見出し（英字小 + 和文）。5 セクション共通
+   PC 713:40（SF Pro Medium 32 → +55.86 に Noto Bold 40）/ SP 733:320・733:321
+   ============================================================ */
+.p-hephead {
+	text-align: center;
+}
+
+.p-hephead__eng {
+	margin: 0;
+	font-family: var(--font-ui);
+	font-size: var(--hep-sec-eng);
+	font-weight: var(--fw-medium);
+	line-height: var(--hep-sec-eng-lh);
+	letter-spacing: var(--hep-sec-eng-ls);
+	color: var(--hep-sec-eng-color);
+}
+
+.p-hephead__heading {
+	margin: calc(var(--hep-sec-heading-gap) - var(--hep-sec-eng) * var(--hep-sec-eng-lh)) 0 0;
+	font-size: var(--hep-sec-heading);
+	font-weight: var(--fw-bold);
+	line-height: var(--hep-heading-lh);
+	letter-spacing: var(--hep-sec-heading-ls);
+	color: var(--color-white2);
+}
+
+/* ============================================================
+   FV（713:34・713:39・713:116 / 733:292〜309）
+   層は下から 夕景 → 夜景 → 暗幕 → 下端グラデ（PC のみ）→ FV コピー → 暗幕後のコピー。
+   ここ（.is-scroll-mask が無い = JS 無効・動きを減らす設定）は完成状態
+   （夜景 + 暗幕 + コピー。FV コピーは出さない）を 1 画面分で出す。
+   ============================================================ */
+.p-hepfv {
+	position: relative;
+	height: var(--hep-fv-stage-h);
+	overflow: hidden;
+	background-color: var(--hep-color-bg);
+}
+
+.p-hepfv__evening,
+.p-hepfv__night,
+.p-hepfv__mask,
+.p-hepfv__fade {
+	position: absolute;
+	inset: 0;
+}
+
+.p-hepfv__evening img,
+.p-hepfv__night img {
+	display: block;
+	width: 100%;
+	height: 100%;
+	max-width: none;
+	object-fit: cover;
+	object-position: var(--hep-fv-image-position);
+}
+
+/* 713:118 / 733:305 黒 50% のベタ */
+.p-hepfv__mask {
+	background-color: var(--hep-mask);
+}
+
+/* 713:119 下端 443 で次のセクションの地へ溶かす（SP は高さ 0 = 出さない） */
+.p-hepfv__fade {
+	top: auto;
+	height: var(--hep-fv-fade-h);
+	background: linear-gradient(180deg, var(--hep-color-bg-0) 0%, var(--hep-color-bg) 100%);
+}
+
+/* 713:36 / 733:302・733:300。2 行とも画面の左右中央・上下中央 */
+.p-hepfv__copy,
+.p-hepfv__statement {
+	position: absolute;
+	inset: 0;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	text-align: center;
+	white-space: nowrap;
+}
+
+.p-hepfv__copy {
+	padding-bottom: var(--hep-fv-center-offset);
+	opacity: 0;
+}
+
+/* 713:38 / 733:302 */
+.p-hepfv__title {
+	margin: 0;
+	font-family: var(--font-display);
+	font-size: var(--hep-fv-title);
+	font-weight: var(--fw-semibold);
+	line-height: var(--hep-display-lh);
+	letter-spacing: var(--hep-fv-title-ls);
+	color: var(--color-white2);
+}
+
+/* 713:37 / 733:300 */
+.p-hepfv__lead {
+	margin: var(--hep-fv-lead-gap) 0 0;
+	font-size: var(--hep-fv-lead);
+	font-weight: var(--hep-fv-lead-fw);
+	line-height: var(--hep-fv-lead-lh);
+	letter-spacing: var(--hep-fv-lead-ls);
+	color: var(--color-white3);
+}
+
+/* 713:121 / 733:308 */
+.p-hepfv__statement-title {
+	margin: 0;
+	font-family: var(--font-display);
+	font-size: var(--hep-st-title);
+	font-weight: var(--fw-semibold);
+	line-height: var(--hep-display-lh);
+	letter-spacing: var(--hep-st-title-ls);
+	color: var(--color-white2);
+}
+
+/* 713:120（Medium 24 / 行高 60 / 5 行）/ 733:306（Regular 12 / 行高 24 / 6 行） */
+.p-hepfv__statement-body {
+	margin: var(--hep-st-title-gap) 0 0;
+	font-size: var(--hep-st-body);
+	font-weight: var(--hep-st-body-fw);
+	line-height: var(--hep-st-body-lh);
+	letter-spacing: var(--hep-st-body-ls);
+	color: var(--color-gray2);
+}
+
+/* 713:122 / 733:309 */
+.p-hepfv__logo {
+	display: block;
+	width: var(--hep-st-logo-w);
+	height: auto;
+	margin-top: var(--hep-st-logo-gap);
+}
+
+.p-hepfv__runway {
+	display: none;
+}
+
+/* --- スクロール連動（js/fv-mask.js が .l-pin に --fv-mask-progress を 0 → 1 で書き込む） ---
+   舞台を画面に留め、走路（舞台の高さ x 2）をスクロールする間に
+   0 → 0.5 夕方 → 夜（FV コピーも同時に消える）/ 0.5 → 0.75 暗幕とグラデ /
+   0.75 → 1 暗幕後のコピーが下から現れる。イージング無し（企業情報と同じ）。 */
+.p-hepin.is-scroll-mask {
+	--hep-p-night: clamp(0, var(--fv-mask-progress, 0) / var(--hep-fv-night-end), 1);
+	--hep-p-mask: clamp(0, (var(--fv-mask-progress, 0) - var(--hep-fv-night-end)) / (var(--hep-fv-mask-end) - var(--hep-fv-night-end)), 1);
+	--hep-p-statement: clamp(0, (var(--fv-mask-progress, 0) - var(--hep-fv-mask-end)) / (1 - var(--hep-fv-mask-end)), 1);
+}
+
+/* 共通の暗幕の板（style.css）は暗幕後のコピーまで暗くしてしまうので使わない。
+   暗幕は舞台の中の .p-hepfv__mask が持つ。 */
+.p-hepin.is-scroll-mask::after {
+	display: none;
+}
+
+.p-hepin.is-scroll-mask .p-hepfv {
+	position: sticky;
+	top: var(--fv-pin-top);
+	height: var(--fv-pin-height);
+}
+
+.p-hepin.is-scroll-mask .p-hepfv__runway {
+	display: block;
+	height: calc(var(--fv-pin-height) * var(--hep-fv-span));
+}
+
+.p-hepin.is-scroll-mask .p-hepfv__night {
+	opacity: var(--hep-p-night);
+}
+
+.p-hepin.is-scroll-mask .p-hepfv__copy {
+	opacity: calc(1 - var(--hep-p-night));
+}
+
+.p-hepin.is-scroll-mask .p-hepfv__mask,
+.p-hepin.is-scroll-mask .p-hepfv__fade {
+	opacity: var(--hep-p-mask);
+}
+
+.p-hepin.is-scroll-mask .p-hepfv__statement {
+	opacity: var(--hep-p-statement);
+	transform: translateY(calc(var(--reveal-shift) * (1 - var(--hep-p-statement))));
+}
+
+/* ============================================================
+   Design Philosophy（713:207 / 733:320〜315）
+   PC: コピー左・住宅 CG 右（画面右端に接する）→ DESIGN GALLERY + 本文 → 写真帯
+   SP: CG → コピー（中央）→ DESIGN GALLERY（左）→ 本文 → 写真帯
+   ============================================================ */
+.p-hepphilo {
+	position: relative;
+	padding-top: var(--hep-sec-gap);
+	overflow-x: clip; /* 住宅 CG の影・写真帯が画面の外へはみ出すぶんを切る */
+	background-color: var(--hep-color-bg);
+}
+
+/* カンプ幅（1920 / 375）の板。これより広い画面では中央に置く */
+.p-hepphilo__main {
+	position: relative;
+	display: flow-root; /* コピーの margin-top が外へ抜けると CG の基準位置がずれる */
+	width: min(100%, var(--hep-canvas-w));
+	margin-inline: auto;
+}
+
+/* 住宅 CG 713:50 / 733:318 と下端グラデ 713:33 / 733:319 */
+.p-hepphilo__visual {
+	position: var(--hep-philo-visual-position);
+	top: var(--hep-philo-visual-top);
+	left: 0;
+	right: 0;
+	height: var(--hep-philo-house-h);
+	margin-top: var(--hep-philo-visual-margin);
+}
+
+.p-hepphilo__house {
+	position: absolute;
+	top: 0;
+	right: var(--hep-philo-house-right);
+	width: var(--hep-philo-house-w);
+	height: var(--hep-philo-house-h);
+}
+
+/* 書き出しは影のぶん枠より上 20 / 左右 32 / 下 44 大きい */
+.p-hepphilo__house img {
+	position: absolute;
+	top: calc(-1 * var(--hep-philo-bleed-top));
+	left: calc(-1 * var(--hep-philo-bleed-x));
+	display: block;
+	width: calc(var(--hep-philo-house-w) + var(--hep-philo-bleed-x) * 2);
+	height: calc(var(--hep-philo-house-h) + var(--hep-philo-bleed-top) + var(--hep-philo-bleed-bottom));
+	max-width: none;
+}
+
+.p-hepphilo__fade {
+	position: absolute;
+	top: var(--hep-philo-fade-top);
+	left: 0;
+	right: 0;
+	height: var(--hep-philo-fade-h);
+	background: linear-gradient(180deg, var(--hep-color-bg-0) 0%, var(--hep-color-bg) 100%);
+}
+
+/* 713:51（Bold 30 / 行高 69 / 左）/ 733:336（Regular 12 / 行高 24 / 中央） */
+.p-hepphilo__copy {
+	position: relative;
+	z-index: 1;
+	margin: var(--hep-philo-copy-top) 0 0 var(--hep-philo-copy-x);
+	font-size: var(--hep-philo-copy);
+	font-weight: var(--hep-philo-copy-fw);
+	line-height: var(--hep-philo-copy-lh);
+	letter-spacing: var(--hep-philo-copy-ls);
+	color: var(--color-gray2);
+	text-align: var(--hep-philo-copy-align);
+	white-space: nowrap;
+}
+
+/* text box 713:58 / 733:317・733:66 */
+.p-hepphilo__text {
+	position: relative;
+	z-index: 1;
+	width: var(--hep-philo-text-w);
+	margin: var(--hep-philo-text-top) 0 0 var(--hep-philo-text-x);
+}
+
+.p-hepphilo__gallery {
+	margin: 0;
+	font-family: var(--font-display);
+	font-size: var(--hep-eng-dim-size);
+	font-weight: var(--fw-semibold);
+	line-height: var(--hep-display-lh);
+	letter-spacing: var(--hep-eng-dim-ls);
+	color: var(--hep-color-eng-dim);
+	white-space: nowrap;
+}
+
+.p-hepphilo__body {
+	margin: var(--hep-philo-body-gap) 0 0;
+	font-size: var(--hep-body);
+	font-weight: var(--fw-regular);
+	line-height: var(--hep-body-lh);
+	letter-spacing: var(--hep-body-ls);
+	color: var(--color-gray2);
+}
+
+/* img list 713:80 / 733:316・733:315。見える枠はカンプの左端（x166 / x25）から画面右端まで。
+   影を切らないよう上下に余白を取り、その分を margin で打ち消す。 */
+.p-hepphilo__imglist {
+	margin: calc(var(--hep-philo-imglist-top) - var(--hep-shadow-pad-top)) 0 calc(-1 * var(--hep-shadow-pad-bottom)) calc(max(0px, (100% - var(--hep-canvas-w)) / 2) + var(--hep-imglist-x));
+	padding-block: var(--hep-shadow-pad-top) var(--hep-shadow-pad-bottom);
+	overflow: hidden;
+}
+
+.p-hepphilo__imglist-row {
+	display: flex;
+	gap: var(--hep-imglist-gap);
+	width: max-content;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.p-hepphilo__imglist-item {
+	flex: 0 0 auto;
+	width: var(--hep-imglist-w);
+	height: var(--hep-imglist-h);
+	overflow: hidden;
+	border-radius: var(--hep-imglist-radius);
+	box-shadow: var(--hep-shadow);
+}
+
+.p-hepphilo__imglist-item img {
+	display: block;
+	width: 100%;
+	height: 100%;
+	max-width: none;
+	object-fit: cover;
+}
+
+/* 複製した列を 1 巡ぶん（--plp-imglist-shift。JS）左へ流し続ける（css/plans.css と同型） */
+@keyframes hep-imglist-flow {
+	to {
+		transform: translateX(calc(-1 * var(--plp-imglist-shift, 0px)));
+	}
+}
+
+.p-hepphilo__imglist-row.is-running {
+	animation: hep-imglist-flow var(--plp-imglist-duration, var(--plp-imglist-screen-time)) linear infinite;
+	will-change: transform;
+}
+
+/* ============================================================
+   Design Details（713:208 / 733:322〜345）
+   PC: 写真 800x453 とテキストエリア 744 幅の左右交互（奇数は写真左）。テキストは写真と上下中央。
+   SP: 写真 163x92 + 英名ブロックの横並び（奇数は写真左）→ 本文は全幅で下。行ピッチ 217。
+   テキストエリアは [data-reveal]（下から。guide 713:224）。写真は動かさない。
+   ============================================================ */
+.p-hepdt {
+	padding-top: var(--hep-sec-gap);
+	background-color: var(--hep-color-bg);
+}
+
+.p-hepdt__list {
+	width: min(100%, var(--hep-canvas-w));
+	margin: var(--hep-dt-list-top) auto 0;
+	padding: 0 var(--hep-dt-inset);
+	list-style: none;
+}
+
+.p-hepdt__item {
+	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
+.p-hepdt__item:nth-child(even) {
+	flex-direction: row-reverse;
+}
+
+.p-hepdt__item + .p-hepdt__item {
+	margin-top: calc(var(--hep-dt-pitch) - var(--hep-dt-photo-h));
+}
+
+.p-hepdt__media {
+	position: relative;
+	flex: 0 0 auto;
+	width: var(--hep-dt-photo-w);
+	height: var(--hep-dt-photo-h);
+}
+
+/* 写真の切り抜きはカンプの画像塗りの値（--crop-*。inc/highend-data.php） */
+.p-hepdt__photo {
+	position: relative;
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+	border-radius: var(--hep-dt-photo-radius);
+	box-shadow: var(--hep-shadow);
+}
+
+.p-hepdt__photo img {
+	position: absolute;
+	top: var(--crop-y);
+	left: var(--crop-x);
+	display: block;
+	width: var(--crop-w);
+	height: var(--crop-h);
+	max-width: none;
+}
+
+/* 713:126 ほか / 733:333 ほか。写真の左上に重ねる */
+.p-hepdt__num {
+	position: absolute;
+	top: var(--hep-dt-num-offset);
+	left: var(--hep-dt-num-x);
+	z-index: 1;
+	margin: 0;
+	font-family: var(--font-display);
+	font-size: var(--hep-dt-num);
+	font-weight: var(--fw-semibold);
+	line-height: var(--hep-display-lh);
+	letter-spacing: var(--hep-dt-num-ls);
+	color: var(--color-white2);
+}
+
+/* text area 713:52 ほか */
+.p-hepdt__text {
+	flex: 0 0 auto;
+	width: var(--hep-dt-text-w);
+}
+
+/* 英名（沈んだ英字）→ 罫線 → 見出し */
+.p-hepdt__eng {
+	margin: 0;
+	font-family: var(--font-display);
+	font-size: var(--hep-dt-eng);
+	font-weight: var(--fw-semibold);
+	line-height: var(--hep-display-lh);
+	letter-spacing: var(--hep-dt-eng-ls);
+	color: var(--hep-color-eng-dim);
+	white-space: nowrap;
+}
+
+/* 713:57 ほか / 733:327 ほか */
+.p-hepdt__eng::after {
+	content: "";
+	display: block;
+	width: var(--hep-dt-rule-w);
+	height: 1px;
+	margin-top: var(--hep-dt-rule-gap);
+	background-color: var(--color-gray2);
+}
+
+.p-hepdt__heading {
+	margin: var(--hep-dt-heading-gap) 0 0;
+	font-size: var(--hep-dt-heading);
+	font-weight: var(--fw-bold);
+	line-height: var(--hep-heading-lh);
+	letter-spacing: var(--hep-dt-heading-ls);
+	color: var(--color-white2);
+	white-space: nowrap;
+}
+
+.p-hepdt__body {
+	margin: var(--hep-dt-body-gap) 0 0;
+	font-size: var(--hep-body);
+	font-weight: var(--fw-regular);
+	line-height: var(--hep-body-lh);
+	letter-spacing: var(--hep-body-ls);
+	color: var(--color-gray2);
+}
+
+/* ============================================================
+   Design Plans（713:209 / 733:323〜371）
+   カード: 地 #232323・写真（上）+ 写真下のグラデ・英名・和名 + 罫線・本文・価格（右寄せ）。
+   PC は 2 枚横並び + 価格注記、SP は縦積み（注記なし）。
+   ============================================================ */
+.p-hepplan {
+	padding-top: var(--hep-sec-gap);
+	background-color: var(--hep-color-bg);
+}
+
+/* 713:84 / 733:346 */
+.p-hepplan__lead {
+	width: min(100%, var(--hep-canvas-w));
+	margin: var(--hep-plan-lead-top) auto 0;
+	padding: 0 var(--hep-plan-lead-x);
+	font-size: var(--hep-plan-lead);
+	font-weight: var(--fw-regular);
+	line-height: var(--hep-plan-lead-lh);
+	letter-spacing: var(--hep-plan-lead-ls);
+	color: var(--color-gray2);
+	text-align: var(--hep-plan-lead-align);
+	white-space: var(--hep-plan-lead-ws);
+}
+
+/* plan list 713:87 */
+.p-hepplan__list {
+	display: flex;
+	flex-direction: var(--hep-plan-list-dir);
+	align-items: center;
+	justify-content: center;
+	gap: var(--hep-plan-gap);
+	margin-top: var(--hep-plan-list-top);
+}
+
+.p-hepplan__card {
+	position: relative;
+	flex: 0 0 auto;
+	width: var(--hep-plan-w);
+	height: var(--hep-plan-h);
+	border-radius: var(--hep-plan-radius);
+	background-color: var(--hep-color-card);
+	box-shadow: var(--hep-shadow);
+}
+
+/* 写真 713:90 / 713:104（上角だけ丸める）と、下端に被せるグラデ 713:91（2 枚とも #232323 へ） */
+.p-hepplan__media {
+	position: relative;
+	height: var(--hep-plan-photo-h);
+	overflow: hidden;
+	border-radius: var(--hep-plan-radius) var(--hep-plan-radius) 0 0;
+	box-shadow: var(--hep-shadow-soft);
+}
+
+.p-hepplan__media img {
+	display: block;
+	width: 100%;
+	height: 100%;
+	max-width: none;
+	object-fit: cover;
+}
+
+.p-hepplan__media::after {
+	content: "";
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	height: var(--hep-plan-fade-h);
+	background: linear-gradient(180deg, var(--hep-color-card-0) 0%, var(--hep-color-card) 100%);
+}
+
+.p-hepplan__content {
+	position: relative;
+	z-index: 1;
+	padding-left: var(--hep-plan-inset);
+}
+
+/* 713:96 / 733:354。写真下のグラデに少し掛かる位置から */
+.p-hepplan__eng {
+	margin: var(--hep-plan-eng-overlap) 0 0;
+	font-family: var(--font-display);
+	font-size: var(--hep-plan-eng);
+	font-weight: var(--fw-semibold);
+	line-height: var(--hep-display-lh);
+	letter-spacing: var(--hep-plan-eng-ls);
+	color: var(--color-white2);
+	white-space: nowrap;
+}
+
+/* 和名 713:94 と罫線 713:97（PC は和名の下に 64 / SP は和名の右からカード右端まで） */
+.p-hepplan__name {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	margin: var(--hep-plan-name-gap) var(--hep-plan-inset-r) 0 0;
+	font-size: var(--hep-plan-jp);
+	font-weight: var(--fw-bold);
+	line-height: var(--hep-heading-lh);
+	letter-spacing: var(--hep-plan-jp-ls);
+	color: var(--color-white2);
+	white-space: nowrap;
+}
+
+.p-hepplan__name::after {
+	content: "";
+	display: block;
+	width: var(--hep-plan-rule-w);
+	height: 1px;
+	margin-top: var(--hep-plan-rule-gap);
+	background-color: var(--color-gray2);
+}
+
+/* 713:92 / 733:349 */
+.p-hepplan__body {
+	width: var(--hep-plan-body-w);
+	margin: var(--hep-plan-body-gap) 0 0;
+	font-size: var(--hep-body);
+	font-weight: var(--fw-regular);
+	line-height: var(--hep-body-lh);
+	letter-spacing: var(--hep-body-ls);
+	color: var(--color-gray2);
+}
+
+/* 価格 713:101・713:100・713:99（右端 = カード右端 - 余白） */
+.p-hepplan__price {
+	position: absolute;
+	top: var(--hep-plan-price-top);
+	right: var(--hep-plan-inset-r);
+	z-index: 1;
+	display: flex;
+	align-items: flex-start;
+	gap: var(--hep-plan-price-gap);
+	margin: 0;
+	color: var(--color-gray2);
+	white-space: nowrap;
+}
+
+.p-hepplan__yen {
+	flex: 0 0 auto;
+	width: var(--hep-plan-yen-w);
+	height: var(--hep-plan-yen-h);
+	margin-top: var(--hep-plan-yen-top);
+}
+
+.p-hepplan__price-num {
+	font-family: var(--font-display);
+	font-size: var(--hep-plan-price);
+	font-weight: var(--fw-semibold);
+	line-height: var(--hep-display-lh);
+	letter-spacing: var(--hep-plan-price-ls);
+}
+
+.p-hepplan__price-from {
+	margin-top: var(--hep-plan-from-top);
+	font-size: var(--hep-plan-price-from);
+	font-weight: var(--fw-medium);
+	line-height: var(--hep-heading-lh);
+	letter-spacing: var(--hep-plan-from-ls);
+}
+
+/* 713:85（PC のみ。右端はカード 2 の右端） */
+.p-hepplan__note {
+	width: calc(var(--hep-plan-w) * 2 + var(--hep-plan-gap));
+	margin: var(--hep-plan-note-top) auto 0;
+	font-size: var(--hep-plan-note);
+	font-weight: var(--fw-regular);
+	line-height: var(--hep-plan-note-lh);
+	letter-spacing: var(--hep-plan-note-ls);
+	color: var(--color-gray2);
+	text-align: right;
+	white-space: nowrap;
+}
+
+/* ============================================================
+   DX Experience（713:140 / 733:291・733:372〜379）
+   住宅写真の上部を紺 → 透明のグラデで覆い、見出し・本文・機器の画像・オレンジのボタンを置く。
+   PC: 本文左 | 画像右 → ボタン / SP: 見出し → 画像 → 本文 → ボタン
+   ============================================================ */
+.p-hepdx {
+	position: relative;
+	height: var(--hep-dx-h);
+	margin-top: var(--hep-sec-gap);
+	overflow: hidden;
+	background-color: var(--hep-color-navy);
+}
+
+.p-hepdx__bg,
+.p-hepdx__navy {
+	position: absolute;
+	inset: 0;
+}
+
+/* 713:142（h135.98% top-35.98%）/ 733:291（h147.72% top-47.69%）= 下端合わせ */
+.p-hepdx__bg img {
+	display: block;
+	width: 100%;
+	height: 100%;
+	max-width: none;
+	object-fit: cover;
+	object-position: 50% 100%;
+}
+
+/* 713:143 / 733:373 */
+.p-hepdx__navy {
+	bottom: auto;
+	height: var(--hep-dx-navy-h);
+	background: linear-gradient(180deg, var(--hep-color-navy) 0%, var(--hep-color-navy-0) 100%);
+}
+
+.p-hepdx__inner {
+	position: relative;
+	z-index: 1;
+	width: min(100%, var(--hep-canvas-w));
+	margin-inline: auto;
+	padding-top: var(--hep-sec-gap);
+}
+
+/* box 713:148（本文 741 + 画像 550） */
+.p-hepdx__box {
+	display: grid;
+	grid-template-areas: var(--hep-dx-box-areas);
+	grid-template-columns: var(--hep-dx-box-cols);
+	align-items: start;
+	margin: var(--hep-dx-box-top) 0 0 var(--hep-dx-box-x);
+}
+
+/* 713:149 / 733:379 */
+.p-hepdx__body {
+	grid-area: body;
+	width: var(--hep-dx-body-w);
+	margin: var(--hep-dx-body-top) 0 0;
+	font-size: var(--hep-dx-body);
+	font-weight: var(--hep-dx-body-fw);
+	line-height: var(--hep-dx-body-lh);
+	letter-spacing: var(--hep-dx-body-ls);
+	color: var(--color-gray2);
+	white-space: var(--hep-dx-body-ws);
+}
+
+/* 713:150 / 733:376（透過 PNG を w106.36% left-6.36% = 右寄せで切り抜く） */
+.p-hepdx__devices {
+	grid-area: devices;
+	justify-self: var(--hep-dx-devices-justify);
+	width: var(--hep-dx-devices-w);
+	height: var(--hep-dx-devices-h);
+	overflow: hidden;
+}
+
+.p-hepdx__devices img {
+	display: block;
+	width: 100%;
+	height: 100%;
+	max-width: none;
+	object-fit: cover;
+	object-position: 100% 50%;
+}
+
+/* btn orange 713:147 / 733:374 */
+.p-hepdx__more {
+	margin-top: var(--hep-dx-btn-top);
+	text-align: center;
+}
+
+/* .c-btn の寸法のまま、オレンジ塗り・枠なしにした変種。ホバーは a:hover（不透明度 0.7）のみ */
+.c-btn.p-hepdx__btn {
+	border: 0;
+	background-color: var(--hep-color-btn);
+	font-size: var(--hep-dx-btn-text);
+	font-weight: var(--hep-dx-btn-fw);
+	letter-spacing: var(--hep-dx-btn-ls);
+	text-indent: var(--hep-dx-btn-ls);
+	color: var(--hep-dx-btn-color);
+}
+
+/* ============================================================
+   Gallery（713:164 / 733:380〜404。guide 718:245）
+   見出し + 本文 → パンフレット（左ページ大 + 右ページ見切れ + 綴じ目の影）→
+   番号・英名・コピー・進捗下線 → タブ 5 個。めくりは js/highend-gallery.js が
+   左ページを細い短冊に分けて回す（決定 §7）。ここ（JS 無効）は 01 の静止状態。
+   ============================================================ */
+.p-hepgal {
+	position: relative;
+	padding: var(--hep-sec-gap) 0 var(--hep-gal-bottom);
+	background-color: var(--hep-color-bg);
+	overflow: hidden;
+}
+
+/* 横だけ切る（めくり中のページは上下にはみ出して見えてよい） */
+@supports (overflow: clip) {
+	.p-hepgal {
+		overflow: visible;
+		overflow-x: clip;
+	}
+}
+
+.p-hepgal__inner {
+	width: min(100%, var(--hep-canvas-w));
+	margin-inline: auto;
+}
+
+/* 713:169 / 733:391 */
+.p-hepgal__body {
+	width: var(--hep-gal-body-w);
+	margin: var(--hep-gal-body-top) 0 0 var(--hep-gal-body-x);
+	font-size: var(--hep-gal-body);
+	font-weight: var(--hep-gal-body-fw);
+	line-height: var(--hep-gal-body-lh);
+	letter-spacing: var(--hep-gal-body-ls);
+	color: var(--color-gray2);
+	text-align: var(--hep-gal-body-align);
+	white-space: var(--hep-gal-body-ws);
+}
+
+/* pamphlet 713:170 / 733:381。左ページの左端から画面右端まで */
+.p-hepgal__book {
+	position: relative;
+	z-index: 1;
+	height: var(--hep-gal-page-h);
+	margin: var(--hep-gal-book-top) 0 0 calc(max(0px, (100% - var(--hep-canvas-w)) / 2) + var(--hep-gal-page-x));
+	perspective: var(--hep-gal-perspective);
+	perspective-origin: var(--hep-gal-page-w) 50%; /* 綴じ目 */
+}
+
+.p-hepgal__page {
+	position: absolute;
+	top: 0;
+	height: 100%;
+	overflow: hidden;
+}
+
+/* 713:171 / 733:383 */
+.p-hepgal__page--left {
+	left: 0;
+	width: var(--hep-gal-page-w);
+	box-shadow: var(--hep-shadow);
+}
+
+/* 713:174 / 733:386。画面右端で切る */
+.p-hepgal__page--right {
+	left: var(--hep-gal-page-w);
+	right: 0;
+	max-width: var(--hep-gal-page-w);
+}
+
+.p-hepgal__photo {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	max-width: none;
+	object-fit: cover;
+	opacity: 0;
+}
+
+/* 右ページは左ページと同じ幅で左揃え = 次の写真の左端だけ見える（713:175 w495.71%） */
+.p-hepgal__page--right .p-hepgal__photo {
+	width: var(--hep-gal-page-w);
+}
+
+.p-hepgal__photo.is-current {
+	opacity: 1;
+}
+
+/* 綴じ目の影 713:173・713:176 / 733:384・733:387 */
+.p-hepgal__fold {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	pointer-events: none;
+}
+
+.p-hepgal__fold--left {
+	right: 0;
+	width: var(--hep-gal-fold-left);
+	background: linear-gradient(90deg, transparent, var(--hep-fold-shade));
+}
+
+.p-hepgal__fold--right {
+	left: 0;
+	width: var(--hep-gal-fold-right);
+	background: linear-gradient(270deg, transparent, var(--hep-fold-shade));
+}
+
+/* めくり中に右ページへ落ちる影（濃さと幅は JS が描画のたびに決める） */
+.p-hepgal__cast {
+	position: absolute;
+	top: 0;
+	left: var(--hep-gal-page-w);
+	width: var(--hep-gal-page-w);
+	height: 100%;
+	background: linear-gradient(90deg, var(--hep-gal-cast), transparent);
+	filter: blur(var(--hep-gal-cast-blur));
+	opacity: 0;
+	transform-origin: left center;
+	pointer-events: none;
+}
+
+/* めくれる 1 枚。短冊 .p-hepgal__strip が綴じ目（右端）を軸に回る。待機中は出さない */
+.p-hepgal__leaf {
+	position: absolute;
+	top: 0;
+	left: 0;
+	display: none;
+	width: var(--hep-gal-page-w);
+	height: 100%;
+	transform-style: preserve-3d;
+	pointer-events: none;
+}
+
+.p-hepgal__book[data-hep-flip] .p-hepgal__leaf {
+	display: block;
+}
+
+.p-hepgal__strip {
+	position: absolute;
+	top: 0;
+	height: 100%;
+	transform-origin: 100% 50%;
+	transform-style: preserve-3d;
+	will-change: transform;
+}
+
+.p-hepgal__leaf-front,
+.p-hepgal__leaf-back {
+	position: absolute;
+	inset: 0;
+	overflow: hidden;
+	backface-visibility: hidden;
+	-webkit-backface-visibility: hidden;
+}
+
+.p-hepgal__leaf-back {
+	transform: rotateY(180deg);
+}
+
+/* 短冊の中身 = ページ 1 枚分の写真を、短冊の位置ぶんずらして見せる。
+   明暗は filter で中身に掛ける（重なり部分に暗さが二重に乗って縦線になるのを防ぐ） */
+.p-hepgal__leaf-img {
+	position: absolute;
+	top: 0;
+	width: var(--hep-leaf-w, var(--hep-gal-page-w));
+	height: 100%;
+	background-position: 50% 50%;
+	background-size: cover;
+}
+
+.p-hepgal__leaf-front .p-hepgal__leaf-img {
+	background-image: var(--hep-leaf-front);
+}
+
+.p-hepgal__leaf-back .p-hepgal__leaf-img {
+	background-image: var(--hep-leaf-back);
+}
+
+/* 表は左ページ・裏は右ページと同じ綴じ目の影 */
+.p-hepgal__leaf-img::after {
+	content: "";
+	position: absolute;
+	top: 0;
+	bottom: 0;
+}
+
+.p-hepgal__leaf-front .p-hepgal__leaf-img::after {
+	right: 0;
+	width: var(--hep-gal-fold-left);
+	background: linear-gradient(90deg, transparent, var(--hep-fold-shade));
+}
+
+.p-hepgal__leaf-back .p-hepgal__leaf-img::after {
+	left: 0;
+	width: var(--hep-gal-fold-right);
+	background: linear-gradient(270deg, transparent, var(--hep-fold-shade));
+}
+
+/* 713:178 / 733:388。ページ上端より上に重ねる */
+.p-hepgal__num {
+	position: absolute;
+	top: var(--hep-gal-num-offset);
+	left: var(--hep-gal-num-x);
+	z-index: 2;
+	margin: 0;
+	font-family: var(--font-display);
+	font-size: var(--hep-gal-num);
+	font-weight: var(--fw-semibold);
+	line-height: var(--hep-display-lh);
+	letter-spacing: var(--hep-gal-num-ls);
+	color: var(--color-white2);
+	pointer-events: none;
+}
+
+/* 透明のクリック領域。next = 左ページの左半分 / prev = 左ページの右半分 + 右ページ */
+.p-hepgal__hit {
+	position: absolute;
+	top: 0;
+	z-index: 3;
+	height: 100%;
+	padding: 0;
+	border: 0;
+	background: transparent;
+	cursor: pointer;
+}
+
+.p-hepgal__hit--next {
+	left: 0;
+	width: calc(var(--hep-gal-page-w) / 2);
+}
+
+.p-hepgal__hit--prev {
+	left: calc(var(--hep-gal-page-w) / 2);
+	right: 0;
+}
+
+/* gallery name 713:195 / 733:392〜394 */
+.p-hepgal__caption {
+	position: relative;
+	z-index: 2;
+	margin: var(--hep-gal-cap-overlap) 0 0 calc(max(0px, (100% - var(--hep-canvas-w)) / 2) + var(--hep-gal-cap-x));
+	pointer-events: none;
+}
+
+.p-hepgal__name {
+	display: flex;
+	flex-direction: var(--hep-gal-name-dir);
+	align-items: var(--hep-gal-name-align);
+	column-gap: var(--hep-gal-name-gap);
+}
+
+.p-hepgal__eng {
+	margin: 0;
+	font-family: var(--font-display);
+	font-size: var(--hep-gal-eng);
+	font-weight: var(--fw-semibold);
+	line-height: var(--hep-display-lh);
+	letter-spacing: var(--hep-gal-eng-ls);
+	color: var(--color-white2);
+	white-space: nowrap;
+}
+
+.p-hepgal__copy {
+	margin: 0;
+	font-size: var(--hep-gal-copy);
+	font-weight: var(--fw-medium);
+	line-height: var(--hep-gal-text-lh);
+	letter-spacing: var(--hep-gal-copy-ls);
+	color: var(--color-white2);
+}
+
+/* めくりの前後に番号・英名・コピーをふわっと消して出す（JS が is-fading を付け外し） */
+.p-hepgal [data-hep-text] {
+	transition: opacity var(--hep-gal-text-fade) linear;
+}
+
+.p-hepgal [data-hep-text].is-fading {
+	opacity: 0;
+}
+
+/* 713:196 / 733:394。左端を起点に伸びる（拡大率は JS。JS 無効・動きを減らす設定は全幅） */
+.p-hepgal__progress {
+	display: block;
+	width: calc(100% + var(--hep-gal-cap-x) - var(--hep-gal-line-x));
+	height: 1px;
+	margin: var(--hep-gal-line-top) 0 0 calc(var(--hep-gal-line-x) - var(--hep-gal-cap-x));
+	background-color: var(--color-gray2);
+	transform-origin: left center;
+}
+
+/* btn list 713:179 / 733:395〜404 */
+.p-hepgal__tabs {
+	display: grid;
+	grid-template-columns: repeat(var(--hep-gal-tab-cols), var(--hep-gal-tab-w));
+	gap: var(--hep-gal-tab-gap);
+	margin: var(--hep-gal-tabs-top) 0 0 calc(max(0px, (100% - var(--hep-canvas-w)) / 2) + var(--hep-gal-tabs-x));
+}
+
+.p-hepgal__tab {
+	height: var(--hep-gal-tab-h);
+	padding: 0;
+	border: 1px solid var(--color-white2);
+	border-radius: var(--hep-gal-tab-radius);
+	background-color: transparent;
+	font-family: var(--font-base);
+	font-size: var(--hep-gal-tab-text);
+	font-weight: var(--fw-medium);
+	line-height: var(--hep-gal-text-lh);
+	letter-spacing: var(--hep-gal-tab-ls);
+	text-indent: var(--hep-gal-tab-ls);
+	color: var(--color-white2);
+	cursor: pointer;
+}
+
+.p-hepgal__tab[aria-pressed="true"] {
+	background-color: var(--color-white2);
+	font-weight: var(--fw-bold);
+	color: var(--color-black2);
+}
+
+/* ============================================================
+   CONTACT（713:151 / 733:405〜413）
+   支店 CTA と同じ写真（images/store/）を全面に敷き、左から暗幕を重ねる。
+   写真の切り抜きはカンプの枠（PC h146.56% top-46.56% / SP w253.39% h146.56%
+   left-109.96% top-46.56%）をそのまま当てて cover で埋める。
+   ============================================================ */
+.p-hepcta {
+	position: relative;
+	min-height: var(--hep-cta-h);
+	overflow: hidden;
+	background-color: var(--hep-color-bg);
+	text-align: center;
+}
+
+.p-hepcta__bg {
+	position: absolute;
+	inset: 0;
+}
+
+.p-hepcta__bg img {
+	position: absolute;
+	top: var(--hep-cta-img-y);
+	left: var(--hep-cta-img-x);
+	display: block;
+	width: var(--hep-cta-img-w);
+	height: var(--hep-cta-img-h);
+	max-width: none;
+	object-fit: cover;
+}
+
+/* 713:154 / 733:406 左 → 85.577% までベタ → 右端で透明 */
+.p-hepcta__bg::after {
+	content: "";
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	width: var(--hep-cta-overlay-w);
+	background: linear-gradient(
+		90deg,
+		var(--hep-contact-overlay) 0%,
+		var(--hep-contact-overlay) var(--hep-contact-overlay-stop),
+		var(--hep-contact-overlay-0) 100%
+	);
+}
+
+.p-hepcta__inner {
+	position: relative;
+	width: min(100%, var(--hep-canvas-w));
+	margin-inline: auto;
+	padding: var(--hep-cta-top) 0 var(--hep-cta-bottom);
+}
+
+/* 713:156 / 733:412 */
+.p-hepcta__eng {
+	margin: 0;
+	font-family: var(--font-display);
+	font-size: var(--hep-cta-title);
+	font-weight: var(--fw-semibold);
+	line-height: var(--hep-display-lh);
+	letter-spacing: var(--hep-cta-title-ls);
+	color: var(--color-white2);
+}
+
+/* 713:158 / 733:411（SP も PC の文言。決定） */
+.p-hepcta__heading {
+	margin: var(--hep-cta-heading-gap) 0 0;
+	font-size: var(--hep-cta-heading);
+	font-weight: var(--fw-bold);
+	line-height: var(--hep-heading-lh);
+	letter-spacing: var(--hep-cta-heading-ls);
+	color: var(--color-white2);
+}
+
+/* 713:159 / 733:413・733:407 */
+.p-hepcta__quotes,
+.p-hepcta__body {
+	margin: 0;
+	font-size: var(--hep-cta-body);
+	font-weight: var(--hep-cta-body-fw);
+	line-height: var(--hep-cta-body-lh);
+	letter-spacing: var(--hep-cta-body-ls);
+	color: var(--color-gray2);
+}
+
+.p-hepcta__quotes {
+	margin-top: var(--hep-cta-quotes-gap);
+}
+
+.p-hepcta__body {
+	width: var(--hep-cta-body-w);
+	margin: var(--hep-cta-body-gap) 0 0 var(--hep-cta-body-x);
+	text-align: var(--hep-cta-body-align);
+}
+
+/* 713:160 / 733:408 */
+.p-hepcta__more {
+	margin-top: var(--hep-cta-btn-top);
+}
+
+/* オレンジのボタン（新規部品）。PC は 3px 下に #734413 のオフセット影、SP は影なし。ホバーは a:hover のみ */
+.p-hepcta__btn {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: var(--hep-cta-btn-w);
+	height: var(--hep-cta-btn-h);
+	margin-inline: auto;
+	border-radius: var(--hep-cta-btn-radius);
+	background-color: var(--hep-color-btn);
+	box-shadow: var(--hep-cta-btn-shadow);
+	font-size: var(--hep-cta-btn-text);
+	font-weight: var(--fw-bold);
+	line-height: var(--hep-heading-lh);
+	letter-spacing: var(--hep-cta-btn-ls);
+	text-indent: var(--hep-cta-btn-ls);
+	color: var(--hep-cta-btn-color);
+}
+
+/* ============================================================
+   JS 無効・動きを減らす設定
+   ============================================================ */
+@media (scripting: none) {
+	.is-highend-page [data-reveal] {
+		opacity: 1;
+		transform: none;
+		transition: none;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.p-hepphilo__imglist-row.is-running {
+		animation: none;
+	}
+
+	/* Gallery はめくらずクロスフェード（決定）。文字は半分ずつで消えて出る */
+	.p-hepgal__photo {
+		transition: opacity var(--hep-gal-crossfade) linear;
+	}
+
+	.p-hepgal [data-hep-text] {
+		transition-duration: calc(var(--hep-gal-crossfade) / 2);
+	}
+}
+
+/* ============================================================
+   PC / SP で組み方が変わるところ（値はファイル末尾の比例ブロック）
+   ============================================================ */
+@media (min-width: 1025px) {
+	.p-hepplan__yen--sp {
+		display: none;
+	}
+}
+
+@media (max-width: 1024px) {
+	/* Design Details: 写真は行の左上（偶数は右上）に置き、英名ブロックを横に、本文を全幅で下に */
+	.p-hepdt__item {
+		display: block;
+		min-height: var(--hep-dt-pitch);
+	}
+
+	.p-hepdt__item:last-child {
+		min-height: 0;
+	}
+
+	.p-hepdt__item + .p-hepdt__item {
+		margin-top: 0;
+	}
+
+	.p-hepdt__media {
+		position: absolute;
+		top: 0;
+		left: 0;
+	}
+
+	.p-hepdt__item:nth-child(even) .p-hepdt__media {
+		left: auto;
+		right: 0;
+	}
+
+	.p-hepdt__text {
+		width: auto;
+	}
+
+	.p-hepdt__head {
+		padding-top: var(--hep-dt-head-top);
+	}
+
+	.p-hepdt__item:nth-child(odd) .p-hepdt__head {
+		margin-left: var(--hep-dt-head-x);
+	}
+
+	/* 733:331 ほか。写真の下に全幅で回り込む */
+	.p-hepdt__body {
+		width: var(--hep-dt-text-w);
+		max-width: 100%;
+	}
+
+	/* Design Plans: 罫線は和名の右からカード右端まで（733:355） */
+	.p-hepplan__name {
+		flex-direction: row;
+		align-items: center;
+	}
+
+	.p-hepplan__name::after {
+		flex: 1 1 auto;
+		margin: 0 0 0 var(--hep-plan-rule-gap);
+	}
+
+	.p-hepplan__yen--pc,
+	.p-hepplan__note {
+		display: none;
+	}
+}
+
+/* ============================================================
+   PC（1025px 以上）: 1920px カンプの縮小拡大コピー化
+   ------------------------------------------------------------
+   1 単位 --hep-vu は「カンプ 1920 の 1px の実寸」。1920px 以上では 1px で
+   固定され、それ以下では画面幅に比例して縮む（PLANS の --plp-vu と同じ）。
+   ============================================================ */
+@media (min-width: 1025px) {
+	:root {
+		--hep-vu: min(1px, calc(100vw / 1920));
+		--hep-canvas-w: calc(1920 * var(--hep-vu));
+
+		/* --- セクション共通 --- */
+		--hep-sec-gap: calc(160 * var(--hep-vu)); /* mask 下端 3240 → 見出し 3400 ほか */
+		--hep-sec-eng: calc(32 * var(--hep-vu)); /* 713:42 */
+		--hep-sec-eng-ls: calc(1 * var(--hep-vu));
+		--hep-sec-eng-color: var(--color-gray2); /* PC は gray2 */
+		--hep-sec-heading: calc(40 * var(--hep-vu)); /* 713:41 */
+		--hep-sec-heading-ls: calc(2 * var(--hep-vu));
+		--hep-sec-heading-gap: calc(55.86 * var(--hep-vu)); /* 英字上端 → 和文上端 */
+		--hep-eng-dim-size: calc(76 * var(--hep-vu)); /* 713:60 */
+		--hep-eng-dim-ls: calc(-3 * var(--hep-vu));
+		--hep-body: calc(18 * var(--hep-vu)); /* 713:61 */
+		--hep-body-lh: calc(36 * var(--hep-vu));
+		--hep-body-ls: calc(1 * var(--hep-vu));
+
+		/* --- FV 713:34 / 713:116 --- */
+		--hep-fv-stage-h: var(--fv-height); /* 留めないときの舞台 = 1 画面分 */
+		--hep-fv-image-position: 50% 50%; /* 枠と同比率（切り抜き指定なし） */
+		--hep-fv-center-offset: 0px; /* ヘッダーは写真に重なる */
+		--hep-fv-title: calc(120 * var(--hep-vu)); /* 713:38 */
+		--hep-fv-title-ls: calc(-3 * var(--hep-vu));
+		--hep-fv-lead: calc(36 * var(--hep-vu)); /* 713:37 Bold lh1.5 ls3 */
+		--hep-fv-lead-ls: calc(3 * var(--hep-vu));
+		--hep-fv-lead-lh: 1.5;
+		--hep-fv-lead-fw: var(--fw-bold);
+		--hep-fv-lead-gap: calc(11 * var(--hep-vu)); /* 英字下端 583 → y594 */
+		--hep-st-title: calc(64 * var(--hep-vu)); /* 713:121 */
+		--hep-st-title-ls: calc(-3 * var(--hep-vu));
+		--hep-st-body: calc(24 * var(--hep-vu)); /* 713:120 Medium 行高 60 ls2 */
+		--hep-st-body-lh: calc(60 * var(--hep-vu));
+		--hep-st-body-ls: calc(2 * var(--hep-vu));
+		--hep-st-body-fw: var(--fw-medium);
+		--hep-st-title-gap: calc(70 * var(--hep-vu)); /* 英字下端 +347 → 本文 +417 */
+		--hep-st-logo-gap: calc(70 * var(--hep-vu)); /* 本文下端 +717 → ロゴ +787 */
+		--hep-st-logo-w: calc(189 * var(--hep-vu)); /* 713:122 */
+		--hep-fv-fade-h: calc(443 * var(--hep-vu)); /* 713:119 */
+
+		/* --- Design Philosophy 713:207（y は見出し上端 3400 から） --- */
+		--hep-philo-copy: calc(30 * var(--hep-vu)); /* 713:51 Bold 行高 69 ls3 */
+		--hep-philo-copy-lh: calc(69 * var(--hep-vu));
+		--hep-philo-copy-ls: calc(3 * var(--hep-vu));
+		--hep-philo-copy-fw: var(--fw-bold);
+		--hep-philo-copy-align: left;
+		--hep-philo-copy-top: calc(160.14 * var(--hep-vu)); /* 見出し下端 +119.86 → +280 */
+		--hep-philo-copy-x: calc(160 * var(--hep-vu));
+		--hep-philo-house-w: calc(1296 * var(--hep-vu)); /* 713:50（624, +185） */
+		--hep-philo-house-h: calc(670 * var(--hep-vu));
+		--hep-philo-house-right: 0px; /* 画面右端に接する */
+		--hep-philo-bleed-top: calc(20 * var(--hep-vu)); /* 書き出しの影のはみ出し */
+		--hep-philo-bleed-x: calc(32 * var(--hep-vu));
+		--hep-philo-bleed-bottom: calc(44 * var(--hep-vu));
+		--hep-philo-visual-position: absolute;
+		--hep-philo-visual-top: calc(65.14 * var(--hep-vu)); /* +185 - 119.86 */
+		--hep-philo-visual-margin: 0px;
+		--hep-philo-fade-top: calc(619 * var(--hep-vu)); /* 713:33 +804 - 185 */
+		--hep-philo-fade-h: calc(54 * var(--hep-vu));
+		--hep-philo-text-top: calc(295 * var(--hep-vu)); /* コピー下端 +487 → text box +782 */
+		--hep-philo-text-x: calc(166 * var(--hep-vu));
+		--hep-philo-text-w: calc(633 * var(--hep-vu));
+		--hep-philo-body-gap: calc(15 * var(--hep-vu)); /* 英字下端 +880 → 本文 +895 */
+		--hep-philo-imglist-top: calc(70 * var(--hep-vu)); /* 本文下端 +967 → img list +1037 */
+		--hep-imglist-x: calc(166 * var(--hep-vu)); /* 713:80 x166 */
+		--hep-imglist-w: calc(593 * var(--hep-vu));
+		--hep-imglist-h: calc(334 * var(--hep-vu));
+		--hep-imglist-gap: calc(40 * var(--hep-vu));
+		--hep-imglist-radius: calc(10 * var(--hep-vu));
+
+		/* --- Design Details 713:208（y は見出し上端 4933 から） --- */
+		--hep-dt-photo-w: calc(800 * var(--hep-vu));
+		--hep-dt-photo-h: calc(453 * var(--hep-vu));
+		--hep-dt-photo-radius: calc(15 * var(--hep-vu));
+		--hep-dt-pitch: calc(513 * var(--hep-vu));
+		--hep-dt-num: calc(100 * var(--hep-vu));
+		--hep-dt-num-offset: calc(-65 * var(--hep-vu));
+		--hep-dt-eng: calc(76 * var(--hep-vu));
+		--hep-dt-rule-w: calc(739 * var(--hep-vu));
+		--hep-dt-heading: calc(24 * var(--hep-vu));
+		--hep-dt-text-w: calc(744 * var(--hep-vu));
+		--hep-dt-inset: calc(160 * var(--hep-vu)); /* 713:208 x160〜1760 */
+		--hep-dt-list-top: calc(80.14 * var(--hep-vu)); /* 見出し下端 +119.86 → 写真 +200 */
+		--hep-dt-num-x: calc(50 * var(--hep-vu)); /* 写真 left +50 */
+		--hep-dt-num-ls: calc(-3 * var(--hep-vu));
+		--hep-dt-eng-ls: calc(-3 * var(--hep-vu)); /* 713:55 */
+		--hep-dt-rule-gap: calc(13 * var(--hep-vu)); /* 英名下端 +98 → 罫線 +111 */
+		--hep-dt-heading-gap: calc(18 * var(--hep-vu)); /* 罫線 +112 → 見出し +130 */
+		--hep-dt-heading-ls: calc(2 * var(--hep-vu)); /* 713:53 Bold lh1.6 ls2 */
+		--hep-dt-body-gap: calc(8.6 * var(--hep-vu)); /* 見出し下端 +168.4 → 本文 +177 */
+
+		/* --- Design Plans 713:209（y はカード上端から） --- */
+		--hep-plan-w: calc(760 * var(--hep-vu));
+		--hep-plan-h: calc(828 * var(--hep-vu));
+		--hep-plan-gap: calc(80 * var(--hep-vu));
+		--hep-plan-radius: calc(15 * var(--hep-vu));
+		--hep-plan-photo-h: calc(424 * var(--hep-vu));
+		--hep-plan-fade-h: calc(109 * var(--hep-vu));
+		--hep-plan-eng: calc(76 * var(--hep-vu));
+		--hep-plan-jp: calc(20 * var(--hep-vu));
+		--hep-plan-price: calc(48 * var(--hep-vu));
+		--hep-plan-price-from: calc(20 * var(--hep-vu));
+		--hep-plan-yen-w: calc(25 * var(--hep-vu));
+		--hep-plan-yen-h: calc(28 * var(--hep-vu));
+		--hep-plan-inset: calc(44 * var(--hep-vu));
+		--hep-plan-note: calc(12 * var(--hep-vu));
+		--hep-plan-note-lh: 1.8; /* 713:85 lh1.8 ls1 */
+		--hep-plan-note-ls: calc(1 * var(--hep-vu));
+		--hep-plan-note-top: calc(80 * var(--hep-vu)); /* カード下端 8558 → 注記 8638 */
+		--hep-plan-lead: calc(18 * var(--hep-vu)); /* 713:84 Regular 行高 2.5 ls2 中央 */
+		--hep-plan-lead-lh: calc(45 * var(--hep-vu));
+		--hep-plan-lead-ls: calc(2 * var(--hep-vu));
+		--hep-plan-lead-align: center;
+		--hep-plan-lead-ws: nowrap; /* 4 行の改行位置はカンプどおり（データの改行） */
+		--hep-plan-lead-x: 0px;
+		--hep-plan-lead-top: calc(80.14 * var(--hep-vu)); /* 見出し下端 +119.86 → +200 */
+		--hep-plan-list-top: calc(65 * var(--hep-vu)); /* コピー下端 +380 → +445 */
+		--hep-plan-list-dir: row;
+		--hep-plan-inset-r: calc(44 * var(--hep-vu)); /* 価格の右端 = カード right -44 */
+		--hep-plan-eng-overlap: calc(-54 * var(--hep-vu)); /* 写真下端 +424 → 英名 +370 */
+		--hep-plan-eng-ls: calc(-3 * var(--hep-vu));
+		--hep-plan-name-gap: calc(2 * var(--hep-vu)); /* 英名下端 +468 → 和名 +470 */
+		--hep-plan-jp-ls: calc(2 * var(--hep-vu)); /* 713:94 Bold lh1.6 ls2 */
+		--hep-plan-rule-w: calc(64 * var(--hep-vu)); /* 713:97 */
+		--hep-plan-rule-gap: calc(31 * var(--hep-vu)); /* 和名下端 +502 → 罫線 +533 */
+		--hep-plan-body-gap: calc(27 * var(--hep-vu)); /* 罫線 +534 → 本文 +561 */
+		--hep-plan-body-w: calc(672 * var(--hep-vu)); /* 713:92 */
+		--hep-plan-price-top: calc(445 * var(--hep-vu)); /* 713:100 */
+		--hep-plan-price-ls: calc(-2 * var(--hep-vu));
+		--hep-plan-price-gap: calc(7 * var(--hep-vu)); /* 円 → 金額 → 「～」 */
+		--hep-plan-yen-top: calc(27 * var(--hep-vu)); /* 金額上端 → 円記号 */
+		--hep-plan-from-top: calc(18 * var(--hep-vu)); /* 金額上端 → 「～」 */
+		--hep-plan-from-ls: calc(2 * var(--hep-vu));
+
+		/* --- DX Experience 713:140（y はセクション上端から） --- */
+		--hep-dx-h: calc(1929 * var(--hep-vu));
+		--hep-dx-navy-h: calc(1145 * var(--hep-vu));
+		--hep-dx-body: calc(18 * var(--hep-vu));
+		--hep-dx-body-lh: calc(45 * var(--hep-vu));
+		--hep-dx-devices-w: calc(550 * var(--hep-vu));
+		--hep-dx-devices-h: calc(390 * var(--hep-vu));
+		--hep-dx-body-ls: calc(2 * var(--hep-vu)); /* 713:149 Medium 行高 2.5 ls2 */
+		--hep-dx-body-fw: var(--fw-medium);
+		--hep-dx-body-ws: nowrap; /* 6 行の改行位置はカンプどおり */
+		--hep-dx-body-w: calc(741 * var(--hep-vu));
+		--hep-dx-body-top: calc(80 * var(--hep-vu)); /* box +280 → 本文 +360 */
+		--hep-dx-box-top: calc(0.14 * var(--hep-vu)); /* 見出し下端 +279.86 → box +280 */
+		--hep-dx-box-x: calc(398 * var(--hep-vu)); /* 713:148 x398 */
+		--hep-dx-box-areas: "body devices";
+		--hep-dx-box-cols: var(--hep-dx-body-w) var(--hep-dx-devices-w);
+		--hep-dx-devices-justify: start;
+		--hep-dx-btn-top: calc(20 * var(--hep-vu)); /* box 下端 +670 → ボタン +690 */
+		--hep-dx-btn-text: calc(20 * var(--hep-vu)); /* 846:165 SF Pro Bold 20 ls2 #ffffff */
+		--hep-dx-btn-ls: calc(2 * var(--hep-vu));
+		--hep-dx-btn-fw: var(--fw-bold);
+		--hep-dx-btn-color: var(--hep-color-white1);
+
+		/* --- Gallery 713:164（S3） --- */
+		--hep-gal-h: calc(1886 * var(--hep-vu));
+		--hep-gal-page-x: calc(276 * var(--hep-vu));
+		--hep-gal-page-w: calc(1368 * var(--hep-vu));
+		--hep-gal-page-h: calc(770 * var(--hep-vu));
+		--hep-gal-right-w: calc(276 * var(--hep-vu));
+		--hep-gal-fold-left: calc(99 * var(--hep-vu));
+		--hep-gal-fold-right: calc(54 * var(--hep-vu));
+		--hep-gal-num: calc(100 * var(--hep-vu));
+		--hep-gal-num-offset: calc(-64 * var(--hep-vu));
+		--hep-gal-eng: calc(100 * var(--hep-vu));
+		--hep-gal-copy: calc(32 * var(--hep-vu));
+		--hep-gal-tab-w: calc(240 * var(--hep-vu));
+		--hep-gal-tab-h: calc(69 * var(--hep-vu));
+		--hep-gal-tab-radius: calc(5 * var(--hep-vu));
+		--hep-gal-tab-gap: calc(11 * var(--hep-vu));
+		--hep-gal-tab-text: calc(20 * var(--hep-vu));
+		--hep-gal-perspective: calc(5300 * var(--hep-vu)); /* 参考コードと同じ比（左ページ幅の約 3.9 倍）。めくる紙の上下のはみ出しを抑える */
+		--hep-gal-body: calc(18 * var(--hep-vu)); /* 713:169 Medium 行高 2.5 ls2 中央 */
+		--hep-gal-body-lh: calc(45 * var(--hep-vu));
+		--hep-gal-body-ls: calc(2 * var(--hep-vu));
+		--hep-gal-body-fw: var(--fw-medium);
+		--hep-gal-body-align: center;
+		--hep-gal-body-ws: nowrap; /* 5 行の改行位置はカンプどおり */
+		--hep-gal-body-x: 0px;
+		--hep-gal-body-w: auto;
+		--hep-gal-body-top: calc(80.14 * var(--hep-vu)); /* 見出し下端 +279.86 → 本文 +360 */
+		--hep-gal-book-top: calc(80 * var(--hep-vu)); /* 本文下端 +585 → 左ページ +665 */
+		--hep-gal-num-x: calc(67 * var(--hep-vu)); /* 713:178 x343（ページ x276 + 67） */
+		--hep-gal-num-ls: calc(-3 * var(--hep-vu));
+		--hep-gal-cap-x: calc(343 * var(--hep-vu)); /* 713:199 */
+		--hep-gal-cap-overlap: calc(-59 * var(--hep-vu)); /* ページ下端 +1435 → 英名 +1376 */
+		--hep-gal-eng-ls: calc(-3 * var(--hep-vu));
+		--hep-gal-name-dir: row; /* コピーは英名の右・下端揃え */
+		--hep-gal-name-align: flex-end;
+		--hep-gal-name-gap: calc(33 * var(--hep-vu));
+		--hep-gal-copy-ls: calc(2 * var(--hep-vu)); /* 713:197 Medium lh1.6 ls2 */
+		--hep-gal-line-x: calc(349 * var(--hep-vu)); /* 713:196 x349 → 画面右端 */
+		--hep-gal-line-top: calc(21 * var(--hep-vu)); /* 英名下端 +1505 → 下線 +1526 */
+		--hep-gal-tabs-x: calc(344 * var(--hep-vu)); /* 713:179 */
+		--hep-gal-tabs-top: calc(50 * var(--hep-vu)); /* 下線 +1527 → タブ +1577 */
+		--hep-gal-tab-cols: 5;
+		--hep-gal-tab-ls: calc(2 * var(--hep-vu)); /* 713:182 lh1.6 ls2 */
+		--hep-gal-bottom: calc(240 * var(--hep-vu)); /* タブ下端 +1646 → セクション下端 +1886 */
+
+		/* --- CONTACT 713:151（S4） --- */
+		--hep-cta-h: calc(1104 * var(--hep-vu));
+		--hep-cta-img-w: 100%; /* 713:153 h146.56% top-46.56% */
+		--hep-cta-img-h: 146.56%;
+		--hep-cta-img-x: 0%;
+		--hep-cta-img-y: -46.56%;
+		--hep-cta-overlay-w: 66.186%; /* 713:154 1270.77 / 1920。1920 超でも中央の文字に掛かるよう幅の比で持つ */
+		--hep-cta-top: calc(162 * var(--hep-vu)); /* 713:156 +162 */
+		--hep-cta-bottom: calc(239 * var(--hep-vu)); /* ボタン下端 +865 → +1104 */
+		--hep-cta-title: calc(64 * var(--hep-vu));
+		--hep-cta-title-ls: calc(-3 * var(--hep-vu));
+		--hep-cta-heading: calc(40 * var(--hep-vu)); /* 713:158 Bold lh1.6 ls2 */
+		--hep-cta-heading-ls: calc(2 * var(--hep-vu));
+		--hep-cta-heading-gap: calc(128.44 * var(--hep-vu)); /* 英字下端 +244.56 → +373 */
+		--hep-cta-body: calc(18 * var(--hep-vu)); /* 713:159 Medium 行高 2.5 ls2 中央 */
+		--hep-cta-body-lh: calc(45 * var(--hep-vu));
+		--hep-cta-body-ls: calc(2 * var(--hep-vu));
+		--hep-cta-body-fw: var(--fw-medium);
+		--hep-cta-quotes-gap: calc(23 * var(--hep-vu)); /* 見出し下端 +437 → +460 */
+		--hep-cta-body-gap: 0px; /* PC は鍵括弧の行に続けて 4 行 */
+		--hep-cta-body-w: auto;
+		--hep-cta-body-x: 0px;
+		--hep-cta-body-align: center;
+		--hep-cta-btn-top: calc(128 * var(--hep-vu)); /* 本文下端 +640 → +768 */
+		--hep-cta-btn-w: calc(597 * var(--hep-vu));
+		--hep-cta-btn-h: calc(97 * var(--hep-vu));
+		--hep-cta-btn-radius: calc(10 * var(--hep-vu));
+		--hep-cta-btn-shadow: 0 calc(3 * var(--hep-vu)) 0 var(--hep-color-btn-shadow); /* 713:161 3px 下にずらした同形 */
+		--hep-cta-btn-text: calc(28 * var(--hep-vu)); /* 713:163 Bold lh1.6 ls2 #fefefe */
+		--hep-cta-btn-ls: calc(2 * var(--hep-vu));
+		--hep-cta-btn-color: var(--color-white2);
+	}
+}
+
+/* ============================================================
+   SP（1024px 以下）: 375px カンプの縮小拡大コピー化
+   ------------------------------------------------------------
+   1 単位 --hep-su は「375px 幅での 1px の実寸」
+   （上限は style.css の --sp-scale-max。タブレットの縮尺方針）。
+   ============================================================ */
+@media (max-width: 1024px) {
+	:root {
+		--hep-su: min(calc(100vw / 375), var(--sp-scale-max));
+		--hep-canvas-w: calc(375 * var(--hep-su));
+
+		/* --- セクション共通 --- */
+		--hep-sec-gap: calc(80 * var(--hep-su)); /* mask 下端 2170 → 見出し 2249 ほか */
+		--hep-sec-eng: calc(14 * var(--hep-su)); /* 733:320 */
+		--hep-sec-eng-ls: calc(1 * var(--hep-su));
+		--hep-sec-eng-color: var(--color-white3); /* SP は white3 */
+		--hep-sec-heading: calc(16 * var(--hep-su)); /* 733:321 */
+		--hep-sec-heading-ls: calc(1 * var(--hep-su));
+		--hep-sec-heading-gap: calc(24.23 * var(--hep-su));
+		--hep-eng-dim-size: calc(36 * var(--hep-su)); /* 733:317 */
+		--hep-eng-dim-ls: calc(-2 * var(--hep-su));
+		--hep-body: calc(12 * var(--hep-su)); /* 733:66 lh1.6 ls1 */
+		--hep-body-lh: calc(19.2 * var(--hep-su));
+		--hep-body-ls: calc(1 * var(--hep-su));
+
+		/* --- FV 733:292〜309（375x723。上 45 はヘッダー） --- */
+		--hep-fv-stage-h: calc(723 * var(--hep-su) - var(--header-height)); /* PLANS SP FV と同じ考え方 */
+		--hep-fv-image-position: var(--hep-fv-image-x) 50%;
+		--hep-fv-center-offset: var(--header-height); /* ヘッダー込みの画面の中央に置く */
+		--hep-fv-title: calc(50 * var(--hep-su)); /* 733:302 */
+		--hep-fv-title-ls: calc(-3 * var(--hep-su));
+		--hep-fv-lead: calc(16 * var(--hep-su)); /* 733:300 Medium lh1.8 ls1 */
+		--hep-fv-lead-ls: calc(1 * var(--hep-su));
+		--hep-fv-lead-lh: 1.8;
+		--hep-fv-lead-fw: var(--fw-medium);
+		--hep-fv-lead-gap: calc(9.5 * var(--hep-su)); /* 英字下端 360.5 → y370 */
+		--hep-st-title: calc(36 * var(--hep-su)); /* 733:308 */
+		--hep-st-title-ls: calc(-2 * var(--hep-su));
+		--hep-st-body: calc(12 * var(--hep-su)); /* 733:306 Regular 行高 24 ls1 */
+		--hep-st-body-lh: calc(24 * var(--hep-su));
+		--hep-st-body-ls: calc(1 * var(--hep-su));
+		--hep-st-body-fw: var(--fw-regular);
+		--hep-st-title-gap: calc(30 * var(--hep-su)); /* 英字下端 +273 → 本文 +303 */
+		--hep-st-logo-gap: calc(36 * var(--hep-su)); /* 本文下端 +447 → ロゴ +483 */
+		--hep-st-logo-w: calc(99.43 * var(--hep-su)); /* 733:309 */
+		--hep-fv-fade-h: 0px; /* SP カンプに下端グラデは無い */
+
+		/* --- Design Philosophy（y は見出し上端 2249 から） --- */
+		--hep-philo-copy: calc(12 * var(--hep-su)); /* 733:336 Regular 行高 24 ls1 中央 */
+		--hep-philo-copy-lh: calc(24 * var(--hep-su));
+		--hep-philo-copy-ls: calc(1 * var(--hep-su));
+		--hep-philo-copy-fw: var(--fw-regular);
+		--hep-philo-copy-align: center;
+		--hep-philo-copy-top: calc(41 * var(--hep-su)); /* CG 下端 +237 → +278 */
+		--hep-philo-copy-x: 0px;
+		--hep-philo-house-w: calc(323 * var(--hep-su)); /* 733:318（26, +70） */
+		--hep-philo-house-h: calc(167 * var(--hep-su));
+		--hep-philo-house-right: calc(26 * var(--hep-su));
+		--hep-philo-bleed-top: calc(20 * var(--hep-su));
+		--hep-philo-bleed-x: calc(32 * var(--hep-su));
+		--hep-philo-bleed-bottom: calc(44 * var(--hep-su));
+		--hep-philo-visual-position: relative;
+		--hep-philo-visual-top: 0px;
+		--hep-philo-visual-margin: calc(20.17 * var(--hep-su)); /* 見出し下端 +49.83 → +70 */
+		--hep-philo-fade-top: calc(155 * var(--hep-su)); /* 733:319 +225 - 70 */
+		--hep-philo-fade-h: calc(13 * var(--hep-su));
+		--hep-philo-text-top: calc(30 * var(--hep-su)); /* コピー下端 +350 → +380 */
+		--hep-philo-text-x: calc(25 * var(--hep-su));
+		--hep-philo-text-w: calc(321 * var(--hep-su));
+		--hep-philo-body-gap: calc(9.56 * var(--hep-su)); /* 英字下端 +426.44 → 本文 +436 */
+		--hep-philo-imglist-top: calc(15.4 * var(--hep-su)); /* 本文下端 +493.6 → +509 */
+		--hep-imglist-x: calc(25 * var(--hep-su)); /* 733:316 x25 */
+		--hep-imglist-w: calc(288 * var(--hep-su));
+		--hep-imglist-h: calc(162 * var(--hep-su));
+		--hep-imglist-gap: calc(10 * var(--hep-su));
+		--hep-imglist-radius: calc(5 * var(--hep-su));
+
+		/* --- Design Details 733:322〜345（y は写真上端から） --- */
+		--hep-dt-photo-w: calc(163 * var(--hep-su));
+		--hep-dt-photo-h: calc(92 * var(--hep-su));
+		--hep-dt-photo-radius: calc(5 * var(--hep-su));
+		--hep-dt-pitch: calc(217 * var(--hep-su));
+		--hep-dt-num: calc(32 * var(--hep-su));
+		--hep-dt-num-offset: calc(-21 * var(--hep-su));
+		--hep-dt-eng: calc(24 * var(--hep-su));
+		--hep-dt-rule-w: calc(150 * var(--hep-su));
+		--hep-dt-heading: calc(12 * var(--hep-su));
+		--hep-dt-text-w: calc(320 * var(--hep-su));
+		--hep-dt-inset: calc(25 * var(--hep-su)); /* 写真・本文 x25 */
+		--hep-dt-list-top: calc(40.17 * var(--hep-su)); /* 見出し下端 +49.83 → 写真 +90 */
+		--hep-dt-num-x: calc(11 * var(--hep-su)); /* 写真 left +11 */
+		--hep-dt-num-ls: calc(-2 * var(--hep-su));
+		--hep-dt-eng-ls: calc(-1 * var(--hep-su)); /* 733:325 */
+		--hep-dt-rule-gap: calc(7 * var(--hep-su)); /* 英名下端 +31 → 罫線 +38 */
+		--hep-dt-heading-gap: calc(3 * var(--hep-su)); /* 罫線 +39 → 見出し +42 */
+		--hep-dt-heading-ls: calc(1 * var(--hep-su)); /* 733:329 Bold lh1.6 ls1 */
+		--hep-dt-body-gap: calc(13.8 * var(--hep-su)); /* 見出し下端 → 本文（写真上端 +106） */
+		--hep-dt-head-top: calc(31 * var(--hep-su)); /* 写真上端 → 英名 */
+		--hep-dt-head-x: calc(173 * var(--hep-su)); /* 奇数: 写真 x25 → 英名 x198 */
+
+		/* --- Design Plans 733:323〜371（y はカード上端から） --- */
+		--hep-plan-w: calc(324 * var(--hep-su));
+		--hep-plan-h: calc(439 * var(--hep-su));
+		--hep-plan-gap: calc(20 * var(--hep-su));
+		--hep-plan-radius: calc(5 * var(--hep-su));
+		--hep-plan-photo-h: calc(181 * var(--hep-su));
+		--hep-plan-fade-h: calc(47 * var(--hep-su));
+		--hep-plan-eng: calc(36 * var(--hep-su));
+		--hep-plan-jp: calc(12 * var(--hep-su));
+		--hep-plan-price: calc(24 * var(--hep-su));
+		--hep-plan-price-from: calc(12 * var(--hep-su));
+		--hep-plan-yen-w: calc(11 * var(--hep-su));
+		--hep-plan-yen-h: calc(12 * var(--hep-su));
+		--hep-plan-inset: calc(20 * var(--hep-su));
+		--hep-plan-note: 0px; /* SP は注記を出さない */
+		--hep-plan-note-lh: 1.8;
+		--hep-plan-note-ls: 0px;
+		--hep-plan-note-top: 0px;
+		--hep-plan-lead: calc(12 * var(--hep-su)); /* 733:346 Regular lh1.6 ls1 左 */
+		--hep-plan-lead-lh: calc(19.2 * var(--hep-su));
+		--hep-plan-lead-ls: calc(1 * var(--hep-su));
+		--hep-plan-lead-align: left;
+		--hep-plan-lead-ws: normal;
+		--hep-plan-lead-x: calc(25 * var(--hep-su));
+		--hep-plan-lead-top: calc(40.57 * var(--hep-su)); /* 見出し下端 +75.43 → +116 */
+		--hep-plan-list-top: calc(40 * var(--hep-su)); /* コピー下端 4176 → カード 4216 */
+		--hep-plan-list-dir: column;
+		--hep-plan-inset-r: calc(26 * var(--hep-su)); /* 罫線・価格の右端 x323 */
+		--hep-plan-eng-overlap: calc(-23 * var(--hep-su)); /* 写真下端 +181 → 英名 +158 */
+		--hep-plan-eng-ls: calc(-1 * var(--hep-su));
+		--hep-plan-name-gap: calc(0.6 * var(--hep-su)); /* 英名下端 +204.4 → 和名 +205 */
+		--hep-plan-jp-ls: calc(1 * var(--hep-su)); /* 733:351 Bold lh1.6 ls1 */
+		--hep-plan-rule-w: auto; /* 和名の右からカード右端まで */
+		--hep-plan-rule-gap: calc(10 * var(--hep-su)); /* 和名の右端 → 罫線 */
+		--hep-plan-body-gap: calc(14.8 * var(--hep-su)); /* 和名下端 +224.2 → 本文 +239 */
+		--hep-plan-body-w: calc(286 * var(--hep-su)); /* 733:349 は 283。句読点のぶら下げが無いブラウザでも 1 行 22 字（カンプの 7 行）に収める */
+		--hep-plan-price-top: calc(378 * var(--hep-su)); /* 733:358 */
+		--hep-plan-price-ls: calc(-1 * var(--hep-su));
+		--hep-plan-price-gap: calc(2.5 * var(--hep-su));
+		--hep-plan-yen-top: calc(16 * var(--hep-su));
+		--hep-plan-from-top: calc(9 * var(--hep-su));
+		--hep-plan-from-ls: calc(2 * var(--hep-su));
+
+		/* --- DX Experience 733:291・733:372〜379（y はセクション上端から） --- */
+		--hep-dx-h: calc(747 * var(--hep-su));
+		--hep-dx-navy-h: calc(553 * var(--hep-su));
+		--hep-dx-body: calc(12 * var(--hep-su));
+		--hep-dx-body-lh: calc(19.2 * var(--hep-su));
+		--hep-dx-devices-w: calc(247 * var(--hep-su));
+		--hep-dx-devices-h: calc(175 * var(--hep-su));
+		--hep-dx-body-ls: calc(1 * var(--hep-su)); /* 733:379 Regular lh1.6 ls1 */
+		--hep-dx-body-fw: var(--fw-regular);
+		--hep-dx-body-ws: normal;
+		--hep-dx-body-w: calc(324 * var(--hep-su));
+		--hep-dx-body-top: calc(13 * var(--hep-su)); /* 画像下端 +326 → 本文 +339 */
+		--hep-dx-box-top: calc(21.17 * var(--hep-su)); /* 見出し下端 +129.83 → 画像 +151 */
+		--hep-dx-box-x: calc(25 * var(--hep-su));
+		--hep-dx-box-areas: "devices" "body";
+		--hep-dx-box-cols: var(--hep-dx-body-w);
+		--hep-dx-devices-justify: center;
+		--hep-dx-btn-top: calc(35 * var(--hep-su)); /* 本文下端 +453 → ボタン +488 */
+		--hep-dx-btn-text: calc(12 * var(--hep-su)); /* 733:375 SF Pro Medium 12 ls1 #fefefe */
+		--hep-dx-btn-ls: calc(1 * var(--hep-su));
+		--hep-dx-btn-fw: var(--fw-medium);
+		--hep-dx-btn-color: var(--color-white2);
+
+		/* --- Gallery 733:380〜404（S3） --- */
+		--hep-gal-h: calc(736 * var(--hep-su));
+		--hep-gal-page-x: calc(25 * var(--hep-su));
+		--hep-gal-page-w: calc(314.54 * var(--hep-su));
+		--hep-gal-page-h: calc(177.02 * var(--hep-su));
+		--hep-gal-right-w: calc(63.46 * var(--hep-su));
+		--hep-gal-fold-left: calc(22.76 * var(--hep-su));
+		--hep-gal-fold-right: calc(12.42 * var(--hep-su));
+		--hep-gal-num: calc(32 * var(--hep-su));
+		--hep-gal-num-offset: calc(-20.7 * var(--hep-su));
+		--hep-gal-eng: calc(32 * var(--hep-su));
+		--hep-gal-copy: calc(12 * var(--hep-su));
+		--hep-gal-tab-w: calc(96 * var(--hep-su));
+		--hep-gal-tab-h: calc(29 * var(--hep-su));
+		--hep-gal-tab-radius: calc(3 * var(--hep-su));
+		--hep-gal-tab-gap: calc(5 * var(--hep-su));
+		--hep-gal-tab-text: calc(10 * var(--hep-su));
+		--hep-gal-perspective: calc(1230 * var(--hep-su)); /* 参考コードと同じ比（左ページ幅の約 3.9 倍） */
+		--hep-gal-body: calc(12 * var(--hep-su)); /* 733:391 Regular lh1.6 ls1 左 */
+		--hep-gal-body-lh: calc(19.2 * var(--hep-su));
+		--hep-gal-body-ls: calc(1 * var(--hep-su));
+		--hep-gal-body-fw: var(--fw-regular);
+		--hep-gal-body-align: left;
+		--hep-gal-body-ws: normal;
+		--hep-gal-body-x: calc(25 * var(--hep-su));
+		--hep-gal-body-w: calc(324 * var(--hep-su));
+		--hep-gal-body-top: calc(40.17 * var(--hep-su)); /* 見出し下端 +49.83 → 本文 +170 */
+		--hep-gal-book-top: calc(49.72 * var(--hep-su)); /* 本文下端 +303 → 左ページ +352.72 */
+		--hep-gal-num-x: calc(13 * var(--hep-su)); /* 733:388 x38（ページ x25 + 13） */
+		--hep-gal-num-ls: calc(-2 * var(--hep-su));
+		--hep-gal-cap-x: calc(38 * var(--hep-su)); /* 733:392 */
+		--hep-gal-cap-overlap: calc(-20.74 * var(--hep-su)); /* ページ下端 +529.74 → 英名 +509 */
+		--hep-gal-eng-ls: calc(-2 * var(--hep-su));
+		--hep-gal-name-dir: column; /* コピーは英名の下 */
+		--hep-gal-name-align: flex-start;
+		--hep-gal-name-gap: 0px;
+		--hep-gal-copy-ls: calc(1 * var(--hep-su)); /* 733:393 Medium lh1.6 ls1 */
+		--hep-gal-line-x: calc(39 * var(--hep-su)); /* 733:394 x39 → 画面右端 */
+		--hep-gal-line-top: calc(9.8 * var(--hep-su)); /* コピー下端 +569.2 → 下線 +579 */
+		--hep-gal-tabs-x: calc(39 * var(--hep-su));
+		--hep-gal-tabs-top: calc(13 * var(--hep-su)); /* 下線 +580 → タブ +593 */
+		--hep-gal-tab-cols: 3; /* 3 + 2 の 2 段 */
+		--hep-gal-tab-ls: calc(1 * var(--hep-su)); /* 733:398 lh1.6 ls1 */
+		--hep-gal-bottom: calc(80 * var(--hep-su)); /* タブ下端 +656 → 背景下端 +736 */
+
+		/* --- CONTACT 733:405〜413（S4） --- */
+		--hep-cta-h: calc(487 * var(--hep-su));
+		--hep-cta-img-w: 253.39%; /* 733:405 */
+		--hep-cta-img-h: 146.56%;
+		--hep-cta-img-x: -109.96%;
+		--hep-cta-img-y: -46.56%;
+		--hep-cta-overlay-w: 90.667%; /* 733:406 340 / 375。中間幅でも中央の文字に掛かるよう幅の比で持つ */
+		--hep-cta-top: calc(72 * var(--hep-su)); /* 733:412 +72 */
+		--hep-cta-bottom: calc(80 * var(--hep-su)); /* ボタン下端 +407 → +487 */
+		--hep-cta-title: calc(32 * var(--hep-su));
+		--hep-cta-title-ls: calc(-1 * var(--hep-su));
+		--hep-cta-heading: calc(16 * var(--hep-su)); /* 733:411 Bold lh1.6 ls1 */
+		--hep-cta-heading-ls: calc(1 * var(--hep-su));
+		--hep-cta-heading-gap: calc(39.72 * var(--hep-su)); /* 英字下端 +113.28 → +153 */
+		--hep-cta-body: calc(12 * var(--hep-su)); /* 733:413・733:407 Regular lh1.6 ls1 */
+		--hep-cta-body-lh: calc(19.2 * var(--hep-su));
+		--hep-cta-body-ls: calc(1 * var(--hep-su));
+		--hep-cta-body-fw: var(--fw-regular);
+		--hep-cta-quotes-gap: calc(14.4 * var(--hep-su)); /* 見出し下端 +178.6 → +193 */
+		--hep-cta-body-gap: calc(14.4 * var(--hep-su)); /* 鍵括弧下端 +250.6 → +265 */
+		--hep-cta-body-w: calc(324 * var(--hep-su));
+		--hep-cta-body-x: calc(25 * var(--hep-su));
+		--hep-cta-body-align: left;
+		--hep-cta-btn-top: calc(44.4 * var(--hep-su)); /* 本文下端 +322.6 → +367 */
+		--hep-cta-btn-w: calc(305 * var(--hep-su));
+		--hep-cta-btn-h: calc(40 * var(--hep-su));
+		--hep-cta-btn-radius: calc(5 * var(--hep-su));
+		--hep-cta-btn-shadow: none; /* SP は影なし */
+		--hep-cta-btn-text: calc(14 * var(--hep-su)); /* 733:410 Bold lh1.6 ls1 #ffffff */
+		--hep-cta-btn-ls: calc(1 * var(--hep-su));
+		--hep-cta-btn-color: var(--hep-color-white1);
+	}
+}

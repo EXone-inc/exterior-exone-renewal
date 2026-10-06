@@ -114,7 +114,7 @@ $exterior_exone_plans = exterior_exone_store_plans();
 					<?php echo wp_kses( exterior_exone_store_lines( $exterior_exone_plans['highend']['lead'] ), array( 'br' => array() ) ); ?>
 				</p>
 
-				<a class="c-btn c-btn--white p-splans__btn" href="<?php echo esc_url( $exterior_exone_plans['highend']['more'] ); ?>">VIEW MORE</a>
+				<a class="c-btn c-btn--white p-splans__btn" href="<?php echo esc_url( exterior_exone_store_link( $exterior_exone_plans['highend']['more'] ) ); ?>">VIEW MORE</a>
 			</div>
 		</div>
 

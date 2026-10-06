@@ -18,6 +18,7 @@ require_once get_theme_file_path( 'inc/store-data.php' );
 require_once get_theme_file_path( 'inc/store-mode.php' );
 require_once get_theme_file_path( 'inc/dx-data.php' );
 require_once get_theme_file_path( 'inc/plans-data.php' );
+require_once get_theme_file_path( 'inc/highend-data.php' );
 require_once get_theme_file_path( 'inc/works-data.php' );
 
 /**
@@ -292,6 +293,35 @@ function exterior_exone_enqueue_assets() {
 		}
 	}
 
+	// ハイエンドページ（/plans/high-end/。page-high-end.php）。CSS はテーマ本体の後に読む。
+	// FV の夕方 → 夜 → 暗幕は fv-mask.js（data-fv-mask-span のオプトイン）、
+	// Design Philosophy の写真帯は PLANS と同じ img list のエンドレスロール、
+	// Gallery はパンフレットのめくり・自動送り（highend-gallery.js）。
+	if ( is_page( 'high-end' ) ) {
+		wp_enqueue_style(
+			'exterior-exone-highend',
+			get_theme_file_uri( 'css/highend.css' ),
+			array( 'exterior-exone-style' ),
+			exterior_exone_asset_version( 'css/highend.css' )
+		);
+
+		foreach (
+			array(
+				'exterior-exone-fv-mask'         => 'js/fv-mask.js',
+				'exterior-exone-plans-imglist'   => 'js/plans-imglist.js',
+				'exterior-exone-highend-gallery' => 'js/highend-gallery.js',
+			) as $exterior_exone_handle => $exterior_exone_path
+		) {
+			wp_enqueue_script(
+				$exterior_exone_handle,
+				get_theme_file_uri( $exterior_exone_path ),
+				array(),
+				exterior_exone_asset_version( $exterior_exone_path ),
+				true
+			);
+		}
+	}
+
 	// 支店ページの施工イメージ帯（PLANS の img list と同じエンドレスロール）・
 	// DX EXPERIENCE（TOP と同じピン留めのステップ送り）・選ばれる理由の浮遊・AREA のアーチ状ロール・FAQ（アコーディオン）。
 	if ( exterior_exone_is_store_page() ) {
@@ -552,13 +582,14 @@ add_filter( 'show_admin_bar', 'exterior_exone_hide_admin_bar' );
  * ヘッダーを FV に重ねるページかどうか。
  *
  * 全幅の FV から始まるページは、ヘッダーを写真の上に半透明で重ねる
- * （カンプ TOP 917:2733 / 企業情報 393:546 / DX 436:381 / PLANS 586:552）。それ以外は黒帯のまま。
+ * （カンプ TOP 917:2733 / 企業情報 393:546 / DX 436:381 / PLANS 586:552。ハイエンドは PC カンプに
+ * ヘッダーが無いので PLANS と同じ扱い）。それ以外は黒帯のまま。
  * 下層ページが増えたらここに追加する。
  *
  * @return bool
  */
 function exterior_exone_has_fv_header() {
-	return is_front_page() || is_page( 'company' ) || is_page( 'dx' ) || is_page( 'vr' ) || is_page( 'plans' ) || exterior_exone_is_store_page();
+	return is_front_page() || is_page( 'company' ) || is_page( 'dx' ) || is_page( 'vr' ) || is_page( 'plans' ) || is_page( 'high-end' ) || exterior_exone_is_store_page();
 }
 
 /**
@@ -593,6 +624,10 @@ function exterior_exone_body_class( $classes ) {
 		$classes[] = 'is-plans-page';
 	}
 
+	if ( is_page( 'high-end' ) ) {
+		$classes[] = 'is-highend-page';
+	}
+
 	if ( exterior_exone_has_fv_header() ) {
 		$classes[] = 'has-fv-header';
 	}
@@ -612,6 +647,18 @@ function exterior_exone_plans_noscript_style() {
 	echo '<noscript><style>.is-plans-page [data-reveal]{opacity:1;transform:none;transition:none}</style></noscript>' . "\n";
 }
 add_action( 'wp_head', 'exterior_exone_plans_noscript_style' );
+
+/**
+ * ハイエンドページで JS が動かないとき、[data-reveal] を最初から表示する。
+ * css/highend.css の @media (scripting: none) に対応しないブラウザ向けの併用。
+ */
+function exterior_exone_highend_noscript_style() {
+	if ( ! is_page( 'high-end' ) ) {
+		return;
+	}
+	echo '<noscript><style>.is-highend-page [data-reveal]{opacity:1;transform:none;transition:none}</style></noscript>' . "\n";
+}
+add_action( 'wp_head', 'exterior_exone_highend_noscript_style' );
 
 /**
  * 支店ページで JS が動かないとき、[data-reveal] を最初から表示し、見える安心の線画を
