@@ -194,9 +194,9 @@ function exterior_exone_highend_details() {
 					'窓からの眺め、季節の移ろい、周囲からの視線。',
 					'植栽の役割を考えながら、成長や手入れにも配慮した、暮らしに寄り添う緑をご提案します。',
 				),
-				'file'    => 'pc-details-03-greenery-713-128.jpg',
+				'file'    => 'pc-details-03-greenery-802-51.jpg', // 2026-10-07 差し替え（旧 713:128）
 				'img'     => array( 1672, 941 ),
-				'crop'    => array( '132.4%', '131.55%', '-14.94%', '-11.09%' ), // 713:128。元画像の窓枠（上端・左端）を切り落とす拡大
+				'crop'    => array( '103.87%', '100.06%', '0%', '-0.03%' ), // 802:51（ほぼ等倍。幅だけ少し広げて右端を切る）
 			),
 			array(
 				'num'     => '04',
@@ -360,7 +360,7 @@ function exterior_exone_highend_gallery() {
 				'tab'  => 'アプローチ',
 				'eng'  => 'APPROACH DESIGN', // 仮
 				'copy' => '光に導かれ、玄関へと続く石の道', // 仮
-				'file' => 'gallery-cand-713-200.jpg', // 仮
+				'file' => 'gallery-02-approach-808-54.jpg', // 2026-10-07 差し替え（808:54。カンプの切り抜きは上 -9.22%・高さ 118.44% = 上下を少し切る）
 				'img'  => array( 1536, 1024 ),
 			),
 			array(

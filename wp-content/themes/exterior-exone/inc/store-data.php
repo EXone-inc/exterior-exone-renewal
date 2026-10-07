@@ -40,7 +40,7 @@ function exterior_exone_stores() {
 			'tel'      => '022-354-8993',
 			'hours'    => 'AM10:00～PM18:00',
 			'closed'   => '土・日・祝',
-			'parking'  => '10台', // 仮。
+			'parking'  => '2台',
 			'areas'    => '仙台市、多賀城市、名取市、塩竈市、岩沼市、富谷市、利府町、川崎町',
 			'line_url' => 'https://lin.ee/Z9M31bf', // @620vhjqe
 			'tel_url'  => 'tel:0223548993',
@@ -53,7 +53,7 @@ function exterior_exone_stores() {
 			'tel'      => '045-443-9592',
 			'hours'    => 'AM10:00～PM18:00',
 			'closed'   => '火・水・祝',
-			'parking'  => '10台', // 仮。
+			'parking'  => '2台',
 			'areas'    => '横浜市、藤沢市、大和市、厚木市、海老名市、鎌倉市、茅ヶ崎市、平塚市、綾瀬市、伊勢原市、寒川町、座間市',
 			'line_url' => 'https://lin.ee/wxMNCYU', // @349lnmmg
 			'tel_url'  => 'tel:0454439592',
@@ -66,7 +66,7 @@ function exterior_exone_stores() {
 			'tel'      => '019-613-4067',
 			'hours'    => 'AM10:00～PM18:00',
 			'closed'   => '土・日・祝',
-			'parking'  => '10台', // 仮。
+			'parking'  => '5台',
 			'areas'    => '盛岡市、雫石町、八幡平市、矢巾町、滝沢市',
 			'line_url' => 'https://lin.ee/Ys2O5ED', // @472bhbvl
 			'tel_url'  => 'tel:0196134067',
@@ -80,7 +80,7 @@ function exterior_exone_stores() {
 			'tel'      => '017-711-8031',
 			'hours'    => 'AM10:00～PM18:00',
 			'closed'   => '土・日・祝',
-			'parking'  => '10台', // 仮。
+			'parking'  => '2台',
 			'areas'    => '青森市、五所川原市、つがる市、平内町、野辺地町、外ヶ浜町',
 			'line_url' => 'https://lin.ee/Tfvjo0k', // @744ivjdd（弘前支店と共通）
 			'tel_url'  => 'tel:0177118031',
@@ -93,7 +93,7 @@ function exterior_exone_stores() {
 			'tel'        => '0178-38-9640',
 			'hours'      => 'AM10:00～PM18:00',
 			'closed'     => '土・日・祝',
-			'parking'    => '10台', // 仮。
+			'parking'    => '2台',
 			// 「奥入瀬町」は支給データの表記のまま（自治体名は「おいらせ町」。要確認）。
 			'areas'      => '青森県：八戸市、三沢市、東北町、奥入瀬町、十和田市、階上町、南部町、三戸町、五戸町、七戸町、田子町、新郷村、六ヶ所村／岩手県：久慈市、二戸市',
 			'areas_lead' => '八戸市、三沢市、東北町、奥入瀬町、十和田市、階上町、南部町、三戸町、五戸町、七戸町、田子町、新郷村、六ヶ所村、岩手県久慈市、二戸市',
@@ -108,7 +108,7 @@ function exterior_exone_stores() {
 			'tel'        => '0172-55-7478',
 			'hours'      => 'AM10:00～PM18:00',
 			'closed'     => '土・日・祝',
-			'parking'    => '10台', // 仮。
+			'parking'    => '2台',
 			'areas'      => '青森県：弘前市、黒石市、平川市、藤崎町、板柳町、大鰐町、田舎館村／秋田県：大館市、鹿角市、小坂町、北秋田市',
 			'areas_lead' => '弘前市、黒石市、平川市、藤崎町、板柳町、大鰐町、田舎館村、秋田県大館市、鹿角市、小坂町、北秋田市',
 			'line_url'   => 'https://lin.ee/Tfvjo0k', // @744ivjdd（青森支店と共通）。青森の支給データの URL に合わせた
@@ -1140,7 +1140,7 @@ function exterior_exone_store_area_media() {
 		'aomori'    => $aomori,
 		// 八戸（ボード 3 行目）。
 		'hachinohe' => array(
-			'photo'   => 'area-hachinohe-store-737-81.jpg',
+			'photo'   => 'area-hachinohe-store-802-41.jpg', // 2026-10-07 差し替え（旧 737:81）
 			'gallery' => array(
 				array( 'file' => 'area-hachinohe-gallery1-737-82.jpg', 'position' => '50% 48%' ),
 				array( 'file' => 'area-hachinohe-gallery2-737-83.jpg', 'position' => '50% 100%' ),

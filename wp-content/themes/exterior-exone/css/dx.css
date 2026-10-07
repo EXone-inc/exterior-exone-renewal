@@ -2175,6 +2175,13 @@
 		background: linear-gradient(180deg, var(--dxp-ex-bg-0) calc(var(--dxp-ex-intro-h, 0px) - 1px), var(--dxp-ex-bg) var(--dxp-ex-intro-h, 0px), var(--dxp-ex-bg-0) 100%);
 		pointer-events: none;
 	}
+
+	/* 支店モードはヘッダーが不透明で映像がその直下から始まるため、継ぎ目のなじませが
+	   映像の上端に薄いもやとして見えてしまう（コーポレートは半透明ヘッダーの影に隠れる）。
+	   帯と映像の色差は 3 階調以下なので、支店モードでは掛けない（2026-10-07） */
+	.is-store-mode .p-dxex--scroll.is-enhanced .p-dxex__stage::after {
+		content: none;
+	}
 }
 
 /* 動きを減らす設定では切り替えを即時にする */

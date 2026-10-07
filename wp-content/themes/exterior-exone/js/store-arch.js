@@ -66,6 +66,51 @@
 		rate = pitchPx > 0 ? frameWidth / screenTime / pitchPx : 0;
 	}
 
+	// PC では写真 1 枚を縦の短冊に分け、短冊ごとに角度を変えて円筒に沿わせる（css/store.css の
+	// .p-sarea__arch-strip。平らな板のままだと軌道が正 12 角形に見える。2026-10-07）。
+	// 1 回だけ作り、SP では CSS が短冊を隠して元の写真を出す。
+	var stripsBuilt = false;
+
+	function buildStrips() {
+		if (stripsBuilt) {
+			return;
+		}
+
+		var strips = Math.max(1, Math.round(token('--st-arch-strips', 10)));
+
+		items.forEach(function (item) {
+			var image = item.querySelector('.p-sarea__arch-image');
+
+			if (!image) {
+				return;
+			}
+
+			var holder = document.createElement('div');
+			holder.className = 'p-sarea__arch-strips';
+			holder.setAttribute('aria-hidden', 'true');
+
+			for (var i = 0; i < strips; i++) {
+				var strip = document.createElement('div');
+				var slice = document.createElement('div');
+				var copy = image.cloneNode(false);
+
+				strip.className = 'p-sarea__arch-strip';
+				strip.style.setProperty('--st-arch-strip-i', String(i));
+				slice.className = 'p-sarea__arch-slice';
+				copy.removeAttribute('alt');
+				copy.removeAttribute('class');
+				slice.appendChild(copy);
+				strip.appendChild(slice);
+				holder.appendChild(strip);
+			}
+
+			item.appendChild(holder);
+			item.classList.add('has-strips');
+		});
+
+		stripsBuilt = true;
+	}
+
 	function render() {
 		items.forEach(function (item, index) {
 			var angle = (((1 - index - phase) * step) % 360 + 540) % 360 - 180;
@@ -97,6 +142,10 @@
 	}
 
 	function update() {
+		if (pc.matches) {
+			buildStrips();
+		}
+
 		if (motion.matches) {
 			stop();
 			phase = 0;

@@ -147,6 +147,8 @@
 	--st-arch-height: 340; /* 同・高さ（見下ろした分だけ低く見えるので 320 / cos） */
 	--st-arch-limit: 110; /* 見せる角度（±度）。90° を越えた分は円筒の奥側（612:661 の左上・右上の細い写真） */
 	--st-arch-fade: 15; /* 見せる角度の端でこの角度をかけて消す */
+	--st-arch-strips: 10; /* 写真 1 枚を縦に分ける短冊の数。平らな板だと軌道が正 12 角形に見えるため、短冊ごとに角度を変えて円筒に沿わせる（2026-10-07） */
+	--st-arch-span: calc(var(--st-arch-width) / var(--st-arch-radius) * 57.2958); /* 写真 1 枚が円筒上で占める角度（度）= 幅 / 半径（rad） */
 	--st-arch-sp-left: 9; /* SP の列の 1 枚目の左端（641:1377） */
 	--st-arch-sp-width: 142; /* SP の写真 142x85・間隔 8（641:1376〜641:1378） */
 	--st-arch-sp-height: 85;
@@ -2086,6 +2088,11 @@ svg.p-svisible__sketch[data-line-draw] :is(path, line, polyline, polygon, rect, 
 	box-shadow: var(--st-shadow-card); /* 641:1464 */
 }
 
+/* 短冊（PC で js/store-arch.js が作る）。SP は直線の列なので使わない */
+.p-sarea__arch-strips {
+	display: none;
+}
+
 .p-sarea__arch-image {
 	display: block;
 	width: 100%;
@@ -3038,6 +3045,68 @@ svg.p-svisible__sketch[data-line-draw] :is(path, line, polyline, polygon, rect, 
 			rotateX(calc(var(--st-arch-tilt) * -1deg))
 			rotateY(calc(var(--st-arch-a) * 1deg))
 			translateZ(calc(var(--st-arch-radius) * var(--st-vu)));
+	}
+
+	/* 写真を縦の短冊に分けて円筒に沿わせる（1 枚を平らな板にすると軌道が正 12 角形に見えるため。
+	   ユーザー指示 2026-10-07）。短冊は js/store-arch.js が作り、無いとき（JS 無効）は平らな板のまま。
+	   短冊はすべて写真の中央に置き、自分の角度（写真の角度 + 短冊ぶんのずれ）で回してから
+	   半径ぶん手前に出す。影は短冊ごとに重なって縞になるので付けない */
+	.p-sarea__arch-item.has-strips {
+		overflow: visible;
+		border-radius: 0;
+		box-shadow: none;
+		transform: none;
+	}
+
+	.p-sarea__arch-item.has-strips > .p-sarea__arch-image {
+		display: none;
+	}
+
+	.p-sarea__arch-item.has-strips .p-sarea__arch-strips {
+		position: absolute;
+		inset: 0;
+		display: block;
+	}
+
+	.p-sarea__arch-strip {
+		--st-arch-strip-w: calc(var(--st-arch-width) / var(--st-arch-strips) * var(--st-vu));
+
+		position: absolute;
+		top: 0;
+		left: calc(50% - var(--st-arch-strip-w) / 2);
+		width: calc(var(--st-arch-strip-w) + 1px); /* 隣と 1px 重ねて継ぎ目の隙間を消す */
+		height: 100%;
+		overflow: hidden;
+		transform:
+			rotateX(calc(var(--st-arch-tilt) * -1deg))
+			rotateY(calc((var(--st-arch-a) + (var(--st-arch-strip-i) - (var(--st-arch-strips) - 1) / 2) * var(--st-arch-span) / var(--st-arch-strips)) * 1deg))
+			translateZ(calc(var(--st-arch-radius) * var(--st-vu)));
+		/* 毎フレーム角度が変わるので GPU のレイヤーに乗せ、描き直しを避ける */
+		will-change: transform;
+	}
+
+	.p-sarea__arch-strip:first-child {
+		border-radius: calc(5 * var(--st-vu)) 0 0 calc(5 * var(--st-vu));
+	}
+
+	.p-sarea__arch-strip:last-child {
+		border-radius: 0 calc(5 * var(--st-vu)) calc(5 * var(--st-vu)) 0;
+	}
+
+	/* 短冊の中身は写真 1 枚ぶんの幅で、短冊の番号ぶん左へずらして該当の列だけ見せる */
+	.p-sarea__arch-slice {
+		position: absolute;
+		top: 0;
+		left: calc(-1 * var(--st-arch-strip-i) * var(--st-arch-strip-w));
+		width: calc(var(--st-arch-width) * var(--st-vu));
+		height: 100%;
+	}
+
+	.p-sarea__arch-slice img {
+		display: block;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
 	}
 
 	/* ロゴと支店名は弧の内側（パネル上端から 746.9 / 801.4） */

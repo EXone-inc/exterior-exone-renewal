@@ -1014,7 +1014,8 @@
 	pointer-events: none;
 }
 
-/* 透明のクリック領域。next = 左ページの左半分 / prev = 左ページの右半分 + 右ページ */
+/* 透明のクリック領域。next = 左ページ全体（押すと右へめくれる）/ prev = 右の見切れページ
+   （押すと左へめくれて前へ）。ユーザー指示 2026-10-07 */
 .p-hepgal__hit {
 	position: absolute;
 	top: 0;
@@ -1028,11 +1029,11 @@
 
 .p-hepgal__hit--next {
 	left: 0;
-	width: calc(var(--hep-gal-page-w) / 2);
+	width: var(--hep-gal-page-w);
 }
 
 .p-hepgal__hit--prev {
-	left: calc(var(--hep-gal-page-w) / 2);
+	left: var(--hep-gal-page-w);
 	right: 0;
 }
 

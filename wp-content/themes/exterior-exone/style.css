@@ -157,6 +157,8 @@ Text Domain: exterior-exone
 	   カンプもこの状態で SP 45+677.81 / PC 1080 と、ちょうど 1 画面に収まる */
 	--fv-pin-height: calc(100vh - var(--header-height));
 	--fv-pin-top: var(--header-height); /* SP は追従ヘッダーの下に留める */
+	--fv-split-upper: 25%; /* SP の 4 本目（上下 2 段の動画）: 上段の中央 */
+	--fv-split-lower: 75%; /* 同 下段の中央 */
 	/* FV は画面高いっぱいで表示するため、上端基準のコピー位置は px ではなく
 	   カンプ高さに対する比率で持つ。px 固定だと画面がカンプより低いほどコピーが下がる */
 	--fv-copy-top: 38.27%; /* SP: 259.41 / 677.81（16:94 / 16:64） */
@@ -1557,9 +1559,22 @@ body.is-drawer-open {
 	transform: translateX(-50%);
 }
 
-/* 4 本目だけ 2 枚組。SP は横に並べきれないので上下に積み、PC で左右へ振り分ける */
-.p-fv__text--right {
-	top: calc(var(--fv-copy-top) + var(--fs-display-hero-small) * 1.4);
+/* 4 本目だけ 2 枚組。PC は左右（昼 | 夜）に振り分ける。
+   SP は動画そのものを上（昼）/ 下（夜）の 2 段にしているので（videos/top/FV04-sp.mp4。
+   2026-10-06）、文字もそれぞれの段の中央に置く */
+@media (max-width: 1024px) {
+	.p-fv__text--left,
+	.p-fv__text--right {
+		transform: translate(-50%, -50%);
+	}
+
+	.p-fv__text--left {
+		top: var(--fv-split-upper);
+	}
+
+	.p-fv__text--right {
+		top: var(--fv-split-lower);
+	}
 }
 
 .p-fv__text--small .p-fv__title {

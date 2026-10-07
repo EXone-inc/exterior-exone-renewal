@@ -81,6 +81,7 @@ $exterior_exone_hep_gal_book  = 'hep-gallery-book';
 
 		<p class="p-hepgal__num" data-hep-text="num"><?php echo esc_html( $exterior_exone_hep_gal_first['num'] ); ?></p>
 
+		<?php // 左ページを押すと右へめくれて次へ、右の見切れページを押すと左へめくれて前へ（ユーザー指示 2026-10-07）。 ?>
 		<button class="p-hepgal__hit p-hepgal__hit--next" type="button" aria-label="次の写真へ" aria-controls="<?php echo esc_attr( $exterior_exone_hep_gal_book ); ?>"></button>
 		<button class="p-hepgal__hit p-hepgal__hit--prev" type="button" aria-label="前の写真へ" aria-controls="<?php echo esc_attr( $exterior_exone_hep_gal_book ); ?>"></button>
 	</div>

@@ -836,7 +836,8 @@ body.is-works-modal-open {
 		margin-inline: auto;
 	}
 
-	/* 439:1034。カンプどおり画面の左右いっぱいに出す */
+	/* 439:1034。カンプどおり画面の左右いっぱいに出す。3:2 の写真を 203 高に収めるとき、
+	   カンプは屋根まで見せて下（道路側）を切っているので、上揃えで切り抜く（2026-10-06） */
 	.p-cworks__sheet.is-open .p-cworks__sheet-image {
 		display: block;
 		width: 100vw;
@@ -844,6 +845,7 @@ body.is-works-modal-open {
 		height: calc(203 * var(--su));
 		margin-inline: calc(50% - 50vw);
 		object-fit: cover;
+		object-position: 50% 0;
 	}
 
 	/* 439:1049 の見出し行は画像の下端に 33px 重なる（画像 203 / 見出し y170） */
