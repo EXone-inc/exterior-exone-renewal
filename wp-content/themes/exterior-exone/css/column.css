@@ -1,0 +1,301 @@
+/* ============================================================
+   共通部品: COLUMN（template-parts/common/section-column.php）と、
+   セクション見出し 3 点セット（.c-store-title / .c-store-jp / .c-store-lead）
+   支店ページ（css/store.css）と WORKS 一覧・詳細（css/works-page.css）で使う。
+   カンプ: 支店 PC 612:869 / SP 641:1447、WORKS PC 821:148・821:184 / SP 836:95（guide 821:266「支店ページと同じもの」）
+   仕様書: docs/spec-20261008-works-page.md F-05
+   ------------------------------------------------------------
+   支店ページから切り出したもの。クラス名・トークン名（--st-*）は据え置き
+   （支店ページの他セクションも同じ見出しクラスとトークンを使うため、定義はここ 1 か所）。
+   支店ページでは css/store.css がこの後に読まれ、セクションごとの上書き（--st-heading-* 等）はそちらが持つ。
+   長さはファイル末尾の比例ブロック（PC --st-vu / SP --st-su）が決める。
+   ============================================================ */
+:root {
+	/* --- COLUMN（1148:91） --- */
+	--st-column-title: clamp(13px, 11.786px + 0.3236vw, 18px); /* 13 → 18 */
+
+	/* --- 角丸 --- */
+	--st-card-radius: clamp(6px, 5.029px + 0.2589vw, 10px); /* 6 → 10 : 大きめのカード（689:1001 ほか） */
+
+	/* --- 色 --- */
+	--st-bg-light: #f3f3f4; /* 薄灰のセクション背景（535:868 / 572:448 ほか） */
+
+	/* 影。新カンプでカード・行・写真・パネルの影はこの 1 種類にそろった */
+	--st-shadow: 0 12px 32px 0 rgba(0, 0, 0, 0.12);
+
+	/* --- セクション見出し 3 点セット（PLANS / WORKS / REVIEWS / FLOW / FAQ / COLUMN / AREA 共通） --- */
+	--st-heading-gap: clamp(32px, 28.893px + 3.1068vw, 80px); /* 32 → 80 : 英字下端 → 和文 */
+	--st-heading-jp: clamp(16px, 14.058px + 0.5178vw, 24px); /* 16 → 24 */
+	--st-heading-lead: clamp(12px, 11.029px + 0.2589vw, 16px); /* 12 → 16 */
+}
+
+/* ============================================================
+   セクション見出し 3 点セット（英字タイトル / 和文見出し / リード文）
+   英字は共通トークン（--fs-section-title / --ls-title）と同値。
+   ============================================================ */
+.c-store-title {
+	margin: 0;
+	font-family: var(--font-ui);
+	font-size: var(--fs-section-title);
+	font-weight: var(--fw-semibold);
+	line-height: 1.18;
+	letter-spacing: var(--ls-title);
+	text-align: center;
+	color: var(--color-black2);
+}
+
+.c-store-jp {
+	margin: var(--st-heading-gap) 0 0;
+	font-size: var(--st-heading-jp);
+	font-weight: var(--fw-medium);
+	line-height: 2.5;
+	letter-spacing: var(--ls-wide);
+	text-align: center;
+	color: var(--color-black2);
+}
+
+/* 和文見出しの行ボックス（24 x 2.5 = 60）がそのまま余白になるので margin は持たない */
+.c-store-lead {
+	margin: 0;
+	font-size: var(--st-heading-lead);
+	font-weight: var(--fw-regular);
+	line-height: 2;
+	letter-spacing: var(--ls-wide);
+	text-align: center;
+	color: var(--color-black1);
+}
+
+/* ============================================================
+   COLUMN（639:417 / 639:418 / 687:997 / 687:996 / Group 479 / 669:204）
+   ------------------------------------------------------------
+   TOP の NEWS と同じカード列。5 枚目が右端で見切れるのは横スクロールの
+   表現なので、PC でも列を横スクロールできるようにする。
+   ============================================================ */
+.p-scolumn {
+	background: var(--color-white2); /* 612:114 */
+}
+
+/* 687:996 だけ行送りが 2.2 */
+.p-scolumn__lead {
+	line-height: 2.2;
+}
+
+.p-scolumn__list {
+	display: flex;
+	margin: 0;
+	padding: 0;
+	overflow-x: auto;
+	list-style: none;
+	scrollbar-width: none;
+}
+
+.p-scolumn__list::-webkit-scrollbar {
+	display: none;
+}
+
+.p-scolumn__card {
+	flex: 0 0 auto;
+}
+
+/* カード全体をお知らせの個別ページへのリンクにする */
+.p-scolumn__card-link {
+	display: block;
+}
+
+.p-scolumn__card-image {
+	display: block;
+	width: 100%;
+	object-fit: cover;
+	border-radius: var(--st-card-radius);
+	box-shadow: var(--st-shadow); /* 612:449 */
+}
+
+/* 画像未設定時のプレースホルダ（1153:108 と同じグレー） */
+.p-scolumn__card-image--empty {
+	background: var(--color-gray2);
+}
+
+.p-scolumn__card-title {
+	font-size: var(--st-column-title);
+	font-weight: var(--fw-medium);
+	line-height: 2.5;
+	letter-spacing: var(--ls-base);
+	color: var(--color-black1);
+}
+
+/* 669:204。枠・文字とも #4d4d4d（TOP の NEWS は文字が #1a1a1a） */
+.p-scolumn__btn {
+	display: flex;
+	margin-inline: auto;
+	border-color: var(--color-black1);
+	color: var(--color-black1);
+}
+
+/* ============================================================
+   PC（1025px 以上）: カンプ 612:869（y26590.4〜27677.6）
+   ============================================================ */
+@media (min-width: 1025px) {
+	.p-scolumn {
+		padding: calc(162.2 * var(--st-vu)) 0 calc(160 * var(--st-vu));
+	}
+
+	/* カード 373 幅・ピッチ約 410。5 枚目が右端（x1796）で見切れる */
+	.p-scolumn__list {
+		gap: calc(36 * var(--st-vu));
+		margin-top: calc(80 * var(--st-vu));
+		/* 1920 を超える幅では、列の始まりを中央の 1920 幅の内容に合わせる（右は画面端まで流れる） */
+		padding-inline: calc(159 * var(--st-vu) + max(0px, (100vw - 1920px) / 2));
+	}
+
+	.p-scolumn__card {
+		flex-basis: calc(373 * var(--st-vu));
+	}
+
+	.p-scolumn__card-image {
+		height: calc(226 * var(--st-vu));
+	}
+
+	.p-scolumn__card-title {
+		margin: calc(7 * var(--st-vu)) 0 0;
+	}
+
+	.p-scolumn__btn {
+		margin-top: calc(65 * var(--st-vu));
+	}
+}
+
+/* ============================================================
+   SP（1024px 以下）: SP-15 641:1447 y14938〜15558・#f3f3f4。見出し 3 点セットは REVIEWS と同じ型。
+   289x175 のカードを指で横にスクロールする列（2 枚目が見切れる）。VIEW MORE なし
+   ============================================================ */
+@media (max-width: 1024px) {
+	.p-scolumn {
+		--st-heading-gap: calc(40 * var(--st-su));
+		--st-heading-jp: calc(14 * var(--st-su));
+		--st-heading-lead: calc(12 * var(--st-su));
+		--st-column-shadow-top: calc(20 * var(--st-su)); /* 影（0 12 32）の上へのはみ出し */
+
+		padding: calc(80 * var(--st-su)) 0 calc(68 * var(--st-su)); /* タイトル下端 +552 → +620 */
+		background: var(--st-bg-light);
+	}
+
+	.p-scolumn .c-store-jp {
+		line-height: 1.5;
+		letter-spacing: var(--ls-base);
+	}
+
+	/* 641:1448 337 幅・左揃え・2 段落（1・2 行目をつなぐ） */
+	.p-scolumn .c-store-lead {
+		width: calc(337 * var(--st-su) + var(--ls-base));
+		margin: calc(11 * var(--st-su)) auto 0;
+		line-height: 2;
+		letter-spacing: var(--ls-base);
+		text-align: left;
+	}
+
+	.p-scolumn__lead br {
+		display: inline;
+	}
+
+	.p-scolumn__lead .p-scolumn__br-pc {
+		display: none;
+	}
+
+	.p-scolumn__list {
+		gap: calc(12 * var(--st-su));
+		overscroll-behavior-x: contain;
+		margin-top: calc(40 * var(--st-su) - var(--st-column-shadow-top)); /* 本文の下端 +291 → +331 */
+		padding: var(--st-column-shadow-top) max(calc(19 * var(--st-su)), calc((100% - 337 * var(--st-su)) / 2)) 0;
+	}
+
+	.p-scolumn__card {
+		flex-basis: calc(289 * var(--st-su));
+	}
+
+	.p-scolumn__card-image {
+		height: calc(175 * var(--st-su));
+		border-radius: calc(5 * var(--st-su));
+	}
+
+	/* 641:1453 Medium 14 / 2.5 / 1px（画像の下端 +11） */
+	.p-scolumn__card-title {
+		margin: calc(11 * var(--st-su)) 0 0;
+	}
+
+	.p-scolumn__btn {
+		display: none;
+	}
+}
+
+/* ============================================================
+   PC（1025px 以上）: 1920px カンプの縮小拡大コピー化
+   ------------------------------------------------------------
+   1 単位 --st-vu は「カンプ 1920 の 1px の実寸」。1920px 以上では 1px で
+   固定され、それ以下では画面幅に比例して縮む（css/store.css も同じ単位を使う）。
+   ============================================================ */
+@media (min-width: 1025px) {
+	:root {
+		--st-vu: min(1px, calc(100vw / 1920));
+
+		/* 見出し 3 点セット */
+		--st-heading-gap: calc(80 * var(--st-vu));
+		--st-heading-jp: calc(24 * var(--st-vu));
+		--st-heading-lead: calc(16 * var(--st-vu));
+
+		--st-column-title: calc(18 * var(--st-vu));
+		--st-card-radius: calc(10 * var(--st-vu));
+	}
+
+	/* 固定 px のグローバル字間トークンは、縮小すると文字サイズ比で相対的に
+	   広がって改行位置を変えてしまう。セクション内だけ比例にする */
+	.p-scolumn {
+		--ls-wide: calc(2 * var(--st-vu));
+		--ls-base: calc(1 * var(--st-vu));
+		--ls-title: calc(5 * var(--st-vu));
+	}
+
+	/* ボタン（265x64・文字 20px）も 1920 比例にする */
+	.p-scolumn {
+		--btn-width: calc(265 * var(--st-vu));
+		--btn-height: calc(64 * var(--st-vu));
+		--fs-button: calc(20 * var(--st-vu));
+		--ls-button: calc(2 * var(--st-vu));
+		--radius-pill: calc(32 * var(--st-vu));
+	}
+}
+
+/* ============================================================
+   SP（1024px 以下）: 375px 基準の縮小拡大コピー化
+   ------------------------------------------------------------
+   1 単位 --st-su は「375px 幅での 1px の実寸」（上限は style.css の --sp-scale-max）。
+   ============================================================ */
+@media (max-width: 1024px) {
+	:root {
+		--st-su: min(calc(100vw / 375), var(--sp-scale-max));
+
+		--st-heading-gap: calc(32 * var(--st-su));
+		--st-heading-jp: calc(16 * var(--st-su));
+		--st-heading-lead: calc(12 * var(--st-su));
+
+		--st-column-title: calc(14 * var(--st-su)); /* 641:1453 */
+		--st-card-radius: calc(6 * var(--st-su));
+	}
+
+	/* ガターと字間はグローバルの clamp / 固定 px のままだと比例にならないため、
+	   セクション内だけ 375 比例にする */
+	.p-scolumn {
+		--gutter: calc(27.5 * var(--st-su));
+		--ls-wide: calc(2 * var(--st-su));
+		--ls-base: calc(1 * var(--st-su));
+		--ls-title: calc(2 * var(--st-su));
+	}
+
+	/* ボタンも 375 比例にする */
+	.p-scolumn {
+		--btn-width: calc(180 * var(--st-su));
+		--btn-height: calc(44 * var(--st-su));
+		--fs-button: calc(13 * var(--st-su));
+		--ls-button: calc(1 * var(--st-su));
+		--radius-pill: calc(22 * var(--st-su));
+	}
+}

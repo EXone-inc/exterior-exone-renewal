@@ -1,0 +1,658 @@
+/* ============================================================
+   WORKS 一覧 /works/（archive-works.php）・詳細 /works/<投稿名>/（single-works.php）
+   カンプ: PC 一覧 821:113 / PC 詳細 821:174 / SP 836:37（詳細。一覧の SP は補間）
+           guide 821:337・821:336
+   設計メモ: docs/figma-works-page.md
+   仕様書: docs/spec-20261008-works-page.md
+   プレフィックスは --wkp- / .p-wkp（css/works.css の .p-cworks は支店・DX の 1 事例部品で別物）。
+   ------------------------------------------------------------
+   ここの :root には幅で変わらない値（色・行高・時間）だけを置き、
+   長さはすべてファイル末尾の比例ブロックが決める:
+   - PC（1025px 以上）… --wkp-vu（カンプ 1920 の 1px の実寸）
+   - SP（1024px 以下）… --wkp-su（カンプ 375 の 1px の実寸。上限 --sp-scale-max）
+   ============================================================ */
+:root {
+	/* --- 色 --- */
+	--wkp-color-bg: var(--color-black2); /* ページ地 821:119 / 821:175 / 836:49 */
+	--wkp-color-paper: #ffffff; /* 図面サムネの地 821:229 / 836:93 */
+	--wkp-color-placeholder: var(--color-gray2); /* 写真が無い事例の枠（決定 §3） */
+	--wkp-fv-title-color: var(--color-white2); /* 821:118 #fefefe */
+	--wkp-fv-lead-color: var(--color-white3); /* 821:117 #f5f5f5 */
+	--wkp-head-jp-color: var(--color-white2); /* 821:128 */
+	--wkp-filter-color: var(--color-white2); /* ボタンの枠と文字 821:121〜135 */
+	--wkp-filter-on-bg: var(--color-white2); /* 押下中は色反転（guide 821:262） */
+	--wkp-filter-on-color: var(--color-black2);
+	--wkp-empty-color: var(--color-gray2); /* 0 件の文言（カンプ外。仕様書 Q7） */
+	--wkp-shadow-color: rgba(0, 0, 0, 0.8); /* 写真・サムネの影の色 */
+
+	/* --- 影（0 12 32。比例させない） --- */
+	--wkp-shadow: 0 12px 32px var(--wkp-shadow-color);
+
+	/* --- 行高 --- */
+	--wkp-display-lh: 1.29; /* Antonio の lh normal の実測（155/120・65/50） */
+	--wkp-head-eng-lh: 1.12; /* 821:129 / 836:88 */
+	--wkp-head-jp-lh: 1.6; /* 821:128 / 836:89 */
+	--wkp-filter-lh: 1.6; /* 821:130〜135 / 836:67〜75 */
+	--wkp-empty-lh: 1.6;
+
+	/* --- 動き --- */
+	--wkp-filter-fade: 0.3s; /* 絞り込みのフェード（仕様書 Q2）。js/works-filter.js が読む */
+	--wkp-filter-ease: ease;
+
+	/* --- カードの比率 --- */
+	--wkp-card-ratio: 510 / 288; /* 821:136〜147 */
+
+	/* --- 詳細（821:181〜222 / 836:76〜94） --- */
+	--wkp-name-color: var(--color-white2); /* 821:221 */
+	--wkp-cap-color: var(--color-gray2); /* 821:223〜225 */
+	--wkp-line-color: var(--color-gray2); /* 821:219 */
+	--wkp-body-color: var(--color-gray2); /* 821:222 */
+	/* 見出しの上に FV 下端からと同じ余白を空けて止める（ヘッダーより低くはしない） */
+	--wkp-detail-anchor: max(var(--wkp-sec-gap), var(--header-height));
+	/* 中央のカンプ幅の左端（1920 を超える画面で中央に寄せる） */
+	--wkp-canvas-x: max(0px, (100% - var(--wkp-canvas-w)) / 2);
+}
+
+/* ページ地（オーバースクロール時・セクションの継ぎ目に白が出ないように） */
+.is-works-page {
+	background-color: var(--wkp-color-bg);
+}
+
+/* ============================================================
+   FV（821:114 / 836:38・836:46・836:48）
+   静止画を全面に敷き、中央に「WORKS」+ 和文コピー。暗幕は無い（PLANS の FV と同じ組版）。
+   PC はヘッダーが写真に重なる（has-fv-header）。SP は黒のヘッダー（45）の下から始まり、
+   カンプ 375x723 のうちヘッダーに隠れる上 45 ぶんの写真はヘッダーの裏へ逃がす。
+   ============================================================ */
+.p-wkpfv {
+	position: relative;
+	height: var(--wkp-fv-height);
+	overflow: hidden;
+	background-color: var(--wkp-color-bg);
+}
+
+.p-wkpfv__bg {
+	position: absolute;
+	inset: var(--wkp-fv-bg-top) 0 0;
+}
+
+.p-wkpfv__bg img {
+	width: 100%;
+	height: 100%;
+	max-width: none;
+	object-fit: cover;
+	object-position: var(--wkp-fv-image-position);
+}
+
+.p-wkpfv__copy {
+	position: absolute;
+	top: var(--wkp-fv-copy-top);
+	left: 0;
+	right: 0;
+	z-index: 1;
+	text-align: center;
+}
+
+/* 821:118 / 836:48 */
+.p-wkpfv__title {
+	margin: 0;
+	font-family: var(--font-display);
+	font-size: var(--wkp-fv-title);
+	font-weight: var(--fw-semibold);
+	line-height: var(--wkp-display-lh);
+	letter-spacing: var(--wkp-fv-title-ls);
+	color: var(--wkp-fv-title-color);
+	white-space: nowrap;
+}
+
+/* 821:117 / 836:46 */
+.p-wkpfv__lead {
+	margin: var(--wkp-fv-lead-gap) 0 0;
+	font-size: var(--wkp-fv-lead);
+	font-weight: var(--wkp-fv-lead-fw);
+	line-height: var(--wkp-fv-lead-lh);
+	letter-spacing: var(--wkp-fv-lead-ls);
+	color: var(--wkp-fv-lead-color);
+	white-space: nowrap;
+}
+
+/* ============================================================
+   本体（FV の下から COLUMN の上まで黒地）
+   ============================================================ */
+.p-wkp {
+	padding-bottom: var(--wkp-sec-gap); /* グリッド下端 → 次のセクション */
+	background-color: var(--wkp-color-bg);
+}
+
+/* ============================================================
+   見出し（英字小 + 和文大）821:129・821:128 / 836:88・836:89
+   ============================================================ */
+.p-wkphead {
+	text-align: center;
+}
+
+.p-wkphead__eng {
+	margin: 0;
+	font-family: var(--font-ui);
+	font-size: var(--wkp-head-eng);
+	font-weight: var(--fw-medium);
+	line-height: var(--wkp-head-eng-lh);
+	letter-spacing: var(--wkp-head-eng-ls);
+	color: var(--wkp-head-eng-color);
+}
+
+/* 英字上端 → 和文上端 = --wkp-head-gap */
+.p-wkphead__heading {
+	margin: calc(var(--wkp-head-gap) - var(--wkp-head-eng) * var(--wkp-head-eng-lh)) 0 0;
+	font-size: var(--wkp-head-jp);
+	font-weight: var(--fw-bold);
+	line-height: var(--wkp-head-jp-lh);
+	letter-spacing: var(--wkp-head-jp-ls);
+	color: var(--wkp-head-jp-color);
+}
+
+.p-wkphead__heading:first-child {
+	margin-top: 0;
+}
+
+/* ============================================================
+   一覧ブロック 821:120 / 836:63・836:50
+   見出し → 絞り込みボタン（PC 6 列 / SP 2 列 x 3 段）→ 写真グリッド（PC 3 列 / SP 2 列）
+   ============================================================ */
+.p-wkplist {
+	padding-top: var(--wkp-sec-gap); /* FV 下端 → 見出し */
+}
+
+/* 821:121〜126 / 836:64〜72 */
+.p-wkplist__filter {
+	display: grid;
+	grid-template-columns: repeat(var(--wkp-filter-cols), minmax(0, 1fr));
+	gap: var(--wkp-filter-gap);
+	width: var(--wkp-content-w);
+	margin: var(--wkp-filter-top) auto 0;
+}
+
+.p-wkplist__btn {
+	height: var(--wkp-filter-btn-h);
+	padding: 0;
+	border: 1px solid var(--wkp-filter-color);
+	border-radius: var(--wkp-filter-radius);
+	background-color: transparent;
+	font-family: var(--font-base);
+	font-size: var(--wkp-filter-text);
+	font-weight: var(--fw-medium);
+	line-height: var(--wkp-filter-lh);
+	letter-spacing: var(--wkp-filter-ls);
+	text-indent: var(--wkp-filter-ls); /* 字間の右端ぶんを戻して中央に見せる */
+	white-space: nowrap;
+	color: var(--wkp-filter-color);
+}
+
+.p-wkplist__btn[aria-pressed="true"] {
+	background-color: var(--wkp-filter-on-bg);
+	color: var(--wkp-filter-on-color);
+}
+
+/* 821:136〜147 / 836:50（SP は決定で 2 列） */
+.p-wkplist__grid {
+	display: grid;
+	grid-template-columns: repeat(var(--wkp-grid-cols), minmax(0, 1fr));
+	column-gap: var(--wkp-grid-gap-x);
+	row-gap: var(--wkp-grid-gap-y);
+	width: var(--wkp-content-w);
+	margin: var(--wkp-grid-top) auto 0;
+	transition: opacity var(--wkp-filter-fade) var(--wkp-filter-ease);
+}
+
+/* 絞り込みの切り替え中（js/works-filter.js）。消えたあとは即時に詰める */
+.p-wkplist__grid.is-fading {
+	opacity: 0;
+}
+
+.p-wkplist__item[hidden] {
+	display: none;
+}
+
+.p-wkplist__card {
+	display: block;
+	aspect-ratio: var(--wkp-card-ratio);
+	overflow: hidden;
+	border-radius: var(--wkp-card-radius);
+	background-color: var(--wkp-color-placeholder);
+	box-shadow: var(--wkp-shadow);
+}
+
+.p-wkplist__img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+/* 0 件の文言（カンプに無い状態。仕様書 Q7）。中身が空の間は場所を取らない */
+.p-wkplist__empty {
+	margin: var(--wkp-grid-top) 0 0;
+	font-size: var(--wkp-empty-text);
+	font-weight: var(--fw-regular);
+	line-height: var(--wkp-empty-lh);
+	letter-spacing: var(--wkp-filter-ls);
+	text-align: center;
+	color: var(--wkp-empty-color);
+}
+
+.p-wkplist__empty:empty {
+	display: none;
+}
+
+/* ============================================================
+   詳細 821:181〜222 / 836:86〜836:76（guide 821:271・並び順の図 821:334）
+   見出し → パンフレット（共通部品 css/flipbook.css の .c-flipbook。寸法はここで橋渡し）→
+   名前・サムネ・キャプション・下線・本文（めくれる紙より前面。右からフェードイン）
+   ============================================================ */
+.p-wkpdetail {
+	--flipbook-page-w: var(--wkp-book-page-w);
+	--flipbook-page-h: var(--wkp-book-page-h);
+	--flipbook-fold-left: var(--wkp-book-fold-left);
+	--flipbook-fold-right: var(--wkp-book-fold-right);
+	--flipbook-perspective: var(--wkp-book-perspective);
+	--flipbook-shadow: var(--wkp-shadow);
+	position: relative;
+	padding-top: var(--wkp-sec-gap); /* FV 下端 → 見出し（仕様書 Q4: 一覧と同じ） */
+	overflow: hidden;
+}
+
+/* 横だけ切る（めくり中のページは上下にはみ出して見えてよい） */
+@supports (overflow: clip) {
+	.p-wkpdetail {
+		overflow: visible;
+		overflow-x: clip;
+	}
+}
+
+/* 一覧のカードからの行き先 #works-detail。ヘッダーに隠れない位置で止める */
+.p-wkpdetail #works-detail {
+	scroll-margin-top: var(--wkp-detail-anchor);
+}
+
+/* pamphlet 821:209 / 836:77。左ページの左端から画面右端まで */
+.p-wkpdetail__book {
+	z-index: 1;
+	margin: var(--wkp-detail-book-top) 0 0 calc(var(--wkp-canvas-x) + var(--wkp-book-x));
+}
+
+/* 写真が 0 枚の事例（決定 §3） */
+.p-wkpdetail__book.c-flipbook--empty .c-flipbook__page {
+	background-color: var(--wkp-color-placeholder);
+}
+
+/* 名前〜本文。めくれる紙より前面（guide）。空いたところはページのクリックを通す */
+.p-wkpdetail__meta {
+	position: relative;
+	z-index: 2;
+	margin-top: var(--wkp-meta-top);
+	pointer-events: none;
+}
+
+.p-wkpdetail__name,
+.p-wkpdetail__thumb,
+.p-wkpdetail__body {
+	pointer-events: auto;
+}
+
+/* PC: 名前（左）とサムネ（右端 x1602）を 1 行に */
+.p-wkpdetail__row {
+	display: flex;
+	align-items: flex-start;
+	margin: 0 calc(var(--wkp-canvas-x) + var(--wkp-thumb-right)) 0 calc(var(--wkp-canvas-x) + var(--wkp-name-x));
+}
+
+/* 821:221 / 836:84。左ページの下端をまたぐ */
+.p-wkpdetail__name {
+	margin: var(--wkp-name-top) 0 0;
+	font-family: var(--font-display);
+	font-size: var(--wkp-name);
+	font-weight: var(--fw-semibold);
+	line-height: var(--wkp-display-lh);
+	letter-spacing: var(--wkp-name-ls);
+	color: var(--wkp-name-color);
+	white-space: nowrap;
+}
+
+/* 821:226〜228 / 836:90〜94 */
+.p-wkpdetail__thumbs {
+	display: flex;
+	gap: var(--wkp-thumb-gap);
+	margin: 0 0 0 auto;
+	padding: 0;
+	list-style: none;
+}
+
+.p-wkpdetail__thumb-item {
+	width: var(--wkp-thumb-w);
+	transition: opacity var(--flipbook-text-fade) linear;
+}
+
+/* めくりの前後にふわっと消して差し替える（js/works-detail.js が is-fading を付け外し） */
+.p-wkpdetail__thumb-item.is-fading {
+	opacity: 0;
+}
+
+.p-wkpdetail__thumb {
+	position: relative;
+	display: block;
+	width: 100%;
+	height: var(--wkp-thumb-h);
+	padding: 0;
+	border: 0;
+	background: transparent;
+	cursor: pointer;
+}
+
+/* 写真は全部重ねて置き、見せる 1 枚に is-current */
+.p-wkpdetail__thumb-photo {
+	position: absolute;
+	inset: 0;
+	overflow: hidden;
+	border-radius: var(--wkp-thumb-radius);
+	box-shadow: var(--wkp-shadow);
+	opacity: 0;
+}
+
+.p-wkpdetail__thumb-photo.is-current {
+	opacity: 1;
+}
+
+.p-wkpdetail__thumb-img {
+	width: 100%;
+	height: 100%;
+	max-width: none;
+	object-fit: cover;
+}
+
+/* 図面（4 枚目）は白地に全体を収める（821:228〜230 / 836:93。影は無し） */
+.p-wkpdetail__thumb-photo--plan {
+	background-color: var(--wkp-color-paper);
+	box-shadow: none;
+}
+
+.p-wkpdetail__thumb-photo--plan .p-wkpdetail__thumb-img {
+	object-fit: contain;
+}
+
+/* 821:223〜225。1 枚目（メイン）が回ってきたときは空欄で高さを保つ */
+.p-wkpdetail__cap {
+	min-height: calc(var(--wkp-cap) * var(--wkp-cap-lh));
+	margin: var(--wkp-cap-gap) 0 0;
+	font-size: var(--wkp-cap);
+	font-weight: var(--fw-regular);
+	line-height: var(--wkp-cap-lh);
+	letter-spacing: var(--wkp-cap-ls);
+	text-align: center;
+	color: var(--wkp-cap-color);
+}
+
+/* 821:219 / 836:85。左端から画面右端まで。進捗は左から伸びる（拡大率は js/flipbook.js） */
+.p-wkpdetail__line {
+	margin: var(--wkp-line-top) 0 0 calc(var(--wkp-canvas-x) + var(--wkp-line-x));
+}
+
+.p-wkpdetail__progress {
+	display: block;
+	height: 1px;
+	background-color: var(--wkp-line-color);
+	transform-origin: left center;
+}
+
+/* 821:222 / 836:76 */
+.p-wkpdetail__body {
+	width: var(--wkp-body-w);
+	margin: var(--wkp-body-top) 0 0 calc(var(--wkp-canvas-x) + var(--wkp-body-x));
+	font-size: var(--wkp-body);
+	font-weight: var(--fw-regular);
+	line-height: var(--wkp-body-lh);
+	letter-spacing: var(--wkp-body-ls);
+	color: var(--wkp-body-color);
+}
+
+.p-wkpdetail__body p {
+	margin: 0;
+}
+
+/* 詳細の下の一覧ブロック（本文下端 → 見出し） */
+.p-wkpdetail + .p-wkplist {
+	padding-top: var(--wkp-detail-list-gap);
+}
+
+/* SP 836:84〜94: 名前 → 下線 → サムネ（キャプション無し）→ 本文の縦積み */
+@media (max-width: 1024px) {
+	/* 836:87。長い見出しは絞り込み・グリッドと同じ幅に収め、行の長さをそろえて折り返す
+	  （カンプは「北欧風の住まいに映える」/「ブラックのエクステリア」の 2 行） */
+	.p-wkphead {
+		width: var(--wkp-content-w);
+		margin-inline: auto;
+	}
+
+	.p-wkphead__heading {
+		text-wrap: balance;
+	}
+
+	.p-wkpdetail__meta {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+	}
+
+	.p-wkpdetail__row {
+		display: contents;
+	}
+
+	.p-wkpdetail__name {
+		order: 1;
+		margin-left: calc(var(--wkp-canvas-x) + var(--wkp-name-x));
+	}
+
+	.p-wkpdetail__line {
+		order: 2;
+		align-self: stretch;
+	}
+
+	.p-wkpdetail__thumbs {
+		order: 3;
+		margin: var(--wkp-thumb-top) 0 0 calc(var(--wkp-canvas-x) + var(--wkp-thumb-x));
+	}
+
+	.p-wkpdetail__cap {
+		display: none;
+	}
+
+	.p-wkpdetail__body {
+		order: 4;
+	}
+}
+
+/* --- JS 無効時: [data-reveal] は JS が合図を出すまで透明なので、最初から最終状態にする --- */
+@media (scripting: none) {
+	.is-works-page [data-reveal] {
+		opacity: 1;
+		transform: none;
+		transition: none;
+	}
+}
+
+/* --- 動きを減らす設定: 絞り込みはフェードせずに切り替える --- */
+@media (prefers-reduced-motion: reduce) {
+	.p-wkplist__grid {
+		transition: none;
+	}
+
+	/* 詳細のサムネはクロスフェードの半分ずつで消えて出る（ハイエンドの文字と同じ） */
+	.p-wkpdetail__thumb-item {
+		transition-duration: calc(var(--flipbook-crossfade) / 2);
+	}
+}
+
+/* ============================================================
+   PC（1025px 以上）: 1920px カンプの縮小拡大コピー化
+   ------------------------------------------------------------
+   1 単位 --wkp-vu は「カンプ 1920 の 1px の実寸」。1920px 以上では 1px で
+   固定され、それ以下では画面幅に比例して縮む（PLANS の --plp-vu と同じ）。
+   ============================================================ */
+@media (min-width: 1025px) {
+	:root {
+		--wkp-vu: min(1px, calc(100vw / 1920));
+		--wkp-canvas-w: calc(1920 * var(--wkp-vu));
+
+		/* --- FV 821:114（1920x1080） --- */
+		--wkp-fv-height: calc(1080 * var(--wkp-vu));
+		--wkp-fv-bg-top: 0px; /* ヘッダーは写真に重なる */
+		--wkp-fv-image-position: 50% 50%; /* 821:116 は上下中央の cover */
+		--wkp-fv-copy-top: calc(428 * var(--wkp-vu)); /* 821:118 y428 */
+		--wkp-fv-title: calc(120 * var(--wkp-vu));
+		--wkp-fv-title-ls: calc(-3 * var(--wkp-vu));
+		--wkp-fv-lead: calc(36 * var(--wkp-vu)); /* 821:117 Bold lh1.5 ls3 */
+		--wkp-fv-lead-fw: var(--fw-bold);
+		--wkp-fv-lead-lh: 1.5;
+		--wkp-fv-lead-ls: calc(3 * var(--wkp-vu));
+		--wkp-fv-lead-gap: calc(11 * var(--wkp-vu)); /* 英字下端 583 → y594 */
+
+		/* --- 余白・見出し 821:127 --- */
+		--wkp-sec-gap: calc(160 * var(--wkp-vu)); /* FV → 見出し、グリッド → COLUMN */
+		--wkp-head-eng: calc(32 * var(--wkp-vu)); /* 821:129 SF Pro Medium 32 */
+		--wkp-head-eng-ls: calc(1 * var(--wkp-vu));
+		--wkp-head-eng-color: var(--color-gray2);
+		--wkp-head-jp: calc(40 * var(--wkp-vu)); /* 821:128 Noto Bold 40 */
+		--wkp-head-jp-ls: calc(2 * var(--wkp-vu));
+		--wkp-head-gap: calc(55.86 * var(--wkp-vu)); /* 英字上端 → 和文上端 */
+
+		/* --- 絞り込み・グリッド 821:121〜147 --- */
+		--wkp-content-w: calc(1600 * var(--wkp-vu)); /* x160〜1760 */
+		--wkp-filter-top: calc(80.14 * var(--wkp-vu)); /* 見出し下端 1359.86 → 1440 */
+		--wkp-filter-cols: 6;
+		--wkp-filter-gap: calc(16 * var(--wkp-vu));
+		--wkp-filter-btn-h: calc(69 * var(--wkp-vu));
+		--wkp-filter-radius: calc(5 * var(--wkp-vu));
+		--wkp-filter-text: calc(20 * var(--wkp-vu)); /* Noto Medium 20 lh1.6 ls1 */
+		--wkp-filter-ls: calc(1 * var(--wkp-vu));
+		--wkp-grid-top: calc(60 * var(--wkp-vu)); /* ボタン下端 1509 → 写真 1569 */
+		--wkp-grid-cols: 3;
+		--wkp-grid-gap-x: calc(35 * var(--wkp-vu)); /* 36 / 34 の平均 */
+		--wkp-grid-gap-y: calc(36 * var(--wkp-vu));
+		--wkp-card-radius: calc(5 * var(--wkp-vu));
+		--wkp-empty-text: calc(20 * var(--wkp-vu)); /* ボタンの文字と同じ（仕様書 Q7） */
+
+		/* --- 詳細 821:181〜222（S2 で使う） --- */
+		--wkp-detail-book-top: calc(80.14 * var(--wkp-vu)); /* 見出し下端 → パンフレット */
+		--wkp-book-x: calc(276 * var(--wkp-vu));
+		--wkp-book-page-w: calc(1172.45 * var(--wkp-vu)); /* 821:210 */
+		--wkp-book-page-h: calc(662.5 * var(--wkp-vu));
+		--wkp-book-fold-left: calc(84.85 * var(--wkp-vu)); /* 821:213 */
+		--wkp-book-fold-right: calc(46.28 * var(--wkp-vu)); /* 821:217 */
+		--wkp-book-perspective: calc(4542 * var(--wkp-vu)); /* 左ページ幅の約 3.87 倍（ハイエンドと同じ比） */
+		--wkp-name: calc(88 * var(--wkp-vu)); /* 821:221 Antonio SemiBold 88 */
+		--wkp-name-ls: calc(-3 * var(--wkp-vu));
+		--wkp-name-x: calc(315 * var(--wkp-vu));
+		--wkp-name-overlap: calc(-61 * var(--wkp-vu)); /* 左ページ下端 → 名前上端 */
+		--wkp-thumb-w: calc(211 * var(--wkp-vu));
+		--wkp-thumb-h: calc(120 * var(--wkp-vu));
+		--wkp-thumb-gap: calc(16.5 * var(--wkp-vu)); /* 15 / 18 の平均 */
+		--wkp-thumb-radius: calc(5 * var(--wkp-vu));
+		--wkp-thumb-right: calc(318 * var(--wkp-vu)); /* サムネ右端 x1602 */
+		--wkp-thumb-overlap: calc(-100 * var(--wkp-vu)); /* 左ページ下端に重なる量 */
+		--wkp-cap: calc(14 * var(--wkp-vu)); /* 821:223〜225 Noto Regular 14 lh2 ls1 */
+		--wkp-cap-lh: 2;
+		--wkp-cap-ls: calc(1 * var(--wkp-vu));
+		--wkp-cap-gap: calc(8 * var(--wkp-vu));
+		--wkp-line-x: calc(319 * var(--wkp-vu)); /* 821:219 */
+		--wkp-line-top: calc(21 * var(--wkp-vu)); /* キャプション下端 → 下線 */
+		--wkp-body-top: calc(42 * var(--wkp-vu)); /* 下線 → 本文 */
+		--wkp-body-x: calc(319 * var(--wkp-vu)); /* 821:222 */
+		--wkp-body-w: calc(1283 * var(--wkp-vu));
+		--wkp-body: calc(18 * var(--wkp-vu)); /* Noto Regular 18 / 行高 36 / ls1 */
+		--wkp-body-lh: calc(36 * var(--wkp-vu));
+		--wkp-body-ls: calc(1 * var(--wkp-vu));
+		--wkp-detail-list-gap: calc(120 * var(--wkp-vu)); /* 本文下端 → 一覧ブロック */
+		--wkp-meta-top: var(--wkp-thumb-overlap); /* 名前〜本文のかたまりはサムネの上端から */
+		--wkp-name-top: calc(39 * var(--wkp-vu)); /* サムネ上端 2012 → 名前 2051 */
+	}
+}
+
+/* ============================================================
+   SP（1024px 以下）: 375px カンプの縮小拡大コピー化
+   ------------------------------------------------------------
+   1 単位 --wkp-su は「375px 幅での 1px の実寸」
+   （上限は style.css の --sp-scale-max。タブレットの縮尺方針）。
+   ============================================================ */
+@media (max-width: 1024px) {
+	:root {
+		--wkp-su: min(calc(100vw / 375), var(--sp-scale-max));
+		--wkp-canvas-w: calc(375 * var(--wkp-su));
+
+		/* --- FV 836:38（375x723。上 45 はヘッダー）---
+		   ヘッダー + FV でカンプの 723 になるよう、ヘッダーのぶんを引く */
+		--wkp-fv-height: calc(723 * var(--wkp-su) - var(--header-height));
+		--wkp-fv-bg-top: calc(-1 * var(--header-height)); /* 写真の上端はヘッダーの裏 */
+		--wkp-fv-image-position: 33% 50%; /* 836:38 left-64.02%（画像の横 18.6〜47.8%） */
+		--wkp-fv-copy-top: calc(296 * var(--wkp-su) - var(--header-height)); /* 836:48 y296 */
+		--wkp-fv-title: calc(50 * var(--wkp-su));
+		--wkp-fv-title-ls: calc(-3 * var(--wkp-su));
+		--wkp-fv-lead: calc(16 * var(--wkp-su)); /* 836:46 Medium lh1.8 ls1 */
+		--wkp-fv-lead-fw: var(--fw-medium);
+		--wkp-fv-lead-lh: 1.8;
+		--wkp-fv-lead-ls: calc(1 * var(--wkp-su));
+		--wkp-fv-lead-gap: calc(9 * var(--wkp-su)); /* 英字下端 361 → y370 */
+
+		/* --- 余白・見出し 836:88・836:89 --- */
+		--wkp-sec-gap: calc(80 * var(--wkp-su));
+		--wkp-head-eng: calc(14 * var(--wkp-su));
+		--wkp-head-eng-ls: calc(1 * var(--wkp-su));
+		--wkp-head-eng-color: var(--color-white3); /* 836:88 #f5f5f5 */
+		--wkp-head-jp: calc(16 * var(--wkp-su));
+		--wkp-head-jp-ls: calc(1 * var(--wkp-su));
+		--wkp-head-gap: calc(24.23 * var(--wkp-su));
+
+		/* --- 絞り込み・グリッド 836:63・836:50（グリッドは決定で 2 列） --- */
+		--wkp-content-w: calc(327 * var(--wkp-su)); /* x24〜351 */
+		--wkp-filter-top: calc(39 * var(--wkp-su)); /* 見出し下端 1481 → 1520 */
+		--wkp-filter-cols: 2;
+		--wkp-filter-gap: calc(5 * var(--wkp-su));
+		--wkp-filter-btn-h: calc(29 * var(--wkp-su));
+		--wkp-filter-radius: calc(3 * var(--wkp-su));
+		--wkp-filter-text: calc(10 * var(--wkp-su)); /* Noto Medium 10 lh1.6 ls1 */
+		--wkp-filter-ls: calc(1 * var(--wkp-su));
+		--wkp-grid-top: calc(20 * var(--wkp-su)); /* ボタン下端 1617 → 写真 1637 */
+		--wkp-grid-cols: 2;
+		--wkp-grid-gap-x: calc(7 * var(--wkp-su));
+		--wkp-grid-gap-y: calc(7 * var(--wkp-su));
+		--wkp-card-radius: calc(2 * var(--wkp-su));
+		--wkp-empty-text: calc(12 * var(--wkp-su));
+
+		/* --- 詳細 836:77〜836:76（S2・S3 で使う） --- */
+		--wkp-detail-book-top: calc(40 * var(--wkp-su));
+		--wkp-book-x: calc(25 * var(--wkp-su));
+		--wkp-book-page-w: calc(314.54 * var(--wkp-su)); /* 836:78 */
+		--wkp-book-page-h: calc(177.73 * var(--wkp-su));
+		--wkp-book-fold-left: calc(22.76 * var(--wkp-su)); /* 836:80 */
+		--wkp-book-fold-right: calc(12.42 * var(--wkp-su)); /* 836:83 */
+		--wkp-book-perspective: calc(1218 * var(--wkp-su));
+		--wkp-name: calc(32 * var(--wkp-su)); /* 836:84 Antonio SemiBold 32 ls-1 */
+		--wkp-name-ls: calc(-1 * var(--wkp-su));
+		--wkp-name-x: calc(38 * var(--wkp-su));
+		--wkp-name-overlap: calc(-22 * var(--wkp-su));
+		--wkp-thumb-w: calc(94.5 * var(--wkp-su));
+		--wkp-thumb-h: calc(53.4 * var(--wkp-su));
+		--wkp-thumb-gap: calc(7.25 * var(--wkp-su)); /* 6.6 / 7.9 の平均 */
+		--wkp-thumb-radius: calc(2 * var(--wkp-su));
+		--wkp-thumb-x: calc(39 * var(--wkp-su));
+		--wkp-thumb-top: calc(12 * var(--wkp-su)); /* 下線 → サムネ */
+		--wkp-line-x: calc(39 * var(--wkp-su)); /* 836:85 */
+		--wkp-line-top: calc(7 * var(--wkp-su)); /* 名前下端 → 下線 */
+		--wkp-body-top: calc(12 * var(--wkp-su)); /* サムネ下端 → 本文 */
+		--wkp-body-x: calc(38 * var(--wkp-su)); /* 836:76 */
+		--wkp-body-w: calc(320 * var(--wkp-su));
+		--wkp-body: calc(12 * var(--wkp-su)); /* Noto Regular 12 lh1.6 ls1 */
+		--wkp-body-lh: calc(19.2 * var(--wkp-su));
+		--wkp-body-ls: calc(1 * var(--wkp-su));
+		--wkp-detail-list-gap: calc(80 * var(--wkp-su));
+		--wkp-meta-top: var(--wkp-name-overlap); /* 名前〜本文のかたまりは名前の上端から */
+		--wkp-name-top: 0px;
+	}
+}

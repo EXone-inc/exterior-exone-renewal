@@ -26,7 +26,6 @@
 	--hep-color-btn: var(--color-orange1); /* オレンジのボタン 2 種 */
 	--hep-color-btn-shadow: #734413; /* CONTACT ボタンのオフセット影 713:161 */
 	--hep-mask: rgba(0, 0, 0, 0.5); /* FV の暗幕 713:118・733:305 */
-	--hep-fold-shade: rgba(0, 0, 0, 0.5); /* 綴じ目の影の終端 713:173・713:176 */
 	--hep-contact-overlay: rgba(13, 0, 0, 0.5); /* CONTACT の左暗幕 713:154・733:406 */
 	--hep-contact-overlay-0: rgba(13, 0, 0, 0);
 	--hep-contact-overlay-stop: 85.577%;
@@ -50,14 +49,8 @@
 	--hep-sec-eng-lh: 1.12; /* 英字小見出し 713:42 / 733:320 */
 	--hep-heading-lh: 1.6; /* 和文見出し 713:41 / 733:321 */
 
-	/* --- Gallery の動き（S3） --- */
-	--hep-gal-interval: 5s; /* 自動送りの表示時間（決定） */
-	--hep-gal-flip: 1.2s; /* めくりの所要時間（決定） */
-	--hep-gal-cast: rgba(0, 0, 0, 0.33); /* めくり中に右ページへ落ちる影（参考コード .shadow #0005） */
-	--hep-gal-cast-blur: 12px;
+	/* --- Gallery（めくりの時間・影は共通部品 css/flipbook.css の --flipbook-*） --- */
 	--hep-gal-text-lh: 1.6; /* コピー・タブ 713:197・713:182 */
-	--hep-gal-text-fade: 0.4s; /* めくり前後の文字のフェード */
-	--hep-gal-crossfade: 0.4s; /* 動きを減らす設定のクロスフェード */
 
 	/* --- 写真帯の速さ（js/plans-imglist.js が読む名前。PLANS・支店と同値。plans.css は読まれない） --- */
 	--plp-imglist-screen-time: 40s;
@@ -800,7 +793,7 @@
 /* ============================================================
    Gallery（713:164 / 733:380〜404。guide 718:245）
    見出し + 本文 → パンフレット（左ページ大 + 右ページ見切れ + 綴じ目の影）→
-   番号・英名・コピー・進捗下線 → タブ 5 個。めくりは js/highend-gallery.js が
+   番号・英名・コピー・進捗下線 → タブ 5 個。めくりは共通部品 js/flipbook.js が
    左ページを細い短冊に分けて回す（決定 §7）。ここ（JS 無効）は 01 の静止状態。
    ============================================================ */
 .p-hepgal {
@@ -836,170 +829,25 @@
 	white-space: var(--hep-gal-body-ws);
 }
 
-/* pamphlet 713:170 / 733:381。左ページの左端から画面右端まで */
+/* pamphlet 713:170 / 733:381。本そのもの（ページ・写真・綴じ目・落ち影・めくれる紙・当たり判定）は
+   共通部品 css/flipbook.css の .c-flipbook。ここは寸法の橋渡しと配置だけ */
+.p-hepgal {
+	--flipbook-page-w: var(--hep-gal-page-w);
+	--flipbook-page-h: var(--hep-gal-page-h);
+	--flipbook-fold-left: var(--hep-gal-fold-left);
+	--flipbook-fold-right: var(--hep-gal-fold-right);
+	--flipbook-perspective: var(--hep-gal-perspective);
+	--flipbook-shadow: var(--hep-shadow);
+}
+
+/* 左ページの左端から画面右端まで */
 .p-hepgal__book {
-	position: relative;
 	z-index: 1;
-	height: var(--hep-gal-page-h);
 	margin: var(--hep-gal-book-top) 0 0 calc(max(0px, (100% - var(--hep-canvas-w)) / 2) + var(--hep-gal-page-x));
-	perspective: var(--hep-gal-perspective);
-	perspective-origin: var(--hep-gal-page-w) 50%; /* 綴じ目 */
-}
-
-.p-hepgal__page {
-	position: absolute;
-	top: 0;
-	height: 100%;
-	overflow: hidden;
-}
-
-/* 713:171 / 733:383 */
-.p-hepgal__page--left {
-	left: 0;
-	width: var(--hep-gal-page-w);
-	box-shadow: var(--hep-shadow);
-}
-
-/* 713:174 / 733:386。画面右端で切る */
-.p-hepgal__page--right {
-	left: var(--hep-gal-page-w);
-	right: 0;
-	max-width: var(--hep-gal-page-w);
-}
-
-.p-hepgal__photo {
-	position: absolute;
-	top: 0;
-	left: 0;
-	width: 100%;
-	height: 100%;
-	max-width: none;
-	object-fit: cover;
-	opacity: 0;
-}
-
-/* 右ページは左ページと同じ幅で左揃え = 次の写真の左端だけ見える（713:175 w495.71%） */
-.p-hepgal__page--right .p-hepgal__photo {
-	width: var(--hep-gal-page-w);
-}
-
-.p-hepgal__photo.is-current {
-	opacity: 1;
-}
-
-/* 綴じ目の影 713:173・713:176 / 733:384・733:387 */
-.p-hepgal__fold {
-	position: absolute;
-	top: 0;
-	bottom: 0;
-	pointer-events: none;
-}
-
-.p-hepgal__fold--left {
-	right: 0;
-	width: var(--hep-gal-fold-left);
-	background: linear-gradient(90deg, transparent, var(--hep-fold-shade));
-}
-
-.p-hepgal__fold--right {
-	left: 0;
-	width: var(--hep-gal-fold-right);
-	background: linear-gradient(270deg, transparent, var(--hep-fold-shade));
-}
-
-/* めくり中に右ページへ落ちる影（濃さと幅は JS が描画のたびに決める） */
-.p-hepgal__cast {
-	position: absolute;
-	top: 0;
-	left: var(--hep-gal-page-w);
-	width: var(--hep-gal-page-w);
-	height: 100%;
-	background: linear-gradient(90deg, var(--hep-gal-cast), transparent);
-	filter: blur(var(--hep-gal-cast-blur));
-	opacity: 0;
-	transform-origin: left center;
-	pointer-events: none;
-}
-
-/* めくれる 1 枚。短冊 .p-hepgal__strip が綴じ目（右端）を軸に回る。待機中は出さない */
-.p-hepgal__leaf {
-	position: absolute;
-	top: 0;
-	left: 0;
-	display: none;
-	width: var(--hep-gal-page-w);
-	height: 100%;
-	transform-style: preserve-3d;
-	pointer-events: none;
-}
-
-.p-hepgal__book[data-hep-flip] .p-hepgal__leaf {
-	display: block;
-}
-
-.p-hepgal__strip {
-	position: absolute;
-	top: 0;
-	height: 100%;
-	transform-origin: 100% 50%;
-	transform-style: preserve-3d;
-	will-change: transform;
-}
-
-.p-hepgal__leaf-front,
-.p-hepgal__leaf-back {
-	position: absolute;
-	inset: 0;
-	overflow: hidden;
-	backface-visibility: hidden;
-	-webkit-backface-visibility: hidden;
-}
-
-.p-hepgal__leaf-back {
-	transform: rotateY(180deg);
-}
-
-/* 短冊の中身 = ページ 1 枚分の写真を、短冊の位置ぶんずらして見せる。
-   明暗は filter で中身に掛ける（重なり部分に暗さが二重に乗って縦線になるのを防ぐ） */
-.p-hepgal__leaf-img {
-	position: absolute;
-	top: 0;
-	width: var(--hep-leaf-w, var(--hep-gal-page-w));
-	height: 100%;
-	background-position: 50% 50%;
-	background-size: cover;
-}
-
-.p-hepgal__leaf-front .p-hepgal__leaf-img {
-	background-image: var(--hep-leaf-front);
-}
-
-.p-hepgal__leaf-back .p-hepgal__leaf-img {
-	background-image: var(--hep-leaf-back);
-}
-
-/* 表は左ページ・裏は右ページと同じ綴じ目の影 */
-.p-hepgal__leaf-img::after {
-	content: "";
-	position: absolute;
-	top: 0;
-	bottom: 0;
-}
-
-.p-hepgal__leaf-front .p-hepgal__leaf-img::after {
-	right: 0;
-	width: var(--hep-gal-fold-left);
-	background: linear-gradient(90deg, transparent, var(--hep-fold-shade));
-}
-
-.p-hepgal__leaf-back .p-hepgal__leaf-img::after {
-	left: 0;
-	width: var(--hep-gal-fold-right);
-	background: linear-gradient(270deg, transparent, var(--hep-fold-shade));
 }
 
 /* 713:178 / 733:388。ページ上端より上に重ねる */
-.p-hepgal__num {
+.p-hepgal .c-flipbook__num {
 	position: absolute;
 	top: var(--hep-gal-num-offset);
 	left: var(--hep-gal-num-x);
@@ -1012,29 +860,6 @@
 	letter-spacing: var(--hep-gal-num-ls);
 	color: var(--color-white2);
 	pointer-events: none;
-}
-
-/* 透明のクリック領域。next = 左ページ全体（押すと右へめくれる）/ prev = 右の見切れページ
-   （押すと左へめくれて前へ）。ユーザー指示 2026-10-07 */
-.p-hepgal__hit {
-	position: absolute;
-	top: 0;
-	z-index: 3;
-	height: 100%;
-	padding: 0;
-	border: 0;
-	background: transparent;
-	cursor: pointer;
-}
-
-.p-hepgal__hit--next {
-	left: 0;
-	width: var(--hep-gal-page-w);
-}
-
-.p-hepgal__hit--prev {
-	left: var(--hep-gal-page-w);
-	right: 0;
 }
 
 /* gallery name 713:195 / 733:392〜394 */
@@ -1072,12 +897,14 @@
 	color: var(--color-white2);
 }
 
-/* めくりの前後に番号・英名・コピーをふわっと消して出す（JS が is-fading を付け外し） */
-.p-hepgal [data-hep-text] {
-	transition: opacity var(--hep-gal-text-fade) linear;
+/* めくりの前後に番号・英名・コピーをふわっと消して出す（js/highend-gallery.js が is-fading を付け外し） */
+.p-hepgal [data-hep-text],
+.p-hepgal .c-flipbook__num {
+	transition: opacity var(--flipbook-text-fade) linear;
 }
 
-.p-hepgal [data-hep-text].is-fading {
+.p-hepgal [data-hep-text].is-fading,
+.p-hepgal .c-flipbook__num.is-fading {
 	opacity: 0;
 }
 
@@ -1256,13 +1083,10 @@
 		animation: none;
 	}
 
-	/* Gallery はめくらずクロスフェード（決定）。文字は半分ずつで消えて出る */
-	.p-hepgal__photo {
-		transition: opacity var(--hep-gal-crossfade) linear;
-	}
-
-	.p-hepgal [data-hep-text] {
-		transition-duration: calc(var(--hep-gal-crossfade) / 2);
+	/* Gallery はめくらずクロスフェード（決定。写真は css/flipbook.css）。文字は半分ずつで消えて出る */
+	.p-hepgal [data-hep-text],
+	.p-hepgal .c-flipbook__num {
+		transition-duration: calc(var(--flipbook-crossfade) / 2);
 	}
 }
 

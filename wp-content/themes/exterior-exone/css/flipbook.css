@@ -1,0 +1,208 @@
+/* ============================================================
+   共通部品: パンフレットのめくり（template-parts/common/flipbook.php / js/flipbook.js）
+   ハイエンド Gallery（css/highend.css .p-hepgal）と WORKS 詳細（css/works-page.css .p-wkpdetail）で使う。
+   仕様書: docs/spec-20261008-works-page.md F-03（めくりの方式は docs/spec-20261005-highend-page-decisions.md §7〜§8）
+   ------------------------------------------------------------
+   :root には動き・影の値だけを置く。寸法は持たず、各ページの CSS が本の祖先要素で与える:
+   --flipbook-page-w / --flipbook-page-h（左ページ）/ --flipbook-fold-left / --flipbook-fold-right
+   （綴じ目の影の幅）/ --flipbook-perspective
+   位置（余白・左端）と z-index は各ページの CSS が本の要素に足したクラスで決める。
+   ============================================================ */
+:root {
+	--flipbook-interval: 5s; /* 自動送りの表示時間（js/flipbook.js が本の要素の computed style から読む） */
+	--flipbook-flip: 1.2s; /* めくりの所要時間 */
+	--flipbook-text-fade: 0.4s; /* めくり前後の文字・サムネのフェード */
+	--flipbook-crossfade: 0.4s; /* 動きを減らす設定のクロスフェード */
+	--flipbook-cast: rgba(0, 0, 0, 0.33); /* めくり中に右ページへ落ちる影 */
+	--flipbook-cast-blur: 12px;
+	--flipbook-fold-shade: rgba(0, 0, 0, 0.5); /* 綴じ目の影の終端 */
+	--flipbook-shadow: 0 12px 32px rgba(0, 0, 0, 0.8); /* 左ページの影 */
+}
+
+/* 左ページの左端から画面右端まで */
+.c-flipbook {
+	position: relative;
+	height: var(--flipbook-page-h);
+	perspective: var(--flipbook-perspective);
+	perspective-origin: var(--flipbook-page-w) 50%; /* 綴じ目 */
+}
+
+.c-flipbook__page {
+	position: absolute;
+	top: 0;
+	height: 100%;
+	overflow: hidden;
+}
+
+.c-flipbook__page--left {
+	left: 0;
+	width: var(--flipbook-page-w);
+	box-shadow: var(--flipbook-shadow);
+}
+
+/* 画面右端で切る */
+.c-flipbook__page--right {
+	left: var(--flipbook-page-w);
+	right: 0;
+	max-width: var(--flipbook-page-w);
+}
+
+.c-flipbook__photo {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	max-width: none;
+	object-fit: cover;
+	opacity: 0;
+}
+
+/* 右ページは左ページと同じ幅で左揃え = 次の写真の左端だけ見える */
+.c-flipbook__page--right .c-flipbook__photo {
+	width: var(--flipbook-page-w);
+}
+
+.c-flipbook__photo.is-current {
+	opacity: 1;
+}
+
+/* 綴じ目の影 */
+.c-flipbook__fold {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	pointer-events: none;
+}
+
+.c-flipbook__fold--left {
+	right: 0;
+	width: var(--flipbook-fold-left);
+	background: linear-gradient(90deg, transparent, var(--flipbook-fold-shade));
+}
+
+.c-flipbook__fold--right {
+	left: 0;
+	width: var(--flipbook-fold-right);
+	background: linear-gradient(270deg, transparent, var(--flipbook-fold-shade));
+}
+
+/* めくり中に右ページへ落ちる影（濃さと幅は JS が描画のたびに決める） */
+.c-flipbook__cast {
+	position: absolute;
+	top: 0;
+	left: var(--flipbook-page-w);
+	width: var(--flipbook-page-w);
+	height: 100%;
+	background: linear-gradient(90deg, var(--flipbook-cast), transparent);
+	filter: blur(var(--flipbook-cast-blur));
+	opacity: 0;
+	transform-origin: left center;
+	pointer-events: none;
+}
+
+/* めくれる 1 枚。短冊 .c-flipbook__strip が綴じ目（右端）を軸に回る。待機中は出さない */
+.c-flipbook__leaf {
+	position: absolute;
+	top: 0;
+	left: 0;
+	display: none;
+	width: var(--flipbook-page-w);
+	height: 100%;
+	transform-style: preserve-3d;
+	pointer-events: none;
+}
+
+.c-flipbook[data-flipbook-flip] .c-flipbook__leaf {
+	display: block;
+}
+
+.c-flipbook__strip {
+	position: absolute;
+	top: 0;
+	height: 100%;
+	transform-origin: 100% 50%;
+	transform-style: preserve-3d;
+	will-change: transform;
+}
+
+.c-flipbook__leaf-front,
+.c-flipbook__leaf-back {
+	position: absolute;
+	inset: 0;
+	overflow: hidden;
+	backface-visibility: hidden;
+	-webkit-backface-visibility: hidden;
+}
+
+.c-flipbook__leaf-back {
+	transform: rotateY(180deg);
+}
+
+/* 短冊の中身 = ページ 1 枚分の写真を、短冊の位置ぶんずらして見せる。
+   明暗は filter で中身に掛ける（重なり部分に暗さが二重に乗って縦線になるのを防ぐ） */
+.c-flipbook__leaf-img {
+	position: absolute;
+	top: 0;
+	width: var(--flipbook-leaf-w, var(--flipbook-page-w));
+	height: 100%;
+	background-position: 50% 50%;
+	background-size: cover;
+}
+
+.c-flipbook__leaf-front .c-flipbook__leaf-img {
+	background-image: var(--flipbook-leaf-front);
+}
+
+.c-flipbook__leaf-back .c-flipbook__leaf-img {
+	background-image: var(--flipbook-leaf-back);
+}
+
+/* 表は左ページ・裏は右ページと同じ綴じ目の影 */
+.c-flipbook__leaf-img::after {
+	content: "";
+	position: absolute;
+	top: 0;
+	bottom: 0;
+}
+
+.c-flipbook__leaf-front .c-flipbook__leaf-img::after {
+	right: 0;
+	width: var(--flipbook-fold-left);
+	background: linear-gradient(90deg, transparent, var(--flipbook-fold-shade));
+}
+
+.c-flipbook__leaf-back .c-flipbook__leaf-img::after {
+	left: 0;
+	width: var(--flipbook-fold-right);
+	background: linear-gradient(270deg, transparent, var(--flipbook-fold-shade));
+}
+
+/* 透明のクリック領域。next = 左ページ全体 / prev = 右の見切れページ（動きは data-flipbook-right） */
+.c-flipbook__hit {
+	position: absolute;
+	top: 0;
+	z-index: 3;
+	height: 100%;
+	padding: 0;
+	border: 0;
+	background: transparent;
+	cursor: pointer;
+}
+
+.c-flipbook__hit--next {
+	left: 0;
+	width: var(--flipbook-page-w);
+}
+
+.c-flipbook__hit--prev {
+	left: var(--flipbook-page-w);
+	right: 0;
+}
+
+/* 動きを減らす設定: めくらずクロスフェード（JS が is-current を付け替える） */
+@media (prefers-reduced-motion: reduce) {
+	.c-flipbook__photo {
+		transition: opacity var(--flipbook-crossfade) linear;
+	}
+}

@@ -19,9 +19,40 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * 施工事例で使うメタキー。
  */
-const EXTERIOR_EXONE_WORKS_GALLERY = '_exterior_exone_works_gallery';
-const EXTERIOR_EXONE_WORKS_AREA    = '_exterior_exone_works_area';
+const EXTERIOR_EXONE_WORKS_GALLERY = '_exterior_exone_works_gallery'; // 旧: 複数枚のギャラリー（読み出しの後方互換にだけ使う）
+const EXTERIOR_EXONE_WORKS_AREA    = '_exterior_exone_works_area'; // 旧: 所在地（入力欄は廃止。値は残す）
 const EXTERIOR_EXONE_WORKS_ON_TOP  = '_exterior_exone_works_on_top';
+
+/**
+ * 提案事例の画像 4 枚（ユーザー指示 2026-10-08: メイン画像 / 外観写真 / 3Dパース / 図面）。
+ * 並び順がそのまま詳細のパンフレットの順になる（1 枚目 = メイン、以降は位置でキャプション固定）。
+ *
+ * @return array<string, array{meta: string, label: string, help: string}>
+ */
+function exterior_exone_works_image_fields() {
+	return array(
+		'main'        => array(
+			'meta'  => '_exterior_exone_works_image_main',
+			'label' => '画像（メイン画像）',
+			'help'  => 'トップページ・一覧のカードと、詳細ページの左ページに使います。',
+		),
+		'exterior'    => array(
+			'meta'  => '_exterior_exone_works_image_exterior',
+			'label' => '画像（外観写真）',
+			'help'  => '',
+		),
+		'perspective' => array(
+			'meta'  => '_exterior_exone_works_image_perspective',
+			'label' => '画像（3Dパース）',
+			'help'  => '',
+		),
+		'plan'        => array(
+			'meta'  => '_exterior_exone_works_image_plan',
+			'label' => '画像（図面）',
+			'help'  => '',
+		),
+	);
+}
 
 /**
  * 説明欄。書式は持たせず、素のテキストエリアにする。
@@ -124,52 +155,47 @@ add_action( 'save_post_news', 'exterior_exone_save_news_meta' );
 /**
  * 施工事例の入力フォームを縦 1 列に並べる。
  *
- * 上から 説明文 → カテゴリータイプ → パッケージタイプ → ハッシュタグ →
- * 画像 → 所在地・掲載設定 の順。タクソノミーは WordPress 標準の枠を
- * サイドバーから本文列へ移して使う（標準の JS をそのまま活かすため）。
+ * 項目はユーザー指示（2026-10-08）の 7 つ: タイトル（標準）/ 説明 / 画像（メイン画像）/
+ * 画像（外観写真）/ 画像（3Dパース）/ 画像（図面）/ デザインテイスト。
+ * 上から 説明 → 画像 4 枚 → デザインテイスト（1 つ選ぶ）→ トップページ掲載 の順。
+ * カテゴリータイプ・ハッシュタグ・所在地の入力欄は出さない（タクソノミーの登録と保存済みの値は残す）。
  */
 function exterior_exone_add_works_meta_boxes() {
 	add_meta_box(
 		'exterior-exone-works-description',
-		'説明文',
+		'説明',
 		'exterior_exone_render_works_description',
 		'works',
 		'normal',
 		'high'
 	);
 
-	$exterior_exone_taxonomies = array(
-		'works_category' => array( 'カテゴリータイプ', 'post_categories_meta_box' ),
-		'works_package'  => array( 'パッケージタイプ', 'post_categories_meta_box' ),
-		'works_tag'      => array( 'ハッシュタグ', 'post_tags_meta_box' ),
-	);
-
-	foreach ( $exterior_exone_taxonomies as $exterior_exone_tax => $exterior_exone_box ) {
+	// 標準のタクソノミー枠はすべて外し、デザインテイストだけ独自の枠（単一選択）で出す。
+	foreach ( array( 'works_category', 'works_package', 'works_tag' ) as $exterior_exone_tax ) {
 		remove_meta_box( $exterior_exone_tax . 'div', 'works', 'side' );
-
-		add_meta_box(
-			'exterior-exone-' . $exterior_exone_tax,
-			$exterior_exone_box[0],
-			$exterior_exone_box[1],
-			'works',
-			'normal',
-			'default',
-			array( 'taxonomy' => $exterior_exone_tax )
-		);
 	}
 
 	add_meta_box(
-		'exterior-exone-works-gallery',
-		'画像（複数枚）',
-		'exterior_exone_render_works_gallery_box',
+		'exterior-exone-works-images',
+		'画像',
+		'exterior_exone_render_works_images_box',
 		'works',
 		'normal',
-		'low'
+		'default'
+	);
+
+	add_meta_box(
+		'exterior-exone-works-taste',
+		'デザインテイスト',
+		'exterior_exone_render_works_taste_box',
+		'works',
+		'normal',
+		'default'
 	);
 
 	add_meta_box(
 		'exterior-exone-works-detail',
-		'所在地・掲載設定',
+		'掲載設定',
 		'exterior_exone_render_works_detail_box',
 		'works',
 		'normal',
@@ -190,72 +216,84 @@ function exterior_exone_render_works_description( $post ) {
 }
 
 /**
- * 画像（複数枚）。
- *
- * 添付ファイル ID をカンマ区切りで 1 つの隠しフィールドに持つ。
- * 並び順がそのまま表示順になり、先頭の 1 枚を TOP と一覧のカードに使う。
+ * 画像 4 枚（メイン画像 / 外観写真 / 3Dパース / 図面）。1 枚ずつのフィールド。
  *
  * @param WP_Post $post 編集中の投稿。
  */
-function exterior_exone_render_works_gallery_box( $post ) {
-	$ids = exterior_exone_works_gallery_ids( $post->ID );
+function exterior_exone_render_works_images_box( $post ) {
 	?>
-	<div class="exone-gallery" data-exone-gallery>
-		<p class="description">
-			1 枚目がトップページと一覧のカードに使われます。ドラッグで並び替えできます。
-		</p>
-
-		<ul class="exone-gallery__list" data-exone-gallery-list>
-			<?php foreach ( $ids as $exterior_exone_id ) : ?>
-				<?php $exterior_exone_thumb = wp_get_attachment_image( $exterior_exone_id, 'thumbnail' ); ?>
-
-				<?php if ( $exterior_exone_thumb ) : ?>
-					<li class="exone-gallery__item" data-exone-gallery-item="<?php echo esc_attr( (string) $exterior_exone_id ); ?>">
-						<?php echo $exterior_exone_thumb; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- WP 生成の img タグ。 ?>
-						<button type="button" class="exone-gallery__remove" data-exone-gallery-remove aria-label="この画像を外す">&times;</button>
-					</li>
-				<?php endif; ?>
-			<?php endforeach; ?>
-		</ul>
-
-		<p>
-			<button type="button" class="button" data-exone-gallery-add>画像を選ぶ / 追加する</button>
-		</p>
-
-		<input
-			type="hidden"
-			name="exterior_exone_works_gallery"
-			value="<?php echo esc_attr( implode( ',', $ids ) ); ?>"
-			data-exone-gallery-input
-		>
+	<div class="exone-form">
+		<?php foreach ( exterior_exone_works_image_fields() as $exterior_exone_key => $exterior_exone_field ) : ?>
+			<div class="exone-form__row">
+				<p class="exone-form__label"><?php echo esc_html( $exterior_exone_field['label'] ); ?></p>
+				<div class="exone-form__field">
+					<?php
+					exterior_exone_render_single_image_field(
+						(int) get_post_meta( $post->ID, $exterior_exone_field['meta'], true ),
+						'exterior_exone_works_image_' . $exterior_exone_key
+					);
+					?>
+					<?php if ( '' !== $exterior_exone_field['help'] ) : ?>
+						<p class="description"><?php echo esc_html( $exterior_exone_field['help'] ); ?></p>
+					<?php endif; ?>
+				</div>
+			</div>
+		<?php endforeach; ?>
 	</div>
 	<?php
 }
 
 /**
- * 所在地とトップ掲載。
+ * デザインテイスト（タクソノミー works_package）。1 つだけ選ぶラジオボタン。
+ *
+ * @param WP_Post $post 編集中の投稿。
+ */
+function exterior_exone_render_works_taste_box( $post ) {
+	$terms   = get_terms(
+		array(
+			'taxonomy'   => 'works_package',
+			'hide_empty' => false,
+		)
+	);
+	$current = wp_get_object_terms( $post->ID, 'works_package', array( 'fields' => 'ids' ) );
+	$current = is_array( $current ) && $current ? (int) $current[0] : 0;
+	?>
+	<div class="exone-form">
+		<?php if ( is_wp_error( $terms ) || ! $terms ) : ?>
+			<p class="description">デザインテイストが登録されていません。「提案事例 → デザインテイスト」で追加してください。</p>
+		<?php else : ?>
+			<fieldset>
+				<legend class="screen-reader-text">デザインテイスト</legend>
+				<p>
+					<label>
+						<input type="radio" name="exterior_exone_works_taste" value="0" <?php checked( 0, $current ); ?>>
+						未設定
+					</label>
+				</p>
+				<?php foreach ( $terms as $exterior_exone_term ) : ?>
+					<p>
+						<label>
+							<input type="radio" name="exterior_exone_works_taste" value="<?php echo esc_attr( (string) $exterior_exone_term->term_id ); ?>" <?php checked( $exterior_exone_term->term_id, $current ); ?>>
+							<?php echo esc_html( $exterior_exone_term->name ); ?>
+						</label>
+					</p>
+				<?php endforeach; ?>
+			</fieldset>
+			<p class="description">一覧の絞り込みと、詳細ページの英字の見出しに使います。</p>
+		<?php endif; ?>
+	</div>
+	<?php
+}
+
+/**
+ * トップページ掲載（所在地の入力欄は 2026-10-08 に廃止）。
  *
  * @param WP_Post $post 編集中の投稿。
  */
 function exterior_exone_render_works_detail_box( $post ) {
-	$area   = (string) get_post_meta( $post->ID, EXTERIOR_EXONE_WORKS_AREA, true );
 	$on_top = (bool) get_post_meta( $post->ID, EXTERIOR_EXONE_WORKS_ON_TOP, true );
 	?>
 	<div class="exone-form">
-		<div class="exone-form__row">
-			<label class="exone-form__label" for="exterior-exone-works-area">所在地</label>
-			<div class="exone-form__field">
-				<input
-					type="text"
-					id="exterior-exone-works-area"
-					name="exterior_exone_works_area"
-					value="<?php echo esc_attr( $area ); ?>"
-					class="regular-text"
-					placeholder="例）青森県青森市"
-				>
-			</div>
-		</div>
-
 		<div class="exone-form__row">
 			<span class="exone-form__label">トップページ</span>
 			<div class="exone-form__field">
@@ -289,35 +327,26 @@ function exterior_exone_save_works_meta( $post_id ) {
 
 	exterior_exone_save_description( $post_id, 'save_post_works', 'exterior_exone_save_works_meta' );
 
-	// 画像: カンマ区切りの ID 列。実在する添付ファイルだけ、並び順のまま残す。
-	$raw = isset( $_POST['exterior_exone_works_gallery'] )
-		? sanitize_text_field( wp_unslash( $_POST['exterior_exone_works_gallery'] ) )
-		: '';
+	// 画像 4 枚。実在する添付ファイルの ID だけ保存し、空なら値ごと消す。
+	foreach ( exterior_exone_works_image_fields() as $key => $field ) {
+		$id = isset( $_POST[ 'exterior_exone_works_image_' . $key ] )
+			? absint( wp_unslash( $_POST[ 'exterior_exone_works_image_' . $key ] ) )
+			: 0;
 
-	$ids = array_values(
-		array_filter(
-			array_map( 'absint', explode( ',', $raw ) ),
-			function ( $id ) {
-				return $id > 0 && 'attachment' === get_post_type( $id );
-			}
-		)
-	);
-
-	if ( $ids ) {
-		update_post_meta( $post_id, EXTERIOR_EXONE_WORKS_GALLERY, implode( ',', $ids ) );
-	} else {
-		delete_post_meta( $post_id, EXTERIOR_EXONE_WORKS_GALLERY );
+		if ( $id > 0 && 'attachment' === get_post_type( $id ) ) {
+			update_post_meta( $post_id, $field['meta'], $id );
+		} else {
+			delete_post_meta( $post_id, $field['meta'] );
+		}
 	}
 
-	// 所在地。
-	$area = isset( $_POST['exterior_exone_works_area'] )
-		? sanitize_text_field( wp_unslash( $_POST['exterior_exone_works_area'] ) )
-		: '';
+	// 新しい 4 枚の形で保存したら、旧ギャラリーは読まれないよう消す（二重管理を避ける）。
+	delete_post_meta( $post_id, EXTERIOR_EXONE_WORKS_GALLERY );
 
-	if ( '' !== $area ) {
-		update_post_meta( $post_id, EXTERIOR_EXONE_WORKS_AREA, $area );
-	} else {
-		delete_post_meta( $post_id, EXTERIOR_EXONE_WORKS_AREA );
+	// デザインテイスト（1 つだけ。0 = 未設定）。
+	if ( isset( $_POST['exterior_exone_works_taste'] ) ) {
+		$taste = absint( wp_unslash( $_POST['exterior_exone_works_taste'] ) );
+		wp_set_object_terms( $post_id, $taste > 0 ? array( $taste ) : array(), 'works_package', false );
 	}
 
 	// トップ掲載。チェックが外れたときは値ごと消す。
@@ -422,12 +451,29 @@ function exterior_exone_save_description( $post_id, $hook, $callback ) {
 }
 
 /**
- * 施工事例のギャラリー画像 ID を並び順のまま返す。
+ * 提案事例の画像 ID を表示順（メイン → 外観写真 → 3Dパース → 図面）で返す。
+ *
+ * 未設定の枠は飛ばす（詰める）。4 枚の形で 1 枚も無いときは、旧ギャラリー
+ * （カンマ区切り）の値を読む（2026-10-08 より前に登録した投稿の後方互換）。
  *
  * @param int $post_id 投稿 ID。
  * @return array<int, int>
  */
 function exterior_exone_works_gallery_ids( $post_id ) {
+	$ids = array();
+
+	foreach ( exterior_exone_works_image_fields() as $field ) {
+		$id = absint( get_post_meta( $post_id, $field['meta'], true ) );
+
+		if ( $id > 0 ) {
+			$ids[] = $id;
+		}
+	}
+
+	if ( $ids ) {
+		return $ids;
+	}
+
 	$raw = (string) get_post_meta( $post_id, EXTERIOR_EXONE_WORKS_GALLERY, true );
 
 	if ( '' === $raw ) {

@@ -20,6 +20,7 @@ require_once get_theme_file_path( 'inc/dx-data.php' );
 require_once get_theme_file_path( 'inc/plans-data.php' );
 require_once get_theme_file_path( 'inc/highend-data.php' );
 require_once get_theme_file_path( 'inc/works-data.php' );
+require_once get_theme_file_path( 'inc/works-page-data.php' );
 
 /**
  * テーマサポートの登録。
@@ -139,13 +140,24 @@ function exterior_exone_enqueue_assets() {
 		);
 	}
 
-	// 支店ページ専用アセット（CSS はテーマ本体の後に読む）。
+	// COLUMN と見出し 3 点セットの共通部品（支店ページ・WORKS 一覧・詳細）。
+	// --st-vu / --st-su などのトークンもここが持つため、css/store.css はこの後に読む（依存に入れる）。
+	if ( exterior_exone_is_store_page() || is_page( 'store' ) || exterior_exone_is_works_page() ) {
+		wp_enqueue_style(
+			'exterior-exone-column',
+			get_theme_file_uri( 'css/column.css' ),
+			array( 'exterior-exone-style' ),
+			exterior_exone_asset_version( 'css/column.css' )
+		);
+	}
+
+	// 支店ページ専用アセット（CSS はテーマ本体と css/column.css の後に読む）。
 	// 親ページ /store/（暫定の支店一覧）も同じ CSS を使う。
 	if ( exterior_exone_is_store_page() || is_page( 'store' ) ) {
 		wp_enqueue_style(
 			'exterior-exone-store',
 			get_theme_file_uri( 'css/store.css' ),
-			array( 'exterior-exone-style' ),
+			array( 'exterior-exone-style', 'exterior-exone-column' ),
 			exterior_exone_asset_version( 'css/store.css' )
 		);
 	}
@@ -293,23 +305,43 @@ function exterior_exone_enqueue_assets() {
 		}
 	}
 
+	// めくりの共通部品（ハイエンド Gallery・WORKS 詳細のパンフレット）。
+	// css/highend.css・css/works-page.css はこの後に読む（依存に入れる）。
+	$exterior_exone_has_flipbook = is_page( 'high-end' ) || is_singular( 'works' );
+
+	if ( $exterior_exone_has_flipbook ) {
+		wp_enqueue_style(
+			'exterior-exone-flipbook',
+			get_theme_file_uri( 'css/flipbook.css' ),
+			array( 'exterior-exone-style' ),
+			exterior_exone_asset_version( 'css/flipbook.css' )
+		);
+
+		wp_enqueue_script(
+			'exterior-exone-flipbook',
+			get_theme_file_uri( 'js/flipbook.js' ),
+			array(),
+			exterior_exone_asset_version( 'js/flipbook.js' ),
+			true
+		);
+	}
+
 	// ハイエンドページ（/plans/high-end/。page-high-end.php）。CSS はテーマ本体の後に読む。
 	// FV の夕方 → 夜 → 暗幕は fv-mask.js（data-fv-mask-span のオプトイン）、
 	// Design Philosophy の写真帯は PLANS と同じ img list のエンドレスロール、
-	// Gallery はパンフレットのめくり・自動送り（highend-gallery.js）。
+	// Gallery の本は共通部品（flipbook.js）、タブと文字の差し替えは highend-gallery.js。
 	if ( is_page( 'high-end' ) ) {
 		wp_enqueue_style(
 			'exterior-exone-highend',
 			get_theme_file_uri( 'css/highend.css' ),
-			array( 'exterior-exone-style' ),
+			array( 'exterior-exone-style', 'exterior-exone-flipbook' ),
 			exterior_exone_asset_version( 'css/highend.css' )
 		);
 
 		foreach (
 			array(
-				'exterior-exone-fv-mask'         => 'js/fv-mask.js',
-				'exterior-exone-plans-imglist'   => 'js/plans-imglist.js',
-				'exterior-exone-highend-gallery' => 'js/highend-gallery.js',
+				'exterior-exone-fv-mask'       => 'js/fv-mask.js',
+				'exterior-exone-plans-imglist' => 'js/plans-imglist.js',
 			) as $exterior_exone_handle => $exterior_exone_path
 		) {
 			wp_enqueue_script(
@@ -317,6 +349,44 @@ function exterior_exone_enqueue_assets() {
 				get_theme_file_uri( $exterior_exone_path ),
 				array(),
 				exterior_exone_asset_version( $exterior_exone_path ),
+				true
+			);
+		}
+
+		wp_enqueue_script(
+			'exterior-exone-highend-gallery',
+			get_theme_file_uri( 'js/highend-gallery.js' ),
+			array( 'exterior-exone-flipbook' ),
+			exterior_exone_asset_version( 'js/highend-gallery.js' ),
+			true
+		);
+	}
+
+	// WORKS 一覧 /works/・詳細 /works/<投稿名>/（archive-works.php / single-works.php）。
+	// CSS はテーマ本体の後に読む。絞り込みは一覧ブロックごとに独立して動く。
+	if ( exterior_exone_is_works_page() ) {
+		wp_enqueue_style(
+			'exterior-exone-works-page',
+			get_theme_file_uri( 'css/works-page.css' ),
+			$exterior_exone_has_flipbook ? array( 'exterior-exone-style', 'exterior-exone-flipbook' ) : array( 'exterior-exone-style' ),
+			exterior_exone_asset_version( 'css/works-page.css' )
+		);
+
+		wp_enqueue_script(
+			'exterior-exone-works-filter',
+			get_theme_file_uri( 'js/works-filter.js' ),
+			array(),
+			exterior_exone_asset_version( 'js/works-filter.js' ),
+			true
+		);
+
+		// 詳細のパンフレットのサムネ・キャプション（めくりの本は flipbook.js）。
+		if ( is_singular( 'works' ) ) {
+			wp_enqueue_script(
+				'exterior-exone-works-detail',
+				get_theme_file_uri( 'js/works-detail.js' ),
+				array( 'exterior-exone-flipbook' ),
+				exterior_exone_asset_version( 'js/works-detail.js' ),
 				true
 			);
 		}
@@ -579,17 +649,26 @@ function exterior_exone_hide_admin_bar( $show ) {
 add_filter( 'show_admin_bar', 'exterior_exone_hide_admin_bar' );
 
 /**
+ * WORKS の一覧・詳細ページかどうか。
+ *
+ * @return bool
+ */
+function exterior_exone_is_works_page() {
+	return is_post_type_archive( 'works' ) || is_singular( 'works' );
+}
+
+/**
  * ヘッダーを FV に重ねるページかどうか。
  *
  * 全幅の FV から始まるページは、ヘッダーを写真の上に半透明で重ねる
  * （カンプ TOP 917:2733 / 企業情報 393:546 / DX 436:381 / PLANS 586:552。ハイエンドは PC カンプに
- * ヘッダーが無いので PLANS と同じ扱い）。それ以外は黒帯のまま。
+ * ヘッダーが無いので PLANS と同じ扱い。WORKS 一覧・詳細も同じ）。それ以外は黒帯のまま。
  * 下層ページが増えたらここに追加する。
  *
  * @return bool
  */
 function exterior_exone_has_fv_header() {
-	return is_front_page() || is_page( 'company' ) || is_page( 'dx' ) || is_page( 'vr' ) || is_page( 'plans' ) || is_page( 'high-end' ) || exterior_exone_is_store_page();
+	return is_front_page() || is_page( 'company' ) || is_page( 'dx' ) || is_page( 'vr' ) || is_page( 'plans' ) || is_page( 'high-end' ) || exterior_exone_is_works_page() || exterior_exone_is_store_page();
 }
 
 /**
@@ -628,6 +707,10 @@ function exterior_exone_body_class( $classes ) {
 		$classes[] = 'is-highend-page';
 	}
 
+	if ( exterior_exone_is_works_page() ) {
+		$classes[] = 'is-works-page';
+	}
+
 	if ( exterior_exone_has_fv_header() ) {
 		$classes[] = 'has-fv-header';
 	}
@@ -659,6 +742,18 @@ function exterior_exone_highend_noscript_style() {
 	echo '<noscript><style>.is-highend-page [data-reveal]{opacity:1;transform:none;transition:none}</style></noscript>' . "\n";
 }
 add_action( 'wp_head', 'exterior_exone_highend_noscript_style' );
+
+/**
+ * WORKS の一覧・詳細で JS が動かないとき、[data-reveal] を最初から表示する。
+ * css/works-page.css の @media (scripting: none) に対応しないブラウザ向けの併用。
+ */
+function exterior_exone_works_noscript_style() {
+	if ( ! exterior_exone_is_works_page() ) {
+		return;
+	}
+	echo '<noscript><style>.is-works-page [data-reveal]{opacity:1;transform:none;transition:none}</style></noscript>' . "\n";
+}
+add_action( 'wp_head', 'exterior_exone_works_noscript_style' );
 
 /**
  * 支店ページで JS が動かないとき、[data-reveal] を最初から表示し、見える安心の線画を

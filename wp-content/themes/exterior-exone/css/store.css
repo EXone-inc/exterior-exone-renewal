@@ -161,8 +161,8 @@
 	--st-cta-button: clamp(15px, 10.874px + 1.1003vw, 32px); /* 15 → 32 */
 	--st-cta-button-ls: clamp(1px, 0.515px + 0.1294vw, 3px); /* 1 → 3 */
 
-	/* --- COLUMN（1148:91） --- */
-	--st-column-title: clamp(13px, 11.786px + 0.3236vw, 18px); /* 13 → 18 */
+	/* COLUMN（--st-column-title）・角丸（--st-card-radius）・--st-bg-light・--st-shadow・
+	   見出し 3 点セット（--st-heading-*）は css/column.css へ移した（名前・値とも据え置き） */
 
 	/* --- 施工イメージ帯（612:569 / 638:134-136） --- */
 	--st-strip-screen-time: 40s; /* 画面幅 1 つ分を流れる時間（PLANS の img list と同じ。決定 B） */
@@ -170,12 +170,8 @@
 	--st-plans-strip-gap: 35.1; /* PACKAGE 下の帯（612:803）の間隔。PC のみ（SP は施工イメージ帯と同じ） */
 	--st-strip-align: auto; /* 静止時の列の寄せ。PC は中央、SP はカンプどおり左端から */
 
-	/* --- 角丸 --- */
-	--st-card-radius: clamp(6px, 5.029px + 0.2589vw, 10px); /* 6 → 10 : 大きめのカード（689:1001 ほか） */
-
 	/* --- 色（このページ固有。共通トークンに無いもののみ） --- */
 	--st-white: #ffffff; /* 535:917 見出し文字 / 572:493 白パネル / 535:852 FV の白グラデ */
-	--st-bg-light: #f3f3f4; /* 薄灰のセクション背景（535:868 / 572:448 ほか） */
 	--st-bg-light-0: rgba(243, 243, 244, 0); /* 上の透明側（グラデの端で灰色が濁らないように） */
 	--st-black2-0: rgba(26, 26, 26, 0); /* --color-black2 の透明側（561:75） */
 	--st-black-0: rgba(0, 0, 0, 0); /* 黒の透明側（691:1016） */
@@ -211,8 +207,7 @@
 		rgba(13, 0, 0, 0.5) 70.28%,
 		rgba(13, 0, 0, 0) 82.13%
 	);
-	/* 影。新カンプでカード・行・写真・パネルの影はこの 1 種類にそろった */
-	--st-shadow: 0 12px 32px 0 rgba(0, 0, 0, 0.12);
+	/* 影の基本 --st-shadow は css/column.css */
 	/* 同じ影を filter: drop-shadow() で付けるときの値（形を切り抜いた FLOW の 07 行） */
 	--st-shadow-drop: 0 12px 16px rgba(0, 0, 0, 0.12);
 	--st-shadow-card: 0 4px 8px 1px rgba(0, 0, 0, 0.05); /* 例外: AREA の店内写真（641:1464） */
@@ -252,48 +247,9 @@
 	);
 	--st-fv-shade-left-size: 51.066%; /* PC 980.47 / 1920。SP は 286 / 375 */
 	--st-fv-image-position: left center; /* PC は左寄せ（612:154）。SP は 638:72 の切り抜き */
-
-	/* --- セクション見出し 3 点セット（PLANS / WORKS / REVIEWS / FLOW / FAQ / COLUMN / AREA 共通） --- */
-	--st-heading-gap: clamp(32px, 28.893px + 3.1068vw, 80px); /* 32 → 80 : 英字下端 → 和文 */
-	--st-heading-jp: clamp(16px, 14.058px + 0.5178vw, 24px); /* 16 → 24 */
-	--st-heading-lead: clamp(12px, 11.029px + 0.2589vw, 16px); /* 12 → 16 */
 }
 
-/* ============================================================
-   セクション見出し 3 点セット（英字タイトル / 和文見出し / リード文）
-   英字は共通トークン（--fs-section-title / --ls-title）と同値。
-   ============================================================ */
-.c-store-title {
-	margin: 0;
-	font-family: var(--font-ui);
-	font-size: var(--fs-section-title);
-	font-weight: var(--fw-semibold);
-	line-height: 1.18;
-	letter-spacing: var(--ls-title);
-	text-align: center;
-	color: var(--color-black2);
-}
-
-.c-store-jp {
-	margin: var(--st-heading-gap) 0 0;
-	font-size: var(--st-heading-jp);
-	font-weight: var(--fw-medium);
-	line-height: 2.5;
-	letter-spacing: var(--ls-wide);
-	text-align: center;
-	color: var(--color-black2);
-}
-
-/* 和文見出しの行ボックス（24 x 2.5 = 60）がそのまま余白になるので margin は持たない */
-.c-store-lead {
-	margin: 0;
-	font-size: var(--st-heading-lead);
-	font-weight: var(--fw-regular);
-	line-height: 2;
-	letter-spacing: var(--ls-wide);
-	text-align: center;
-	color: var(--color-black1);
-}
+/* セクション見出し 3 点セット（.c-store-title / .c-store-jp / .c-store-lead）は css/column.css */
 
 /* ============================================================
    FV（535:838 / 534:647 / 561:3 / 561:46 / 535:852）
@@ -2312,71 +2268,7 @@ svg.p-svisible__sketch[data-line-draw] :is(path, line, polyline, polygon, rect, 
 	display: block;
 }
 
-/* ============================================================
-   COLUMN（639:417 / 639:418 / 687:997 / 687:996 / Group 479 / 669:204）
-   ------------------------------------------------------------
-   TOP の NEWS と同じカード列。5 枚目が右端で見切れるのは横スクロールの
-   表現なので、PC でも列を横スクロールできるようにする。
-   ============================================================ */
-.p-scolumn {
-	background: var(--color-white2); /* 612:114 */
-}
-
-/* 687:996 だけ行送りが 2.2 */
-.p-scolumn__lead {
-	line-height: 2.2;
-}
-
-.p-scolumn__list {
-	display: flex;
-	margin: 0;
-	padding: 0;
-	overflow-x: auto;
-	list-style: none;
-	scrollbar-width: none;
-}
-
-.p-scolumn__list::-webkit-scrollbar {
-	display: none;
-}
-
-.p-scolumn__card {
-	flex: 0 0 auto;
-}
-
-/* カード全体をお知らせの個別ページへのリンクにする */
-.p-scolumn__card-link {
-	display: block;
-}
-
-.p-scolumn__card-image {
-	display: block;
-	width: 100%;
-	object-fit: cover;
-	border-radius: var(--st-card-radius);
-	box-shadow: var(--st-shadow); /* 612:449 */
-}
-
-/* 画像未設定時のプレースホルダ（1153:108 と同じグレー） */
-.p-scolumn__card-image--empty {
-	background: var(--color-gray2);
-}
-
-.p-scolumn__card-title {
-	font-size: var(--st-column-title);
-	font-weight: var(--fw-medium);
-	line-height: 2.5;
-	letter-spacing: var(--ls-base);
-	color: var(--color-black1);
-}
-
-/* 669:204。枠・文字とも #4d4d4d（TOP の NEWS は文字が #1a1a1a） */
-.p-scolumn__btn {
-	display: flex;
-	margin-inline: auto;
-	border-color: var(--color-black1);
-	color: var(--color-black1);
-}
+/* COLUMN（.p-scolumn）は共通部品 css/column.css */
 
 /* ============================================================
    支店一覧（親ページ /store/・デザイン未定の暫定表示）
@@ -3225,35 +3117,6 @@ svg.p-svisible__sketch[data-line-draw] :is(path, line, polyline, polygon, rect, 
 		width: calc(60.7 * var(--st-vu));
 		height: calc(60.7 * var(--st-vu));
 	}
-
-	/* --- COLUMN（y26590.4〜27677.6） --- */
-	.p-scolumn {
-		padding: calc(162.2 * var(--st-vu)) 0 calc(160 * var(--st-vu));
-	}
-
-	/* カード 373 幅・ピッチ約 410。5 枚目が右端（x1796）で見切れる */
-	.p-scolumn__list {
-		gap: calc(36 * var(--st-vu));
-		margin-top: calc(80 * var(--st-vu));
-		/* 1920 を超える幅では、列の始まりを中央の 1920 幅の内容に合わせる（右は画面端まで流れる） */
-		padding-inline: calc(159 * var(--st-vu) + max(0px, (100vw - 1920px) / 2));
-	}
-
-	.p-scolumn__card {
-		flex-basis: calc(373 * var(--st-vu));
-	}
-
-	.p-scolumn__card-image {
-		height: calc(226 * var(--st-vu));
-	}
-
-	.p-scolumn__card-title {
-		margin: calc(7 * var(--st-vu)) 0 0;
-	}
-
-	.p-scolumn__btn {
-		margin-top: calc(65 * var(--st-vu));
-	}
 }
 
 /* ============================================================
@@ -3289,8 +3152,7 @@ svg.p-svisible__sketch[data-line-draw] :is(path, line, polyline, polygon, rect, 
 	.p-sreasons__copy-lead br,
 	.p-sarea__lead br,
 	.p-sarea__local-lead br,
-	.p-scta__lead br,
-	.p-scolumn__lead br {
+	.p-scta__lead br {
 		display: none;
 	}
 
@@ -4532,65 +4394,6 @@ svg.p-svisible__sketch[data-line-draw] :is(path, line, polyline, polygon, rect, 
 		width: calc(33.9 * var(--st-su)); /* 641:1445 */
 		height: calc(33.9 * var(--st-su));
 	}
-
-	/* --- COLUMN（SP-15 641:1447 y14938〜15558・#f3f3f4）: 見出し 3 点セットは REVIEWS と同じ型。
-	   289x175 のカードを指で横にスクロールする列（2 枚目が見切れる）。VIEW MORE なし --- */
-	.p-scolumn {
-		--st-heading-gap: calc(40 * var(--st-su));
-		--st-heading-jp: calc(14 * var(--st-su));
-		--st-heading-lead: calc(12 * var(--st-su));
-		--st-column-shadow-top: calc(20 * var(--st-su)); /* 影（0 12 32）の上へのはみ出し */
-
-		padding: calc(80 * var(--st-su)) 0 calc(68 * var(--st-su)); /* タイトル下端 +552 → +620 */
-		background: var(--st-bg-light);
-	}
-
-	.p-scolumn .c-store-jp {
-		line-height: 1.5;
-		letter-spacing: var(--ls-base);
-	}
-
-	/* 641:1448 337 幅・左揃え・2 段落（1・2 行目をつなぐ） */
-	.p-scolumn .c-store-lead {
-		width: calc(337 * var(--st-su) + var(--ls-base));
-		margin: calc(11 * var(--st-su)) auto 0;
-		line-height: 2;
-		letter-spacing: var(--ls-base);
-		text-align: left;
-	}
-
-	.p-scolumn__lead br {
-		display: inline;
-	}
-
-	.p-scolumn__lead .p-scolumn__br-pc {
-		display: none;
-	}
-
-	.p-scolumn__list {
-		gap: calc(12 * var(--st-su));
-		overscroll-behavior-x: contain;
-		margin-top: calc(40 * var(--st-su) - var(--st-column-shadow-top)); /* 本文の下端 +291 → +331 */
-		padding: var(--st-column-shadow-top) max(calc(19 * var(--st-su)), calc((100% - 337 * var(--st-su)) / 2)) 0;
-	}
-
-	.p-scolumn__card {
-		flex-basis: calc(289 * var(--st-su));
-	}
-
-	.p-scolumn__card-image {
-		height: calc(175 * var(--st-su));
-		border-radius: calc(5 * var(--st-su));
-	}
-
-	/* 641:1453 Medium 14 / 2.5 / 1px（画像の下端 +11） */
-	.p-scolumn__card-title {
-		margin: calc(11 * var(--st-su)) 0 0;
-	}
-
-	.p-scolumn__btn {
-		display: none;
-	}
 }
 
 /* ============================================================
@@ -4602,7 +4405,7 @@ svg.p-svisible__sketch[data-line-draw] :is(path, line, polyline, polygon, rect, 
    ============================================================ */
 @media (min-width: 1025px) {
 	:root {
-		--st-vu: min(1px, calc(100vw / 1920));
+		/* --st-vu 自体は css/column.css が定義する */
 
 		/* clamp（375→1920 の補間）だった FV のトークンを 1920 比例に置き換える */
 		--st-fv-height: calc(1237.5 * var(--st-vu));
@@ -4630,11 +4433,6 @@ svg.p-svisible__sketch[data-line-draw] :is(path, line, polyline, polygon, rect, 
 		--st-fv-copy-left: calc(141.6 * var(--st-vu));
 		/* FV 下端 y1237.5 − 写真の上端 y1125.1 */
 		--st-fv-band-overlap: calc(112.4 * var(--st-vu));
-
-		/* 見出し 3 点セット */
-		--st-heading-gap: calc(80 * var(--st-vu));
-		--st-heading-jp: calc(24 * var(--st-vu));
-		--st-heading-lead: calc(16 * var(--st-vu));
 
 		/* 導入コピー以降の文字サイズ（カンプ 1920 の実測値） */
 		--st-intro-heading: calc(36 * var(--st-vu));
@@ -4698,8 +4496,6 @@ svg.p-svisible__sketch[data-line-draw] :is(path, line, polyline, polygon, rect, 
 		--st-cta-lead: calc(20 * var(--st-vu));
 		--st-cta-button: calc(32 * var(--st-vu));
 		--st-cta-button-ls: calc(3 * var(--st-vu));
-		--st-column-title: calc(18 * var(--st-vu));
-		--st-card-radius: calc(10 * var(--st-vu));
 		--st-fv-band-radius: calc(5 * var(--st-vu));
 	}
 
@@ -4721,16 +4517,14 @@ svg.p-svisible__sketch[data-line-draw] :is(path, line, polyline, polygon, rect, 
 	.p-squality,
 	.p-sfaq,
 	.p-sarea,
-	.p-scta,
-	.p-scolumn {
+	.p-scta {
 		--ls-wide: calc(2 * var(--st-vu));
 		--ls-base: calc(1 * var(--st-vu));
 		--ls-title: calc(5 * var(--st-vu));
 	}
 
 	/* ボタン（265x64・文字 20px）も 1920 比例にする */
-	.p-splans,
-	.p-scolumn {
+	.p-splans {
 		--btn-width: calc(265 * var(--st-vu));
 		--btn-height: calc(64 * var(--st-vu));
 		--fs-button: calc(20 * var(--st-vu));
@@ -4749,7 +4543,7 @@ svg.p-svisible__sketch[data-line-draw] :is(path, line, polyline, polygon, rect, 
    ============================================================ */
 @media (max-width: 1024px) {
 	:root {
-		--st-su: min(calc(100vw / 375), var(--sp-scale-max));
+		/* --st-su 自体は css/column.css が定義する */
 
 		/* FV（SP-1 638:72〜638:94。y0〜723、ヘッダーは上に重なる） */
 		--st-fv-height: calc(723 * var(--st-su));
@@ -4780,10 +4574,6 @@ svg.p-svisible__sketch[data-line-draw] :is(path, line, polyline, polygon, rect, 
 		--st-fv-band-pad: calc(16 * var(--st-su)); /* 638:94 の x16 */
 		--st-fv-band-overlap: calc(62 * var(--st-su)); /* FV 下端 723 − 写真の上端 661 */
 		--st-fv-band-item-width: calc(161.07 * var(--st-su));
-
-		--st-heading-gap: calc(32 * var(--st-su));
-		--st-heading-jp: calc(16 * var(--st-su));
-		--st-heading-lead: calc(12 * var(--st-su));
 
 		/* 導入コピー以降の文字サイズ（SERVICE までは SP カンプ、それ以降は補間値） */
 		--st-intro-heading: calc(16 * var(--st-su)); /* 638:97 */
@@ -4848,8 +4638,6 @@ svg.p-svisible__sketch[data-line-draw] :is(path, line, polyline, polygon, rect, 
 		--st-cta-lead: calc(12 * var(--st-su)); /* 641:1432 */
 		--st-cta-button: calc(20 * var(--st-su)); /* 641:1438 */
 		--st-cta-button-ls: calc(1 * var(--st-su));
-		--st-column-title: calc(14 * var(--st-su)); /* 641:1453 */
-		--st-card-radius: calc(6 * var(--st-su));
 		--st-fv-band-radius: calc(3 * var(--st-su));
 	}
 
@@ -4870,8 +4658,7 @@ svg.p-svisible__sketch[data-line-draw] :is(path, line, polyline, polygon, rect, 
 	.p-squality,
 	.p-sfaq,
 	.p-sarea,
-	.p-scta,
-	.p-scolumn {
+	.p-scta {
 		--gutter: calc(27.5 * var(--st-su));
 		--ls-wide: calc(2 * var(--st-su));
 		--ls-base: calc(1 * var(--st-su));
@@ -4879,8 +4666,7 @@ svg.p-svisible__sketch[data-line-draw] :is(path, line, polyline, polygon, rect, 
 	}
 
 	/* ボタンも 375 比例にする */
-	.p-splans,
-	.p-scolumn {
+	.p-splans {
 		--btn-width: calc(180 * var(--st-su));
 		--btn-height: calc(44 * var(--st-su));
 		--fs-button: calc(13 * var(--st-su));
