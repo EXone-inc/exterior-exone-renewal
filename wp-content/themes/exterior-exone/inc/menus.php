@@ -48,10 +48,7 @@ function exterior_exone_global_menu_items() {
 			'label' => 'RECRUIT',
 			'url'   => '#',
 		),
-		array(
-			'label' => 'CONTACT',
-			'url'   => '#',
-		),
+		exterior_exone_contact_item( 'CONTACT' ),
 	);
 }
 
@@ -201,7 +198,8 @@ function exterior_exone_store_footer_menu_items() {
 }
 
 /**
- * お問い合わせ。カンプ 670:244・670:257（ハンバーガーメニューではボタン）。支店用 PC ヘッダーでは CONTACT ボタン（670:337）。
+ * お問い合わせ。カンプ 670:244・670:257（ハンバーガーメニューではボタン）。支店用 PC ヘッダーでは CONTACT ボタン（670:337）、
+ * コーポレート PC ヘッダーではグローバルナビの CONTACT。行き先の出典はここ 1 か所。
  *
  * @param string $label 表示名（PC ヘッダーは CONTACT）。
  * @return array{label: string, url: string}
@@ -209,7 +207,7 @@ function exterior_exone_store_footer_menu_items() {
 function exterior_exone_contact_item( $label = 'お問い合わせ' ) {
 	return array(
 		'label' => $label,
-		'url'   => '#',
+		'url'   => exterior_exone_contact_url(), // /contact/（支店モードは ?store= 付き。inc/contact-data.php）
 	);
 }
 

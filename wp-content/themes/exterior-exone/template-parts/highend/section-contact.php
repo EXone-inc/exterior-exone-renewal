@@ -7,7 +7,7 @@
  *
  * 写真は支店 CTA と同じもの（images/store/。決定）。暗幕はカンプの値（左 → 85.577% で停止）。
  * 本文は PC 中央 4 行、SP は鍵括弧を中央 3 行 + 残りを左揃え 1 段落。
- * ボタンの遷移先は未定（#。公開前チェックリスト）。ホバーは a:hover のみ。
+ * ボタンはお問い合わせページ /contact/ へ（支店モードは ?store= 付き）。ホバーは a:hover のみ。
  *
  * @package exterior-exone
  */
@@ -46,7 +46,7 @@ foreach ( $exterior_exone_hep_cta['quotes'] as $exterior_exone_quote ) {
 		<p class="p-hepcta__quotes"><?php echo exterior_exone_highend_lines( $exterior_exone_hep_cta_quotes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wp_kses 済み。 ?></p>
 		<p class="p-hepcta__body"><?php echo exterior_exone_highend_lines( $exterior_exone_hep_cta['body'] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wp_kses 済み。 ?></p>
 		<div class="p-hepcta__more">
-			<a class="p-hepcta__btn" href="<?php echo esc_url( $exterior_exone_hep_cta['url'] ); ?>"><?php echo esc_html( $exterior_exone_hep_cta['button'] ); ?></a>
+			<a class="p-hepcta__btn" href="<?php echo esc_url( exterior_exone_store_link( $exterior_exone_hep_cta['url'] ) ); ?>"><?php echo esc_html( $exterior_exone_hep_cta['button'] ); ?></a>
 		</div>
 	</div>
 </section>

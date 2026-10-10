@@ -1,0 +1,937 @@
+/* ============================================================
+   CONTACT（お問い合わせ）/contact/（page-contact.php）
+   カンプ: PC 親 853:581（デフォルト 860:142 / 個人 853:426 / 法人 853:198 / 支店 853:146 /
+           電話 853:467 / メール 853:94）/ SP 869:436（全部展開）・869:618（初回表示）
+           guide 853:579
+   設計メモ: docs/figma-contact-page.md
+   仕様書: docs/spec-20261010-contact-page.md
+   プレフィックスは --contact- / .p-contact。
+   ------------------------------------------------------------
+   ここの :root には幅で変わらない値（色・行高・時間）だけを置き、
+   長さはすべてファイル末尾の比例ブロックが決める:
+   - PC（1025px 以上）… --contact-vu（カンプ 1920 の 1px の実寸）
+   - SP（1024px 以下）… --contact-su（カンプ 375 の 1px の実寸。上限 --sp-scale-max）
+   ============================================================ */
+:root {
+	/* --- 色 --- */
+	--contact-color-bg: var(--color-white4); /* ページ地 853:95 / 869:446 */
+	--contact-mask: rgba(0, 0, 0, 0.2); /* FV の暗幕 864:405 / 869:523（ベタ） */
+	--contact-title-color: var(--color-gray2); /* 853:390 ゴースト文字（決定 §5-16） */
+	--contact-sub-color: var(--color-black2); /* 853:389 */
+	--contact-lead-color: var(--color-black1); /* 853:372 */
+	/* ボタン（全ボタン共通）。非選択 = 枠 + 黒文字 / 選択中・ホバー = 黒地 + 白文字（guide 853:568） */
+	--contact-btn-border: var(--color-black1);
+	--contact-btn-color: var(--color-black2);
+	--contact-btn-note-color: var(--color-black1);
+	--contact-btn-on-bg: var(--color-black2);
+	--contact-btn-on-color: var(--color-white2);
+	--contact-btn-on-note-color: var(--color-gray2);
+	--contact-icon-on-filter: brightness(0) invert(1); /* 黒版アイコンを白に（決定 §5-6） */
+	--contact-rule-color: var(--color-gray2); /* 電話ブロックの縦線 853:505 */
+	/* フォーム（864:294 / 860:166 / 869:602） */
+	--contact-label-color: var(--color-black2);
+	--contact-note-color: var(--color-black1); /* 「（ハイフンなし）」853:140 */
+	--contact-input-bg: var(--color-white1);
+	--contact-input-border: var(--color-gray2);
+	--contact-input-focus: var(--color-black1); /* フォーカスの枠（決定 §5-10） */
+	--contact-input-color: var(--color-black2);
+	--contact-error: var(--color-error); /* 入力エラーの文字・枠（決定 §4・仕様書 Q1） */
+	--contact-submit-bg: var(--color-orange1);
+	--contact-submit-color: var(--color-white2);
+	--contact-submit-radius: var(--radius-pill);
+	--contact-disabled-opacity: 0.5; /* 送信中のボタン */
+
+	/* --- 行高 --- */
+	--contact-display-lh: 1.29; /* Antonio の lh normal の実測（155/120・65/50） */
+	--contact-lead-lh: 1.5;
+	--contact-type-title-lh: 1.6;
+	--contact-type-note-lh: 1.5;
+	--contact-heading-lh: 1.6;
+	--contact-label-lh: 1.6;
+	--contact-input-lh: 1.6;
+	--contact-done-lh: 1.8;
+
+	/* --- 動き --- */
+	--contact-reveal: 0.3s; /* 段の出現のフェード（仕様書 Q2） */
+	--contact-btn-transition: var(--transition-base); /* ボタンの色反転 */
+}
+
+/* ページ地（オーバースクロール時・セクションの継ぎ目に白が出ないように） */
+.is-contact-page {
+	background-color: var(--contact-color-bg);
+}
+
+/* FV の下からフッターの上まで #f3f3f4。選択前の 1 画面（PC 1080 / SP 723）は地で埋める */
+.p-contact {
+	min-height: var(--contact-min-h);
+	background-color: var(--contact-color-bg);
+}
+
+/* ============================================================
+   FV（860:142 / 869:618）
+   写真帯（暗幕 20% のベタ）の下端を「CONTACT」がまたぐ。和文は地の上。
+   PC はヘッダーが写真に重なる（has-fv-header）。SP は黒のヘッダー（45）の下から始まり、
+   カンプ 375 のうちヘッダーに隠れる上 45 ぶんの写真はヘッダーの裏へ逃がす。
+   ============================================================ */
+.p-contactfv {
+	position: relative;
+	padding-top: var(--contact-title-top);
+	text-align: center;
+}
+
+.p-contactfv__bg {
+	position: absolute;
+	inset: 0 0 auto;
+	height: var(--contact-fv-h);
+	overflow: hidden;
+}
+
+.p-contactfv__bg img {
+	width: 100%;
+	height: calc(100% + var(--contact-fv-shift));
+	max-width: none;
+	margin-top: calc(-1 * var(--contact-fv-shift));
+	object-fit: cover;
+	object-position: var(--contact-fv-pos);
+}
+
+.p-contactfv__bg::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	background-color: var(--contact-mask);
+}
+
+/* 写真・暗幕より前面（決定 §5-16） */
+.p-contactfv__copy {
+	position: relative;
+	z-index: 1;
+}
+
+/* 853:390 / 869:671 */
+.p-contactfv__title {
+	font-family: var(--font-display);
+	font-size: var(--contact-title-size);
+	font-weight: var(--fw-semibold);
+	line-height: var(--contact-display-lh);
+	letter-spacing: var(--contact-title-ls);
+	color: var(--contact-title-color);
+	white-space: nowrap;
+}
+
+/* 853:389 / 869:669 */
+.p-contactfv__sub {
+	margin-top: var(--contact-sub-gap);
+	font-size: var(--contact-sub-size);
+	font-weight: var(--contact-sub-fw);
+	line-height: var(--contact-sub-lh);
+	letter-spacing: var(--contact-sub-ls);
+	color: var(--contact-sub-color);
+}
+
+/* ============================================================
+   選択フロー（リード・個人 / 法人 → 下の段）
+   ============================================================ */
+.p-contactsel {
+	width: var(--contact-content-w);
+	margin-inline: auto;
+	padding-bottom: var(--contact-end);
+}
+
+/* 853:372 / 869:666 */
+.p-contactsel__lead {
+	margin-top: var(--contact-lead-top);
+	font-size: var(--contact-lead-size);
+	line-height: var(--contact-lead-lh);
+	letter-spacing: var(--contact-lead-ls);
+	color: var(--contact-lead-color);
+	text-align: center;
+}
+
+/* 個人 / 法人（860:140 / 869:640・869:641）。幅は 2 等分（カンプの 580 / 583 は揃える） */
+.p-contactsel__types {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	column-gap: var(--contact-type-gap);
+	margin-top: var(--contact-type-top);
+}
+
+.p-contactsel__type {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	height: var(--contact-type-h);
+	border: var(--border-thin) solid var(--contact-btn-border);
+	border-radius: var(--contact-radius);
+	background-color: transparent;
+	color: var(--contact-btn-color);
+	text-align: center;
+	transition:
+		background-color var(--contact-btn-transition),
+		border-color var(--contact-btn-transition),
+		color var(--contact-btn-transition);
+}
+
+.p-contactsel__type-title {
+	font-size: var(--contact-type-title);
+	font-weight: var(--fw-bold);
+	line-height: var(--contact-type-title-lh);
+	letter-spacing: var(--contact-type-title-ls);
+}
+
+.p-contactsel__type-note {
+	font-size: var(--contact-type-note);
+	line-height: var(--contact-type-note-lh);
+	letter-spacing: var(--contact-type-note-ls);
+	color: var(--contact-btn-note-color);
+	transition: color var(--contact-btn-transition);
+}
+
+/* ============================================================
+   下の段（店舗 853:454・860:153 / 方法 853:185・864:183 / 電話 853:502〜853:476 /
+   フォームの枠 864:294・860:166）。上の段は動かず、下に足されていく（guide 853:572）
+   ============================================================ */
+.p-contactsel__step--store,
+.p-contactsel__step--form-personal {
+	margin-top: var(--contact-gap-lg); /* 2 ボタン下端 +80 / 方法下端 +80 */
+}
+
+.p-contactsel__step--method,
+.p-contactsel__step--tel {
+	margin-top: var(--contact-gap-md); /* 店舗下端 +50 / 方法下端 +50 */
+}
+
+.p-contactsel__step--form-corporate {
+	margin-top: var(--contact-gap-corp); /* 2 ボタン下端 +75 */
+}
+
+/* 新しく現れた段のフェード（仕様書 Q2）。is-entering は js/contact-select.js が 1 フレームだけ付ける。
+   自動スクロールで段の下に残す余白は scroll-margin-bottom（JS が読む） */
+.p-contactsel__step {
+	transition: opacity var(--contact-reveal) ease;
+	scroll-margin-top: var(--contact-gap-md);
+	scroll-margin-bottom: var(--contact-gap-md);
+}
+
+.p-contactsel__step.is-entering {
+	opacity: 0;
+	transition: none;
+}
+
+/* 段の見出し（h2 853:454・853:185 / h3 853:502） */
+.p-contactsel__heading {
+	font-size: var(--contact-heading-size);
+	font-weight: var(--fw-bold);
+	line-height: var(--contact-heading-lh);
+	letter-spacing: var(--contact-heading-ls);
+	color: var(--contact-btn-color);
+}
+
+/* 店舗 6 個（PC 1 行 6 等分 / SP 2 列 × 3 行。カンプの 192 / 191 は揃える） */
+.p-contactsel__stores {
+	display: grid;
+	grid-template-columns: repeat(var(--contact-store-cols), minmax(0, 1fr));
+	gap: var(--contact-store-gap);
+	margin-top: var(--contact-gap-sm);
+}
+
+.p-contactsel__store {
+	width: 100%;
+	height: var(--contact-store-h);
+	font-size: var(--contact-store-size);
+	font-weight: var(--fw-medium);
+	line-height: var(--contact-store-lh);
+	letter-spacing: var(--contact-store-ls);
+}
+
+/* 方法 3 個（アイコン + 文言を一塊で中央。間隔はカンプのばらつきを 14 に揃える） */
+.p-contactsel__methods {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	column-gap: var(--contact-method-gap);
+	margin-top: var(--contact-gap-sm);
+}
+
+.p-contactsel__method {
+	display: flex;
+	flex-direction: var(--contact-method-dir);
+	align-items: center;
+	justify-content: var(--contact-method-justify);
+	gap: var(--contact-icon-gap);
+	width: 100%;
+	height: var(--contact-method-h);
+	padding-top: var(--contact-method-pad-top);
+	font-size: var(--contact-method-size);
+	font-weight: var(--contact-method-fw);
+	line-height: var(--contact-method-lh);
+	letter-spacing: var(--contact-method-ls);
+}
+
+/* LINE と SP の電話は a。a:hover の不透明度は使わず、ほかのボタンと同じ色反転にする */
+a.p-contactsel__method:hover {
+	opacity: 1;
+}
+
+.p-contactsel__method-line {
+	letter-spacing: var(--contact-method-line-ls);
+}
+
+.p-contactsel__method-icon {
+	flex-shrink: 0;
+	object-fit: contain; /* SP はアイコンの枠の高さを揃える（絵は縦中央） */
+	transition: filter var(--contact-btn-transition);
+}
+
+/* アイコンの見た目の大きさはカンプのまま（決定 §5-6・仕様書 Q16） */
+.p-contactsel__method--mail .p-contactsel__method-icon {
+	width: var(--contact-icon-mail-w);
+	height: var(--contact-icon-mail-h);
+}
+
+.p-contactsel__method--line .p-contactsel__method-icon {
+	width: var(--contact-icon-line-w);
+	height: var(--contact-icon-line-h);
+}
+
+.p-contactsel__method--tel .p-contactsel__method-icon {
+	width: var(--contact-icon-tel-w);
+	height: var(--contact-icon-tel-h);
+}
+
+.p-contactsel__method-label--sp {
+	display: var(--contact-method-sp-display);
+}
+
+.p-contactsel__method-label--pc {
+	display: var(--contact-method-pc-display);
+}
+
+/* --- ボタン共通: 非選択 = 枠 + 黒文字 / 選択中・ホバー = 黒地 + 白文字 + 白アイコン（色反転）。
+   枠は地と同色にして大きさを変えない --- */
+.p-contactsel__store,
+.p-contactsel__method {
+	border: var(--border-thin) solid var(--contact-btn-border);
+	border-radius: var(--contact-radius);
+	background-color: transparent;
+	color: var(--contact-btn-color);
+	text-align: center;
+	transition:
+		background-color var(--contact-btn-transition),
+		border-color var(--contact-btn-transition),
+		color var(--contact-btn-transition);
+}
+
+.p-contactsel__type[aria-pressed="true"],
+.p-contactsel__store[aria-pressed="true"],
+.p-contactsel__method[aria-pressed="true"] {
+	border-color: var(--contact-btn-on-bg);
+	background-color: var(--contact-btn-on-bg);
+	color: var(--contact-btn-on-color);
+}
+
+.p-contactsel__type[aria-pressed="true"] .p-contactsel__type-note {
+	color: var(--contact-btn-on-note-color);
+}
+
+.p-contactsel__method[aria-pressed="true"] .p-contactsel__method-icon {
+	filter: var(--contact-icon-on-filter);
+}
+
+@media (hover: hover) {
+	.p-contactsel__type:hover,
+	.p-contactsel__store:hover,
+	.p-contactsel__method:hover {
+		border-color: var(--contact-btn-on-bg);
+		background-color: var(--contact-btn-on-bg);
+		color: var(--contact-btn-on-color);
+	}
+
+	.p-contactsel__type:hover .p-contactsel__type-note {
+		color: var(--contact-btn-on-note-color);
+	}
+
+	.p-contactsel__method:hover .p-contactsel__method-icon {
+		filter: var(--contact-icon-on-filter);
+	}
+}
+
+/* --- 電話ブロック（853:467）: 番号 + 受付時間の左カラム / 縦線 / 補足文 --- */
+.p-contacttel {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	margin-top: var(--contact-tel-num-top);
+}
+
+/* 番号と受付時間は左揃えで見出しの左端（x360）にそろえる（S2 所見。カンプ 853:494 は 355） */
+.p-contacttel__main {
+	text-align: left;
+}
+
+.p-contacttel__number {
+	display: inline-block;
+	font-family: var(--font-display);
+	font-size: var(--contact-tel-num-size);
+	font-weight: var(--fw-semibold);
+	line-height: var(--contact-display-lh);
+	letter-spacing: var(--contact-tel-num-ls);
+	color: var(--contact-btn-color);
+	white-space: nowrap;
+}
+
+.p-contacttel__hours {
+	font-size: var(--contact-tel-hours-size);
+	line-height: var(--contact-lead-lh);
+	letter-spacing: var(--contact-tel-hours-ls);
+	color: var(--contact-lead-color);
+	white-space: nowrap;
+}
+
+/* 853:505 縦線（1px gray2）。左カラムの縦中央 */
+.p-contacttel__rule {
+	flex-shrink: 0;
+	width: var(--border-thin);
+	height: var(--contact-tel-rule-h);
+	margin-inline: var(--contact-tel-rule-before) var(--contact-tel-rule-after);
+	background-color: var(--contact-rule-color);
+}
+
+.p-contacttel__note {
+	font-size: var(--contact-tel-note-size);
+	line-height: var(--contact-lead-lh);
+	letter-spacing: var(--contact-tel-note-ls);
+	color: var(--contact-lead-color);
+}
+
+/* ============================================================
+   フォーム（個人 864:294 / 法人 860:166 / 送信 869:602・869:601。中身は CF7）
+   PC はラベル列 + 入力欄の 2 カラム、SP はラベルの下に入力欄。
+   確認表示・完了表示はカンプに無い（フォームの書式を流用。仕様書 Q13）
+   ============================================================ */
+.p-contactform__rows {
+	display: grid;
+	row-gap: var(--contact-row-gap);
+}
+
+.p-contactform__row {
+	display: grid;
+	grid-template-columns: var(--contact-row-cols);
+	row-gap: var(--contact-label-gap);
+	align-items: start;
+	scroll-margin-top: var(--contact-gap-md);
+}
+
+/* 853:136 ほか（Medium 24 lh1.6 ls1。50 高の欄と上下中央、テキストエリアは上揃え） */
+.p-contactform__label {
+	padding-top: var(--contact-label-pad);
+	font-size: var(--contact-label-size);
+	font-weight: var(--fw-medium);
+	line-height: var(--contact-label-lh);
+	letter-spacing: var(--contact-label-ls);
+	color: var(--contact-label-color);
+}
+
+/* 853:140 「（ハイフンなし）」ラベルの右に隣接（ベースライン揃え） */
+.p-contactform__note {
+	font-size: var(--contact-note-size);
+	font-weight: var(--contact-note-fw);
+	letter-spacing: var(--contact-note-ls);
+	color: var(--contact-note-color);
+}
+
+.p-contactform .wpcf7-form-control-wrap {
+	display: block;
+}
+
+/* 853:125〜853:129（地 white1 + 枠 1px gray2 + 角丸。プレースホルダ・必須マークは無し） */
+.p-contactform .wpcf7-text,
+.p-contactform .wpcf7-textarea {
+	display: block;
+	width: 100%;
+	height: var(--contact-input-h);
+	margin: 0;
+	padding: 0 var(--contact-input-pad-x);
+	border: var(--border-thin) solid var(--contact-input-border);
+	border-radius: var(--contact-radius);
+	background-color: var(--contact-input-bg);
+	color: var(--contact-input-color);
+	font: inherit;
+	font-size: var(--contact-input-size);
+	line-height: var(--contact-input-lh);
+	letter-spacing: var(--contact-input-ls);
+	appearance: none;
+	transition: border-color var(--contact-btn-transition);
+}
+
+.p-contactform .wpcf7-textarea {
+	height: var(--contact-textarea-h);
+	min-height: var(--contact-input-h);
+	padding-block: var(--contact-input-pad-y);
+	resize: vertical;
+}
+
+.p-contactform .wpcf7-text:focus,
+.p-contactform .wpcf7-textarea:focus {
+	border-color: var(--contact-input-focus);
+	outline: none;
+}
+
+/* 入力エラー: 枠を赤に、欄のすぐ下に赤文字（決定 §4） */
+.p-contactform .wpcf7-not-valid,
+.p-contactform .wpcf7-not-valid:focus {
+	border-color: var(--contact-error);
+}
+
+.p-contactform .wpcf7-not-valid-tip {
+	display: block;
+	margin-top: var(--contact-tip-gap);
+	font-size: var(--contact-tip-size);
+	line-height: var(--contact-label-lh);
+	letter-spacing: var(--contact-tip-ls);
+	color: var(--contact-error);
+}
+
+/* CF7 が出す補助の要素（既定 CSS を読まないので、ここで隠す・整える） */
+.p-contactform .screen-reader-response {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	margin: -1px;
+	padding: 0;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border: 0;
+}
+
+.p-contactform .hidden-fields-container {
+	display: contents;
+	margin: 0;
+	padding: 0;
+	border: 0;
+}
+
+.p-contactform .wpcf7-spinner {
+	display: none;
+}
+
+/* フォーム全体の帯は送信の失敗のときだけ（仕様書 Q11。入力エラーでは出さない） */
+.p-contactform .wpcf7-response-output {
+	display: none;
+	margin-top: var(--contact-gap-md);
+	font-size: var(--contact-tip-size);
+	line-height: var(--contact-label-lh);
+	letter-spacing: var(--contact-tip-ls);
+	color: var(--contact-error);
+	text-align: center;
+}
+
+.p-contactform .wpcf7-form:is(.failed, .spam, .aborted) .wpcf7-response-output {
+	display: block;
+}
+
+/* 送信ボタン 869:602（orange1・角丸 32・331x64。SF Pro Bold 20 ls2）。フォーム下端 +80 */
+.p-contactform__actions,
+.p-contactform__buttons {
+	display: flex;
+	justify-content: center;
+	gap: var(--contact-confirm-btn-gap);
+	margin-top: var(--contact-submit-top);
+}
+
+.p-contactform__submit,
+.p-contactform__button {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: var(--contact-submit-w);
+	height: var(--contact-submit-h);
+	margin: 0;
+	padding: 0;
+	border: var(--border-thin) solid var(--contact-submit-bg);
+	border-radius: var(--contact-submit-radius);
+	background-color: var(--contact-submit-bg);
+	color: var(--contact-submit-color);
+	font-family: var(--font-ui);
+	font-size: var(--contact-submit-size);
+	font-weight: var(--fw-bold);
+	line-height: var(--contact-label-lh);
+	letter-spacing: var(--contact-submit-ls);
+	cursor: pointer;
+	appearance: none;
+	transition: opacity var(--transition-base);
+}
+
+/* 確認の 2 ボタンは送信ボタンと同じ組み（SP は 1 行に収まる幅） */
+.p-contactform__button {
+	width: var(--contact-confirm-btn-w);
+}
+
+/* 「修正する」: 透明地 + 枠 black1（仕様書 Q13） */
+.p-contactform__button--back {
+	border-color: var(--contact-btn-border);
+	background-color: transparent;
+	color: var(--contact-btn-color);
+}
+
+.p-contactform__submit:hover,
+.p-contactform__button:hover {
+	opacity: 0.7;
+}
+
+.p-contactform__button:disabled,
+.p-contactform__button:disabled:hover {
+	opacity: var(--contact-disabled-opacity);
+	cursor: default;
+}
+
+/* --- 確認表示（入力と同じ 2 カラム。値は black2 の文字で、改行を保つ） --- */
+.p-contactform__confirm {
+	scroll-margin-top: var(--contact-gap-md);
+}
+
+.p-contactform__confirm:focus,
+.p-contactform__done:focus {
+	outline: none;
+}
+
+.p-contactform__list {
+	display: grid;
+	row-gap: var(--contact-row-gap);
+}
+
+.p-contactform__item {
+	display: grid;
+	grid-template-columns: var(--contact-row-cols);
+	row-gap: var(--contact-label-gap);
+	align-items: first baseline;
+}
+
+.p-contactform__term {
+	font-size: var(--contact-label-size);
+	font-weight: var(--fw-medium);
+	line-height: var(--contact-label-lh);
+	letter-spacing: var(--contact-label-ls);
+	color: var(--contact-label-color);
+}
+
+.p-contactform__value {
+	margin: 0;
+	font-size: var(--contact-input-size);
+	line-height: var(--contact-input-lh);
+	letter-spacing: var(--contact-input-ls);
+	color: var(--contact-input-color);
+	white-space: pre-wrap;
+	overflow-wrap: anywhere;
+}
+
+/* --- 完了表示（決定 §5-8 の文面） --- */
+.p-contactform__done {
+	scroll-margin-top: var(--contact-gap-md);
+	font-size: var(--contact-lead-size);
+	line-height: var(--contact-done-lh);
+	letter-spacing: var(--contact-lead-ls);
+	color: var(--contact-label-color);
+	text-align: center;
+}
+
+/* CF7 が無効・フォーム未登録のときの案内（仕様書 Q10） */
+.p-contactform__fallback {
+	font-size: var(--contact-lead-size);
+	line-height: var(--contact-lead-lh);
+	letter-spacing: var(--contact-lead-ls);
+	color: var(--contact-lead-color);
+	text-align: center;
+}
+
+/* --- JS 無効時: [data-reveal] を最初から表示し、選択フローの段をすべて出す（仕様書 Q9）。
+   電話ブロックは最初から支店があるとき（?store=）だけ出す --- */
+@media (scripting: none) {
+	.is-contact-page [data-reveal] {
+		opacity: 1;
+		transform: none;
+		transition: none;
+	}
+
+	.is-contact-page [data-contact-step]:not([data-contact-step="tel"])[hidden],
+	.is-contact-page [data-contact-step="tel"][data-contact-has-store][hidden] {
+		display: block;
+	}
+}
+
+/* --- 動きを減らす設定: 色反転・段の出現は即時 --- */
+@media (prefers-reduced-motion: reduce) {
+	:root {
+		--contact-btn-transition: 0s;
+		--contact-reveal: 0s;
+	}
+}
+
+/* ============================================================
+   PC（1025px 以上）: 1920px カンプの縮小拡大コピー化
+   ------------------------------------------------------------
+   1 単位 --contact-vu は「カンプ 1920 の 1px の実寸」。1920px 以上では 1px で
+   固定され、それ以下では画面幅に比例して縮む（WORKS の --wkp-vu と同じ）。
+   値は設計メモ §0「PC の縦リズム」・§2。
+   ============================================================ */
+@media (min-width: 1025px) {
+	:root {
+		--contact-vu: min(1px, calc(100vw / 1920));
+
+		/* --- ページ --- */
+		--contact-min-h: calc(1080 * var(--contact-vu)); /* 860:142 の 1 画面 */
+		--contact-content-w: calc(1200 * var(--contact-vu)); /* x360〜1560 */
+		--contact-end: calc(160 * var(--contact-vu)); /* 最終ブロックの下（決定 §5-12） */
+
+		/* --- FV 869:409（1920x515） --- */
+		--contact-fv-h: calc(515 * var(--contact-vu));
+		--contact-fv-shift: 0px; /* ヘッダーは写真に重なる */
+		--contact-fv-pos: 50% 22%; /* 864:390 上寄りの cover */
+		--contact-title-top: calc(428 * var(--contact-vu)); /* 853:390 y428 */
+		--contact-title-size: calc(120 * var(--contact-vu));
+		--contact-title-ls: calc(-3 * var(--contact-vu));
+		--contact-sub-gap: calc(11 * var(--contact-vu)); /* 英字下端 583 → y594 */
+		--contact-sub-size: calc(36 * var(--contact-vu)); /* 853:389 Bold lh1.5 ls3 */
+		--contact-sub-fw: var(--fw-bold);
+		--contact-sub-lh: 1.5;
+		--contact-sub-ls: calc(3 * var(--contact-vu));
+
+		/* --- リード 853:372 --- */
+		--contact-lead-top: calc(80 * var(--contact-vu)); /* 和文下端 648 → y728 */
+		--contact-lead-size: calc(18 * var(--contact-vu));
+		--contact-lead-ls: calc(2 * var(--contact-vu));
+
+		/* --- 個人 / 法人 860:140 --- */
+		--contact-type-top: calc(43 * var(--contact-vu)); /* リード下端 755 → y798 */
+		--contact-type-h: calc(130 * var(--contact-vu));
+		--contact-type-gap: calc(37 * var(--contact-vu));
+		--contact-type-title: calc(24 * var(--contact-vu)); /* Bold 24 ls2 */
+		--contact-type-title-ls: calc(2 * var(--contact-vu));
+		--contact-type-note: calc(16 * var(--contact-vu)); /* Regular 16 lh1.5 ls2 */
+		--contact-type-note-ls: calc(2 * var(--contact-vu));
+		--contact-radius: calc(5 * var(--contact-vu));
+
+		/* --- 下の段（設計メモ §0「PC の縦リズム」・§3） --- */
+		--contact-gap-lg: calc(80 * var(--contact-vu));
+		--contact-gap-md: calc(50 * var(--contact-vu));
+		--contact-gap-sm: calc(20 * var(--contact-vu));
+		--contact-gap-corp: calc(75 * var(--contact-vu)); /* 2 ボタン下端 928 → 法人フォーム 1003 */
+		--contact-heading-size: calc(24 * var(--contact-vu)); /* 853:454 Bold 24 lh1.6 ls1 */
+		--contact-heading-ls: calc(1 * var(--contact-vu));
+
+		/* 店舗 860:153（1200 を 6 等分・間隔 10・高さ 50。Medium 16 lh1.5 ls2） */
+		--contact-store-h: calc(50 * var(--contact-vu));
+		--contact-store-gap: calc(10 * var(--contact-vu));
+		--contact-store-cols: 6;
+		--contact-store-size: calc(16 * var(--contact-vu));
+		--contact-store-lh: 1.5;
+		--contact-store-ls: calc(2 * var(--contact-vu));
+
+		/* 方法 864:183（379x76 を 3 個。アイコン左 + 14 + 文言。Bold 24 lh1.6 ls3、LINE だけ ls4） */
+		--contact-method-w: calc(379 * var(--contact-vu));
+		--contact-method-h: calc(76 * var(--contact-vu));
+		--contact-method-gap: calc(31.5 * var(--contact-vu)); /* (1200 - 379 x 3) / 2 */
+		--contact-method-dir: row;
+		--contact-method-justify: center;
+		--contact-method-pad-top: 0px;
+		--contact-method-size: calc(24 * var(--contact-vu));
+		--contact-method-fw: var(--fw-bold);
+		--contact-method-lh: 1.6;
+		--contact-method-ls: calc(3 * var(--contact-vu));
+		--contact-method-line-ls: calc(4 * var(--contact-vu));
+		--contact-method-pc-display: inline;
+		--contact-method-sp-display: none;
+		--contact-icon-gap: calc(14 * var(--contact-vu));
+		--contact-icon-mail-w: calc(41 * var(--contact-vu)); /* 864:375 */
+		--contact-icon-mail-h: calc(24 * var(--contact-vu));
+		--contact-icon-line-w: calc(41 * var(--contact-vu)); /* 864:379 */
+		--contact-icon-line-h: calc(39 * var(--contact-vu));
+		--contact-icon-tel-w: calc(38 * var(--contact-vu)); /* 864:381 */
+		--contact-icon-tel-h: calc(38 * var(--contact-vu));
+
+		/* 電話ブロック 853:467（見出し下端 1388 → 番号 1396 / 縦線は左カラム右端 +80、補足文はその +67） */
+		--contact-tel-num-top: calc(8 * var(--contact-vu));
+		--contact-tel-num-size: calc(64 * var(--contact-vu)); /* 853:494 Antonio SemiBold 64 ls-2 */
+		--contact-tel-num-ls: calc(-2 * var(--contact-vu));
+		--contact-tel-hours-size: calc(16 * var(--contact-vu)); /* 853:480 Regular 16 lh1.5 ls2 */
+		--contact-tel-hours-ls: calc(2 * var(--contact-vu));
+		--contact-tel-rule-h: calc(91 * var(--contact-vu));
+		--contact-tel-rule-before: calc(80 * var(--contact-vu));
+		--contact-tel-rule-after: calc(67 * var(--contact-vu));
+		--contact-tel-note-size: calc(18 * var(--contact-vu)); /* 853:476 Regular 18 lh1.5 ls2 */
+		--contact-tel-note-ls: calc(2 * var(--contact-vu));
+
+		/* フォーム 864:294 / 860:166（ラベル列 365 + 入力欄 835・行間 25） */
+		--contact-row-cols: var(--contact-label-w) minmax(0, 1fr);
+		--contact-row-gap: calc(25 * var(--contact-vu));
+		--contact-label-gap: 0px;
+		--contact-label-w: calc(365 * var(--contact-vu));
+		--contact-label-pad: calc(6 * var(--contact-vu)); /* 行上端 +6（50 高の欄と上下中央） */
+		--contact-label-size: calc(24 * var(--contact-vu)); /* Medium 24 lh1.6 ls1 */
+		--contact-label-ls: calc(1 * var(--contact-vu));
+		--contact-note-size: calc(14 * var(--contact-vu)); /* 853:140 Regular 14 ls1 */
+		--contact-note-fw: var(--fw-regular);
+		--contact-note-ls: calc(1 * var(--contact-vu));
+		--contact-input-h: calc(50 * var(--contact-vu));
+		--contact-textarea-h: calc(231 * var(--contact-vu));
+		--contact-input-pad-x: calc(16 * var(--contact-vu)); /* カンプに無い（欄は空）。読める余白 */
+		--contact-input-pad-y: calc(10 * var(--contact-vu));
+		--contact-input-size: calc(18 * var(--contact-vu)); /* 入力文字（カンプに無い。リードと同じ 18） */
+		--contact-input-ls: calc(1 * var(--contact-vu));
+		--contact-tip-gap: calc(6 * var(--contact-vu));
+		--contact-tip-size: calc(16 * var(--contact-vu)); /* エラー文言（カンプに無い） */
+		--contact-tip-ls: calc(1 * var(--contact-vu));
+
+		/* 送信ボタン 869:602（331x64・SF Pro Bold 20 ls2）/ 確認の 2 ボタンの間隔 */
+		--contact-submit-w: calc(331 * var(--contact-vu));
+		--contact-submit-h: calc(64 * var(--contact-vu));
+		--contact-submit-size: calc(20 * var(--contact-vu));
+		--contact-submit-ls: calc(2 * var(--contact-vu));
+		--contact-submit-top: var(--contact-gap-lg); /* フォーム下端 1911 → 1991 */
+		--contact-confirm-btn-gap: calc(30 * var(--contact-vu));
+		--contact-confirm-btn-w: var(--contact-submit-w);
+	}
+}
+
+/* ============================================================
+   SP（1024px 以下）: 375px カンプの縮小拡大コピー化
+   ------------------------------------------------------------
+   1 単位 --contact-su は「375px 幅での 1px の実寸」
+   （上限は style.css の --sp-scale-max。タブレットの縮尺方針）。
+   値は設計メモ §5。
+   ============================================================ */
+@media (max-width: 1024px) {
+	:root {
+		--contact-su: min(calc(100vw / 375), var(--sp-scale-max));
+
+		/* --- ページ（ヘッダー 45 + 本体でカンプの 723） --- */
+		--contact-min-h: calc(723 * var(--contact-su) - var(--header-height)); /* 869:618 */
+		--contact-content-w: calc(321 * var(--contact-su)); /* 左右 27 */
+		--contact-end: calc(80 * var(--contact-su));
+
+		/* --- FV 869:619（375x332。上 45 はヘッダー） --- */
+		--contact-fv-h: calc(332 * var(--contact-su) - var(--header-height));
+		--contact-fv-shift: var(--header-height); /* 写真の上端はヘッダーの裏 */
+		/* 869:519 は写真を w267.65% / h170.05%（1004x565）に拡大し、left -67.46% / top -19.35%（-253 / -64。
+		   枠はヘッダー込みの 375x332）で門柱と CONTACT のサインを中央に寄せている。cover では寄りが足りないので
+		   同じ切り抜きを実寸で再現する（2026-10-10 の S4 評価の所見。--contact-fv-pos は SP では使わない） */
+		--contact-fv-zoom-w: calc(1004 * var(--contact-su));
+		--contact-fv-zoom-h: calc(565 * var(--contact-su));
+		--contact-fv-zoom-x: calc(-253 * var(--contact-su));
+		--contact-fv-zoom-y: calc(-64 * var(--contact-su));
+		--contact-title-top: calc(296 * var(--contact-su) - var(--header-height)); /* 869:671 y296 */
+		--contact-title-size: calc(50 * var(--contact-su));
+		--contact-title-ls: calc(-3 * var(--contact-su));
+		--contact-sub-gap: calc(9.5 * var(--contact-su)); /* 英字下端 360.5 → y370 */
+		--contact-sub-size: calc(16 * var(--contact-su)); /* 869:669 Medium lh1.8 ls1 */
+		--contact-sub-fw: var(--fw-medium);
+		--contact-sub-lh: 1.8;
+		--contact-sub-ls: calc(1 * var(--contact-su));
+
+		/* --- リード 869:666（2 行） --- */
+		--contact-lead-top: calc(40 * var(--contact-su)); /* 和文下端 399 → y439 */
+		--contact-lead-size: calc(12 * var(--contact-su));
+		--contact-lead-ls: calc(2 * var(--contact-su));
+
+		/* --- 個人 / 法人 869:640・869:641（155x64） --- */
+		--contact-type-top: calc(40 * var(--contact-su)); /* リード下端 475 → y515 */
+		--contact-type-h: calc(64 * var(--contact-su));
+		--contact-type-gap: calc(10 * var(--contact-su));
+		--contact-type-title: calc(12 * var(--contact-su)); /* Bold 12 ls1 */
+		--contact-type-title-ls: calc(1 * var(--contact-su));
+		--contact-type-note: calc(10 * var(--contact-su)); /* Regular 10 lh1.5 */
+		--contact-type-note-ls: 0px;
+		--contact-radius: calc(3 * var(--contact-su));
+
+		/* --- 下の段（設計メモ §5.1。2 ボタン下端 579 → 609 / 店舗下端 756 → 786 / 方法下端 916 → 946） --- */
+		--contact-gap-lg: calc(30 * var(--contact-su));
+		--contact-gap-md: calc(30 * var(--contact-su));
+		--contact-gap-sm: calc(9 * var(--contact-su)); /* 見出し 609 + 22 → ボタン 640 */
+		--contact-gap-corp: calc(30 * var(--contact-su));
+		--contact-heading-size: calc(14 * var(--contact-su)); /* 869:536 Bold 14 lh1.6 ls1 */
+		--contact-heading-ls: calc(1 * var(--contact-su));
+
+		/* 店舗 869:538〜549（155x32・2 列 x 3 行。Medium 12 lh1.6 ls1） */
+		--contact-store-h: calc(32 * var(--contact-su));
+		--contact-store-gap: calc(10 * var(--contact-su));
+		--contact-store-cols: 2;
+		--contact-store-size: calc(12 * var(--contact-su));
+		--contact-store-lh: 1.6;
+		--contact-store-ls: calc(1 * var(--contact-su));
+
+		/* 方法 869:554〜564（正方形・アイコン上 + 文言下。Medium 12 lh1.6 ls1）。
+		   高さは列幅と同じ（321 を 3 等分 ≒ 99）。アイコンは上端 +19 の 39 高の枠で縦中央、文言は +67 */
+		--contact-method-w: calc(99 * var(--contact-su));
+		--contact-method-gap: calc(11 * var(--contact-su));
+		--contact-method-h: calc((var(--contact-content-w) - 2 * var(--contact-method-gap)) / 3);
+		--contact-method-dir: column;
+		--contact-method-justify: flex-start;
+		--contact-method-pad-top: calc(18 * var(--contact-su)); /* 枠 1px と合わせて上端 +19 */
+		--contact-method-size: calc(12 * var(--contact-su));
+		--contact-method-fw: var(--fw-medium);
+		--contact-method-lh: 1.6;
+		--contact-method-ls: calc(1 * var(--contact-su));
+		--contact-method-line-ls: calc(1 * var(--contact-su));
+		--contact-method-pc-display: none;
+		--contact-method-sp-display: inline;
+		--contact-icon-gap: calc(9 * var(--contact-su));
+		--contact-icon-mail-w: calc(41 * var(--contact-su)); /* 869:560（絵は 41x24。枠を LINE と同じ 39 高に） */
+		--contact-icon-mail-h: calc(39 * var(--contact-su));
+		--contact-icon-line-w: calc(41 * var(--contact-su)); /* 869:562 */
+		--contact-icon-line-h: calc(39 * var(--contact-su));
+		--contact-icon-tel-w: calc(38 * var(--contact-su)); /* 869:564 */
+		--contact-icon-tel-h: calc(39 * var(--contact-su)); /* 絵は 38x38 */
+
+		/* 電話ブロック: SP は電話ボタンが tel: 直リンクで出さない（仕様書 Q14）。
+		   JS 無効で ?store= のときだけ出る、そのための縮小 */
+		--contact-tel-num-top: calc(4 * var(--contact-su));
+		--contact-tel-num-size: calc(32 * var(--contact-su));
+		--contact-tel-num-ls: calc(-1 * var(--contact-su));
+		--contact-tel-hours-size: calc(10 * var(--contact-su));
+		--contact-tel-hours-ls: calc(1 * var(--contact-su));
+		--contact-tel-rule-h: 0px;
+		--contact-tel-rule-before: 0px;
+		--contact-tel-rule-after: 0px;
+		--contact-tel-note-size: calc(12 * var(--contact-su));
+		--contact-tel-note-ls: calc(1 * var(--contact-su));
+
+		/* フォーム 869:585〜869:596（ラベルの下に欄。ラベル → 欄 +24・ピッチ 64。法人も同じ組み = 決定 §5-15） */
+		--contact-row-cols: minmax(0, 1fr);
+		--contact-row-gap: calc(10 * var(--contact-su));
+		--contact-label-gap: calc(5 * var(--contact-su));
+		--contact-label-pad: 0px;
+		--contact-label-size: calc(12 * var(--contact-su)); /* Medium 12 lh1.6 ls1 */
+		--contact-label-ls: calc(1 * var(--contact-su));
+		--contact-note-size: calc(10 * var(--contact-su)); /* 869:615 Medium 10 字間なし */
+		--contact-note-fw: var(--fw-medium);
+		--contact-note-ls: 0px;
+		--contact-input-h: calc(30 * var(--contact-su));
+		--contact-textarea-h: calc(247 * var(--contact-su));
+		--contact-input-pad-x: calc(8 * var(--contact-su));
+		--contact-input-pad-y: calc(6 * var(--contact-su));
+		--contact-input-size: 16px; /* iOS がフォーカス時に拡大しない最小の大きさ */
+		--contact-input-ls: 0px;
+		--contact-tip-gap: calc(4 * var(--contact-su));
+		--contact-tip-size: calc(11 * var(--contact-su));
+		--contact-tip-ls: 0px;
+
+		/* 送信ボタン 869:607（237x44・Bold 14 ls1）。フォーム下端 1473 → 1513 */
+		--contact-submit-top: calc(40 * var(--contact-su));
+		--contact-submit-w: calc(237 * var(--contact-su));
+		--contact-submit-h: calc(44 * var(--contact-su));
+		--contact-submit-size: calc(14 * var(--contact-su));
+		--contact-submit-ls: calc(1 * var(--contact-su));
+		--contact-confirm-btn-gap: calc(10 * var(--contact-su));
+		--contact-confirm-btn-w: calc(155.5 * var(--contact-su)); /* (321 - 10) / 2 */
+	}
+
+	/* FV の写真はカンプの切り抜き（上のトークン）を実寸で置く。枠の上端はヘッダーの裏（--contact-fv-shift） */
+	.p-contactfv__bg img {
+		width: var(--contact-fv-zoom-w);
+		height: var(--contact-fv-zoom-h);
+		margin: calc(var(--contact-fv-zoom-y) - var(--contact-fv-shift)) 0 0 var(--contact-fv-zoom-x);
+		object-fit: fill;
+	}
+}

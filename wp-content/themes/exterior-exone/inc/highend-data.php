@@ -394,7 +394,7 @@ function exterior_exone_highend_gallery() {
 /**
  * CONTACT（PC 713:151 / SP 733:405〜413）。
  *
- * SP の見出しは PC の文言（SP 733:411 はコピペ残り。決定）。ボタンの遷移先は未定（#）。
+ * SP の見出しは PC の文言（SP 733:411 はコピペ残り。決定）。ボタンはお問い合わせページ /contact/ へ。
  *
  * @return array<string, mixed>
  */
@@ -411,6 +411,6 @@ function exterior_exone_highend_contact() {
 		),
 		'bg'      => 'cta-bg-645-3.jpg', // images/store/（exterior_exone_store_image()）
 		'button'  => 'ハイエンドプランについて相談する', // 713:163 / 733:410
-		'url'     => '#', // お問い合わせページが無い（決定。公開前チェックリスト）
+		'url'     => home_url( '/contact/' ), // 出力時に exterior_exone_store_link() を通す
 	);
 }

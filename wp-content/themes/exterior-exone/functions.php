@@ -21,6 +21,8 @@ require_once get_theme_file_path( 'inc/plans-data.php' );
 require_once get_theme_file_path( 'inc/highend-data.php' );
 require_once get_theme_file_path( 'inc/works-data.php' );
 require_once get_theme_file_path( 'inc/works-page-data.php' );
+require_once get_theme_file_path( 'inc/contact-data.php' );
+require_once get_theme_file_path( 'inc/contact-forms.php' );
 
 /**
  * テーマサポートの登録。
@@ -392,6 +394,35 @@ function exterior_exone_enqueue_assets() {
 		}
 	}
 
+	// お問い合わせページ（/contact/。page-contact.php）。CSS はテーマ本体の後に読む。
+	// 選択フロー・確認表示の JS はスプリントごとにここへ足す。
+	if ( is_page( 'contact' ) ) {
+		wp_enqueue_style(
+			'exterior-exone-contact',
+			get_theme_file_uri( 'css/contact.css' ),
+			array( 'exterior-exone-style' ),
+			exterior_exone_asset_version( 'css/contact.css' )
+		);
+
+		// 選択フロー（段の出し分け・色反転・LINE / 電話の差し替え・出現・自動スクロール）。
+		wp_enqueue_script(
+			'exterior-exone-contact-select',
+			get_theme_file_uri( 'js/contact-select.js' ),
+			array(),
+			exterior_exone_asset_version( 'js/contact-select.js' ),
+			true
+		);
+
+		// フォーム（入力チェック・確認表示・CF7 の送信・完了表示）。CF7 が無効なら依存を付けない。
+		wp_enqueue_script(
+			'exterior-exone-contact-form',
+			get_theme_file_uri( 'js/contact-form.js' ),
+			wp_script_is( 'contact-form-7', 'registered' ) ? array( 'contact-form-7' ) : array(),
+			exterior_exone_asset_version( 'js/contact-form.js' ),
+			true
+		);
+	}
+
 	// 支店ページの施工イメージ帯（PLANS の img list と同じエンドレスロール）・
 	// DX EXPERIENCE（TOP と同じピン留めのステップ送り）・選ばれる理由の浮遊・AREA のアーチ状ロール・FAQ（アコーディオン）。
 	if ( exterior_exone_is_store_page() ) {
@@ -662,13 +693,13 @@ function exterior_exone_is_works_page() {
  *
  * 全幅の FV から始まるページは、ヘッダーを写真の上に半透明で重ねる
  * （カンプ TOP 917:2733 / 企業情報 393:546 / DX 436:381 / PLANS 586:552。ハイエンドは PC カンプに
- * ヘッダーが無いので PLANS と同じ扱い。WORKS 一覧・詳細も同じ）。それ以外は黒帯のまま。
+ * ヘッダーが無いので PLANS と同じ扱い。WORKS 一覧・詳細・CONTACT も同じ）。それ以外は黒帯のまま。
  * 下層ページが増えたらここに追加する。
  *
  * @return bool
  */
 function exterior_exone_has_fv_header() {
-	return is_front_page() || is_page( 'company' ) || is_page( 'dx' ) || is_page( 'vr' ) || is_page( 'plans' ) || is_page( 'high-end' ) || exterior_exone_is_works_page() || exterior_exone_is_store_page();
+	return is_front_page() || is_page( 'company' ) || is_page( 'dx' ) || is_page( 'vr' ) || is_page( 'plans' ) || is_page( 'high-end' ) || exterior_exone_is_works_page() || is_page( 'contact' ) || exterior_exone_is_store_page();
 }
 
 /**
@@ -709,6 +740,10 @@ function exterior_exone_body_class( $classes ) {
 
 	if ( exterior_exone_is_works_page() ) {
 		$classes[] = 'is-works-page';
+	}
+
+	if ( is_page( 'contact' ) ) {
+		$classes[] = 'is-contact-page';
 	}
 
 	if ( exterior_exone_has_fv_header() ) {
@@ -754,6 +789,24 @@ function exterior_exone_works_noscript_style() {
 	echo '<noscript><style>.is-works-page [data-reveal]{opacity:1;transform:none;transition:none}</style></noscript>' . "\n";
 }
 add_action( 'wp_head', 'exterior_exone_works_noscript_style' );
+
+/**
+ * お問い合わせページで JS が動かないとき、[data-reveal] を最初から表示し、
+ * 選択フローの段（店舗・方法・両フォーム）をすべて出す（仕様書 Q9。電話ブロックは
+ * 最初から支店が選ばれているとき = data-contact-has-store だけ出す）。
+ * css/contact.css の @media (scripting: none) に対応しないブラウザ向けの併用。
+ */
+function exterior_exone_contact_noscript_style() {
+	if ( ! is_page( 'contact' ) ) {
+		return;
+	}
+	echo '<noscript><style>'
+		. '.is-contact-page [data-reveal]{opacity:1;transform:none;transition:none}'
+		. '.is-contact-page [data-contact-step]:not([data-contact-step="tel"])[hidden],'
+		. '.is-contact-page [data-contact-step="tel"][data-contact-has-store][hidden]{display:block}'
+		. '</style></noscript>' . "\n";
+}
+add_action( 'wp_head', 'exterior_exone_contact_noscript_style' );
 
 /**
  * 支店ページで JS が動かないとき、[data-reveal] を最初から表示し、見える安心の線画を
