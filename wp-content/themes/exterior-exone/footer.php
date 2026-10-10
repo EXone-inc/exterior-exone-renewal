@@ -32,7 +32,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<ul class="p-footer__sns">
 		<?php foreach ( exterior_exone_sns_items() as $exterior_exone_sns ) : ?>
 			<li class="p-footer__sns-item">
-				<a class="p-footer__sns-link" href="<?php echo esc_url( $exterior_exone_sns['url'] ); ?>">
+				<a class="p-footer__sns-link" href="<?php echo esc_url( $exterior_exone_sns['url'] ); ?>" target="_blank" rel="noopener">
 					<img
 						class="p-footer__sns-icon"
 						src="<?php echo esc_url( exterior_exone_top_image( $exterior_exone_sns['icon'] ) ); ?>"

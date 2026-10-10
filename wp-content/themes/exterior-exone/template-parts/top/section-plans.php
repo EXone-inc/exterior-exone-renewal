@@ -60,7 +60,7 @@ $exterior_exone_plan_cards = exterior_exone_plan_cards();
 				<p class="p-plans__jp">パッケージプラン</p>
 				<h3 class="c-display p-plans__eng">PACKAGE PLAN</h3>
 				<p class="p-plans__desc">人気の外構デザインをベースに、<br class="u-br-sp">必要な要素をわかりやすく整理。<br>予算感をつかみながら、<br class="u-br-sp">スムーズにお選びいただけます。</p>
-				<a class="c-btn c-btn--black p-plans__btn" href="#">VIEW MORE</a>
+				<a class="c-btn c-btn--black p-plans__btn" href="<?php echo esc_url( exterior_exone_store_link( home_url( '/plans/#package' ) ) ); ?>">VIEW MORE</a>
 			</div>
 
 			<?php $exterior_exone_first_plan = $exterior_exone_plan_cards[0]; ?>

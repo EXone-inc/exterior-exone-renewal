@@ -135,7 +135,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<ul class="p-drawer__sns">
 			<?php foreach ( exterior_exone_sns_items() as $exterior_exone_sns ) : ?>
 				<li class="p-drawer__sns-item">
-					<a class="p-drawer__sns-link" href="<?php echo esc_url( $exterior_exone_sns['url'] ); ?>">
+					<a class="p-drawer__sns-link" href="<?php echo esc_url( $exterior_exone_sns['url'] ); ?>" target="_blank" rel="noopener">
 						<img
 							class="p-drawer__sns-icon"
 							src="<?php echo esc_url( exterior_exone_top_image( $exterior_exone_sns['icon'] ) ); ?>"

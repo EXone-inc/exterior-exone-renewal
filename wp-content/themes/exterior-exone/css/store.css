@@ -311,12 +311,16 @@
 	position: absolute;
 	inset: 0;
 	z-index: 2; /* 黒幕・グラデ（z-index:1）より上。文字を必ず読める側に置く */
+	/* FV 全面に広がる透明な層なので、指やポインタは素通しにする。下端に食い込む写真 4 枚
+	   （.p-sfv__band。SP は指で横スクロール）がこの層に遮られて動かなかったため（2026-10-10） */
+	pointer-events: none;
 }
 
 .p-sfv__copy {
 	position: absolute;
 	top: var(--st-fv-copy-top);
 	left: var(--st-fv-copy-left);
+	pointer-events: auto; /* 文字の選択だけはできるように */
 }
 
 /* --- コピー塊（561:3） --- */
