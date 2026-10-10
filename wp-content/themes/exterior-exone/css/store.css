@@ -101,7 +101,7 @@
 
 	/* --- REVIEWS（612:460 / SP 641:400） --- */
 	--st-reviews-score: clamp(14px, 11.573px + 0.6472vw, 24px); /* 14 → 24 */
-	--st-reviews-title: clamp(14px, 12.544px + 0.3883vw, 20px); /* 14 → 20 */
+	--st-reviews-name: clamp(10px, 9.029px + 0.2589vw, 14px); /* 10 → 14（本文の下の名前。カンプに無い） */
 	--st-reviews-text: clamp(10px, 8.544px + 0.3883vw, 16px); /* 10 → 16 */
 
 	/* --- FLOW（612:376 / 612:416 / SP 641:470〜641:508） --- */
@@ -145,8 +145,9 @@
 	--st-arch-center-y: 404; /* 円筒の中心の高さ（612:661 の上端から） */
 	--st-arch-width: 470; /* 正面の写真の幅（612:661 の中央の写真） */
 	--st-arch-height: 340; /* 同・高さ（見下ろした分だけ低く見えるので 320 / cos） */
-	--st-arch-limit: 110; /* 見せる角度（±度）。90° を越えた分は円筒の奥側（612:661 の左上・右上の細い写真） */
-	--st-arch-fade: 15; /* 見せる角度の端でこの角度をかけて消す */
+	--st-arch-hide: 110; /* この角度（±度）を越えた奥側の写真は白パネルの背面に回す。90〜110° は円筒の奥側でパネルの外（612:661 の左上・右上の細い写真）。
+	                        110° でちょうどパネルの端（x = 中心 ± (R·sin110° − w·|cos110°| / 2) ≒ ±800 = パネル半幅）に達するので、
+	                        以降はパネルに隠れて消える（薄くして消さない。2026-10-10 の指示） */
 	--st-arch-strips: 10; /* 写真 1 枚を縦に分ける短冊の数。平らな板だと軌道が正 12 角形に見えるため、短冊ごとに角度を変えて円筒に沿わせる（2026-10-07） */
 	--st-arch-span: calc(var(--st-arch-width) / var(--st-arch-radius) * 57.2958); /* 写真 1 枚が円筒上で占める角度（度）= 幅 / 半径（rad） */
 	--st-arch-sp-left: 9; /* SP の列の 1 枚目の左端（641:1377） */
@@ -1484,9 +1485,9 @@ svg.p-svisible__sketch[data-line-draw] :is(path, line, polyline, polygon, rect, 
 /* ============================================================
    REVIEWS（620:289 / Group 369 / 669:223）
    ------------------------------------------------------------
-   白背景にカード 3 枚。カンプの画像は灰色のプレースホルダなので
-   写真は置かず、同じ色のベタで枠だけ作る。
-   本文は長くなっても 3 行で省略する（決定事項 Q10）。
+   白背景にカード 3 枚。写真はユーザー支給の 3 枚（2026-10-10）。
+   本文は省略せず全文を出し、カードの高さは一番長い文章にそろえる。
+   カンプの「タイトル」行は使わず、本文の下に名前を右寄せで出す（2026-10-10 の決定）。
    ============================================================ */
 .p-sreviews {
 	background: var(--st-white);
@@ -1533,28 +1534,24 @@ svg.p-svisible__sketch[data-line-draw] :is(path, line, polyline, polygon, rect, 
 	color: var(--color-black1);
 }
 
-.p-sreviews__title {
-	margin: 0;
-	font-size: var(--st-reviews-title);
-	font-weight: var(--fw-medium);
-	line-height: 2.5;
-	letter-spacing: var(--ls-wide);
-	color: var(--color-black2);
-}
-
-/* 文字数が多いときは 3 行で省略する */
 .p-sreviews__text {
-	display: -webkit-box;
-	overflow: hidden;
 	margin: 0;
-	-webkit-box-orient: vertical;
-	-webkit-line-clamp: 3;
-	line-clamp: 3;
 	font-size: var(--st-reviews-text);
 	font-weight: var(--fw-regular);
 	line-height: 1.8;
 	letter-spacing: var(--ls-wide);
 	color: var(--color-black1);
+}
+
+/* 本文の下の名前（地域 / 年代）。カンプに無いので本文と同じ色で小さく右寄せ */
+.p-sreviews__name {
+	margin: 0;
+	font-size: var(--st-reviews-name);
+	font-weight: var(--fw-regular);
+	line-height: 1.8;
+	letter-spacing: var(--ls-wide);
+	color: var(--color-black1);
+	text-align: right;
 }
 
 /* ============================================================
@@ -1937,6 +1934,9 @@ svg.p-svisible__sketch[data-line-draw] :is(path, line, polyline, polygon, rect, 
 	position: relative;
 	/* 円筒の端の写真が画面の外へはみ出しても横スクロールを出さない */
 	overflow-x: clip;
+	/* アーチの写真の z-index（最大 200）をこのセクションの中に閉じ込める。
+	   これが無いとページ全体の重なりに参加して、追従するヘッダー（--z-header: 100）の上に出てしまう（2026-10-10） */
+	isolation: isolate;
 	background: var(--st-area-bg);
 }
 
@@ -1953,6 +1953,14 @@ svg.p-svisible__sketch[data-line-draw] :is(path, line, polyline, polygon, rect, 
 	height: 100%;
 	object-fit: cover;
 	object-position: var(--st-area-bg-position);
+}
+
+/* PC は支店ごとの切り抜き位置（inc/store-data.php の bg_position → インラインの --st-area-bg-position-branch）。
+   SP は従来どおり上端（--st-area-bg-position: 50% 0%）に揃える */
+@media (min-width: 1025px) {
+	.p-sarea__bg img {
+		object-position: var(--st-area-bg-position-branch, var(--st-area-bg-position));
+	}
 }
 
 /* 628:302。このページで唯一白抜きの見出し */
@@ -2745,8 +2753,9 @@ svg.p-svisible__sketch[data-line-draw] :is(path, line, polyline, polygon, rect, 
 		margin: calc(80 * var(--st-vu)) 0 0;
 	}
 
+	/* 高さはカンプの 515.5 を下限にして、本文が長ければ伸びる（3 枚は grid で同じ高さ） */
 	.p-sreviews__card {
-		height: calc(515.5 * var(--st-vu));
+		min-height: calc(515.5 * var(--st-vu));
 	}
 
 	.p-sreviews__thumb {
@@ -2754,7 +2763,16 @@ svg.p-svisible__sketch[data-line-draw] :is(path, line, polyline, polygon, rect, 
 	}
 
 	.p-sreviews__body {
-		padding: 0 calc(41.4 * var(--st-vu));
+		padding: 0 calc(41.4 * var(--st-vu)) calc(40 * var(--st-vu));
+	}
+
+	/* 本文はカンプの「タイトル」の文字があった高さ（星の行の 15 下）から始める */
+	.p-sreviews__text {
+		margin-top: calc(15 * var(--st-vu));
+	}
+
+	.p-sreviews__name {
+		margin-top: calc(8 * var(--st-vu));
 	}
 
 	/* 星と「5.0」は中心をそろえる（星 y17168.9 / 5.0 y17163.2） */
@@ -2868,6 +2886,9 @@ svg.p-svisible__sketch[data-line-draw] :is(path, line, polyline, polygon, rect, 
 
 	/* 628:303。見出し下端 y193 → パネル上端 y613.9 */
 	.p-sarea__panel {
+		/* アーチの写真（z-index: 200 − |角度|）のうち、奥へ回った --st-arch-hide 超の写真だけを背面にする。
+		   正面側の写真はパネルの下端にかぶる（612:661）ので、パネルを一律に前へ出すことはできない */
+		z-index: calc(200 - var(--st-arch-hide));
 		width: calc(1600 * var(--st-vu));
 		min-height: calc(987.6 * var(--st-vu));
 		margin: calc(420.9 * var(--st-vu)) auto 0;
@@ -2914,7 +2935,8 @@ svg.p-svisible__sketch[data-line-draw] :is(path, line, polyline, polygon, rect, 
 
 	/* 612:661。パネルと背景にまたがる箱（x18.5 y+919.9 1883.3x1000.2）の中に円筒を置く。
 	   写真は円筒の中心から半径ぶん手前に出して回し、少し上から見下ろす（遠近なしの投影）。
-	   正面ほど下・大きく、端ほど上・細く・弧に沿って傾く。奥（90° 超）は --st-arch-limit まで見せて消す */
+	   正面ほど下・大きく、端ほど上・細く・弧に沿って傾く。奥（90° 超）はパネルの横に細く見え、
+	   --st-arch-hide を越えてパネルに重なった時点で背面に回って隠れる（薄くはしない） */
 	.p-sarea__arch {
 		position: absolute;
 		top: calc(919.9 * var(--st-vu));
@@ -2928,11 +2950,10 @@ svg.p-svisible__sketch[data-line-draw] :is(path, line, polyline, polygon, rect, 
 
 		top: calc((var(--st-arch-center-y) - var(--st-arch-height) / 2) * var(--st-vu));
 		left: calc(50% - var(--st-arch-width) / 2 * var(--st-vu));
-		z-index: calc(200 - var(--st-arch-abs)); /* 正面に近いほど手前 */
+		z-index: calc(200 - var(--st-arch-abs)); /* 正面に近いほど手前。--st-arch-hide 超は白パネル（.p-sarea__panel）より奥 */
 		width: calc(var(--st-arch-width) * var(--st-vu));
 		height: calc(var(--st-arch-height) * var(--st-vu));
 		border-radius: calc(5 * var(--st-vu));
-		opacity: clamp(0, (var(--st-arch-limit) - var(--st-arch-abs)) / var(--st-arch-fade), 1);
 		transform:
 			rotateX(calc(var(--st-arch-tilt) * -1deg))
 			rotateY(calc(var(--st-arch-a) * 1deg))
@@ -3919,7 +3940,7 @@ svg.p-svisible__sketch[data-line-draw] :is(path, line, polyline, polygon, rect, 
 	/* 641:400 280x329 radius 10 */
 	.p-sreviews__card {
 		flex: 0 0 calc(280 * var(--st-su));
-		height: calc(329 * var(--st-su));
+		min-height: calc(329 * var(--st-su)); /* 本文が長ければ伸びる（列の 3 枚は同じ高さ） */
 		border-radius: calc(10 * var(--st-su));
 	}
 
@@ -3928,7 +3949,7 @@ svg.p-svisible__sketch[data-line-draw] :is(path, line, polyline, polygon, rect, 
 	}
 
 	.p-sreviews__body {
-		padding: 0 calc(20 * var(--st-su)) 0 calc(21 * var(--st-su));
+		padding: 0 calc(20 * var(--st-su)) calc(20 * var(--st-su)) calc(21 * var(--st-su));
 	}
 
 	/* 星 641:405（86.95x15）と「5.0」641:404 は中心をそろえる（行 +151） */
@@ -3942,9 +3963,13 @@ svg.p-svisible__sketch[data-line-draw] :is(path, line, polyline, polygon, rect, 
 		height: calc(15 * var(--st-su));
 	}
 
-	/* 641:401 Regular 10 / 1.8 / 2px は +205（タイトルの行ボックスに 3 重なる）。3 行で省略は PC と同じ */
+	/* 641:401 Regular 10 / 1.8 / 2px。タイトルを使わないので、その文字があった高さ（星の行の 10 下）から */
 	.p-sreviews__text {
-		margin-top: calc(-3.4 * var(--st-su));
+		margin-top: calc(10 * var(--st-su));
+	}
+
+	.p-sreviews__name {
+		margin-top: calc(6 * var(--st-su));
 	}
 
 	/* --- FLOW（SP-10 641:466 y9728〜11051）: 矢羽根なし。白の縦カード 7 枚（336 幅・角丸なし・
@@ -4468,7 +4493,7 @@ svg.p-svisible__sketch[data-line-draw] :is(path, line, polyline, polygon, rect, 
 		--st-plans-copy: calc(18 * var(--st-vu));
 		--st-plans-feature: calc(20 * var(--st-vu));
 		--st-reviews-score: calc(24 * var(--st-vu));
-		--st-reviews-title: calc(20 * var(--st-vu));
+		--st-reviews-name: calc(14 * var(--st-vu)); /* 本文の下の名前（カンプに無い） */
 		--st-reviews-text: calc(16 * var(--st-vu));
 		--st-flow-chevron: calc(16 * var(--st-vu));
 		--st-flow-number: calc(64 * var(--st-vu));
@@ -4610,7 +4635,7 @@ svg.p-svisible__sketch[data-line-draw] :is(path, line, polyline, polygon, rect, 
 		--st-plans-copy: calc(12 * var(--st-su)); /* 641:317 */
 		--st-plans-feature: calc(10 * var(--st-su)); /* 641:299 ほか */
 		--st-reviews-score: calc(14 * var(--st-su)); /* 641:404 */
-		--st-reviews-title: calc(14 * var(--st-su)); /* 641:402 */
+		--st-reviews-name: calc(10 * var(--st-su)); /* 本文の下の名前（カンプに無い） */
 		--st-reviews-text: calc(10 * var(--st-su)); /* 641:401 */
 		--st-flow-number: calc(36 * var(--st-su)); /* 641:474 */
 		--st-flow-row-title: calc(16 * var(--st-su)); /* 641:473 */

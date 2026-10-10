@@ -11,7 +11,8 @@
  * 横にスクロールして見えたときにフェードインする。
  *
  * 英字見出しはカンプの「REVIERS」を誤記とみなし REVIEWS で出す。
- * 画像・タイトル・本文はカンプどおりダミー（inc/store-data.php）。
+ * カードは「星 5.0 → 本文（全文）→ 右寄せの名前」。カンプの「タイトル」行は使わない
+ *（2026-10-10 の決定。文言・写真は inc/store-data.php）。
  *
  * @package exterior-exone
  */
@@ -20,7 +21,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-$exterior_exone_reviews = exterior_exone_store_reviews();
+$exterior_exone_store = isset( $args['store'] ) ? $args['store'] : exterior_exone_current_store();
+
+$exterior_exone_reviews = exterior_exone_store_reviews( $exterior_exone_store ? $exterior_exone_store : array() );
 ?>
 <section class="p-sreviews" data-section="store-reviews">
 	<h2 class="c-store-title"><?php echo esc_html( $exterior_exone_reviews['title'] ); ?></h2>
@@ -33,7 +36,7 @@ $exterior_exone_reviews = exterior_exone_store_reviews();
 	<ul class="p-sreviews__list">
 		<?php foreach ( $exterior_exone_reviews['cards'] as $exterior_exone_card ) : ?>
 			<li class="p-sreviews__card" data-reveal>
-				<?php // カンプの画像は灰色のプレースホルダ。写真は仮（inc/store-data.php）。無ければ灰色のまま。 ?>
+				<?php // カンプの画像は灰色のプレースホルダ。写真が無ければ灰色のまま。 ?>
 				<?php if ( ! empty( $exterior_exone_card['image'] ) ) : ?>
 					<img
 						class="p-sreviews__thumb"
@@ -60,10 +63,11 @@ $exterior_exone_reviews = exterior_exone_store_reviews();
 						<span class="p-sreviews__score"><?php echo esc_html( $exterior_exone_card['score'] ); ?></span>
 					</p>
 
-					<p class="p-sreviews__title"><?php echo esc_html( $exterior_exone_card['title'] ); ?></p>
+					<p class="p-sreviews__text"><?php echo wp_kses( exterior_exone_store_lines( (array) $exterior_exone_card['text'] ), array( 'br' => array() ) ); ?></p>
 
-					<?php // 本文が長いときは 3 行で省略する（決定事項 Q10）。 ?>
-					<p class="p-sreviews__text"><?php echo esc_html( $exterior_exone_card['body'] ); ?></p>
+					<?php if ( ! empty( $exterior_exone_card['name'] ) ) : ?>
+						<p class="p-sreviews__name"><?php echo esc_html( $exterior_exone_card['name'] ); ?></p>
+					<?php endif; ?>
 				</div>
 			</li>
 		<?php endforeach; ?>

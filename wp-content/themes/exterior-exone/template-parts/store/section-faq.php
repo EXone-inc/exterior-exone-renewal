@@ -55,7 +55,7 @@ $exterior_exone_faq = exterior_exone_store_faq();
 				</h3>
 
 				<div class="p-sfaq__answer" id="<?php echo esc_attr( $exterior_exone_answer_id ); ?>" hidden>
-					<p class="p-sfaq__answer-text"><?php echo esc_html( $exterior_exone_item['a'] ); ?></p>
+					<p class="p-sfaq__answer-text"><?php echo wp_kses( exterior_exone_store_lines( (array) $exterior_exone_item['a'] ), array( 'br' => array() ) ); ?></p>
 				</div>
 			</div>
 		<?php endforeach; ?>

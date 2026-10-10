@@ -42,6 +42,9 @@ $exterior_exone_arch_count = count( $exterior_exone_area['gallery'] );
 			height="934"
 			alt=""
 			loading="lazy"
+			<?php if ( ! empty( $exterior_exone_area['image_position'] ) ) : ?>
+			style="<?php echo esc_attr( '--st-area-bg-position-branch: ' . $exterior_exone_area['image_position'] . ';' ); ?>"
+			<?php endif; ?>
 		>
 	</div>
 
