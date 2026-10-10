@@ -1552,6 +1552,14 @@
 		--dxp-vu: min(1px, calc(100vw / 1920), calc((100vh - var(--header-height)) / 1080));
 	}
 
+	/* 縦長の画面（iPad の縦 1032x1376 など）では縮尺が幅で決まり、固定した 1 画面の下が
+	   空く。余った高さはステップの上下に等しく配り、内容を縦中央に置く（2026-10-10 の指示）。
+	   1920x1080 ではカンプどおり上 77・下 61（フローバーまでの余り）で余りが 0 になり位置は変わらない */
+	.is-enhanced .p-dxstep {
+		justify-content: center;
+		padding-bottom: var(--dxp-step-pin-slack);
+	}
+
 	.p-dxsteps__stage {
 
 		/* --- ステップ共通（各 1920x1080。y はステップ上端から） ---
@@ -1559,6 +1567,7 @@
 		   1〜6px のずれ（テキスト列 76/82/77、04 の写真 x164.4）は作図ブレとみなし、
 		   77 / 内容幅 1600 の左右いっぱいに揃えた（決定事項 2026-09-19）。 */
 		--dxp-step-h: calc(1080 * var(--dxp-vu));
+		--dxp-step-pin-slack: calc(61 * var(--dxp-vu)); /* 固定表示で内容の下端 → フローバーの上端（1080 − 77 − 753 − 189） */
 		--dxp-step-pad-top: calc(77 * var(--dxp-vu)); /* テキスト列・写真の上端 */
 		--dxp-step-pad-bottom: calc(58.8 * var(--dxp-vu)); /* フローバー下端 9443.2 → 01 下端 9502 */
 		--dxp-step-inner-w: calc(1600 * var(--dxp-vu)); /* x159.4〜1759.4 */

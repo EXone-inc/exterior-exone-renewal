@@ -621,6 +621,18 @@ body {
 	-webkit-font-smoothing: antialiased;
 }
 
+/* 中身が画面より短いページ（支店一覧・CONTACT の初期状態など）でも、フッターを画面の下端まで下ろす。
+   iPad の縦（1032x1376）で html の地（--color-black3）がフッターの下に黒い帯として残っていたため（2026-10-10） */
+body {
+	display: flex;
+	flex-direction: column;
+	min-height: 100vh;
+}
+
+.l-main {
+	flex: 1 0 auto;
+}
+
 h1,
 h2,
 h3,

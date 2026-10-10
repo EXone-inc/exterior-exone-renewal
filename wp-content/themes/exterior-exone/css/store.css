@@ -2594,7 +2594,9 @@ svg.p-svisible__sketch[data-line-draw] :is(path, line, polyline, polygon, rect, 
 		   続く TOP の DX は中身（カンプ 863.8 + 下の詰め物 8.6）を画面の縦中央に置くので、
 		   その上の空き（ピン留め前のセクション上端 → 見出し）を差し引いた分だけ下を空ける。
 		   --dx-u は style.css の .p-dx と同じ式（DX 側の縮尺） */
-		padding: calc(85.7 * var(--st-vu)) 0 max(0px, calc(204 * var(--st-vu) - (100vh - 872.4 * min(100vw / 1920, 100vh / 1080)) / 2));
+		padding: calc(85.7 * var(--st-vu)) 0 max(calc(100.2 * var(--st-vu)), calc(204 * var(--st-vu) - (100vh - 872.4 * min(100vw / 1920, 100vh / 1080)) / 2));
+		/* 下限の 100.2 は 1920x1080 での値（204 − 103.8）。縦長の画面（iPad の縦など）では DX の空きが
+		   大きくなって 0 まで減り、黒い DX の縁に本文が接してしまうため、基準の幅の余白を下限にする（2026-10-10） */
 	}
 
 	/* Group 360。線画の上にコピーが重なる */
@@ -2636,7 +2638,9 @@ svg.p-svisible__sketch[data-line-draw] :is(path, line, polyline, polygon, rect, 
 		  「PLANS」y11107.9 で 283.3。DX は中身を画面の縦中央に置くので、中身の下端から
 		   セクション下端までの空き（画面の高さ − 851.2 単位）/ 2 を差し引く（851.2 は
 		   1920x1080 の実測。空き 114.4）。見える安心の padding-bottom（S3）と同じ考え方 */
-		padding-top: max(0px, calc(283.3 * var(--st-vu) - (100vh - 851.2 * min(100vw / 1920, 100vh / 1080)) / 2));
+		padding-top: max(calc(168.9 * var(--st-vu)), calc(283.3 * var(--st-vu) - (100vh - 851.2 * min(100vw / 1920, 100vh / 1080)) / 2));
+		/* 下限の 168.9 は 1920x1080 での値（283.3 − 114.4）。縦長の画面では DX の空き（黒）が大きくなって
+		   0 まで減り、「PLANS」が黒い縁に接してしまうため、基準の幅の余白を下限にする（2026-10-10） */
 	}
 
 	.p-splans__lead {
