@@ -196,7 +196,83 @@ function exterior_exone_register_works_taxonomies() {
 add_action( 'init', 'exterior_exone_register_works_taxonomies' );
 
 /**
- * お知らせ・施工事例はブロックエディタを使わない。
+ * コラム（column）とコラムカテゴリー（column_category）。
+ *
+ * 名前は現サイト（exterior-exone.com）と同じにしてある。WordPress の書き出し／取り込みで
+ * 記事をそのまま移せるようにするため。本文はブロックエディタ（現サイトは「カスタム HTML」
+ * ブロックに HTML を貼る運用）。独自のメタボックスは持たない。
+ * 一覧・詳細の表示は archive-column.php / single-column.php、データは inc/column-page-data.php。
+ */
+function exterior_exone_register_column_post_type() {
+	register_post_type(
+		'column',
+		array(
+			'labels'        => array(
+				'name'               => 'コラム',
+				'singular_name'      => 'コラム',
+				'add_new'            => '新規追加',
+				'add_new_item'       => 'コラムを追加',
+				'edit_item'          => 'コラムを編集',
+				'new_item'           => '新しいコラム',
+				'view_item'          => 'コラムを表示',
+				'view_items'         => 'コラム一覧を表示',
+				'search_items'       => 'コラムを検索',
+				'not_found'          => 'コラムが見つかりませんでした',
+				'not_found_in_trash' => 'ゴミ箱にコラムはありません',
+				'all_items'          => 'コラム一覧',
+				'archives'           => 'コラム一覧',
+				'menu_name'          => 'コラム',
+			),
+			'public'        => true,
+			'has_archive'   => true,
+			'menu_position' => 7,
+			'menu_icon'     => 'dashicons-welcome-write-blog',
+			'supports'      => array( 'title', 'editor', 'excerpt', 'thumbnail' ),
+			'show_in_rest'  => true,
+			'rewrite'       => array(
+				'slug'       => 'column',
+				'with_front' => false,
+			),
+		)
+	);
+}
+add_action( 'init', 'exterior_exone_register_column_post_type' );
+
+/**
+ * コラムカテゴリー（階層なし）。ブロックエディタのサイドバーで付け、一覧の列にも出す。
+ */
+function exterior_exone_register_column_taxonomies() {
+	register_taxonomy(
+		'column_category',
+		'column',
+		array(
+			'labels'            => array(
+				'name'                       => 'コラムカテゴリー',
+				'singular_name'              => 'コラムカテゴリー',
+				'all_items'                  => 'すべてのコラムカテゴリー',
+				'edit_item'                  => 'コラムカテゴリーを編集',
+				'add_new_item'               => 'コラムカテゴリーを追加',
+				'search_items'               => 'コラムカテゴリーを検索',
+				'separate_items_with_commas' => 'コラムカテゴリーをカンマで区切ってください',
+				'choose_from_most_used'      => 'よく使われているコラムカテゴリーから選択',
+				'not_found'                  => 'コラムカテゴリーが見つかりませんでした',
+				'menu_name'                  => 'コラムカテゴリー',
+			),
+			'hierarchical'      => false,
+			'public'            => true,
+			'show_admin_column' => true,
+			'show_in_rest'      => true,
+			'rewrite'           => array(
+				'slug'       => 'column-category',
+				'with_front' => false,
+			),
+		)
+	);
+}
+add_action( 'init', 'exterior_exone_register_column_taxonomies' );
+
+/**
+ * お知らせ・施工事例はブロックエディタを使わない（コラムは使う）。
  *
  * 項目を縦 1 列で順に埋められる形にしたいので、旧来の編集画面に寄せる。
  *
@@ -224,6 +300,8 @@ function exterior_exone_flush_rewrite_rules() {
 	exterior_exone_register_news_post_type();
 	exterior_exone_register_works_post_type();
 	exterior_exone_register_works_taxonomies();
+	exterior_exone_register_column_post_type();
+	exterior_exone_register_column_taxonomies();
 	flush_rewrite_rules();
 }
 add_action( 'after_switch_theme', 'exterior_exone_flush_rewrite_rules' );

@@ -348,15 +348,19 @@
 	color: var(--color-gray2);
 }
 
-/* img list 713:80 / 733:316・733:315。見える枠はカンプの左端（x166 / x25）から画面右端まで。
+/* img list 713:80 / 733:316・733:315。見える枠は画面の左端から右端まで（流れる写真が左端まで見える。
+   2026-10-13 のユーザー指示「左側の余白は不要」。それまでは枠をカンプの 1 枚目の位置 x166 / x25 から
+   始めていたため、左に常に空きが出ていた）。1 枚目の初期位置だけカンプどおり x166 / x25 に置く（row の left）。
    影を切らないよう上下に余白を取り、その分を margin で打ち消す。 */
 .p-hepphilo__imglist {
-	margin: calc(var(--hep-philo-imglist-top) - var(--hep-shadow-pad-top)) 0 calc(-1 * var(--hep-shadow-pad-bottom)) calc(max(0px, (100% - var(--hep-canvas-w)) / 2) + var(--hep-imglist-x));
+	margin: calc(var(--hep-philo-imglist-top) - var(--hep-shadow-pad-top)) 0 calc(-1 * var(--hep-shadow-pad-bottom));
 	padding-block: var(--hep-shadow-pad-top) var(--hep-shadow-pad-bottom);
 	overflow: hidden;
 }
 
 .p-hepphilo__imglist-row {
+	position: relative;
+	left: calc(max(0px, (100% - var(--hep-canvas-w)) / 2) + var(--hep-imglist-x));
 	display: flex;
 	gap: var(--hep-imglist-gap);
 	width: max-content;

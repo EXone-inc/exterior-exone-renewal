@@ -1,0 +1,1322 @@
+/* ============================================================
+   コラム一覧 /column/（archive-column.php）・詳細 /column/<投稿名>/（single-column.php）
+   カンプ: ボード 875:50（指示書き 875:47 / 参考画像 875:30。精密なカンプは無い）
+   仕様書: docs/spec-20261010-column-page.md（決定事項 docs/spec-20261010-column-page-decisions.md）
+   寸法の目安は現サイトの column.css（docs/reference-20261010-column/）。配色は指示書きの反転ルール:
+   背景 → white4 / 見出し・強調 → black2 / テキスト → black1 / アクセント → orange1 / サブテキスト・線 → gray2
+   プレフィックスは --col- / .p-colp（css/column.css の .p-scolumn は共通 COLUMN セクションで別物）。
+   ------------------------------------------------------------
+   ここの :root には幅で変わらない値（色・行高・時間）だけを置き、
+   長さはすべてファイル末尾の比例ブロックが決める:
+   - PC（1025px 以上）… --col-vu（カンプ 1920 の 1px の実寸）
+   - SP（1024px 以下）… --col-su（カンプ 375 の 1px の実寸。上限 --sp-scale-max）
+   ============================================================ */
+:root {
+	/* --- 色（反転ルール） --- */
+	--col-bg: var(--color-white4); /* ページ地 */
+	--col-heading: var(--color-black2); /* 見出し・強調 */
+	--col-text: var(--color-black1); /* テキスト */
+	--col-accent: var(--color-orange1); /* アクセント（現サイトの金 #c79a5f） */
+	--col-sub: var(--color-gray2); /* 日付などのサブテキスト（決定 §4 Q7） */
+	--col-line: var(--color-gray2); /* 線 */
+	--col-placeholder: var(--color-gray2); /* アイキャッチが無い記事のサムネ（仕様書 Q9） */
+	--col-on-accent: var(--color-white2); /* orange1 の地に載せる文字 */
+
+	/* --- 行高・字間 --- */
+	--col-title-jp-lh: 1.6;
+	--col-filter-lh: 1.6;
+	--col-tab-lh: 1.2;
+	--col-meta-lh: 1.5;
+	--col-card-title-lh: 1.5;
+	--col-excerpt-lh: 1.8;
+	--col-empty-lh: 1.6;
+	--col-ls: 0.04em;
+
+	/* --- 線（細線は比例させない） --- */
+	--col-line-w: 1px;
+	--col-tab-bar: 2px; /* 選択中のタブの下線 */
+
+	/* --- 動き --- */
+	--col-tab-ease: 0.25s ease; /* タブの下線が左から伸びる（現サイトと同じ） */
+	--col-thumb-ease: 0.4s ease; /* カードのサムネの拡大 */
+	--col-thumb-zoom: 1.05;
+
+	/* --- 比率・行数 --- */
+	--col-thumb-ratio: 3 / 2;
+}
+
+/* ページ地（オーバースクロール時・セクションの継ぎ目に別の色が出ないように） */
+.is-column-page {
+	background-color: var(--col-bg);
+}
+
+/* ============================================================
+   一覧の枠（コンテンツ 1600 / その内側 1400。仕様書 Q2）
+   ============================================================ */
+.p-colp {
+	padding: var(--col-page-top) 0 var(--col-page-bottom);
+	background-color: var(--col-bg);
+	color: var(--col-text);
+}
+
+.p-colp__inner {
+	width: var(--col-content-w);
+	margin-inline: auto;
+}
+
+.p-colp__body {
+	width: var(--col-inner-w);
+	margin-inline: auto;
+}
+
+/* ============================================================
+   見出し（875:36・875:39）。英字と和文は 1 つの h1（現サイトと同じ）
+   ============================================================ */
+.p-colp__title {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	text-align: center;
+	color: var(--col-heading);
+}
+
+.p-colp__title-en {
+	font-family: var(--font-display);
+	font-size: var(--fs-display-lg);
+	font-weight: var(--fw-semibold);
+	line-height: normal;
+	letter-spacing: var(--ls-display-lg);
+}
+
+.p-colp__title-jp {
+	margin-top: var(--col-title-gap);
+	font-size: var(--fs-copy-md);
+	font-weight: var(--fw-medium);
+	line-height: var(--col-title-jp-lh);
+	letter-spacing: var(--col-ls);
+}
+
+/* ============================================================
+   カテゴリーで絞り込む（875:43）
+   ============================================================ */
+.p-colp__filter {
+	margin-top: var(--col-filter-top);
+}
+
+/* 先頭に短い横線 */
+.p-colp__filter-head {
+	position: relative;
+	padding-left: var(--col-filter-pad);
+	font-size: var(--col-filter-text);
+	font-weight: var(--fw-semibold);
+	line-height: var(--col-filter-lh);
+	letter-spacing: var(--col-ls);
+	color: var(--col-heading);
+}
+
+.p-colp__filter-head::before {
+	content: "";
+	position: absolute;
+	top: 50%;
+	left: 0;
+	width: var(--col-filter-rule);
+	height: var(--col-line-w);
+	background-color: var(--col-line);
+}
+
+.p-colp__tabs {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	gap: var(--col-tab-gap-y) var(--col-tab-gap-x);
+	margin-top: var(--col-tabs-top);
+	border-bottom: var(--col-line-w) solid var(--col-line);
+}
+
+.p-colp__tab {
+	position: relative;
+	padding: 0 var(--col-tab-pad-x) var(--col-tab-pad-b);
+	font-size: var(--col-filter-text);
+	line-height: var(--col-tab-lh);
+	letter-spacing: var(--col-ls);
+	color: var(--col-text);
+	transition: color var(--col-tab-ease);
+}
+
+/* 下線（ホバーで左から伸びる・選択中は伸びたまま） */
+.p-colp__tab::after {
+	content: "";
+	position: absolute;
+	left: 0;
+	bottom: calc(var(--col-line-w) * -1);
+	width: 100%;
+	height: var(--col-tab-bar);
+	background-color: var(--col-accent);
+	transform: scaleX(0);
+	transform-origin: 0 0;
+	transition: transform var(--col-tab-ease);
+}
+
+.p-colp__tab:hover {
+	opacity: 1;
+	color: var(--col-heading);
+}
+
+.p-colp__tab:hover::after,
+.p-colp__tab.is-current::after {
+	transform: scaleX(1);
+}
+
+.p-colp__tab.is-current {
+	font-weight: var(--fw-bold);
+	color: var(--col-heading);
+}
+
+/* ============================================================
+   記事カード（875:31）。カード全体が 1 つのリンク
+   ============================================================ */
+.p-colp__list {
+	display: flex;
+	flex-direction: column;
+	margin-top: var(--col-list-top);
+}
+
+.p-colp__card {
+	min-width: 0;
+	border-bottom: var(--col-line-w) solid var(--col-line);
+}
+
+.p-colp__link {
+	display: flex;
+	flex-direction: var(--col-card-dir);
+	align-items: flex-start;
+	gap: var(--col-card-gap);
+	padding-block: var(--col-card-pad);
+	color: var(--col-text);
+}
+
+.p-colp__link:hover {
+	opacity: 1;
+}
+
+.p-colp__thumb {
+	flex-shrink: 0;
+	width: var(--col-thumb-w);
+	aspect-ratio: var(--col-thumb-ratio);
+	overflow: hidden;
+	border-radius: var(--col-thumb-radius);
+	background-color: var(--col-placeholder);
+}
+
+.p-colp__img {
+	display: block;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	transition: transform var(--col-thumb-ease);
+}
+
+.p-colp__img--empty {
+	background-color: var(--col-placeholder);
+}
+
+.p-colp__link:hover .p-colp__img {
+	transform: scale(var(--col-thumb-zoom));
+}
+
+.p-colp__text {
+	display: flex;
+	flex: 1;
+	flex-direction: column;
+	gap: var(--col-text-gap);
+	min-width: 0;
+	width: 100%;
+}
+
+/* 投稿日（左）とカテゴリーのラベル（右）。現サイトと同じ並び */
+.p-colp__meta {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--col-meta-gap-y) var(--col-meta-gap-x);
+	font-size: var(--col-meta-text);
+	line-height: var(--col-meta-lh);
+	letter-spacing: var(--col-ls);
+}
+
+.p-colp__date {
+	color: var(--col-sub);
+}
+
+.p-colp__cats {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: flex-end;
+	gap: var(--col-cat-gap);
+}
+
+/* カテゴリーの札は参考画像 875:31 どおり薄灰の塗り（現サイトの #e9e9e9 の札を反転ルールの gray2 で）。
+   枠線は付けない（2026-10-10 の S1 評価後に変更） */
+.p-colp__cat {
+	padding: var(--col-cat-pad-y) var(--col-cat-pad-x);
+	border-radius: var(--radius-pill);
+	background: var(--col-line);
+	font-weight: var(--fw-medium);
+	color: var(--col-text);
+	white-space: nowrap;
+}
+
+.p-colp__card-title {
+	font-size: var(--col-card-title);
+	font-weight: var(--fw-bold);
+	line-height: var(--col-card-title-lh);
+	letter-spacing: var(--col-ls);
+	color: var(--col-heading); /* 参考画像 875:31 はタイトルが黒。ホバーでアクセント色 */
+	overflow-wrap: anywhere;
+	transition: color var(--transition-base);
+}
+
+.p-colp__link:hover .p-colp__card-title {
+	color: var(--col-accent);
+	text-decoration: underline;
+}
+
+.p-colp__excerpt {
+	display: -webkit-box;
+	overflow: hidden;
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: var(--col-excerpt-lines);
+	font-size: var(--col-excerpt);
+	line-height: var(--col-excerpt-lh);
+	letter-spacing: var(--col-ls);
+	color: var(--col-text);
+	overflow-wrap: anywhere;
+}
+
+/* 0 件（仕様書 Q15） */
+.p-colp__empty {
+	padding: var(--col-empty-pad-t) 0 var(--col-empty-pad-b);
+	font-size: var(--col-empty-text);
+	line-height: var(--col-empty-lh);
+	letter-spacing: var(--col-ls);
+	text-align: center;
+	color: var(--col-text);
+}
+
+/* ============================================================
+   ページ送り（前へ・番号・次へ）
+   ============================================================ */
+.p-colp__pager {
+	margin-top: var(--col-pager-top);
+}
+
+.p-colp__pages {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	align-items: center;
+	gap: var(--col-page-gap);
+}
+
+.p-colp__page {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-width: var(--col-page-size);
+	height: var(--col-page-size);
+	padding: 0 var(--col-page-pad);
+	border: var(--col-line-w) solid var(--col-line);
+	border-radius: var(--col-page-radius);
+	font-size: var(--col-page-text);
+	line-height: 1;
+	letter-spacing: var(--col-ls);
+	color: var(--col-text);
+	transition: border-color var(--transition-base), color var(--transition-base);
+}
+
+a.p-colp__page:hover {
+	opacity: 1;
+	border-color: var(--col-accent);
+	color: var(--col-heading);
+}
+
+.p-colp__page.is-current {
+	border-color: var(--col-accent);
+	background-color: var(--col-accent);
+	font-weight: var(--fw-bold);
+	color: var(--col-on-accent);
+}
+
+.p-colp__page--dots {
+	border-color: transparent;
+}
+
+.p-colp__page--prev,
+.p-colp__page--next {
+	padding: 0 var(--col-page-pad-wide);
+}
+
+/* --- JS 無効時: [data-reveal] は JS が合図を出すまで透明なので、最初から最終状態にする --- */
+@media (scripting: none) {
+	.is-column-page [data-reveal] {
+		opacity: 1;
+		transform: none;
+		transition: none;
+	}
+}
+
+/* --- 動きを減らす設定: タブの下線・サムネの拡大を動かさない --- */
+@media (prefers-reduced-motion: reduce) {
+	.p-colp__tab,
+	.p-colp__tab::after,
+	.p-colp__img {
+		transition: none;
+	}
+}
+
+/* ============================================================
+   PC（1025px 以上）: 1920px 基準の比例
+   ------------------------------------------------------------
+   1 単位 --col-vu は「1920 幅での 1px の実寸」。1920px 以上では 1px で固定。
+   ============================================================ */
+@media (min-width: 1025px) {
+	:root {
+		--col-vu: min(1px, calc(100vw / 1920));
+
+		/* --- 幅（指示書き 875:47: コンテンツ 1600 / コンテンツ内 1400） --- */
+		--col-content-w: calc(1600 * var(--col-vu));
+		--col-inner-w: calc(1400 * var(--col-vu));
+
+		/* --- 余白 --- */
+		--col-page-top: calc(160 * var(--col-vu)); /* ヘッダー下端 → 見出し（他ページのセクション間と同じ） */
+		--col-page-bottom: calc(160 * var(--col-vu)); /* ページ送り → フッター */
+		--col-title-gap: calc(8 * var(--col-vu));
+		--col-filter-top: calc(80 * var(--col-vu)); /* 見出し → 絞り込み */
+
+		/* --- 絞り込み・タブ（PC 18） --- */
+		--col-filter-text: calc(18 * var(--col-vu));
+		--col-filter-pad: calc(40 * var(--col-vu));
+		--col-filter-rule: calc(28 * var(--col-vu));
+		--col-tabs-top: calc(24 * var(--col-vu));
+		--col-tab-gap-x: calc(40 * var(--col-vu));
+		--col-tab-gap-y: calc(8 * var(--col-vu));
+		--col-tab-pad-x: calc(2 * var(--col-vu));
+		--col-tab-pad-b: calc(16 * var(--col-vu));
+
+		/* --- カード（サムネ左 3:2・幅 400 / 文字右） --- */
+		--col-list-top: calc(40 * var(--col-vu));
+		--col-card-dir: row;
+		--col-card-gap: calc(56 * var(--col-vu));
+		--col-card-pad: calc(40 * var(--col-vu));
+		--col-thumb-w: calc(400 * var(--col-vu));
+		--col-thumb-radius: calc(8 * var(--col-vu));
+		--col-text-gap: calc(14 * var(--col-vu));
+		--col-meta-text: calc(14 * var(--col-vu));
+		--col-meta-gap-x: calc(16 * var(--col-vu));
+		--col-meta-gap-y: calc(8 * var(--col-vu));
+		--col-cat-gap: calc(8 * var(--col-vu));
+		--col-cat-pad-x: calc(14 * var(--col-vu));
+		--col-cat-pad-y: calc(3 * var(--col-vu));
+		--col-card-title: calc(24 * var(--col-vu));
+		--col-excerpt: calc(16 * var(--col-vu));
+		--col-excerpt-lines: 3;
+		--col-empty-text: calc(18 * var(--col-vu));
+		--col-empty-pad-t: calc(100 * var(--col-vu));
+		--col-empty-pad-b: calc(60 * var(--col-vu));
+
+		/* --- ページ送り --- */
+		--col-pager-top: calc(72 * var(--col-vu));
+		--col-page-gap: calc(12 * var(--col-vu));
+		--col-page-size: calc(48 * var(--col-vu));
+		--col-page-pad: calc(8 * var(--col-vu));
+		--col-page-pad-wide: calc(20 * var(--col-vu));
+		--col-page-radius: calc(4 * var(--col-vu));
+		--col-page-text: calc(16 * var(--col-vu));
+	}
+}
+
+/* ============================================================
+   SP（1024px 以下）: 375px 基準の比例
+   ------------------------------------------------------------
+   1 単位 --col-su は「375px 幅での 1px の実寸」
+   （上限は style.css の --sp-scale-max。タブレットの縮尺方針）。
+   ============================================================ */
+@media (max-width: 1024px) {
+	:root {
+		--col-su: min(calc(100vw / 375), var(--sp-scale-max));
+
+		/* --- 幅（左右 24 → 中身 327） --- */
+		--col-content-w: calc(327 * var(--col-su));
+		--col-inner-w: calc(327 * var(--col-su));
+
+		/* --- 余白 --- */
+		--col-page-top: calc(60 * var(--col-su));
+		--col-page-bottom: calc(80 * var(--col-su));
+		--col-title-gap: calc(6 * var(--col-su));
+		--col-filter-top: calc(40 * var(--col-su));
+
+		/* --- 絞り込み・タブ（SP 14） --- */
+		--col-filter-text: calc(14 * var(--col-su));
+		--col-filter-pad: calc(30 * var(--col-su));
+		--col-filter-rule: calc(20 * var(--col-su));
+		--col-tabs-top: calc(16 * var(--col-su));
+		--col-tab-gap-x: calc(20 * var(--col-su));
+		--col-tab-gap-y: calc(8 * var(--col-su));
+		--col-tab-pad-x: calc(2 * var(--col-su));
+		--col-tab-pad-b: calc(10 * var(--col-su));
+
+		/* --- カード（1 カラム。サムネ上 3:2・全幅 / 文字下。仕様書 Q11） --- */
+		--col-list-top: calc(16 * var(--col-su));
+		--col-card-dir: column;
+		--col-card-gap: calc(14 * var(--col-su));
+		--col-card-pad: calc(24 * var(--col-su));
+		--col-thumb-w: 100%;
+		--col-thumb-radius: calc(4 * var(--col-su));
+		--col-text-gap: calc(8 * var(--col-su));
+		--col-meta-text: calc(11 * var(--col-su));
+		--col-meta-gap-x: calc(12 * var(--col-su));
+		--col-meta-gap-y: calc(6 * var(--col-su));
+		--col-cat-gap: calc(6 * var(--col-su));
+		--col-cat-pad-x: calc(10 * var(--col-su));
+		--col-cat-pad-y: calc(2 * var(--col-su));
+		--col-card-title: calc(16 * var(--col-su));
+		--col-excerpt: calc(13 * var(--col-su));
+		--col-excerpt-lines: 2;
+		--col-empty-text: calc(14 * var(--col-su));
+		--col-empty-pad-t: calc(60 * var(--col-su));
+		--col-empty-pad-b: calc(40 * var(--col-su));
+
+		/* --- ページ送り --- */
+		--col-pager-top: calc(40 * var(--col-su));
+		--col-page-gap: calc(8 * var(--col-su));
+		--col-page-size: calc(36 * var(--col-su));
+		--col-page-pad: calc(6 * var(--col-su));
+		--col-page-pad-wide: calc(14 * var(--col-su));
+		--col-page-radius: calc(4 * var(--col-su));
+		--col-page-text: calc(13 * var(--col-su));
+	}
+}
+
+/* ============================================================
+   詳細 /column/<投稿名>/（single-column.php。仕様書 F-05・F-06）
+   ------------------------------------------------------------
+   寸法・組みの出典は現サイトの column_detail.css と記事本文の <style>
+  （docs/reference-20261010-column/）。配色は反転ルール（黒地 → white4 / 文字 → black1 /
+   見出し・強調 → black2 / 金 → orange1 / 線・サブ → gray2）。
+   記事に埋め込まれた <style> は表示時に取り除く（inc/column-page-data.php）ので、
+   本文と本文内の部品（クラス名は現サイトと同じ）の見た目はすべてここが持つ。
+   本文内の余白は本文の文字サイズに対する em（PC 18 / SP 14 で自然に縮む）。
+   ============================================================ */
+:root {
+	/* --- 色 --- */
+	--col-panel: var(--color-white1); /* 本文内の面（.box / .summary / .author / details / .cta / blockquote / 表） */
+	--col-panel-alt: var(--color-white3); /* 表の偶数行 */
+	--col-marker: color-mix(in srgb, var(--color-orange1) 32%, transparent); /* .mk の蛍光ペン */
+	--col-todo: var(--color-error); /* .todo（執筆中のメモ。現サイトは赤） */
+	--col-lightbox-bg: color-mix(in srgb, var(--color-white4) 96%, transparent);
+	--col-lightbox-close-bg: var(--color-gray2);
+
+	/* --- 本文の行高・字間 --- */
+	--col-title-lh: 1.5;
+	--col-body-lh: 2;
+	--col-li-lh: 1.8;
+	--col-h2-lh: 1.5;
+	--col-h3-lh: 1.55;
+	--col-adjacent-lh: 1.5;
+
+	/* --- 本文内の余白（本文の文字サイズに対する em） --- */
+	--col-p-gap: 1.4em; /* 段落の下 */
+	--col-block-gap: 1.6em; /* 部品（box / figure / 表など）の上下 */
+	--col-h2-top: 2.4em; /* h2 自身の文字サイズに対する em */
+	--col-h2-bottom: 0.8em;
+	--col-h3-top: 1.9em;
+	--col-h3-bottom: 0.6em;
+	--col-list-indent: 1.5em;
+	--col-li-gap: 0.4em;
+	--col-panel-pad-y: 1.2em;
+	--col-panel-pad-x: 1.4em;
+	--col-small: 0.85em; /* .note / figcaption */
+	--col-tbl-text: 0.92em;
+	--col-tbl-pad: 0.65em;
+	--col-grid-gap: 0.6em;
+	--col-summary-pad-y: 0.75em;
+	--col-summary-pad-x: 1.25em;
+	--col-check-indent: 1.9em;
+	--col-faq-pad-y: 0.9em;
+	--col-faq-pad-x: 1.1em;
+	--col-faq-pad-r: 2.8em; /* 「＋ / −」のぶん */
+	--col-cta-pad-y: 2em;
+	--col-cta-pad-x: 1.5em;
+	--col-btn-pad-y: 0.9em;
+	--col-btn-pad-x: 2.1em;
+	--col-author-logo: 7.5em;
+	--col-author-body: 15em;
+	--col-img-left: 44%;
+	--col-anchor-gap: 1.5em; /* 目次で移動したときの見出しとヘッダーの間 */
+
+	/* --- 線 --- */
+	--col-imgph-line: 2px;
+
+	/* --- ライトボックス（記事本文のスクリプトが作る。固定の大きさ） --- */
+	--col-lightbox-z: 1000; /* ヘッダー（--z-header）・ドロワー（--z-overlay）より上 */
+	--col-lightbox-pad: 16px;
+	--col-lightbox-img-h: 88vh;
+	--col-lightbox-close: 44px;
+	--col-lightbox-close-text: 28px;
+	--col-lightbox-close-top: 10px;
+	--col-lightbox-close-right: 12px;
+	--col-lightbox-cap-bottom: 10px;
+	--col-lightbox-radius: 6px;
+}
+
+/* ============================================================
+   記事の枠（コンテンツ 1600 の内側 1400。仕様書 Q2）
+   ============================================================ */
+.p-cold {
+	padding: var(--col-d-top) 0 var(--col-d-bottom);
+	background-color: var(--col-bg);
+	color: var(--col-text);
+}
+
+.p-cold__article {
+	width: var(--col-inner-w);
+	margin-inline: auto;
+}
+
+/* --- メタ（カテゴリー・投稿日・最終更新日） --- */
+.p-cold__meta {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--col-meta-gap-y) var(--col-meta-gap-x);
+	font-size: var(--col-meta-text);
+	line-height: var(--col-meta-lh);
+	letter-spacing: var(--col-ls);
+}
+
+.p-cold__cat {
+	font-weight: var(--fw-bold);
+	color: var(--col-accent);
+}
+
+.p-cold__date {
+	color: var(--col-sub);
+}
+
+.p-cold__title {
+	margin-top: var(--col-d-title-top);
+	font-size: var(--col-d-title);
+	font-weight: var(--fw-bold);
+	line-height: var(--col-title-lh);
+	letter-spacing: var(--col-ls);
+	color: var(--col-heading);
+	overflow-wrap: anywhere;
+}
+
+/* --- アイキャッチ（1400 幅・元の比率） --- */
+.p-cold__eyecatch {
+	margin-top: var(--col-d-eyecatch-top);
+	overflow: hidden;
+	border-radius: var(--col-thumb-radius);
+}
+
+.p-cold__eyecatch-img {
+	width: 100%;
+	height: auto;
+}
+
+/* ============================================================
+   本文の基本スタイル
+   ============================================================ */
+.p-cold__body {
+	margin-top: var(--col-d-body-top);
+	font-size: var(--col-d-body);
+	line-height: var(--col-body-lh);
+	letter-spacing: var(--col-ls);
+	color: var(--col-text);
+	overflow-wrap: anywhere;
+}
+
+/* 本文ラッパ（現サイトの記事）。埋め込みの max-width 880 は取り除き済み、念のため幅を戻す */
+.p-cold__body .exone-col {
+	max-width: none;
+	margin: 0;
+	padding: 0;
+}
+
+.p-cold__body > :first-child,
+.p-cold__body .exone-col > :first-child {
+	margin-top: 0;
+}
+
+.p-cold__body p {
+	margin: 0 0 var(--col-p-gap);
+}
+
+.p-cold__body strong,
+.p-cold__body b {
+	font-weight: var(--fw-bold);
+	color: var(--col-heading);
+}
+
+.p-cold__body h2 {
+	margin: var(--col-h2-top) 0 var(--col-h2-bottom);
+	padding: var(--col-h2-pad-t) 0 var(--col-h2-pad-b) var(--col-h2-pad-l);
+	border-left: var(--col-h2-bar) solid var(--col-accent);
+	border-bottom: var(--col-line-w) solid var(--col-line);
+	font-size: var(--col-d-h2);
+	font-weight: var(--fw-bold);
+	line-height: var(--col-h2-lh);
+	color: var(--col-heading);
+}
+
+.p-cold__body h3 {
+	margin: var(--col-h3-top) 0 var(--col-h3-bottom);
+	font-size: var(--col-d-h3);
+	font-weight: var(--fw-bold);
+	line-height: var(--col-h3-lh);
+	color: var(--col-heading);
+}
+
+.p-cold__body h4 {
+	margin: var(--col-h3-top) 0 var(--col-h3-bottom);
+	font-size: 1em;
+	font-weight: var(--fw-bold);
+	color: var(--col-heading);
+}
+
+/* 目次（.toc → h2[id]）で移動したとき、追従するヘッダーに隠れないように */
+.p-cold__body [id] {
+	scroll-margin-top: calc(var(--header-height) + var(--col-anchor-gap));
+}
+
+.p-cold__body ul,
+.p-cold__body ol {
+	margin: 0 0 var(--col-p-gap);
+	padding-left: var(--col-list-indent);
+}
+
+.p-cold__body ul {
+	list-style: disc outside;
+}
+
+.p-cold__body ol {
+	list-style: decimal outside;
+}
+
+.p-cold__body li {
+	margin: 0 0 var(--col-li-gap);
+	line-height: var(--col-li-lh);
+}
+
+.p-cold__body a {
+	color: var(--col-accent);
+	text-decoration: underline;
+	text-underline-offset: 0.2em;
+}
+
+.p-cold__body img {
+	max-width: 100%;
+	height: auto;
+	border-radius: var(--col-d-radius-sm);
+}
+
+.p-cold__body figure {
+	margin: var(--col-block-gap) 0;
+}
+
+.p-cold__body figure img {
+	width: 100%;
+}
+
+/* キャプション・注記は読める濃さが要るので black1 の小さい文字（決定事項 §4 Q7） */
+.p-cold__body figcaption {
+	margin-top: 0.5em;
+	font-size: var(--col-small);
+	line-height: var(--col-meta-lh);
+	text-align: center;
+	color: var(--col-text);
+}
+
+.p-cold__body blockquote {
+	margin: var(--col-block-gap) 0;
+	padding: var(--col-panel-pad-y) var(--col-panel-pad-x);
+	border-left: var(--col-d-bar) solid var(--col-accent);
+	border-radius: 0 var(--col-d-radius-sm) var(--col-d-radius-sm) 0;
+	background-color: var(--col-panel);
+	color: var(--col-text);
+}
+
+.p-cold__body blockquote p:last-child {
+	margin-bottom: 0;
+}
+
+.p-cold__body hr {
+	margin: var(--col-h2-top) 0;
+	border: 0;
+	border-top: var(--col-line-w) solid var(--col-line);
+}
+
+/* ============================================================
+   本文内の部品（クラス名は現サイトと同じ。実例は prod-detail-body.html）
+   ============================================================ */
+.p-cold__body .lead {
+	font-size: 1.05em;
+	color: var(--col-heading);
+}
+
+.p-cold__body .mk {
+	padding: 0 1px;
+	background: linear-gradient(transparent 60%, var(--col-marker) 60%);
+	font-weight: var(--fw-bold);
+	color: var(--col-heading);
+}
+
+.p-cold__body .accent {
+	font-weight: var(--fw-bold);
+	color: var(--col-accent);
+}
+
+.p-cold__body .note {
+	margin: 0 0 var(--col-p-gap);
+	font-size: var(--col-small);
+	color: var(--col-text);
+}
+
+/* --- 囲み（.box / .box-ttl。目次もこの中） --- */
+.p-cold__body .box {
+	margin: var(--col-block-gap) 0;
+	padding: var(--col-panel-pad-y) var(--col-panel-pad-x);
+	border: var(--col-line-w) solid var(--col-line);
+	border-radius: var(--col-d-radius);
+	background-color: var(--col-panel);
+}
+
+.p-cold__body .box > :last-child {
+	margin-bottom: 0;
+}
+
+.p-cold__body .box .box-ttl {
+	margin: 0 0 0.7em;
+	font-size: 1.05em;
+	font-weight: var(--fw-bold);
+	color: var(--col-heading);
+}
+
+.p-cold__body .toc li::marker {
+	color: var(--col-accent);
+}
+
+.p-cold__body .toc a {
+	text-decoration: none;
+}
+
+/* --- 要約（.summary / .head / .check） --- */
+.p-cold__body .summary {
+	margin: var(--col-block-gap) 0;
+	overflow: hidden;
+	border: var(--col-line-w) solid var(--col-line);
+	border-radius: var(--col-d-radius);
+	background-color: var(--col-panel);
+}
+
+.p-cold__body .summary .head {
+	padding: var(--col-summary-pad-y) var(--col-summary-pad-x);
+	background-color: var(--col-accent);
+	font-size: 1.06em;
+	font-weight: var(--fw-bold);
+	color: var(--col-heading);
+}
+
+.p-cold__body .check {
+	margin: 0;
+	padding: var(--col-panel-pad-y) var(--col-panel-pad-x);
+	list-style: none;
+	line-height: var(--col-li-lh);
+}
+
+.p-cold__body .check li {
+	position: relative;
+	padding-left: var(--col-check-indent);
+	list-style: none;
+}
+
+.p-cold__body .check li:last-child {
+	margin-bottom: 0;
+}
+
+.p-cold__body .check li::before {
+	content: "\2713";
+	position: absolute;
+	top: 0;
+	left: 0;
+	font-weight: var(--fw-bold);
+	color: var(--col-accent);
+}
+
+/* --- 表（.tbl-wrap の中だけ横スクロール） --- */
+.p-cold__body .tbl-wrap {
+	margin: var(--col-block-gap) 0;
+	overflow-x: auto;
+	-webkit-overflow-scrolling: touch;
+}
+
+.p-cold__body .tbl {
+	width: 100%;
+	min-width: var(--col-tbl-min);
+	border-collapse: collapse;
+	background-color: var(--col-panel);
+	font-size: var(--col-tbl-text);
+	line-height: var(--col-li-lh);
+}
+
+.p-cold__body .tbl th,
+.p-cold__body .tbl td {
+	padding: var(--col-tbl-pad);
+	border: var(--col-line-w) solid var(--col-line);
+	text-align: left;
+	vertical-align: top;
+}
+
+.p-cold__body .tbl th {
+	background-color: var(--col-accent);
+	font-weight: var(--fw-bold);
+	color: var(--col-heading);
+}
+
+.p-cold__body .tbl td {
+	color: var(--col-text);
+}
+
+.p-cold__body .tbl tbody tr:nth-child(even) {
+	background-color: var(--col-panel-alt);
+}
+
+.p-cold__body .tbl td.label {
+	font-weight: var(--fw-bold);
+	color: var(--col-heading);
+}
+
+/* --- 画像の並び（.img-grid2 / .img-grid3 / .img-left） --- */
+.p-cold__body .img-grid2,
+.p-cold__body .img-grid3 {
+	display: grid;
+	grid-template-columns: repeat(var(--col-grid-cols), minmax(0, 1fr));
+	gap: var(--col-grid-gap);
+	margin: var(--col-block-gap) 0;
+}
+
+.p-cold__body .img-grid2 {
+	--col-grid-cols: var(--col-grid2-cols);
+}
+
+.p-cold__body .img-grid3 {
+	--col-grid-cols: var(--col-grid3-cols);
+}
+
+.p-cold__body .img-grid2 img,
+.p-cold__body .img-grid3 img {
+	display: block;
+	width: 100%;
+	height: auto;
+	margin: 0;
+}
+
+.p-cold__body .img-left {
+	float: var(--col-img-left-float);
+	width: var(--col-img-left-w);
+	margin: var(--col-img-left-m);
+}
+
+.p-cold__body .img-left img {
+	width: 100%;
+}
+
+.p-cold__body .clearfix::after {
+	content: "";
+	display: block;
+	clear: both;
+}
+
+/* --- 画像の差し込み予定・執筆メモ（.imgph / .todo） --- */
+.p-cold__body .imgph {
+	margin: var(--col-block-gap) 0;
+	padding: var(--col-panel-pad-y);
+	border: var(--col-imgph-line) dashed var(--col-accent);
+	border-radius: var(--col-d-radius);
+	background-color: var(--col-panel);
+	text-align: center;
+	color: var(--col-text);
+}
+
+.p-cold__body .todo {
+	margin: var(--col-block-gap) 0;
+	padding: var(--col-panel-pad-y) var(--col-panel-pad-x);
+	border: var(--col-line-w) solid var(--col-line);
+	border-left: var(--col-d-bar) solid var(--col-todo);
+	border-radius: 0 var(--col-d-radius-sm) var(--col-d-radius-sm) 0;
+	background-color: var(--col-panel);
+	color: var(--col-text);
+}
+
+.p-cold__body .todo p {
+	margin: 0;
+}
+
+/* --- FAQ（details / summary / .faq-a。開閉はブラウザ標準） --- */
+.p-cold__body details {
+	margin: 0 0 0.75em;
+	overflow: hidden;
+	border: var(--col-line-w) solid var(--col-line);
+	border-radius: var(--col-d-radius-sm);
+	background-color: var(--col-panel);
+}
+
+.p-cold__body details summary {
+	position: relative;
+	padding: var(--col-faq-pad-y) var(--col-faq-pad-r) var(--col-faq-pad-y) var(--col-faq-pad-x);
+	list-style: none;
+	cursor: pointer;
+	font-weight: var(--fw-bold);
+	color: var(--col-heading);
+}
+
+.p-cold__body details summary::-webkit-details-marker {
+	display: none;
+}
+
+.p-cold__body details summary::after {
+	content: "\002B";
+	position: absolute;
+	top: 50%;
+	right: var(--col-faq-pad-x);
+	transform: translateY(-50%);
+	font-size: 1.4em;
+	font-weight: var(--fw-regular);
+	line-height: 1;
+	color: var(--col-accent);
+}
+
+.p-cold__body details[open] summary {
+	border-bottom: var(--col-line-w) solid var(--col-line);
+}
+
+.p-cold__body details[open] summary::after {
+	content: "\2212";
+}
+
+.p-cold__body .faq-a {
+	padding: var(--col-faq-pad-y) var(--col-faq-pad-x);
+	color: var(--col-text);
+}
+
+.p-cold__body .faq-a p {
+	margin: 0;
+}
+
+/* --- 本文内の CTA（.cta / .t / .s / .btn-main） --- */
+.p-cold__body .cta {
+	margin: var(--col-h2-top) 0 0;
+	padding: var(--col-cta-pad-y) var(--col-cta-pad-x);
+	border: var(--col-line-w) solid var(--col-line);
+	border-radius: var(--col-d-radius-lg);
+	background-color: var(--col-panel);
+	text-align: center;
+}
+
+.p-cold__body .cta .t {
+	margin: 0 0 0.5em;
+	font-size: 1.2em;
+	font-weight: var(--fw-bold);
+	color: var(--col-heading);
+}
+
+.p-cold__body .cta .s {
+	margin: 0 0 1.2em;
+	font-size: 0.95em;
+	color: var(--col-text);
+}
+
+.p-cold__body .cta a {
+	display: inline-block;
+	margin: 0.4em 0.5em;
+	padding: var(--col-btn-pad-y) var(--col-btn-pad-x);
+	border-radius: var(--col-d-radius-sm);
+	font-size: 1.05em;
+	font-weight: var(--fw-bold);
+	line-height: var(--col-li-lh);
+	text-decoration: none;
+}
+
+.p-cold__body .cta .btn-main {
+	background-color: var(--col-accent);
+	color: var(--col-on-accent);
+}
+
+/* --- この記事を書いた人（.author / .logo / .body / .eyebrow / .name / .desc） --- */
+.p-cold__body .author {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 1.25em;
+	margin: var(--col-block-gap) 0;
+	padding: var(--col-panel-pad-y) var(--col-panel-pad-x);
+	border: var(--col-line-w) solid var(--col-line);
+	border-left: var(--col-d-bar) solid var(--col-accent);
+	border-radius: var(--col-d-radius);
+	background-color: var(--col-panel);
+}
+
+.p-cold__body .author .logo {
+	flex: 0 0 auto;
+	width: var(--col-author-logo);
+}
+
+.p-cold__body .author .logo img {
+	width: 100%;
+	border-radius: 0;
+}
+
+.p-cold__body .author .body {
+	flex: 1 1 var(--col-author-body);
+	min-width: min(var(--col-author-body), 100%);
+}
+
+.p-cold__body .author .eyebrow {
+	margin: 0 0 0.25em;
+	font-size: 0.8em;
+	letter-spacing: 0.08em;
+	color: var(--col-accent);
+}
+
+.p-cold__body .author .name {
+	margin: 0 0 0.6em;
+	font-size: 1.1em;
+	font-weight: var(--fw-bold);
+	color: var(--col-heading);
+}
+
+.p-cold__body .author .desc {
+	margin: 0;
+	font-size: 0.92em;
+	line-height: 1.9;
+	color: var(--col-text);
+}
+
+/* --- 画像を押すと拡大（ライトボックスは記事本文のスクリプトが body の末尾に作る） --- */
+.p-cold__body .exone-col figure img,
+.p-cold__body .exone-col .img-grid2 img,
+.p-cold__body .exone-col .img-grid3 img {
+	cursor: zoom-in;
+}
+
+.exone-lightbox {
+	position: fixed;
+	inset: 0;
+	z-index: var(--col-lightbox-z);
+	display: none;
+	align-items: center;
+	justify-content: center;
+	padding: var(--col-lightbox-pad);
+	background-color: var(--col-lightbox-bg);
+	overscroll-behavior: contain;
+}
+
+.exone-lightbox.is-open {
+	display: flex;
+}
+
+.exone-lightbox img {
+	width: auto;
+	max-width: 100%;
+	height: auto;
+	max-height: var(--col-lightbox-img-h);
+	margin: 0;
+	object-fit: contain;
+	border-radius: var(--col-lightbox-radius);
+}
+
+.exone-lightbox .lb-close {
+	position: absolute;
+	top: var(--col-lightbox-close-top);
+	right: var(--col-lightbox-close-right);
+	width: var(--col-lightbox-close);
+	height: var(--col-lightbox-close);
+	border-radius: 50%;
+	background-color: var(--col-lightbox-close-bg);
+	font-size: var(--col-lightbox-close-text);
+	line-height: var(--col-lightbox-close);
+	text-align: center;
+	color: var(--col-heading);
+}
+
+.exone-lightbox .lb-cap {
+	position: absolute;
+	right: 0;
+	bottom: var(--col-lightbox-cap-bottom);
+	left: 0;
+	margin: 0;
+	padding: 0 var(--col-lightbox-pad);
+	font-size: var(--col-small);
+	line-height: var(--col-meta-lh);
+	text-align: center;
+	color: var(--col-text);
+}
+
+/* ============================================================
+   前の記事 / 次の記事・一覧へ戻る
+   ============================================================ */
+.p-cold__adjacent {
+	display: flex;
+	justify-content: space-between;
+	gap: var(--col-d-adjacent-gap);
+	margin-top: var(--col-d-adjacent-top);
+	padding-block: var(--col-d-adjacent-pad);
+	border-top: var(--col-line-w) solid var(--col-line);
+	border-bottom: var(--col-line-w) solid var(--col-line);
+}
+
+.p-cold__adjacent-link {
+	display: flex;
+	flex-direction: column;
+	gap: var(--col-d-adjacent-label-gap);
+	min-width: 0;
+	max-width: 48%;
+}
+
+.p-cold__adjacent-link:hover {
+	opacity: 1;
+}
+
+/* 前の記事は左、次の記事は右（片側だけのときも寄せたまま） */
+.p-cold__adjacent-link--next {
+	margin-left: auto;
+	align-items: flex-end;
+	text-align: right;
+}
+
+.p-cold__adjacent-label {
+	font-size: var(--col-meta-text);
+	line-height: var(--col-meta-lh);
+	letter-spacing: var(--col-ls);
+	color: var(--col-sub);
+}
+
+.p-cold__adjacent-title {
+	display: -webkit-box;
+	overflow: hidden;
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: 2;
+	font-size: var(--col-d-adjacent-title);
+	font-weight: var(--fw-medium);
+	line-height: var(--col-adjacent-lh);
+	letter-spacing: var(--col-ls);
+	color: var(--col-heading);
+	overflow-wrap: anywhere;
+}
+
+.p-cold__adjacent-link:hover .p-cold__adjacent-title {
+	text-decoration: underline;
+}
+
+.p-cold__back {
+	margin-top: var(--col-d-back-top);
+	text-align: center;
+}
+
+.p-cold__back-link {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding: var(--col-d-back-pad-y) var(--col-d-back-pad-x);
+	border: var(--col-line-w) solid var(--col-line);
+	border-radius: var(--radius-pill);
+	font-size: var(--col-d-back-text);
+	line-height: 1;
+	letter-spacing: var(--col-ls);
+	color: var(--col-text);
+	transition: border-color var(--transition-base), color var(--transition-base);
+}
+
+.p-cold__back-link:hover {
+	opacity: 1;
+	border-color: var(--col-accent);
+	color: var(--col-heading);
+}
+
+/* --- 詳細の長さ: PC（1025px 以上）。1920 基準の比例（--col-vu） --- */
+@media (min-width: 1025px) {
+	:root {
+		--col-d-top: calc(120 * var(--col-vu)); /* ヘッダー下端 → メタ */
+		--col-d-bottom: calc(160 * var(--col-vu)); /* 一覧へ戻る → COLUMN */
+		--col-d-title: calc(40 * var(--col-vu));
+		--col-d-title-top: calc(16 * var(--col-vu));
+		--col-d-eyecatch-top: calc(48 * var(--col-vu));
+		--col-d-body-top: calc(64 * var(--col-vu));
+		--col-d-body: calc(18 * var(--col-vu));
+		--col-d-h2: calc(28 * var(--col-vu));
+		--col-d-h3: calc(22 * var(--col-vu));
+		--col-h2-pad-t: calc(8 * var(--col-vu));
+		--col-h2-pad-b: calc(12 * var(--col-vu));
+		--col-h2-pad-l: calc(18 * var(--col-vu));
+		--col-h2-bar: calc(6 * var(--col-vu));
+		--col-d-bar: calc(5 * var(--col-vu));
+		--col-d-radius-sm: calc(8 * var(--col-vu));
+		--col-d-radius: calc(10 * var(--col-vu));
+		--col-d-radius-lg: calc(14 * var(--col-vu));
+		--col-tbl-min: 0;
+		--col-grid2-cols: 2;
+		--col-grid3-cols: 3;
+		--col-img-left-float: left;
+		--col-img-left-w: var(--col-img-left);
+		--col-img-left-m: 0.3em 1.1em 0.6em 0;
+		--col-d-adjacent-top: calc(96 * var(--col-vu));
+		--col-d-adjacent-pad: calc(32 * var(--col-vu));
+		--col-d-adjacent-gap: calc(32 * var(--col-vu));
+		--col-d-adjacent-label-gap: calc(8 * var(--col-vu));
+		--col-d-adjacent-title: calc(16 * var(--col-vu));
+		--col-d-back-top: calc(64 * var(--col-vu));
+		--col-d-back-pad-y: calc(20 * var(--col-vu));
+		--col-d-back-pad-x: calc(64 * var(--col-vu));
+		--col-d-back-text: calc(16 * var(--col-vu));
+	}
+}
+
+/* --- 詳細の長さ: SP（1024px 以下）。375 基準の比例（--col-su） --- */
+@media (max-width: 1024px) {
+	:root {
+		--col-d-top: calc(40 * var(--col-su));
+		--col-d-bottom: calc(80 * var(--col-su));
+		--col-d-title: calc(20 * var(--col-su));
+		--col-d-title-top: calc(10 * var(--col-su));
+		--col-d-eyecatch-top: calc(24 * var(--col-su));
+		--col-d-body-top: calc(32 * var(--col-su));
+		--col-d-body: calc(14 * var(--col-su));
+		--col-d-h2: calc(18 * var(--col-su));
+		--col-d-h3: calc(16 * var(--col-su));
+		--col-h2-pad-t: calc(6 * var(--col-su));
+		--col-h2-pad-b: calc(8 * var(--col-su));
+		--col-h2-pad-l: calc(12 * var(--col-su));
+		--col-h2-bar: calc(4 * var(--col-su));
+		--col-d-bar: calc(4 * var(--col-su));
+		--col-d-radius-sm: calc(6 * var(--col-su));
+		--col-d-radius: calc(8 * var(--col-su));
+		--col-d-radius-lg: calc(10 * var(--col-su));
+		--col-tbl-min: calc(560 * var(--col-su)); /* 表は .tbl-wrap の中で横スクロール */
+		--col-grid2-cols: 1;
+		--col-grid3-cols: 1;
+		--col-img-left-float: none;
+		--col-img-left-w: 100%;
+		--col-img-left-m: var(--col-block-gap) 0;
+		--col-d-adjacent-top: calc(56 * var(--col-su));
+		--col-d-adjacent-pad: calc(20 * var(--col-su));
+		--col-d-adjacent-gap: calc(16 * var(--col-su));
+		--col-d-adjacent-label-gap: calc(4 * var(--col-su));
+		--col-d-adjacent-title: calc(13 * var(--col-su));
+		--col-d-back-top: calc(40 * var(--col-su));
+		--col-d-back-pad-y: calc(14 * var(--col-su));
+		--col-d-back-pad-x: calc(36 * var(--col-su));
+		--col-d-back-text: calc(13 * var(--col-su));
+	}
+}

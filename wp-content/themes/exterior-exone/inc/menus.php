@@ -108,7 +108,7 @@ function exterior_exone_drawer_menu_items() {
 		),
 		array(
 			'label' => 'コラム',
-			'url'   => '#',
+			'url'   => (string) get_post_type_archive_link( 'column' ),
 		),
 	);
 }
@@ -175,7 +175,7 @@ function exterior_exone_store_drawer_menu_items() {
 		),
 		array(
 			'label' => 'コラム',
-			'url'   => '#',
+			'url'   => exterior_exone_store_link( (string) get_post_type_archive_link( 'column' ) ),
 		),
 		// コーポレートへ戻る唯一の入口なので ?store= を付けない。
 		array(

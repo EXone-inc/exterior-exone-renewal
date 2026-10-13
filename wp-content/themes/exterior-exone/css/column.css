@@ -97,7 +97,7 @@
 	flex: 0 0 auto;
 }
 
-/* カード全体をお知らせの個別ページへのリンクにする */
+/* カード全体をコラムの個別ページへのリンクにする */
 .p-scolumn__card-link {
 	display: block;
 }
@@ -116,6 +116,12 @@
 }
 
 .p-scolumn__card-title {
+	/* コラムのタイトルは長い（35〜40 文字）ので 2 行で省略し、カードの高さをそろえる（ユーザー決定 2026-10-10） */
+	display: -webkit-box;
+	overflow: hidden;
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: 2;
+	line-clamp: 2;
 	font-size: var(--st-column-title);
 	font-weight: var(--fw-medium);
 	line-height: 2.5;

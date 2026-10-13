@@ -1,6 +1,6 @@
 <?php
 /**
- * 共通部品: COLUMN（支店ページ・WORKS 一覧・詳細）。
+ * 共通部品: COLUMN（支店ページ・WORKS 一覧・詳細・コラム詳細の末尾）。
  *
  * カンプ: 支店 PC 612:869（背景 #fefefe）/ 612:264「COLUMN」/ 612:629・612:628（見出し 3 点セット）/
  *         612:449 = カード 5 枚（373x226・ピッチ 410。5 枚目は右端で見切れる）/
@@ -8,16 +8,17 @@
  *         SP 641:1447〜641:1459（背景 #f3f3f4、289x175 のカードを指で横にスクロール、VIEW MORE なし）
  *         WORKS PC 821:148・821:184 / SP 836:95（guide 821:266「支店ページと同じもの」）
  *
- * TOP の NEWS（template-parts/top/section-news.php）と同じ作りで、既存 CPT news の
- * 最新 5 件をそのまま出す（支店での絞り込みはしない）。1 件も無ければ出さない。
- * カンプで 5 枚目が見切れているのは横スクロールの表現（決定事項 Q5）。
+ * TOP の NEWS（template-parts/top/section-news.php）と同じ作りで、コラム（CPT column）の
+ * 最新 3 件を出す（exterior_exone_column_cards()。支店での絞り込みはしない）。1 件も無ければ出さない。
+ * コラム詳細では表示中の記事を除く（$args['exclude']）。VIEW MORE はコラム一覧 /column/ へ。
+ * 件数はカンプの 5 枚ではなく 3 件（コラムページ決定事項 §3「共通」・仕様書 Q13）。
  * CSS は css/column.css。リンクは exterior_exone_store_link() 経由（支店モードなら ?store= が付く）。
  *
  * TOP との差分（設計メモ §17）: 和文見出し + 本文 3 行が付く / カードの影が薄い /
  * ボタンの文字色が #4d4d4d。
  *
  * $args: column（必須。exterior_exone_store_column() と同じ形 {title, jp, lead[], lead_sp_join[]}）
- *        / section（data-section の値。既定 column）
+ *        / section（data-section の値。既定 column）/ exclude（除くコラムの ID。既定なし）
  *
  * @package exterior-exone
  */
@@ -32,14 +33,14 @@ if ( ! $exterior_exone_column ) {
 	return;
 }
 
-$exterior_exone_cards = exterior_exone_news_cards();
+$exterior_exone_cards = exterior_exone_column_cards( isset( $args['exclude'] ) ? $args['exclude'] : array() );
 
 if ( ! $exterior_exone_cards ) {
 	return;
 }
 
 $exterior_exone_column_section = empty( $args['section'] ) ? 'column' : (string) $args['section'];
-$exterior_exone_archive        = exterior_exone_store_link( (string) get_post_type_archive_link( 'news' ) );
+$exterior_exone_archive        = exterior_exone_store_link( (string) get_post_type_archive_link( 'column' ) );
 ?>
 <section class="p-scolumn" data-section="<?php echo esc_attr( $exterior_exone_column_section ); ?>">
 	<h2 class="c-store-title"><?php echo esc_html( $exterior_exone_column['title'] ); ?></h2>

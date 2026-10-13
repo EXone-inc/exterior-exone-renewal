@@ -21,6 +21,7 @@ require_once get_theme_file_path( 'inc/plans-data.php' );
 require_once get_theme_file_path( 'inc/highend-data.php' );
 require_once get_theme_file_path( 'inc/works-data.php' );
 require_once get_theme_file_path( 'inc/works-page-data.php' );
+require_once get_theme_file_path( 'inc/column-page-data.php' );
 require_once get_theme_file_path( 'inc/contact-data.php' );
 require_once get_theme_file_path( 'inc/contact-forms.php' );
 
@@ -142,9 +143,9 @@ function exterior_exone_enqueue_assets() {
 		);
 	}
 
-	// COLUMN と見出し 3 点セットの共通部品（支店ページ・WORKS 一覧・詳細）。
+	// COLUMN と見出し 3 点セットの共通部品（支店ページ・WORKS 一覧・詳細・コラム詳細）。
 	// --st-vu / --st-su などのトークンもここが持つため、css/store.css はこの後に読む（依存に入れる）。
-	if ( exterior_exone_is_store_page() || is_page( 'store' ) || exterior_exone_is_works_page() ) {
+	if ( exterior_exone_is_store_page() || is_page( 'store' ) || exterior_exone_is_works_page() || is_singular( 'column' ) ) {
 		wp_enqueue_style(
 			'exterior-exone-column',
 			get_theme_file_uri( 'css/column.css' ),
@@ -392,6 +393,17 @@ function exterior_exone_enqueue_assets() {
 				true
 			);
 		}
+	}
+
+	// コラム一覧 /column/・詳細 /column/<投稿名>/（archive-column.php / single-column.php）。
+	// CSS はテーマ本体の後に読む（css/column.css は共通 COLUMN セクションの CSS で別物）。
+	if ( exterior_exone_is_column_page() ) {
+		wp_enqueue_style(
+			'exterior-exone-column-page',
+			get_theme_file_uri( 'css/column-page.css' ),
+			array( 'exterior-exone-style' ),
+			exterior_exone_asset_version( 'css/column-page.css' )
+		);
 	}
 
 	// お問い合わせページ（/contact/。page-contact.php）。CSS はテーマ本体の後に読む。
@@ -746,6 +758,10 @@ function exterior_exone_body_class( $classes ) {
 		$classes[] = 'is-contact-page';
 	}
 
+	if ( exterior_exone_is_column_page() ) {
+		$classes[] = 'is-column-page';
+	}
+
 	if ( exterior_exone_has_fv_header() ) {
 		$classes[] = 'has-fv-header';
 	}
@@ -789,6 +805,18 @@ function exterior_exone_works_noscript_style() {
 	echo '<noscript><style>.is-works-page [data-reveal]{opacity:1;transform:none;transition:none}</style></noscript>' . "\n";
 }
 add_action( 'wp_head', 'exterior_exone_works_noscript_style' );
+
+/**
+ * コラムの一覧・詳細で JS が動かないとき、[data-reveal] を最初から表示する。
+ * css/column-page.css の @media (scripting: none) に対応しないブラウザ向けの併用。
+ */
+function exterior_exone_column_noscript_style() {
+	if ( ! exterior_exone_is_column_page() ) {
+		return;
+	}
+	echo '<noscript><style>.is-column-page [data-reveal]{opacity:1;transform:none;transition:none}</style></noscript>' . "\n";
+}
+add_action( 'wp_head', 'exterior_exone_column_noscript_style' );
 
 /**
  * お問い合わせページで JS が動かないとき、[data-reveal] を最初から表示し、
