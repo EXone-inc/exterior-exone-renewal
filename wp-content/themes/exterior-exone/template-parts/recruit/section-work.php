@@ -30,7 +30,7 @@ $exterior_exone_rc_work = exterior_exone_recruit_work();
 							src="<?php echo esc_url( exterior_exone_recruit_image( $exterior_exone_rc_member['card'] ) ); ?>"
 							width="764"
 							height="818"
-							alt=""
+							alt="<?php echo esc_attr( $exterior_exone_rc_member['dept'] . ' ' . $exterior_exone_rc_member['role'] . '（' . $exterior_exone_rc_member['year'] . '）の社員の写真' ); ?>"
 							loading="lazy"
 							decoding="async"
 						>
@@ -80,7 +80,7 @@ $exterior_exone_rc_work = exterior_exone_recruit_work();
 								src="<?php echo esc_url( exterior_exone_recruit_image( $exterior_exone_rc_member['photo'] ) ); ?>"
 								width="<?php echo esc_attr( (string) $exterior_exone_rc_member['size'][0] ); ?>"
 								height="<?php echo esc_attr( (string) $exterior_exone_rc_member['size'][1] ); ?>"
-								alt=""
+								alt="<?php echo esc_attr( $exterior_exone_rc_member['name'] . '（' . $exterior_exone_rc_member['join'] . '）のインタビュー写真' ); ?>"
 								loading="lazy"
 								decoding="async"
 							>
