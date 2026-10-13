@@ -46,7 +46,7 @@ function exterior_exone_global_menu_items() {
 		),
 		array(
 			'label' => 'RECRUIT',
-			'url'   => '#',
+			'url'   => exterior_exone_recruit_url(), // /recruit/（inc/recruit-data.php）
 		),
 		exterior_exone_contact_item( 'CONTACT' ),
 	);
@@ -104,7 +104,7 @@ function exterior_exone_drawer_menu_items() {
 		),
 		array(
 			'label' => '採用情報',
-			'url'   => '#',
+			'url'   => exterior_exone_recruit_url(), // /recruit/（inc/recruit-data.php）
 		),
 		array(
 			'label' => 'コラム',

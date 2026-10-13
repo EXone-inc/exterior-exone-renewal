@@ -415,13 +415,13 @@ function exterior_exone_contact_form_messages( $key ) {
 add_filter( 'wpcf7_load_css', '__return_false' );
 
 /**
- * CF7 の JS は /contact/ だけで読む。
+ * CF7 の JS は /contact/ と応募フォーム /recruit/entry/（inc/recruit-form.php）だけで読む。
  *
  * @param bool $load 既定値。
  * @return bool
  */
 function exterior_exone_contact_cf7_load_js( $load ) {
-	return $load && is_page( 'contact' );
+	return $load && ( is_page( 'contact' ) || ( function_exists( 'exterior_exone_is_recruit_entry_page' ) && exterior_exone_is_recruit_entry_page() ) );
 }
 add_filter( 'wpcf7_load_js', 'exterior_exone_contact_cf7_load_js' );
 

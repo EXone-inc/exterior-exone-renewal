@@ -24,6 +24,8 @@ require_once get_theme_file_path( 'inc/works-page-data.php' );
 require_once get_theme_file_path( 'inc/column-page-data.php' );
 require_once get_theme_file_path( 'inc/contact-data.php' );
 require_once get_theme_file_path( 'inc/contact-forms.php' );
+require_once get_theme_file_path( 'inc/recruit-data.php' );
+require_once get_theme_file_path( 'inc/recruit-form.php' );
 
 /**
  * テーマサポートの登録。
@@ -435,6 +437,97 @@ function exterior_exone_enqueue_assets() {
 		);
 	}
 
+	// 採用ページ（/recruit/。page-recruit.php）。CSS はテーマ本体の後に読む。
+	// 粒子は recruit.js、FV の写真の列は PLANS と同じ img list のエンドレスロール（plans-imglist.js）。
+	// 流す速さ（px/秒）は recruit-flow.js が先に入れるので、plans-imglist.js の依存にする。
+	if ( is_page( 'recruit' ) ) {
+		wp_enqueue_style(
+			'exterior-exone-recruit',
+			get_theme_file_uri( 'css/recruit.css' ),
+			array( 'exterior-exone-style' ),
+			exterior_exone_asset_version( 'css/recruit.css' )
+		);
+
+		wp_enqueue_script(
+			'exterior-exone-recruit',
+			get_theme_file_uri( 'js/recruit.js' ),
+			array(),
+			exterior_exone_asset_version( 'js/recruit.js' ),
+			true
+		);
+
+		wp_enqueue_script(
+			'exterior-exone-recruit-flow',
+			get_theme_file_uri( 'js/recruit-flow.js' ),
+			array(),
+			exterior_exone_asset_version( 'js/recruit-flow.js' ),
+			true
+		);
+
+		wp_enqueue_script(
+			'exterior-exone-plans-imglist',
+			get_theme_file_uri( 'js/plans-imglist.js' ),
+			array( 'exterior-exone-recruit-flow' ),
+			exterior_exone_asset_version( 'js/plans-imglist.js' ),
+			true
+		);
+
+		// Work のインタビューのモーダル（<dialog>）。
+		wp_enqueue_script(
+			'exterior-exone-recruit-modal',
+			get_theme_file_uri( 'js/recruit-modal.js' ),
+			array(),
+			exterior_exone_asset_version( 'js/recruit-modal.js' ),
+			true
+		);
+
+		// FAQ の開閉。
+		wp_enqueue_script(
+			'exterior-exone-recruit-faq',
+			get_theme_file_uri( 'js/recruit-faq.js' ),
+			array(),
+			exterior_exone_asset_version( 'js/recruit-faq.js' ),
+			true
+		);
+
+		// 募集要項の開閉と /recruit/#<slug> のディープリンク。
+		wp_enqueue_script(
+			'exterior-exone-recruit-req',
+			get_theme_file_uri( 'js/recruit-req.js' ),
+			array(),
+			exterior_exone_asset_version( 'js/recruit-req.js' ),
+			true
+		);
+
+		// 固定表示の「応募する」。
+		wp_enqueue_script(
+			'exterior-exone-recruit-apply',
+			get_theme_file_uri( 'js/recruit-apply.js' ),
+			array(),
+			exterior_exone_asset_version( 'js/recruit-apply.js' ),
+			true
+		);
+	}
+
+	// 応募フォーム（/recruit/entry/。page-recruit-entry.php）。CSS はテーマ本体の後に読む。
+	// 送信・完了・エラーの見せ方は recruit-entry.js（CF7 が無効なら依存を付けない）。
+	if ( exterior_exone_is_recruit_entry_page() ) {
+		wp_enqueue_style(
+			'exterior-exone-recruit-entry',
+			get_theme_file_uri( 'css/recruit-entry.css' ),
+			array( 'exterior-exone-style' ),
+			exterior_exone_asset_version( 'css/recruit-entry.css' )
+		);
+
+		wp_enqueue_script(
+			'exterior-exone-recruit-entry',
+			get_theme_file_uri( 'js/recruit-entry.js' ),
+			wp_script_is( 'contact-form-7', 'registered' ) ? array( 'contact-form-7' ) : array(),
+			exterior_exone_asset_version( 'js/recruit-entry.js' ),
+			true
+		);
+	}
+
 	// 支店ページの施工イメージ帯（PLANS の img list と同じエンドレスロール）・
 	// DX EXPERIENCE（TOP と同じピン留めのステップ送り）・選ばれる理由の浮遊・AREA のアーチ状ロール・FAQ（アコーディオン）。
 	if ( exterior_exone_is_store_page() ) {
@@ -705,7 +798,8 @@ function exterior_exone_is_works_page() {
  *
  * 全幅の FV から始まるページは、ヘッダーを写真の上に半透明で重ねる
  * （カンプ TOP 917:2733 / 企業情報 393:546 / DX 436:381 / PLANS 586:552。ハイエンドは PC カンプに
- * ヘッダーが無いので PLANS と同じ扱い。WORKS 一覧・詳細・CONTACT も同じ）。それ以外は黒帯のまま。
+ * ヘッダーが無いので PLANS と同じ扱い。WORKS 一覧・詳細・CONTACT も同じ。採用ページは白地 + 粒子の FV に
+ * 重ねる＝現サイトと同じ構図）。それ以外は黒帯のまま。
  * 下層ページが増えたらここに追加する。
  *
  * @return bool
@@ -713,7 +807,8 @@ function exterior_exone_is_works_page() {
 function exterior_exone_has_fv_header() {
 	// コラム（FV は無い）もコーポレートの半透明ヘッダーを重ねる（2026-10-13 のユーザー指示。黒帯のままだと
 	// 支店用ヘッダーに見えるため）。重ねたぶんの上余白は css/column-page.css 側で足す。
-	return is_front_page() || is_page( 'company' ) || is_page( 'dx' ) || is_page( 'vr' ) || is_page( 'plans' ) || is_page( 'high-end' ) || exterior_exone_is_works_page() || is_page( 'contact' ) || exterior_exone_is_store_page() || ( function_exists( 'exterior_exone_is_column_page' ) && exterior_exone_is_column_page() );
+	// 応募フォーム（白地）もコラムと同じ扱い。上余白は css/recruit-entry.css 側で足す。
+	return is_front_page() || is_page( 'company' ) || is_page( 'dx' ) || is_page( 'vr' ) || is_page( 'plans' ) || is_page( 'high-end' ) || exterior_exone_is_works_page() || is_page( 'contact' ) || is_page( 'recruit' ) || exterior_exone_is_recruit_entry_page() || exterior_exone_is_store_page() || ( function_exists( 'exterior_exone_is_column_page' ) && exterior_exone_is_column_page() );
 }
 
 /**
@@ -762,6 +857,14 @@ function exterior_exone_body_class( $classes ) {
 
 	if ( exterior_exone_is_column_page() ) {
 		$classes[] = 'is-column-page';
+	}
+
+	if ( is_page( 'recruit' ) ) {
+		$classes[] = 'is-recruit-page';
+	}
+
+	if ( exterior_exone_is_recruit_entry_page() ) {
+		$classes[] = 'is-recruit-entry-page';
 	}
 
 	if ( exterior_exone_has_fv_header() ) {
@@ -857,6 +960,26 @@ function exterior_exone_store_noscript_style() {
 add_action( 'wp_head', 'exterior_exone_store_noscript_style' );
 
 /**
+ * 採用ページで JS が動かないとき、FAQ の回答と募集要項 6 職種を開いた状態で出し、
+ * 開けない Work のモーダルの＋ボタンと募集要項・FAQ の＋アイコンを隠す（仕様書 Q11）。
+ */
+function exterior_exone_recruit_noscript_style() {
+	if ( ! is_page( 'recruit' ) ) {
+		return;
+	}
+	echo '<noscript><style>'
+		. '.is-recruit-page .p-rcfaq__a{max-height:none}'
+		. '.is-recruit-page .p-rcwork__open{display:none}'
+		. '.is-recruit-page .p-rcreq__body{max-height:none;padding-top:16px}'
+		. '.is-recruit-page .p-rcreq__icon{display:none}'
+		. '.is-recruit-page .p-rcreq__toggle{cursor:default}'
+		. '.is-recruit-page .p-rcfaq__icon{display:none}'
+		. '.is-recruit-page .p-rcfaq__q{cursor:default}'
+		. '</style></noscript>' . "\n";
+}
+add_action( 'wp_head', 'exterior_exone_recruit_noscript_style' );
+
+/**
  * 支店ページのテンプレートを割り当てる。
  *
  * 6 拠点は固定ページのスラッグ（inc/store-data.php）で判定して page-store.php、
@@ -883,6 +1006,13 @@ function exterior_exone_store_template( $template ) {
 		$index_template = locate_template( 'page-store-index.php' );
 
 		return $index_template ? $index_template : $template;
+	}
+
+	// 応募フォーム（親が recruit の entry だけ。階層の page-entry.php にはしない）。
+	if ( exterior_exone_is_recruit_entry_page() ) {
+		$entry_template = locate_template( 'page-recruit-entry.php' );
+
+		return $entry_template ? $entry_template : $template;
 	}
 
 	return $template;

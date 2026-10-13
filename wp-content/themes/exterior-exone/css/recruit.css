@@ -1,0 +1,1625 @@
+/* ============================================================
+   RECRUIT（採用ページ）/recruit/（page-recruit.php）
+   カンプは無い。正は現サイト https://exterior-exone.com/recruit/ と
+   参照物 docs/reference-20261013-recruit/（recruit.css の rem は 1rem = 10px で読み替え）
+   仕様書: docs/spec-20261013-recruit-page.md
+   決定事項: docs/spec-20261013-recruit-page-decisions.md
+   プレフィックスは --rc- / .p-rc（TOP の RECRUIT セクション .p-recruit と別物）。
+   ------------------------------------------------------------
+   現サイトは clamp() 設計なので比例ブロック（--*-vu）は使わない。
+   ブレイクポイントは現サイトの 960 を 1024 に読み替える（1025px 以上 = PC）。
+   色・寸法・速さはここの :root に置き、下の各ルールはトークン経由で使う。
+   ============================================================ */
+:root {
+	/* --- 色（現サイトのまま。決定 §2-2） --- */
+	--rc-white: #fff;
+	--rc-black: #000;
+	--rc-sage: #99aea4; /* アイコンの丸・Flow の三角 */
+	--rc-sage-dark: #608373; /* 募集要項の箱・FAQ の Q・ラベル */
+	--rc-earth: #4c3d15; /* 表の文字・説明文 */
+	--rc-earth-light: #ede3bf; /* 表の内容の下線・FAQ の枠 */
+	--rc-gray: #3c3c3d; /* 見出し */
+	--rc-bg: #f9f9f9; /* .content-bg・FV 下端のカーブ */
+	--rc-yellow: #ffe622; /* 送信ボタン */
+	--rc-red: #c80202; /* モーダルの「働く人を知る」・Q 番号 */
+	--rc-required: #de3434; /* 必須の札 */
+	--rc-input-bg: #e7e7e7; /* フォームの入力欄 */
+	--rc-marquee-color: #d9d9d984; /* 流れる大文字 */
+	--rc-overlay: rgba(0, 0, 0, 0.8); /* モーダルの暗幕 */
+
+	/* 粒子の 6 色（現サイト recruit.js の THREE.Color。js/recruit.js が canvas から読む） */
+	--rc-particle-1: #006e54;
+	--rc-particle-2: #0075c2;
+	--rc-particle-3: #009b9f;
+	--rc-particle-4: #fdd35c;
+	--rc-particle-5: #ea5532;
+	--rc-particle-6: #915da3;
+
+	/* --- 角丸 --- */
+	--rc-radius-lg: 20px;
+	--rc-radius-md: 14px;
+	--rc-radius-sm: 8px;
+
+	/* --- FV（.recruit-first--view） --- */
+	--rc-fv-bg: var(--rc-white); /* PC は現サイトどおり黒（粒子の白い canvas が覆う） */
+	--rc-fv-pad-bottom: 100px; /* 10rem → PC 5rem */
+	--rc-fv-slider-gap: 60px; /* スライダーの上 6rem */
+	--rc-fv-slider-top: var(--rc-fv-slider-gap); /* PC はヘッダーを重ねるぶんを足す（下の PC ブロック） */
+
+	/* 写真スライダー（Splide の fixedWidth / gap / height。1024 以下 → 1025〜 → 1920〜） */
+	--rc-slide-w: 180px;
+	--rc-slide-h: 250px;
+	--rc-slide-gap: 40px;
+	--rc-slide-shadow: 0 5px 15px 0 rgba(0, 0, 0, 0.741);
+	--rc-slide-speed: 60; /* px/秒（AutoScroll speed 1 を 60Hz 相当に。仕様書 Q2。js/recruit-flow.js が読む） */
+
+	/* コピー（.text-container） */
+	--rc-fv-text: var(--rc-black);
+	--rc-fv-copy-bg: #ffffffcf;
+	--rc-fv-copy-top: 50px; /* 5rem → PC 2rem */
+	--rc-fv-copy-pad: 0 14px 14px; /* 0 1.4rem 1.4rem → PC 0 0 2rem */
+	--rc-fv-copy-max: none; /* PC 1060 */
+	--rc-fv-copy-lh: 1.8;
+	--rc-fv-copy-ls: 0.2px; /* .02rem */
+	--rc-fv-copy-p-gap: 5px; /* .text-container p { margin: 5px 0 } */
+	--rc-fv-sub-top: 40px; /* 4rem */
+	--rc-fs-fv-en: clamp(24px, 15.92px + 3.01vw, 52px);
+	--rc-fs-fv-ja: clamp(22px, 14.5px + 2.79vw, 48px);
+	--rc-fs-fv-sub: clamp(18px, 15.67px + 1.17vw, 25px);
+	--rc-fw-black: 900; /* 同梱の Noto Sans JP は 700 まで。表示は 700（仕様書 Q16） */
+	--rc-fv-shadow-lg: 3px 3px 5px rgba(0, 0, 0, 0.3);
+	--rc-fv-shadow-sm: 2px 2px 4px rgba(0, 0, 0, 0.2);
+
+	/* 応募ボタン（.rec-btn-flat / .rec-btn-border） */
+	--rc-btn-w: 280px;
+	--rc-btn-margin: 60px; /* 6rem auto */
+	--rc-btn-pad-y: 28px; /* 2.8rem 0 */
+	--rc-btn-radius: 45px;
+	--rc-btn-fs: 15px;
+	--rc-btn-shadow: 0 0 5px 0 var(--rc-black);
+	--rc-btn-icon: 18px; /* 1.8rem */
+	--rc-btn-icon-left: 220px;
+	--rc-btn-icon-shift: 7.5px; /* ホバーの translateX(25%)（幅 30 の 25%） */
+	--rc-btn-time: 0.5s; /* all .5s ease-in-out */
+	/* 左上から広がる白い円（:before。通常 150 角を左へ寄せて三日月だけ見せ、ホバーで 500 角に） */
+	--rc-btn-circle: 150px;
+	--rc-btn-circle-top: -8px;
+	--rc-btn-circle-x: -80%;
+	--rc-btn-circle-y: -28px;
+	--rc-btn-circle-hover: 500px;
+	--rc-btn-circle-hover-x: -10px;
+	--rc-btn-circle-hover-y: -200px;
+
+	/* 下端のカーブ（.clipped-rounded。SP は浅い roundedClipMobile） */
+	--rc-curve-h: 100px; /* padding 50px 0 */
+	--rc-curve-bottom: -50px; /* bottom -5rem */
+}
+
+/* ============================================================
+   FV
+   ============================================================ */
+.p-rcfv {
+	position: relative;
+	overflow: hidden;
+	padding-bottom: var(--rc-fv-pad-bottom);
+	background: var(--rc-fv-bg);
+	color: var(--rc-fv-text);
+}
+
+/* 粒子（js/recruit.js）。canvas 自体を白にして、JS が動かなくても白地に見せる */
+.p-rcfv__bg {
+	position: absolute;
+	inset: 0;
+	z-index: 0;
+}
+
+.p-rcfv__canvas {
+	display: block;
+	width: 100%;
+	height: 100%;
+	background: var(--rc-white);
+}
+
+/* --- 写真スライダー（js/plans-imglist.js で右 → 左へ流す） --- */
+.p-rcfv__slider {
+	position: relative;
+	z-index: 2;
+	padding-top: var(--rc-fv-slider-top);
+}
+
+.p-rcfv__slides {
+	display: flex;
+	gap: var(--rc-slide-gap);
+	width: max-content;
+}
+
+.p-rcfv__slide {
+	flex: 0 0 auto;
+	width: var(--rc-slide-w);
+	height: var(--rc-slide-h);
+	overflow: hidden;
+	border-radius: var(--rc-radius-lg);
+	background: var(--rc-white);
+	box-shadow: var(--rc-slide-shadow);
+}
+
+.p-rcfv__slide img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+@keyframes rc-flow {
+	to {
+		transform: translateX(calc(-1 * var(--plp-imglist-shift, 0px)));
+	}
+}
+
+.p-rcfv__slides.is-running {
+	animation: rc-flow var(--plp-imglist-duration) linear infinite;
+}
+
+/* --- コピー（.text-container。h1 = 英字 + 和文、p = サブ） --- */
+.p-rcfv__copy {
+	position: relative;
+	z-index: 2;
+	max-width: var(--rc-fv-copy-max);
+	margin: var(--rc-fv-copy-top) auto 0;
+	padding: var(--rc-fv-copy-pad);
+	background: var(--rc-fv-copy-bg);
+	color: var(--rc-fv-text);
+	text-align: center;
+	line-height: var(--rc-fv-copy-lh);
+	letter-spacing: var(--rc-fv-copy-ls);
+}
+
+.p-rcfv__title {
+	font-weight: inherit;
+	font-size: inherit;
+	line-height: inherit;
+}
+
+.p-rcfv__en,
+.p-rcfv__ja {
+	display: block;
+	margin-block: var(--rc-fv-copy-p-gap);
+	text-shadow: var(--rc-fv-shadow-lg);
+}
+
+.p-rcfv__en {
+	font-size: var(--rc-fs-fv-en);
+	font-weight: var(--rc-fw-black);
+}
+
+.p-rcfv__ja {
+	font-size: var(--rc-fs-fv-ja);
+	font-weight: var(--fw-bold);
+}
+
+.p-rcfv__sub {
+	margin: var(--rc-fv-sub-top) 0 var(--rc-fv-copy-p-gap);
+	font-size: var(--rc-fs-fv-sub);
+	font-weight: var(--fw-medium);
+	line-height: var(--rc-fv-copy-lh);
+	text-shadow: var(--rc-fv-shadow-sm);
+}
+
+/* --- 応募ボタン（.rec-rink_btn / .rec-btn-flat / .rec-btn-border） --- */
+.p-rcfv__apply {
+	position: relative;
+	z-index: 3;
+	width: var(--rc-btn-w);
+	margin: var(--rc-btn-margin) auto;
+}
+
+.p-rcbtn {
+	position: relative;
+	display: block;
+	overflow: hidden;
+	padding: var(--rc-btn-pad-y) 0;
+	border-radius: var(--rc-btn-radius);
+	background: var(--rc-black);
+	box-shadow: var(--rc-btn-shadow);
+	color: var(--rc-white);
+	font-size: var(--rc-btn-fs);
+	font-weight: var(--fw-bold);
+	line-height: 1;
+	text-align: center;
+	text-decoration: none;
+}
+
+.p-rcbtn:hover {
+	opacity: 1; /* a:hover の透過を打ち消す（白が広がる演出に置き換え） */
+}
+
+.p-rcbtn::before {
+	position: absolute;
+	top: var(--rc-btn-circle-top);
+	left: 0;
+	width: var(--rc-btn-circle);
+	height: var(--rc-btn-circle);
+	border-radius: 50%;
+	background: var(--rc-white);
+	content: "";
+	transform: translateX(var(--rc-btn-circle-x)) translateY(var(--rc-btn-circle-y));
+	transition: all var(--rc-btn-time) ease-in-out;
+}
+
+.p-rcbtn:hover::before {
+	width: var(--rc-btn-circle-hover);
+	height: var(--rc-btn-circle-hover);
+	transform: translateX(var(--rc-btn-circle-hover-x)) translateY(var(--rc-btn-circle-hover-y));
+}
+
+.p-rcbtn__label {
+	position: relative;
+	color: var(--rc-white);
+}
+
+.p-rcbtn:hover .p-rcbtn__label {
+	color: var(--rc-black);
+}
+
+/* 右向き矢印（Font Awesome arrow-right）→ ホバーで丸の中の右矢印（circle-right）・黒 */
+.p-rcbtn__icon {
+	position: absolute;
+	top: 50%;
+	left: var(--rc-btn-icon-left);
+	width: var(--rc-btn-icon);
+	height: var(--rc-btn-icon);
+	margin-top: calc(var(--rc-btn-icon) / -2);
+	background-color: var(--rc-white);
+	-webkit-mask: url("../images/recruit/icons/arrow-right.svg") center / contain no-repeat;
+	mask: url("../images/recruit/icons/arrow-right.svg") center / contain no-repeat;
+	transition: all var(--rc-btn-time) ease-in-out;
+}
+
+.p-rcbtn:hover .p-rcbtn__icon {
+	background-color: var(--rc-black);
+	-webkit-mask-image: url("../images/recruit/icons/circle-right.svg");
+	mask-image: url("../images/recruit/icons/circle-right.svg");
+	transform: translateX(var(--rc-btn-icon-shift));
+}
+
+/* --- 下端のカーブ（.clipped-rounded の clipPath と同じ形。FV の overflow で下端が切れる） --- */
+.p-rcfv__curve {
+	position: absolute;
+	right: 0;
+	bottom: var(--rc-curve-bottom);
+	left: 0;
+	z-index: 1;
+	height: var(--rc-curve-h);
+	pointer-events: none;
+}
+
+.p-rcfv__curve-svg {
+	display: block;
+	width: 100%;
+	height: 100%;
+	fill: var(--rc-bg);
+}
+
+.p-rcfv__curve-svg--pc {
+	display: none;
+}
+
+/* ============================================================
+   PC（1025px 以上。現サイトの min-width: 960px）
+   ============================================================ */
+@media (min-width: 1025px) {
+	:root {
+		--rc-fv-bg: var(--rc-black);
+		--rc-fv-pad-bottom: 50px;
+
+		--rc-slide-w: 230px;
+		--rc-slide-h: 300px;
+		--rc-slide-gap: 35px;
+
+		--rc-fv-copy-top: 20px;
+		--rc-fv-copy-pad: 0 0 20px;
+		--rc-fv-copy-max: 1060px;
+
+		/* roundedClipPC（深いカーブ）。padding 100px 20px → 高さ 200・bottom -1rem */
+		--rc-curve-h: 200px;
+		--rc-curve-bottom: -10px;
+	}
+
+	/* コーポレートではヘッダーを fixed で重ねる（body.has-fv-header。functions.php）ので、
+	   ヘッダーの高さぶんだけスライダーを下げる（粒子の白地はヘッダーの下まで。仕様書 Q7）。
+	   支店モードはヘッダーが流れの中（sticky）なので足さない */
+	.has-fv-header:not(.is-store-mode) .p-rcfv {
+		--rc-fv-slider-top: calc(var(--header-height) + var(--rc-fv-slider-gap));
+	}
+
+	.p-rcfv__curve-svg--sp {
+		display: none;
+	}
+
+	.p-rcfv__curve-svg--pc {
+		display: block;
+	}
+}
+
+@media (min-width: 1920px) {
+	:root {
+		--rc-slide-w: 280px;
+		--rc-slide-h: 350px;
+		--rc-slide-gap: 50px;
+	}
+}
+
+/* ============================================================
+   動きを減らす設定
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+	.p-rcfv__slides.is-running {
+		animation: none;
+	}
+
+	.p-rcbtn::before,
+	.p-rcbtn__icon {
+		transition: none;
+	}
+}
+
+
+/* ============================================================
+   S2: Training / Work（+ モーダル）/ 流れる大文字 / Benefits / Flow / FAQ
+   現サイト recruit.css の .rsec*・.recruit-content・.work_*・.modal_*・
+   .recruit_text--slide・.benefit-*・.flow-*・.faq-* を 1rem = 10px で読み替え。
+   現サイトは body の line-height: 1・letter-spacing なしが前提なので、各セクションでそろえる。
+   ============================================================ */
+:root {
+	/* --- 色（S2 で増えた分） --- */
+	--rc-photo-bg: #e7ece9; /* .rimg の画像枠 */
+	--rc-flow-note: #6f7873;
+	--rc-flow-border: rgba(60, 60, 61, 0.43); /* #3c3c3d6e */
+	--rc-flow-shadow: 5px 5px 0 rgba(0, 0, 0, 0.402);
+	--rc-card-shadow: 0 4px 24px rgba(0, 0, 0, 0.05);
+	--rc-work-open-bg: rgba(0, 18, 8, 0.863); /* #001208dc */
+	--rc-hero-kicker: #d3ded8;
+	--rc-hero-sub: #eef2f0;
+	--rc-hero-scrim:
+		linear-gradient(to top, rgba(38, 50, 44, 0.86) 0%, rgba(38, 50, 44, 0.34) 36%, rgba(38, 50, 44, 0) 66%),
+		linear-gradient(105deg, rgba(38, 50, 44, 0.5) 0%, rgba(38, 50, 44, 0) 48%);
+	--rc-hero-lead-shadow: 0 2px 18px rgba(0, 0, 0, 0.3);
+	--rc-hero-sub-shadow: 0 1px 10px rgba(0, 0, 0, 0.32);
+
+	/* --- セクションの枠（.rsec = Training / Benefits / FAQ、.recruit-content = Work / Flow） --- */
+	--rc-content-max: 1280px;
+	--rc-sec-pad-y: 80px; /* 8rem → PC 11rem */
+	--rc-sec-pad-x: 24px; /* 2.4rem → PC 4rem */
+	--rc-bg-pad-y: 80px; /* .recruit-content 8rem */
+	--rc-bg-pad-x: 30px; /* SP は現サイトの実測 30（PC 2.4rem） */
+
+	/* --- 見出し（.rsec-title / .work_title / .flow_title） --- */
+	--rc-fs-head-en: clamp(28px, 9.79px + 6.78vw, 64px);
+	--rc-fs-head-ja: clamp(16px, 10.67px + 2.67vw, 32px);
+	--rc-head-gap: 12px; /* .rsec-title */
+	--rc-head-gap-bg: 14px; /* .work_title / .flow_title */
+	--rc-head-bottom: 40px;
+	--rc-head-indent: 0px; /* .flow_title の PC 字下げ 2.4rem */
+	--rc-head-ls: 0.02em;
+
+	/* --- 本文の文字 --- */
+	--rc-fs-lead: clamp(14px, 13px + 0.4vw, 17px);
+	--rc-lh-lead: 1.9;
+	--rc-fs-cat: clamp(15px, 14px + 0.5vw, 18px);
+	--rc-fs-desc: clamp(13px, 12.5px + 0.3vw, 15px);
+	--rc-lh-desc: 1.75;
+
+	/* --- Training --- */
+	--rc-training-gap: 32px; /* SP の写真 → リスト。PC は 5rem */
+	--rc-training-cols: 1fr;
+	--rc-item-gap: 14px;
+	--rc-item-pad: 20px 22px;
+	--rc-icon-circle: 50px;
+	--rc-icon-size: 20px;
+
+	/* --- Work（カード） --- */
+	--rc-work-list-top: 50px; /* .work-content 5rem */
+	--rc-work-photo-w: 330px; /* PC 470 */
+	--rc-work-overlap: -75px; /* margin-right -7.5rem */
+	--rc-work-scrollbar: 20px; /* PC の中間幅で 3 枚を収めるときの、スクロールバーぶんの逃げ */
+	--rc-work-text-up: 105px; /* bottom 10.5rem → PC 18rem */
+	--rc-work-text-left: 50px;
+	--rc-work-text-gap: 4px; /* PC 1rem */
+	--rc-work-text-lh: 1; /* PC 1.2 */
+	--rc-work-text-ls: 0.02em;
+	--rc-fs-work-dept: clamp(14px, 11.34px + 0.99vw, 20px);
+	--rc-fs-work-des: clamp(12px, 10.23px + 0.66vw, 16px);
+	--rc-work-open: 53px; /* PC 85 */
+	--rc-work-open-bottom: 60px; /* PC 120 */
+	--rc-work-open-left: 165px; /* PC 240 */
+	--rc-work-open-icon: 18px; /* PC 28 */
+	--rc-work-open-time: 0.8s cubic-bezier(0.2, 1, 0.2, 1);
+
+	/* --- Work（モーダル。現サイト .modal__menu / .modal_content） --- */
+	--rc-modal-w: 80%; /* content-box（左右の内余白はこの外。現サイトと同じ） */
+	--rc-modal-top: 10px; /* 現サイトは × ボタンの行の高さぶん下がって始まる */
+	--rc-modal-pad: 50px 30px;
+	--rc-modal-inner-top: 0px; /* PC 10rem */
+	--rc-modal-inner-x: 0px; /* PC 8rem */
+	--rc-modal-fade: 0.8s ease; /* 開くときだけ（閉じるのは即時。仕様書 Q4） */
+	--rc-modal-close: 53px; /* PC 85 */
+	--rc-modal-close-top: 20px; /* PC 30 */
+	--rc-modal-close-right: 30px;
+	--rc-modal-close-icon: 20px; /* PC 28 */
+	--rc-modal-label-fs: 14px;
+	--rc-modal-label-bottom: 30px;
+	--rc-modal-head-dir: column-reverse; /* SP は写真が上。PC は文字が上 */
+	--rc-modal-head-gap: 17px; /* PC 3rem */
+	--rc-modal-name-gap: 10px;
+	--rc-fs-modal-role: clamp(16px, 14.23px + 0.66vw, 20px);
+	--rc-fs-modal-join: clamp(14px, 13.11px + 0.33vw, 16px);
+	--rc-modal-qa-top: 50px;
+	--rc-modal-qa-gap: 40px;
+	--rc-modal-item-gap: 14px; /* PC 3rem */
+	--rc-fs-modal-q: clamp(14px, 11.98px + 0.75vw, 18px);
+	--rc-fs-modal-a: clamp(14px, 12.99px + 0.38vw, 16px);
+	--rc-lh-modal: 1.8;
+	--rc-modal-line-gap: 30px; /* br.am */
+
+	/* --- 流れる大文字（.recruit_text--slide） --- */
+	--rc-fs-marquee: clamp(240px, 159.06px + 30.12vw, 400px);
+	--rc-marquee-gap: 40px; /* PC 10 */
+	--rc-marquee-shift: 100px; /* Work の下端から上へ食い込む量。PC 28rem */
+	--rc-marquee-speed: 84; /* px/秒（AutoScroll 1.4 を 60Hz 相当に。PC 0.8 → 48。仕様書 Q2） */
+
+	/* --- Benefits --- */
+	--rc-hero-ratio: 4 / 3; /* PC 2 / 1 */
+	--rc-hero-bottom: 32px; /* PC 4.4rem */
+	--rc-hero-pad: clamp(24px, 10px + 4vw, 56px);
+	--rc-hero-gap: 12px; /* PC 1.6rem */
+	--rc-fs-hero-kicker: clamp(11px, 10px + 0.35vw, 14px);
+	--rc-hero-kicker-line: clamp(26px, 20px + 1.6vw, 44px);
+	--rc-fs-hero-lead: clamp(24px, 13px + 3.2vw, 44px);
+	--rc-fs-hero-sub: clamp(13px, 11.5px + 0.4vw, 16px);
+	--rc-benefit-cols: 1fr; /* 768〜 2 列、1100〜 4 列 */
+	--rc-benefit-gap: 16px;
+	--rc-benefit-pad: 32px 20px;
+	--rc-benefit-icon: 64px;
+	--rc-benefit-icon-size: 26px;
+	--rc-fs-benefit-label: clamp(12px, 11.5px + 0.2vw, 13px);
+	--rc-fs-benefit-value: clamp(19px, 15px + 1.2vw, 26px);
+	--rc-fs-benefit-note: clamp(12px, 11.5px + 0.25vw, 13.5px);
+	--rc-benefit-lift: -4px;
+	--rc-benefit-time: 0.3s ease;
+
+	/* --- Flow --- */
+	--rc-flow-dir: column;
+	--rc-flow-gap: 60px; /* 1025〜1199 は 1.6rem */
+	--rc-flow-top: 50px; /* PC 8rem */
+	--rc-flow-item-w: 100%; /* PC 200（content-box） */
+	--rc-flow-item-max: 500px;
+	--rc-flow-item-pad: 65px 0; /* PC 6.5rem 5.5rem */
+	--rc-flow-item-margin: 0 auto; /* PC 0 */
+	--rc-fs-flow-step: clamp(24px, 19.95px + 1.51vw, 32px);
+	--rc-fs-flow-num: clamp(32px, 10.25px + 8.09vw, 75px);
+	--rc-flow-circle: 100px;
+	--rc-fs-flow-title: clamp(18px, 16.99px + 0.38vw, 20px);
+	--rc-flow-title-top: 20px;
+	--rc-flow-arrow-w: 40px; /* PC 20 */
+	--rc-flow-arrow-h: 20px; /* PC 40 */
+	--rc-flow-arrow-off: -45px;
+	--rc-fs-flow-note: clamp(12px, 11px + 0.4vw, 14px);
+	--rc-flow-note-top: 40px; /* PC 6rem */
+
+	/* --- FAQ --- */
+	--rc-faq-max: 880px;
+	--rc-faq-gap: 12px;
+	--rc-faq-pad: 20px 22px;
+	--rc-fs-faq-q: clamp(14px, 13px + 0.4vw, 16px);
+	--rc-faq-time: 0.35s ease;
+	--rc-faq-icon-time: 0.3s ease;
+}
+
+/* --- 共通: セクションの枠 --- */
+.p-rcsec,
+.p-rcbg {
+	position: relative;
+	line-height: 1;
+	letter-spacing: normal;
+	color: var(--rc-black);
+}
+
+.p-rcsec {
+	padding: var(--rc-sec-pad-y) var(--rc-sec-pad-x);
+}
+
+.p-rcsec--white {
+	background: var(--rc-white);
+}
+
+.p-rcsec--gray,
+.p-rcbg {
+	background: var(--rc-bg);
+}
+
+.p-rcsec__inner {
+	max-width: var(--rc-content-max);
+	margin: 0 auto;
+}
+
+/* .recruit-content（content-box で最大 1280 + 左右の内余白） */
+.p-rcbg__inner {
+	box-sizing: content-box;
+	max-width: var(--rc-content-max);
+	margin: 0 auto;
+	padding: var(--rc-bg-pad-y) var(--rc-bg-pad-x);
+}
+
+/* Work は Requirements（S3）と同じ地に続くので下の内余白は無し（現サイトは 1 つの .recruit-content） */
+.p-rcwork .p-rcbg__inner {
+	padding-bottom: 0;
+}
+
+/* --- 共通: 見出し（h2 = 英字 + 和文） --- */
+.p-rchead {
+	display: flex;
+	flex-direction: column;
+	gap: var(--rc-head-gap);
+	margin-bottom: var(--rc-head-bottom);
+	color: var(--rc-gray);
+	font-weight: var(--fw-bold);
+	line-height: 1;
+	letter-spacing: var(--rc-head-ls);
+	text-align: left;
+}
+
+.p-rchead--bg {
+	gap: var(--rc-head-gap-bg);
+	margin-bottom: 0;
+}
+
+.p-rchead--indent {
+	padding-left: var(--rc-head-indent);
+}
+
+.p-rchead__en {
+	font-size: var(--rc-fs-head-en);
+}
+
+.p-rchead__ja {
+	font-size: var(--rc-fs-head-ja);
+}
+
+.p-rcsec__lead {
+	margin-bottom: var(--rc-head-bottom);
+	color: var(--rc-gray);
+	font-size: var(--rc-fs-lead);
+	line-height: var(--rc-lh-lead);
+	letter-spacing: var(--rc-head-ls);
+}
+
+/* --- 共通: 画像枠（.rimg） --- */
+.p-rcimg {
+	position: relative;
+	overflow: hidden;
+	margin: 0;
+	border-radius: var(--rc-radius-lg);
+	background: var(--rc-photo-bg);
+}
+
+.p-rcimg > img {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+/* --- 共通: アイコン（Font Awesome Free の SVG を mask で塗る。font-size = アイコンの高さ） --- */
+.p-rcicon {
+	display: block;
+	flex-shrink: 0;
+	width: 1.25em;
+	height: 1em;
+	background-color: currentColor;
+	-webkit-mask: var(--rc-icon) center / contain no-repeat;
+	mask: var(--rc-icon) center / contain no-repeat;
+}
+
+.p-rcicon--helmet-safety { --rc-icon: url("../images/recruit/icons/helmet-safety.svg"); }
+.p-rcicon--handshake { --rc-icon: url("../images/recruit/icons/handshake.svg"); }
+.p-rcicon--pen-ruler { --rc-icon: url("../images/recruit/icons/pen-ruler.svg"); }
+.p-rcicon--laptop { --rc-icon: url("../images/recruit/icons/laptop.svg"); }
+.p-rcicon--chart-line { --rc-icon: url("../images/recruit/icons/chart-line.svg"); }
+.p-rcicon--calendar-days { --rc-icon: url("../images/recruit/icons/calendar-days.svg"); }
+.p-rcicon--umbrella-beach { --rc-icon: url("../images/recruit/icons/umbrella-beach.svg"); }
+.p-rcicon--yen-sign { --rc-icon: url("../images/recruit/icons/yen-sign.svg"); }
+.p-rcicon--shield-halved { --rc-icon: url("../images/recruit/icons/shield-halved.svg"); }
+.p-rcicon--user { --rc-icon: url("../images/recruit/icons/user.svg"); }
+.p-rcicon--clipboard-check { --rc-icon: url("../images/recruit/icons/clipboard-check.svg"); }
+.p-rcicon--comments { --rc-icon: url("../images/recruit/icons/comments.svg"); }
+.p-rcicon--square-check { --rc-icon: url("../images/recruit/icons/square-check.svg"); }
+.p-rcicon--plus { --rc-icon: url("../images/recruit/icons/plus.svg"); }
+.p-rcicon--xmark { --rc-icon: url("../images/recruit/icons/xmark.svg"); }
+
+/* ============================================================
+   Training（.rsec--edu）
+   ============================================================ */
+.p-rctraining__layout {
+	display: grid;
+	grid-template-columns: var(--rc-training-cols);
+	gap: var(--rc-training-gap);
+	align-items: center;
+}
+
+.p-rctraining__media {
+	aspect-ratio: 3 / 4;
+}
+
+.p-rctraining__list {
+	display: flex;
+	flex-direction: column;
+	gap: var(--rc-item-gap);
+}
+
+.p-rctraining__item {
+	display: grid;
+	grid-template-columns: auto 1fr;
+	gap: 16px;
+	align-items: start;
+	padding: var(--rc-item-pad);
+	border-radius: var(--rc-radius-lg);
+	background: var(--rc-bg);
+}
+
+.p-rctraining__icon {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: var(--rc-icon-circle);
+	height: var(--rc-icon-circle);
+	border-radius: 50%;
+	background: var(--rc-sage);
+	color: var(--rc-white);
+	font-size: var(--rc-icon-size);
+}
+
+.p-rctraining__cat {
+	margin: 0 0 4px;
+	color: var(--rc-gray);
+	font-size: var(--rc-fs-cat);
+	font-weight: var(--rc-fw-black);
+}
+
+.p-rctraining__note {
+	color: var(--rc-sage-dark);
+	font-size: 0.85em;
+}
+
+.p-rctraining__desc {
+	color: var(--rc-earth);
+	font-size: var(--rc-fs-desc);
+	line-height: var(--rc-lh-desc);
+}
+
+/* ============================================================
+   Work（.recruit-work / .work_iv-list）
+   ============================================================ */
+.p-rcwork {
+	overflow: hidden;
+}
+
+/* SP はカードの列だけ横スクロール（左右の内余白を打ち消して画面幅いっぱい） */
+.p-rcwork__list {
+	position: relative;
+	display: grid;
+	grid-template-columns: 1fr 1fr 1fr;
+	margin: var(--rc-work-list-top) calc(-1 * var(--rc-bg-pad-x)) 0;
+	overflow-x: auto;
+}
+
+.p-rcwork__card {
+	position: relative;
+}
+
+.p-rcwork__card:not(:last-child) {
+	margin-right: var(--rc-work-overlap);
+}
+
+.p-rcwork__photo img {
+	width: var(--rc-work-photo-w);
+	max-width: none;
+	height: auto;
+}
+
+.p-rcwork__text {
+	position: relative;
+	bottom: var(--rc-work-text-up);
+	left: var(--rc-work-text-left);
+	display: flex;
+	flex-direction: column;
+	gap: var(--rc-work-text-gap);
+	width: 100%;
+	color: var(--rc-white);
+	font-weight: var(--rc-fw-black);
+	line-height: var(--rc-work-text-lh);
+	letter-spacing: var(--rc-work-text-ls);
+}
+
+.p-rcwork__dept {
+	font-size: var(--rc-fs-work-dept);
+}
+
+.p-rcwork__des {
+	font-size: var(--rc-fs-work-des);
+}
+
+.p-rcwork__open {
+	position: absolute;
+	bottom: var(--rc-work-open-bottom);
+	left: var(--rc-work-open-left);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: var(--rc-work-open);
+	height: var(--rc-work-open);
+	border-radius: 50%;
+	background-color: var(--rc-work-open-bg);
+	color: var(--rc-white);
+	font-size: var(--rc-work-open-icon);
+	transition: var(--rc-work-open-time);
+}
+
+.p-rcwork__open-icon {
+	width: 0.875em; /* plus は 448 × 512 */
+}
+
+/* ============================================================
+   Work のモーダル（<dialog>。現サイト .modal__menu / .modal_content）
+   dialog 自体が画面全体の暗幕兼スクロールの器。パネルは右寄せの白。
+   ============================================================ */
+.p-rcmodal {
+	position: fixed;
+	inset: 0;
+	width: 100%;
+	max-width: none;
+	height: 100%;
+	max-height: none;
+	margin: 0;
+	padding: 0;
+	overflow-y: auto;
+	overscroll-behavior: contain;
+	border: 0;
+	background: var(--rc-overlay);
+	color: var(--rc-black);
+	line-height: 1;
+	letter-spacing: normal;
+}
+
+.p-rcmodal::backdrop {
+	background: transparent;
+}
+
+/* 開いている間は背面をスクロールさせない（ドロワー・WORKS の見積モーダルと同じ作法） */
+body.is-rc-modal-open {
+	overflow: hidden;
+}
+
+.p-rcmodal__close {
+	position: fixed;
+	top: var(--rc-modal-close-top);
+	right: var(--rc-modal-close-right);
+	z-index: 2;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	box-sizing: content-box;
+	width: var(--rc-modal-close);
+	height: var(--rc-modal-close);
+	border: 1px solid var(--rc-black);
+	border-radius: 50%;
+	background: var(--rc-white);
+	color: var(--rc-black);
+	font-size: var(--rc-modal-close-icon);
+}
+
+.p-rcmodal__close-icon {
+	width: 0.75em; /* xmark は 384 × 512 */
+}
+
+.p-rcmodal__panel {
+	position: relative;
+	box-sizing: content-box;
+	width: var(--rc-modal-w);
+	max-width: var(--rc-content-max);
+	margin: var(--rc-modal-top) 0 0 auto;
+	padding: var(--rc-modal-pad);
+	border-radius: var(--rc-radius-sm) 0 0 var(--rc-radius-sm);
+	background: var(--rc-white);
+	opacity: 0;
+}
+
+/* 開くときだけ 0.8 秒でフェードイン（閉じるときは即時。js/recruit-modal.js が付け外し） */
+.p-rcmodal__panel.is-shown {
+	opacity: 1;
+	transition: opacity var(--rc-modal-fade);
+}
+
+.p-rcmodal__label {
+	margin-bottom: var(--rc-modal-label-bottom);
+	color: var(--rc-red);
+	font-size: var(--rc-modal-label-fs);
+	font-weight: var(--rc-fw-black);
+}
+
+.p-rcmodal__body {
+	margin-top: var(--rc-modal-inner-top);
+	padding: 0 var(--rc-modal-inner-x);
+}
+
+.p-rcmodal__head {
+	display: flex;
+	flex-direction: var(--rc-modal-head-dir);
+	gap: var(--rc-modal-head-gap);
+}
+
+.p-rcmodal__name {
+	display: flex;
+	flex-direction: column;
+	gap: var(--rc-modal-name-gap);
+	font-weight: var(--rc-fw-black);
+	line-height: 1;
+}
+
+.p-rcmodal__role {
+	font-size: var(--rc-fs-modal-role);
+}
+
+.p-rcmodal__join {
+	font-size: var(--rc-fs-modal-join);
+}
+
+.p-rcmodal__photo img {
+	width: 100%;
+	height: auto;
+	border-radius: var(--rc-radius-sm);
+	object-fit: cover;
+}
+
+.p-rcmodal__qa {
+	display: grid;
+	gap: var(--rc-modal-qa-gap);
+	margin-top: var(--rc-modal-qa-top);
+}
+
+.p-rcmodal__item {
+	display: grid;
+	gap: var(--rc-modal-item-gap);
+}
+
+.p-rcmodal__q {
+	display: flex;
+	align-items: start;
+	gap: 8px;
+	font-size: var(--rc-fs-modal-q);
+	font-weight: var(--rc-fw-black);
+	line-height: var(--rc-lh-modal);
+}
+
+.p-rcmodal__qnum {
+	flex-shrink: 0;
+	color: var(--rc-red);
+}
+
+.p-rcmodal__a {
+	font-size: var(--rc-fs-modal-a);
+	font-weight: var(--fw-medium);
+	line-height: var(--rc-lh-modal);
+	letter-spacing: var(--rc-head-ls);
+}
+
+.p-rcmodal__line {
+	display: block;
+}
+
+.p-rcmodal__line--gap {
+	margin-top: var(--rc-modal-line-gap);
+}
+
+/* ============================================================
+   流れる大文字（.recruit_text--slide）
+   高さ 0 の枠から Work の下端へ食い込ませる。Requirements（S3）の箱・見出しより背面
+   ============================================================ */
+.p-rcmarquee {
+	position: relative;
+	z-index: 0;
+	height: 0;
+	pointer-events: none;
+}
+
+.p-rcmarquee__frame {
+	position: absolute;
+	top: calc(-1 * var(--rc-marquee-shift));
+	right: 0;
+	left: 0;
+	overflow: hidden;
+	pointer-events: none;
+}
+
+.p-rcmarquee__row {
+	--rc-flow-speed: var(--rc-marquee-speed);
+
+	display: flex;
+	gap: var(--rc-marquee-gap);
+	width: max-content;
+	padding-left: var(--rc-bg-pad-x);
+	color: var(--rc-marquee-color);
+	font-size: var(--rc-fs-marquee);
+	font-weight: var(--rc-fw-black);
+	line-height: 1;
+	letter-spacing: normal;
+	white-space: nowrap;
+}
+
+.p-rcmarquee__item {
+	flex: 0 0 auto;
+}
+
+.p-rcmarquee__row.is-running {
+	animation: rc-flow var(--plp-imglist-duration) linear infinite;
+}
+
+/* ============================================================
+   Benefits（.rsec--benefit）
+   ============================================================ */
+.p-rcbenefits__hero {
+	aspect-ratio: var(--rc-hero-ratio);
+	margin-bottom: var(--rc-hero-bottom);
+}
+
+.p-rcbenefits__copy {
+	position: absolute;
+	inset: 0;
+	z-index: 2;
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-end;
+	gap: var(--rc-hero-gap);
+	padding: var(--rc-hero-pad);
+	background: var(--rc-hero-scrim);
+	color: var(--rc-white);
+}
+
+.p-rcbenefits__kicker {
+	display: inline-flex;
+	align-items: center;
+	gap: 12px;
+	color: var(--rc-hero-kicker);
+	font-size: var(--rc-fs-hero-kicker);
+	font-weight: var(--fw-bold);
+	letter-spacing: 0.2em;
+	text-transform: uppercase;
+}
+
+.p-rcbenefits__kicker::before {
+	width: var(--rc-hero-kicker-line);
+	height: 1px;
+	background: var(--rc-sage);
+	content: "";
+}
+
+.p-rcbenefits__lead {
+	display: block;
+	font-size: var(--rc-fs-hero-lead);
+	font-weight: var(--fw-semibold);
+	line-height: 1.4;
+	letter-spacing: 0.05em;
+	text-shadow: var(--rc-hero-lead-shadow);
+}
+
+.p-rcbenefits__sub {
+	display: block;
+	max-width: 30ch;
+	color: var(--rc-hero-sub);
+	font-size: var(--rc-fs-hero-sub);
+	line-height: 1.85;
+	letter-spacing: 0.03em;
+	text-shadow: var(--rc-hero-sub-shadow);
+	white-space: nowrap;
+}
+
+.p-rcbenefits__grid {
+	display: grid;
+	grid-template-columns: var(--rc-benefit-cols);
+	gap: var(--rc-benefit-gap);
+}
+
+.p-rcbenefits__card {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 12px;
+	padding: var(--rc-benefit-pad);
+	border-radius: var(--rc-radius-lg);
+	background: var(--rc-white);
+	box-shadow: var(--rc-card-shadow);
+	text-align: center;
+	transition: transform var(--rc-benefit-time);
+}
+
+.p-rcbenefits__card:hover {
+	transform: translateY(var(--rc-benefit-lift));
+}
+
+.p-rcbenefits__icon {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: var(--rc-benefit-icon);
+	height: var(--rc-benefit-icon);
+	border-radius: 50%;
+	background: var(--rc-sage);
+	color: var(--rc-white);
+	font-size: var(--rc-benefit-icon-size);
+}
+
+.p-rcbenefits__label {
+	color: var(--rc-sage-dark);
+	font-size: var(--rc-fs-benefit-label);
+	font-weight: var(--fw-bold);
+	letter-spacing: 0.08em;
+}
+
+.p-rcbenefits__value {
+	color: var(--rc-gray);
+	font-size: var(--rc-fs-benefit-value);
+	font-weight: var(--rc-fw-black);
+	line-height: 1.25;
+}
+
+.p-rcbenefits__value small {
+	margin-left: 0.2em;
+	font-size: 0.55em;
+	font-weight: var(--fw-bold);
+}
+
+.p-rcbenefits__note {
+	color: var(--rc-earth);
+	font-size: var(--rc-fs-benefit-note);
+	line-height: 1.7;
+}
+
+/* ============================================================
+   Flow（.recruit-flow）
+   ============================================================ */
+.p-rcflow .p-rcbg__inner {
+	position: relative;
+	z-index: 3;
+}
+
+.p-rcflow__list {
+	display: flex;
+	flex-direction: var(--rc-flow-dir);
+	gap: var(--rc-flow-gap);
+	margin-top: var(--rc-flow-top);
+}
+
+/* 現サイトどおり content-box（PC は幅 200 + 内余白 55 × 2 を 4 つ並べ、縮めて収める） */
+.p-rcflow__item {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: flex-start;
+	box-sizing: content-box;
+	width: var(--rc-flow-item-w);
+	max-width: var(--rc-flow-item-max);
+	margin: var(--rc-flow-item-margin);
+	padding: var(--rc-flow-item-pad);
+	border: 1px solid var(--rc-flow-border);
+	border-radius: var(--rc-radius-lg);
+	background: var(--rc-white);
+	box-shadow: var(--rc-flow-shadow);
+}
+
+.p-rcflow__step {
+	color: var(--rc-gray);
+	font-size: var(--rc-fs-flow-step);
+	font-weight: var(--rc-fw-black);
+}
+
+.p-rcflow__num {
+	position: relative;
+	z-index: 3;
+	color: var(--rc-gray);
+	font-size: var(--rc-fs-flow-num);
+	font-weight: var(--rc-fw-black);
+	line-height: 1.5;
+}
+
+.p-rcflow__icon {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: var(--rc-flow-circle);
+	height: var(--rc-flow-circle);
+	border-radius: 50%;
+	background: var(--rc-sage);
+	color: var(--rc-white);
+	font-size: var(--rc-fs-flow-step);
+}
+
+.p-rcflow__title {
+	margin-top: var(--rc-flow-title-top);
+	font-size: var(--rc-fs-flow-title);
+	font-weight: var(--fw-bold);
+	line-height: 1;
+}
+
+/* 箱の間の三角（SP 下向き / PC 右向き） */
+.p-rcflow__item:not(:last-child)::after {
+	position: absolute;
+	right: 50%;
+	bottom: var(--rc-flow-arrow-off);
+	width: var(--rc-flow-arrow-w);
+	height: var(--rc-flow-arrow-h);
+	background: var(--rc-sage);
+	clip-path: polygon(0% 0%, 100% 0%, 50% 100%);
+	content: "";
+	transform: translateX(50%);
+}
+
+.p-rcflow__note {
+	margin: var(--rc-flow-note-top) auto 0;
+	color: var(--rc-flow-note);
+	font-size: var(--rc-fs-flow-note);
+	line-height: 1.7;
+	letter-spacing: 0.04em;
+	text-align: center;
+}
+
+/* ============================================================
+   FAQ（.rsec--faq）
+   ============================================================ */
+.p-rcfaq__list {
+	display: flex;
+	flex-direction: column;
+	gap: var(--rc-faq-gap);
+	max-width: var(--rc-faq-max);
+	margin: 0 auto;
+}
+
+.p-rcfaq__item {
+	overflow: hidden;
+	border: 1px solid var(--rc-earth-light);
+	border-radius: var(--rc-radius-md);
+	background: var(--rc-white);
+}
+
+.p-rcfaq__q {
+	display: flex;
+	align-items: center;
+	gap: 14px;
+	width: 100%;
+	padding: var(--rc-faq-pad);
+	color: var(--rc-gray);
+	font-size: var(--rc-fs-faq-q);
+	font-weight: var(--fw-bold);
+	line-height: 1.5;
+	letter-spacing: normal;
+	text-align: left;
+}
+
+.p-rcfaq__mark {
+	flex-shrink: 0;
+	color: var(--rc-sage-dark);
+	font-size: 1.5em;
+	font-weight: var(--rc-fw-black);
+	line-height: 1;
+}
+
+.p-rcfaq__qtext {
+	flex: 1;
+}
+
+.p-rcfaq__icon {
+	width: 0.875em; /* plus は 448 × 512 */
+	margin-left: auto;
+	color: var(--rc-sage-dark);
+	transition: transform var(--rc-faq-icon-time);
+}
+
+.p-rcfaq__q[aria-expanded="true"] .p-rcfaq__icon {
+	transform: rotate(45deg);
+}
+
+.p-rcfaq__a {
+	max-height: 0;
+	overflow: hidden;
+	transition: max-height var(--rc-faq-time);
+}
+
+.p-rcfaq__inner {
+	padding: 0 22px 22px;
+	color: var(--rc-earth);
+	font-size: var(--rc-fs-desc);
+	line-height: 1.85;
+	letter-spacing: var(--rc-head-ls);
+}
+
+/* ============================================================
+   S2 の中間幅・PC
+   ============================================================ */
+@media (min-width: 768px) {
+	:root {
+		--rc-benefit-cols: 1fr 1fr;
+	}
+}
+
+@media (min-width: 1025px) {
+	:root {
+		--rc-sec-pad-y: 110px;
+		--rc-sec-pad-x: 40px;
+		--rc-bg-pad-x: 24px;
+		--rc-head-indent: 24px;
+
+		--rc-training-cols: 0.95fr 1.05fr;
+		--rc-training-gap: 50px;
+
+		/* 470 を上限に、1025〜1279 では 3 枚（重なり 75 × 2 を含む）が中身の幅に収まるまで縮める
+		   （現サイトの値のままだと 3 枚目と＋ボタンが画面外で切れる） */
+		--rc-work-photo-w: min(470px, (100vw - 2 * var(--rc-bg-pad-x) - 2 * var(--rc-work-overlap) - var(--rc-work-scrollbar)) / 3);
+		--rc-work-text-up: 180px;
+		--rc-work-text-gap: 10px;
+		--rc-work-text-lh: 1.2;
+		--rc-work-open: 85px;
+		--rc-work-open-bottom: 120px;
+		--rc-work-open-left: 240px;
+		--rc-work-open-icon: 28px;
+
+		--rc-modal-inner-top: 100px;
+		--rc-modal-inner-x: 80px;
+		--rc-modal-close: 85px;
+		--rc-modal-close-top: 30px;
+		--rc-modal-close-icon: 28px;
+		--rc-modal-head-dir: column;
+		--rc-modal-head-gap: 30px;
+		--rc-modal-item-gap: 30px;
+
+		--rc-marquee-gap: 10px;
+		--rc-marquee-shift: 280px;
+		--rc-marquee-speed: 48;
+
+		--rc-hero-ratio: 2 / 1;
+		--rc-hero-bottom: 44px;
+		--rc-hero-gap: 16px;
+
+		--rc-flow-dir: row;
+		--rc-flow-top: 80px;
+		--rc-flow-item-w: 200px;
+		--rc-flow-item-max: none;
+		--rc-flow-item-pad: 65px 55px;
+		--rc-flow-item-margin: 0;
+		--rc-flow-arrow-w: 20px;
+		--rc-flow-arrow-h: 40px;
+		--rc-flow-note-top: 60px;
+	}
+
+	.p-rcwork__list {
+		margin-right: 0;
+		margin-left: 0;
+		overflow-x: visible;
+	}
+
+	.p-rcwork__text {
+		width: fit-content;
+	}
+
+	.p-rcbenefits__br {
+		display: none;
+	}
+
+	.p-rcflow__item:not(:last-child)::after {
+		top: 50%;
+		right: var(--rc-flow-arrow-off);
+		bottom: auto;
+		clip-path: polygon(0% 0%, 100% 50%, 0% 100%);
+		transform: translateY(-50%);
+	}
+}
+
+/* 4 ステップを狭めの PC 幅でも収める（現サイトの 960〜1199） */
+@media (min-width: 1025px) and (max-width: 1199.98px) {
+	:root {
+		--rc-flow-gap: 16px;
+	}
+}
+
+@media (min-width: 1100px) {
+	:root {
+		--rc-benefit-cols: repeat(4, 1fr);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.p-rcmarquee__row.is-running {
+		animation: none;
+	}
+
+	.p-rcmodal__panel.is-shown,
+	.p-rcfaq__a,
+	.p-rcfaq__icon,
+	.p-rcbenefits__card,
+	.p-rcwork__open {
+		transition: none;
+	}
+}
+
+/* ============================================================
+   Requirements（#recruit-req。募集要項 6 職種の開閉。js/recruit-req.js）
+   地はセクション（position なし = 重なり順に参加しない）に塗り、流れる大文字（z-index 0）の
+   後ろに来るようにする。中身（見出し・箱）だけを z-index 2 で大文字の前面に出す
+   ============================================================ */
+:root {
+	--rc-caption: #999; /* 注記 */
+	--rc-req-shadow: 5px 5px 0 rgba(0, 0, 0, 0.05);
+	--rc-req-top: 100px; /* Work の後ろから 10rem */
+	--rc-req-bottom: 80px; /* SP は .recruit-req の 8rem、PC は .recruit-content の 8rem */
+	--rc-req-head-bottom: 20px; /* 見出し → 最初の箱（.req-content の margin-top 2rem） */
+	--rc-req-gap: 20px; /* 箱どうし */
+	--rc-req-pad: 15px; /* 箱の内余白 */
+	--rc-req-toggle-pad: 12px 15px; /* PC 12 30 */
+	--rc-req-toggle-gap: 10px;
+	--rc-fs-req-title: 18px;
+	--rc-req-title-lh: 1; /* PC 1.5 */
+	--rc-req-title-indent: 1.4em; /* PC 2.4em */
+	--rc-req-ring: 10px; /* 白い輪の内径。PC 20 */
+	--rc-req-ring-border: 4px;
+	--rc-req-icon: 22px;
+	--rc-req-icon-bar: 14px;
+	--rc-req-icon-bar-h: 2px;
+	--rc-req-icon-time: 0.3s ease;
+	--rc-req-open-time: 0.4s ease; /* 高さのアニメ */
+	--rc-req-body-top: 16px; /* 開いたときの見出し → 表（1.6rem） */
+	--rc-req-table-pad: 20px; /* PC 40 60 60 */
+	--rc-req-cols: 1fr; /* PC 120 + 1fr */
+	--rc-req-row-gap: 14px; /* SP の行どうし。PC 0 */
+	--rc-req-label-pad: 14px 0; /* PC 24 0 */
+	--rc-fs-req-label: 14px; /* PC 16 */
+	--rc-fs-req-note: clamp(14px, 12.99px + 0.38vw, 16px);
+	--rc-req-note-pad: 20px 10px; /* PC 24 0 24 24 */
+	--rc-req-note-gap: 12px;
+	--rc-req-note-lh: 1.3;
+	--rc-req-caption-top: 20px; /* PC 40 */
+	--rc-fs-req-caption: 12px; /* PC 14 */
+	--rc-req-caption-lh: 1.5;
+
+	/* 固定の「応募する」（.rec-rink_btn.is-fixed） */
+	--rc-apply-bottom: 20px;
+	--rc-apply-edge: 30px; /* 狭い画面で左右に残す合計（max-width: calc(100% - 3rem)） */
+	--rc-apply-shift: 15px; /* 非表示のときの下へのずれ（1.5rem） */
+	--rc-apply-time: 0.35s ease;
+	--rc-apply-z: calc(var(--z-overlay) + 100); /* ヘッダー・ドロワーより前面 */
+}
+
+.p-rcreq {
+	padding: var(--rc-req-top) var(--rc-bg-pad-x) var(--rc-req-bottom);
+	background: var(--rc-bg);
+	color: var(--rc-black);
+	line-height: 1;
+	letter-spacing: normal;
+}
+
+.p-rcreq__inner {
+	position: relative;
+	z-index: 2;
+	max-width: var(--rc-content-max);
+	margin: 0 auto;
+}
+
+.p-rcreq__jobs {
+	display: flex;
+	flex-direction: column;
+	gap: var(--rc-req-gap);
+	margin-top: var(--rc-req-head-bottom);
+}
+
+.p-rcreq__job {
+	padding: var(--rc-req-pad);
+	border-radius: var(--rc-radius-lg);
+	background-color: var(--rc-sage-dark);
+	box-shadow: var(--rc-req-shadow);
+	/* #スラッグ でのスクロール位置（ヘッダーの下 + 24）。JS が動かないときのアンカーにも効く */
+	scroll-margin-top: calc(var(--header-height) + 24px);
+}
+
+.p-rcreq__head {
+	font-size: inherit;
+	font-weight: inherit;
+	line-height: inherit;
+}
+
+.p-rcreq__toggle {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--rc-req-toggle-gap);
+	width: 100%;
+	padding: var(--rc-req-toggle-pad);
+	border: 0;
+	background: none;
+	color: var(--rc-white);
+	font: inherit;
+	text-align: left;
+	cursor: pointer;
+	-webkit-user-select: none;
+	user-select: none;
+}
+
+.p-rcreq__title {
+	position: relative;
+	padding-left: var(--rc-req-title-indent);
+	font-size: var(--rc-fs-req-title);
+	font-weight: var(--rc-fw-black);
+	line-height: var(--rc-req-title-lh);
+}
+
+/* 白い輪 */
+.p-rcreq__title::before {
+	position: absolute;
+	top: 0;
+	left: 0;
+	box-sizing: content-box;
+	width: var(--rc-req-ring);
+	height: var(--rc-req-ring);
+	border: var(--rc-req-ring-border) solid var(--rc-white);
+	border-radius: 50%;
+	content: "";
+}
+
+/* ＋ / −（開くと縦線が消える） */
+.p-rcreq__icon {
+	position: relative;
+	flex: 0 0 auto;
+	width: var(--rc-req-icon);
+	height: var(--rc-req-icon);
+}
+
+.p-rcreq__icon::before,
+.p-rcreq__icon::after {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: var(--rc-req-icon-bar);
+	height: var(--rc-req-icon-bar-h);
+	background: var(--rc-white);
+	content: "";
+	transform: translate(-50%, -50%);
+	transition: transform var(--rc-req-icon-time), opacity var(--rc-req-icon-time);
+}
+
+.p-rcreq__icon::after {
+	transform: translate(-50%, -50%) rotate(90deg);
+}
+
+.p-rcreq__job.is-open .p-rcreq__icon::after {
+	opacity: 0;
+	transform: translate(-50%, -50%) rotate(0);
+}
+
+/* 開閉する領域（高さは JS が入れる。開き終わったら上限を外す） */
+.p-rcreq__body {
+	max-height: 0;
+	overflow: hidden;
+	transition: max-height var(--rc-req-open-time);
+}
+
+.p-rcreq__job.is-open .p-rcreq__body {
+	padding-top: var(--rc-req-body-top);
+}
+
+/* 白い表（.req-outline--list） */
+.p-rcreq__table {
+	padding: var(--rc-req-table-pad);
+	border-radius: var(--rc-radius-lg);
+	background: var(--rc-white);
+	color: var(--rc-earth);
+}
+
+.p-rcreq__row {
+	display: grid;
+	grid-template-columns: var(--rc-req-cols);
+}
+
+.p-rcreq__row:not(:first-child) {
+	margin-top: var(--rc-req-row-gap);
+}
+
+.p-rcreq__label {
+	padding: var(--rc-req-label-pad);
+	border-bottom: 1px solid var(--rc-earth);
+	font-size: var(--rc-fs-req-label);
+}
+
+.p-rcreq__note {
+	display: flex;
+	flex-direction: column;
+	gap: var(--rc-req-note-gap);
+	padding: var(--rc-req-note-pad);
+	border-bottom: 1px solid var(--rc-earth-light);
+	font-size: var(--rc-fs-req-note);
+}
+
+.p-rcreq__note span {
+	line-height: var(--rc-req-note-lh);
+}
+
+.p-rcreq__caption {
+	margin-top: var(--rc-req-caption-top);
+	color: var(--rc-caption);
+	font-size: var(--rc-fs-req-caption);
+	line-height: var(--rc-req-caption-lh);
+}
+
+/* --- 固定の「応募する」（js/recruit-apply.js が body 直下へ移し、Training に入ったら .is-visible） ---
+   JS が無いときは出さない（FV のボタンで応募できる）。非表示の間は押せず、フォーカスも当たらない */
+.p-rcapply {
+	position: fixed;
+	bottom: var(--rc-apply-bottom);
+	left: 50%;
+	z-index: var(--rc-apply-z);
+	width: var(--rc-btn-w);
+	max-width: calc(100% - var(--rc-apply-edge));
+	visibility: hidden;
+	opacity: 0;
+	pointer-events: none;
+	transform: translate(-50%, var(--rc-apply-shift));
+	transition: opacity var(--rc-apply-time), transform var(--rc-apply-time), visibility var(--rc-apply-time);
+}
+
+.p-rcapply.is-visible {
+	visibility: visible;
+	opacity: 1;
+	pointer-events: auto;
+	transform: translate(-50%, 0);
+}
+
+/* モーダル・ドロワーを開いている間は隠す（仕様書 Q6） */
+body.is-rc-modal-open .p-rcapply.is-visible,
+body.is-drawer-open .p-rcapply.is-visible {
+	visibility: hidden;
+	opacity: 0;
+	pointer-events: none;
+}
+
+@media (min-width: 1025px) {
+	:root {
+		--rc-req-toggle-pad: 12px 30px;
+		--rc-req-title-lh: 1.5;
+		--rc-req-title-indent: 2.4em;
+		--rc-req-ring: 20px;
+		--rc-req-table-pad: 40px 60px 60px;
+		--rc-req-cols: 120px 1fr;
+		--rc-req-row-gap: 0px;
+		--rc-req-label-pad: 24px 0;
+		--rc-fs-req-label: 16px;
+		--rc-req-note-pad: 24px 0 24px 24px;
+		--rc-req-caption-top: 40px;
+		--rc-fs-req-caption: 14px;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.p-rcreq__body,
+	.p-rcreq__icon::before,
+	.p-rcreq__icon::after,
+	.p-rcapply {
+		transition: none;
+	}
+}
+
+/* ============================================================
+   SP の .recruit-content 相当の上下の内余白（2026-10-13 の S4 評価の所見）
+   現サイトは recruit.css の後に footer.css が読まれ、その 959px 以下の
+   `.recruit-content { padding: 0 30px }` が採用ページの箱にも当たっている。
+   実際の表示（上下 0）に合わせる。左右の 30 はそのまま
+   ============================================================ */
+@media (max-width: 1024px) {
+	.p-rcbg__inner {
+		padding-block: 0;
+	}
+}

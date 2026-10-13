@@ -1,0 +1,478 @@
+/* ============================================================
+   応募フォーム /recruit/entry/（page-recruit-entry.php）
+   カンプは無い。正は現サイト https://exterior-exone.com/recruit/entry/ と
+   参照物 docs/reference-20261013-recruit/entry-form.css（rem は 1rem = 10px で読み替え）
+   仕様書: docs/spec-20261013-recruit-page.md F-10・F-11
+   決定事項: docs/spec-20261013-recruit-page-decisions.md
+   ------------------------------------------------------------
+   フォームの中の markup は CF7 の雛形（inc/recruit-form.php）で、現サイトのクラス
+   （.page_form-layout / .page_form-item01 / .p_form-labelarea / .is_label / .is_req …）のまま。
+   ページ側は .p-rce。ブレイクポイントは現サイトの 960 を 1024 に読み替える（1025px 以上 = PC）。
+   css/recruit.css はこのページでは読まないので、使う --rc-* はここにも置く（値は同じ）。
+   ============================================================ */
+:root {
+	/* --- 色（現サイトのまま。決定 §2-2） --- */
+	--rc-white: #fff;
+	--rc-black: #000;
+	--rc-yellow: #ffe622; /* 送信ボタン */
+	--rc-required: #de3434; /* 必須の札 */
+	--rc-input-bg: #e7e7e7; /* 入力欄の地 */
+	--rc-placeholder: #a5a5a5;
+	--rc-entry-error: var(--color-error); /* 入力エラーの文字（お問い合わせと同じ） */
+
+	/* --- ページ（#page_entry--form / .entry_form） --- */
+	--rc-entry-pad: 30px; /* 3rem */
+	--rc-entry-top: 100px; /* 見出しの上 10rem（PC はヘッダーを重ねるぶんを足す） */
+	--rc-entry-bottom: 100px; /* フォームの下 10rem */
+	--rc-entry-title-lh: 1.5;
+	--rc-entry-title-ls: 0.2px; /* .02em（基準 10px） */
+	--rc-fs-entry-en: clamp(28px, 9.79px + 6.78vw, 64px);
+	--rc-fs-entry-ja: clamp(14px, 11.98px + 0.75vw, 18px);
+	--rc-fs-entry: clamp(14px, 12.18px + 0.73vw, 18px); /* ラベル・選択肢・入力・送信ボタン */
+
+	/* --- フォームの組み（.page_form-layout / .page_form-item01） --- */
+	--rc-entry-gap: 50px; /* 項目どうし 5rem */
+	--rc-entry-layout-top: 50px; /* margin-top 5rem・padding-top 5rem */
+	--rc-entry-item-fs: 14px;
+	--rc-entry-item-fw: 600;
+	--rc-entry-item-gap: 24px; /* ラベルと入力 2.4rem */
+	--rc-entry-label-lh: 1.75;
+	--rc-entry-label-space: 100px; /* ラベル列の右 10rem → PC 5rem */
+	--rc-entry-label-w: auto; /* PC 190 */
+
+	/* 必須の札（.is_req。現サイトは content-box で幅 30 + 内余白） */
+	--rc-entry-req-fs: 12px;
+	--rc-entry-req-pad: 3px 8px;
+	--rc-entry-req-radius: 5px;
+	--rc-entry-req-gap: 15px; /* PC は右寄せ（auto） */
+	--rc-entry-req-w: auto; /* PC 30 */
+
+	/* チェックボックス（.wpcf7-checkbox。行 1.2rem / 列 2.4rem） */
+	--rc-entry-check-gap-y: 12px;
+	--rc-entry-check-gap-x: 24px;
+	--rc-entry-check-label-gap: 6px;
+	--rc-entry-check-box: 13px; /* ブラウザ既定の大きさ（現サイトの見え方） */
+	--rc-entry-check-margin: 3px 3px 3px 0;
+	--rc-entry-check-lh: 1.4;
+
+	/* 入力欄 */
+	--rc-entry-input-pad: 16px;
+	--rc-entry-input-radius: 10px;
+	--rc-entry-input-lh: 1.15; /* 現サイトの入力欄（Arial の normal）と同じ高さ（SP 48 / PC 53）に */
+	--rc-entry-textarea-h: 192px; /* 10 行（現サイトの見え方。PC 212） */
+	--rc-entry-name-gap: 15px; /* 姓・名の間 1.5rem */
+	--rc-entry-name-label-gap: 12px;
+
+	/* 送信ボタン（.form-btn-flat / .form-btn-border。SP → PC） */
+	--rc-entry-btn-w: 280px;
+	--rc-entry-btn-top: 20px; /* .page_form-submit の上 2rem（PC は .form-btn の上 3rem を足す） */
+	--rc-entry-btn-extra-top: 0px;
+	--rc-entry-btn-pad: 25px 20px;
+	--rc-entry-btn-radius: 45px;
+	--rc-entry-btn-shadow: 0 0 5px 0 var(--rc-black);
+	--rc-entry-btn-time: 0.5s;
+	--rc-entry-btn-text-delay: 250ms;
+	--rc-entry-btn-icon: 18px;
+	--rc-entry-btn-icon-top: 24px; /* PC 28 */
+	--rc-entry-btn-icon-left: 198px; /* PC 260 */
+	--rc-entry-btn-icon-shift: 7.5px; /* ホバーの translateX(25%)（幅 30 の 25%） */
+	/* 左上から広がる黒い円（:before。150 角を左へ寄せて三日月だけ見せ、ホバーで 500 角に） */
+	--rc-entry-btn-circle: 150px;
+	--rc-entry-btn-circle-top: -10px;
+	--rc-entry-btn-circle-x: -80%;
+	--rc-entry-btn-circle-y: -28px;
+	--rc-entry-btn-circle-hover: 500px;
+	--rc-entry-btn-circle-hover-x: -10px;
+	--rc-entry-btn-circle-hover-y: -180px;
+
+	/* エラー・完了 */
+	--rc-entry-tip-gap: 8px;
+	--rc-entry-tip-fs: 14px;
+	--rc-entry-msg-lh: 1.8;
+}
+
+/* ============================================================
+   ページ・見出し
+   ============================================================ */
+.p-rce {
+	padding: var(--rc-entry-pad);
+	background-color: var(--rc-white);
+	color: var(--rc-black);
+	font-size: var(--rc-entry-item-fs);
+	line-height: 1;
+	letter-spacing: normal;
+}
+
+.p-rce__inner {
+	position: relative;
+	margin: 0 auto;
+	padding-bottom: var(--rc-entry-bottom);
+}
+
+.p-rce__title {
+	display: flex;
+	flex-direction: column;
+	padding-top: var(--rc-entry-top);
+	color: var(--rc-black);
+	line-height: var(--rc-entry-title-lh);
+	letter-spacing: var(--rc-entry-title-ls);
+	text-align: center;
+}
+
+.p-rce__title-en {
+	font-size: var(--rc-fs-entry-en);
+	font-weight: var(--fw-bold);
+}
+
+.p-rce__title-ja {
+	font-size: var(--rc-fs-entry-ja);
+	font-weight: var(--fw-medium);
+}
+
+/* ============================================================
+   フォームの組み（CF7 の雛形の現サイトのクラス）
+   ============================================================ */
+.p-rce .page_form-layout {
+	display: grid;
+	gap: var(--rc-entry-gap);
+	justify-content: center;
+	margin-top: var(--rc-entry-layout-top);
+	padding-top: var(--rc-entry-layout-top);
+}
+
+.p-rce .page_form-item01 {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--rc-entry-item-gap);
+	font-size: var(--rc-entry-item-fs);
+	font-weight: var(--rc-entry-item-fw);
+}
+
+.p-rce .p_form-labelarea {
+	margin-right: var(--rc-entry-label-space);
+	line-height: var(--rc-entry-label-lh);
+}
+
+.p-rce .p_form {
+	display: flex;
+}
+
+.p-rce .is_label {
+	width: var(--rc-entry-label-w);
+	font-size: var(--rc-fs-entry);
+}
+
+.p-rce .is_req {
+	box-sizing: content-box;
+	width: var(--rc-entry-req-w);
+	margin-left: var(--rc-entry-req-gap);
+	padding: var(--rc-entry-req-pad);
+	border-radius: var(--rc-entry-req-radius);
+	background-color: var(--rc-required);
+	color: var(--rc-white);
+	font-size: var(--rc-entry-req-fs);
+	text-align: center;
+}
+
+.p-rce .wpcf7-form-control-wrap {
+	display: block;
+	width: 100%;
+}
+
+/* --- チェックボックス（左揃え・折り返し。希望職種は SP で 1 項目 1 行） --- */
+.p-rce .wpcf7-checkbox {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--rc-entry-check-gap-y) var(--rc-entry-check-gap-x);
+	font-size: var(--rc-fs-entry);
+	font-weight: var(--fw-medium);
+}
+
+.p-rce .wpcf7-checkbox .wpcf7-list-item {
+	display: flex;
+	align-items: center;
+	gap: var(--rc-entry-check-label-gap);
+	margin: 0;
+}
+
+.p-rce .wpcf7-checkbox .wpcf7-list-item-label {
+	line-height: var(--rc-entry-check-lh);
+}
+
+/* 文字を押しても選べるように、項目を label で包む（use_label_element。2026-10-13）。並びは従来どおり */
+.p-rce .wpcf7-checkbox .wpcf7-list-item > label {
+	display: flex;
+	align-items: center;
+	gap: var(--rc-entry-check-label-gap);
+	margin: 0;
+	cursor: pointer;
+}
+
+.p-rce .page_form-item01 input[type="checkbox"] {
+	flex-shrink: 0;
+	width: var(--rc-entry-check-box);
+	height: var(--rc-entry-check-box);
+	margin: var(--rc-entry-check-margin);
+	padding: 0;
+}
+
+.p-rce .wpcf7-form-control-wrap[data-name="your-job"] .wpcf7-checkbox {
+	flex-direction: column;
+	align-items: flex-start;
+	gap: var(--rc-entry-check-gap-y);
+}
+
+/* --- お名前（姓・名。SP は縦、PC は横 2 列） --- */
+.p-rce .p_form-namearea {
+	display: grid;
+	gap: var(--rc-entry-name-gap);
+	width: 100%;
+}
+
+.p-rce .p_form-nameblock {
+	display: flex;
+	align-items: center;
+	gap: var(--rc-entry-name-label-gap);
+	font-size: var(--rc-fs-entry);
+}
+
+.p-rce .p_form-name {
+	flex-shrink: 0;
+}
+
+/* --- 入力欄（地 #e7e7e7・枠なし・角丸 10） --- */
+.p-rce .page_form-item01 :is(input[type="text"], input[type="email"], input[type="tel"], textarea) {
+	display: block;
+	width: 100%;
+	margin: 0;
+	padding: var(--rc-entry-input-pad);
+	border: none;
+	border-radius: var(--rc-entry-input-radius);
+	background-color: var(--rc-input-bg);
+	color: var(--rc-black);
+	font: inherit;
+	font-size: var(--rc-fs-entry);
+	font-weight: var(--fw-regular);
+	line-height: var(--rc-entry-input-lh);
+	appearance: none;
+}
+
+.p-rce .page_form-item01 textarea {
+	height: var(--rc-entry-textarea-h);
+	resize: vertical;
+}
+
+.p-rce .page_form-item01 :is(input, textarea)::placeholder {
+	color: var(--rc-placeholder);
+	opacity: 1;
+}
+
+/* --- 送信ボタン（黄色の丸ボタン。ホバーで左上から黒が広がり、文字・矢印が白に） --- */
+.p-rce .page_form-submit {
+	margin: var(--rc-entry-btn-top) auto 0;
+}
+
+.p-rce .form-btn {
+	display: block;
+	width: var(--rc-entry-btn-w);
+	margin-top: var(--rc-entry-btn-extra-top);
+	text-align: center;
+}
+
+.p-rce .form-btn .form-btn {
+	margin-top: 0;
+}
+
+.p-rce .form-btn-flat {
+	position: relative;
+	overflow: hidden;
+	border-radius: var(--rc-entry-btn-radius);
+	background: var(--rc-yellow);
+	box-shadow: var(--rc-entry-btn-shadow);
+}
+
+.p-rce .form-btn-flat::before {
+	position: absolute;
+	top: var(--rc-entry-btn-circle-top);
+	left: 0;
+	width: var(--rc-entry-btn-circle);
+	height: var(--rc-entry-btn-circle);
+	border-radius: 50%;
+	background: var(--rc-black);
+	content: "";
+	transform: translateX(var(--rc-entry-btn-circle-x)) translateY(var(--rc-entry-btn-circle-y));
+	transition: all var(--rc-entry-btn-time) ease-in-out;
+}
+
+.p-rce .form-btn-flat:hover::before {
+	width: var(--rc-entry-btn-circle-hover);
+	height: var(--rc-entry-btn-circle-hover);
+	transform: translateX(var(--rc-entry-btn-circle-hover-x)) translateY(var(--rc-entry-btn-circle-hover-y));
+}
+
+/* 右向き矢印（Font Awesome arrow-right）→ ホバーで丸の中の右矢印（circle-right）・白 */
+.p-rce .form-btn-border::after {
+	position: absolute;
+	top: var(--rc-entry-btn-icon-top);
+	left: var(--rc-entry-btn-icon-left);
+	width: var(--rc-entry-btn-icon);
+	height: var(--rc-entry-btn-icon);
+	background-color: var(--rc-black);
+	content: "";
+	-webkit-mask: url("../images/recruit/icons/arrow-right.svg") center / contain no-repeat;
+	mask: url("../images/recruit/icons/arrow-right.svg") center / contain no-repeat;
+	pointer-events: none;
+	transition: all var(--rc-entry-btn-time) ease-in-out;
+}
+
+.p-rce .form-btn-border:hover::after {
+	background-color: var(--rc-white);
+	-webkit-mask-image: url("../images/recruit/icons/circle-right.svg");
+	mask-image: url("../images/recruit/icons/circle-right.svg");
+	transform: translateX(var(--rc-entry-btn-icon-shift));
+}
+
+.p-rce .wpcf7-submit {
+	position: relative;
+	display: block;
+	width: 100%;
+	margin: 0;
+	padding: var(--rc-entry-btn-pad);
+	border: none;
+	background-color: transparent;
+	color: var(--rc-black);
+	font: inherit;
+	font-size: var(--rc-fs-entry);
+	font-weight: var(--fw-bold);
+	line-height: normal;
+	cursor: pointer;
+	appearance: none;
+}
+
+.p-rce .form-btn-flat:hover .wpcf7-submit {
+	color: var(--rc-white);
+	transition-delay: var(--rc-entry-btn-text-delay);
+}
+
+.p-rce .wpcf7-submit:disabled {
+	cursor: wait;
+}
+
+/* ============================================================
+   CF7 が出す要素（既定 CSS は読まないので、ここで整える）
+   ============================================================ */
+.p-rce .screen-reader-response {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	margin: -1px;
+	padding: 0;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border: 0;
+}
+
+.p-rce .hidden-fields-container {
+	display: contents;
+	margin: 0;
+	padding: 0;
+	border: 0;
+}
+
+.p-rce .wpcf7-spinner {
+	display: none;
+}
+
+/* 入力エラー: 欄のすぐ下に赤文字（お問い合わせと同じ。帯は出さない＝決定 §5 Q13） */
+.p-rce .wpcf7-not-valid-tip {
+	display: block;
+	margin-top: var(--rc-entry-tip-gap);
+	color: var(--rc-entry-error);
+	font-size: var(--rc-entry-tip-fs);
+	font-weight: var(--fw-regular);
+	line-height: var(--rc-entry-msg-lh);
+}
+
+.p-rce .wpcf7-response-output {
+	display: none;
+	margin-top: var(--rc-entry-gap);
+	color: var(--rc-entry-error);
+	font-size: var(--rc-entry-tip-fs);
+	line-height: var(--rc-entry-msg-lh);
+	text-align: center;
+}
+
+/* 送信の失敗（mail_failed など）のときだけ帯を出す */
+.p-rce .wpcf7-form:is(.failed, .spam, .aborted) .wpcf7-response-output {
+	display: block;
+}
+
+/* 完了表示（フォームを隠してフォームの位置に。js/recruit-entry.js） */
+.p-rce__done,
+.p-rce__fallback {
+	margin-top: calc(var(--rc-entry-layout-top) * 2);
+	font-size: var(--rc-fs-entry);
+	font-weight: var(--fw-medium);
+	line-height: var(--rc-entry-msg-lh);
+	text-align: center;
+}
+
+.p-rce__done {
+	scroll-margin-top: var(--rc-entry-layout-top);
+}
+
+.p-rce__done:focus {
+	outline: none;
+}
+
+/* ============================================================
+   PC（1025px 以上。現サイトの min-width: 960px）
+   ============================================================ */
+@media (min-width: 1025px) {
+	:root {
+		--rc-entry-label-space: 50px;
+		--rc-entry-label-w: 190px;
+		--rc-entry-req-gap: auto;
+		--rc-entry-req-w: 30px;
+		--rc-entry-textarea-h: 212px;
+		--rc-entry-btn-w: 320px;
+		--rc-entry-btn-extra-top: 30px;
+		--rc-entry-btn-pad: 24px 20px;
+		--rc-entry-btn-icon-top: 28px;
+		--rc-entry-btn-icon-left: 260px;
+	}
+
+	/* コーポレートではヘッダーを fixed で重ねる（body.has-fv-header。functions.php）ので、
+	   ヘッダーの高さぶんだけ見出しの上余白を足す（コラムと同じ）。
+	   支店モードはヘッダーが流れの中（sticky）なので足さない */
+	.has-fv-header:not(.is-store-mode) .p-rce__title {
+		padding-top: calc(var(--header-height) + var(--rc-entry-top));
+	}
+
+	.p-rce .page_form-item01 {
+		flex-wrap: nowrap;
+	}
+
+	.p-rce .p_form-namearea {
+		grid-template-columns: 1fr 1fr;
+	}
+
+	.p-rce .wpcf7-form-control-wrap[data-name="your-job"] .wpcf7-checkbox {
+		flex-direction: row;
+		flex-wrap: wrap;
+		gap: var(--rc-entry-check-gap-y) var(--rc-entry-check-gap-x);
+	}
+}
+
+/* ============================================================
+   動きを減らす設定
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+	.p-rce .form-btn-flat::before,
+	.p-rce .form-btn-border::after,
+	.p-rce .wpcf7-submit {
+		transition: none;
+	}
+}

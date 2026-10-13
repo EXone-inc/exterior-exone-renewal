@@ -21,6 +21,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<h2 class="c-section-title p-recruit__title">RECRUIT</h2>
 		<p class="p-recruit__copy">私たちと共に新たな<br>エクステリア業界を創造しよう！</p>
 		<p class="p-recruit__sub">エクステリア業界の古い構造を見直し<br>新たな時代を創る仲間を募集中！<br>業界の変革を実現するため、共に挑戦しましょう。</p>
-		<a class="c-btn c-btn--white p-recruit__btn" href="#">VIEW MORE</a>
+		<a class="c-btn c-btn--white p-recruit__btn" href="<?php echo esc_url( exterior_exone_store_link( exterior_exone_recruit_url() ) ); ?>">VIEW MORE</a>
 	</div>
 </section>
