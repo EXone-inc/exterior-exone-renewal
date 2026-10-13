@@ -30,6 +30,7 @@
 
 	var current = 0;
 	var timer = null;
+	var startedAt = 0; // 切り替えの待ち時間を計り始めた時刻（schedule() で更新）
 
 	// --- 自動再生が拒否されたとき（iOS の低電力モード等）の静止画フォールバック ---
 	// 拒否を検知したら動画に is-blocked を付けて隣のポスター画像を見せ、
@@ -137,6 +138,11 @@
 
 			video.classList.toggle('is-active', active);
 
+			// 表示中だけ繰り返す。消えていく側は繰り返さず最後のフレームで止める。
+			// 尺（9.03 秒）が切り替え（9 秒）より少し長いため、クロスフェード中に先頭へ戻って
+			// 1 シーン目が一瞬映っていた（2026-10-13 ユーザー指摘）。
+			video.loop = active;
+
 			if (active) {
 				try {
 					video.currentTime = 0;
@@ -179,21 +185,21 @@
 
 	function schedule() {
 		window.clearInterval(timer);
+		startedAt = performance.now();
 
 		timer = window.setInterval(function () {
+			startedAt = performance.now();
 			show((current + 1) % videos.length);
 		}, CHANGE_TIME);
 	}
 
 	function update() {
-		var video = videos[current];
 		var thumb = thumbs[current];
 
-		if (video && thumb) {
-			// メタデータ未取得の間は切り替え間隔を尺の代わりに使う。
-			var duration = isFinite(video.duration) && video.duration > 0 ? video.duration : CHANGE_TIME / 1000;
-
-			drawRing(thumb, Math.min(video.currentTime / duration, 1), true);
+		if (thumb) {
+			// リングは切り替えの待ち時間（CHANGE_TIME）に対する経過で描く。動画の currentTime を使うと、
+			// 再生開始の遅れや尺の違いのぶん切り替え時に 1 周せずに終わるため（2026-10-13 ユーザー指摘）。
+			drawRing(thumb, Math.min((performance.now() - startedAt) / CHANGE_TIME, 1), true);
 		}
 
 		window.requestAnimationFrame(update);
