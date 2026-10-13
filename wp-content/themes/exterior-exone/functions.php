@@ -711,7 +711,9 @@ function exterior_exone_is_works_page() {
  * @return bool
  */
 function exterior_exone_has_fv_header() {
-	return is_front_page() || is_page( 'company' ) || is_page( 'dx' ) || is_page( 'vr' ) || is_page( 'plans' ) || is_page( 'high-end' ) || exterior_exone_is_works_page() || is_page( 'contact' ) || exterior_exone_is_store_page();
+	// コラム（FV は無い）もコーポレートの半透明ヘッダーを重ねる（2026-10-13 のユーザー指示。黒帯のままだと
+	// 支店用ヘッダーに見えるため）。重ねたぶんの上余白は css/column-page.css 側で足す。
+	return is_front_page() || is_page( 'company' ) || is_page( 'dx' ) || is_page( 'vr' ) || is_page( 'plans' ) || is_page( 'high-end' ) || exterior_exone_is_works_page() || is_page( 'contact' ) || exterior_exone_is_store_page() || ( function_exists( 'exterior_exone_is_column_page' ) && exterior_exone_is_column_page() );
 }
 
 /**
