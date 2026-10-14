@@ -290,6 +290,28 @@ function exterior_exone_column_page_card( $post ) {
  * @return array<int, array{type:string, label:string, url:string}>
  */
 function exterior_exone_column_page_pager( $current, $total ) {
+	$term = exterior_exone_column_current_cat();
+	$slug = $term ? (string) $term->slug : '';
+
+	return exterior_exone_list_pager(
+		$current,
+		$total,
+		exterior_exone_column_page_texts(),
+		fn( $page ) => exterior_exone_column_list_url( $page, $slug )
+	);
+}
+
+/**
+ * 一覧のページ送りの並び（コラム・お知らせで共有）。
+ * 番号は先頭・末尾と現在の前後 1 つずつ（現サイトの mid_size 1 / end_size 1 と同じ）。
+ *
+ * @param int                   $current 現在のページ。
+ * @param int                   $total   総ページ数。
+ * @param array<string, string> $texts   文言（prev / next）。
+ * @param callable              $url_for ページ番号 → URL。
+ * @return array<int, array{type:string, label:string, url:string}>
+ */
+function exterior_exone_list_pager( $current, $total, $texts, $url_for ) {
 	$current = max( 1, (int) $current );
 	$total   = (int) $total;
 
@@ -297,16 +319,13 @@ function exterior_exone_column_page_pager( $current, $total ) {
 		return array();
 	}
 
-	$texts = exterior_exone_column_page_texts();
-	$term  = exterior_exone_column_current_cat();
-	$slug  = $term ? (string) $term->slug : '';
 	$items = array();
 
 	if ( $current > 1 ) {
 		$items[] = array(
 			'type'  => 'prev',
 			'label' => $texts['prev'],
-			'url'   => exterior_exone_column_list_url( $current - 1, $slug ),
+			'url'   => $url_for( $current - 1 ),
 		);
 	}
 
@@ -317,7 +336,7 @@ function exterior_exone_column_page_pager( $current, $total ) {
 			$items[] = array(
 				'type'  => $page === $current ? 'current' : 'page',
 				'label' => (string) $page,
-				'url'   => $page === $current ? '' : exterior_exone_column_list_url( $page, $slug ),
+				'url'   => $page === $current ? '' : $url_for( $page ),
 			);
 			$dots    = false;
 		} elseif ( ! $dots ) {
@@ -334,7 +353,7 @@ function exterior_exone_column_page_pager( $current, $total ) {
 		$items[] = array(
 			'type'  => 'next',
 			'label' => $texts['next'],
-			'url'   => exterior_exone_column_list_url( $current + 1, $slug ),
+			'url'   => $url_for( $current + 1 ),
 		);
 	}
 

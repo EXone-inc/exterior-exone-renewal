@@ -1,0 +1,21 @@
+/* ============================================================
+   お知らせ一覧 /news/（archive-news.php）
+   見た目はコラム一覧と同じ（css/column-page.css とクラス名 .p-colp を共有して一緒に読む）。
+   ここはお知らせだけの差分: 説明文を行数で切らずに全文・段落で出す。
+   押せないカード（.p-colp__link が div）はホバーの変化が出ない（column-page.css のホバーは a.p-colp__link だけ）。
+   仕様書: docs/spec-20261014-news-page.md（F-02）
+   ============================================================ */
+:root {
+	--news-para-gap: 1em; /* 説明文の段落の間（説明文の文字 1 文字ぶん） */
+}
+
+/* 説明文: コラムの抜粋と同じ書体・大きさ・色・行間のまま、行数で切らない */
+.p-newsp__desc {
+	display: block;
+	overflow: visible;
+	-webkit-line-clamp: none;
+}
+
+.p-newsp__desc > p + p {
+	margin-top: var(--news-para-gap);
+}

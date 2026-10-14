@@ -377,7 +377,8 @@ function exterior_exone_news_cards() {
 		function ( $post ) {
 			return array(
 				'title'    => get_the_title( $post ),
-				'url'      => exterior_exone_store_link( (string) get_permalink( $post ) ),
+				// 詳細ページは無いので一覧へ（個別 URL は一覧へ 301。inc/news-page-data.php）。
+				'url'      => exterior_exone_store_link( (string) get_post_type_archive_link( 'news' ) ),
 				// 0 なら画像未設定。カンプ 917:111 と同じグレーの塗りを出す。
 				'image_id' => (int) get_post_thumbnail_id( $post ),
 			);

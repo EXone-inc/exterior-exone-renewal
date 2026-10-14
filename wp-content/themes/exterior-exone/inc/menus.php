@@ -96,7 +96,7 @@ function exterior_exone_drawer_menu_items() {
 		),
 		array(
 			'label' => 'お知らせ',
-			'url'   => '#',
+			'url'   => (string) get_post_type_archive_link( 'news' ),
 		),
 		array(
 			'label' => '企業情報',
@@ -171,7 +171,7 @@ function exterior_exone_store_drawer_menu_items() {
 		),
 		array(
 			'label' => 'お知らせ',
-			'url'   => '#',
+			'url'   => exterior_exone_store_link( (string) get_post_type_archive_link( 'news' ) ),
 		),
 		array(
 			'label' => 'コラム',

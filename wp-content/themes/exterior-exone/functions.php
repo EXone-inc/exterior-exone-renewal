@@ -22,6 +22,7 @@ require_once get_theme_file_path( 'inc/highend-data.php' );
 require_once get_theme_file_path( 'inc/works-data.php' );
 require_once get_theme_file_path( 'inc/works-page-data.php' );
 require_once get_theme_file_path( 'inc/column-page-data.php' );
+require_once get_theme_file_path( 'inc/news-page-data.php' );
 require_once get_theme_file_path( 'inc/contact-data.php' );
 require_once get_theme_file_path( 'inc/contact-forms.php' );
 require_once get_theme_file_path( 'inc/recruit-data.php' );
@@ -405,6 +406,22 @@ function exterior_exone_enqueue_assets() {
 			get_theme_file_uri( 'css/column-page.css' ),
 			array( 'exterior-exone-style' ),
 			exterior_exone_asset_version( 'css/column-page.css' )
+		);
+	}
+
+	// お知らせ一覧 /news/（archive-news.php）。コラム一覧の CSS とクラス名を共有し、差分だけ css/news-page.css。
+	if ( exterior_exone_is_news_page() ) {
+		wp_enqueue_style(
+			'exterior-exone-column-page',
+			get_theme_file_uri( 'css/column-page.css' ),
+			array( 'exterior-exone-style' ),
+			exterior_exone_asset_version( 'css/column-page.css' )
+		);
+		wp_enqueue_style(
+			'exterior-exone-news-page',
+			get_theme_file_uri( 'css/news-page.css' ),
+			array( 'exterior-exone-column-page' ),
+			exterior_exone_asset_version( 'css/news-page.css' )
 		);
 	}
 
@@ -808,7 +825,8 @@ function exterior_exone_has_fv_header() {
 	// コラム（FV は無い）もコーポレートの半透明ヘッダーを重ねる（2026-10-13 のユーザー指示。黒帯のままだと
 	// 支店用ヘッダーに見えるため）。重ねたぶんの上余白は css/column-page.css 側で足す。
 	// 応募フォーム（白地）もコラムと同じ扱い。上余白は css/recruit-entry.css 側で足す。
-	return is_front_page() || is_page( 'company' ) || is_page( 'dx' ) || is_page( 'vr' ) || is_page( 'plans' ) || is_page( 'high-end' ) || exterior_exone_is_works_page() || is_page( 'contact' ) || is_page( 'recruit' ) || exterior_exone_is_recruit_entry_page() || exterior_exone_is_store_page() || ( function_exists( 'exterior_exone_is_column_page' ) && exterior_exone_is_column_page() );
+	// お知らせ一覧もコラムと同じ扱い（上余白は css/column-page.css の .p-colp を共有）。
+	return is_front_page() || is_page( 'company' ) || is_page( 'dx' ) || is_page( 'vr' ) || is_page( 'plans' ) || is_page( 'high-end' ) || exterior_exone_is_works_page() || is_page( 'contact' ) || is_page( 'recruit' ) || exterior_exone_is_recruit_entry_page() || exterior_exone_is_store_page() || ( function_exists( 'exterior_exone_is_column_page' ) && exterior_exone_is_column_page() ) || ( function_exists( 'exterior_exone_is_news_page' ) && exterior_exone_is_news_page() );
 }
 
 /**
@@ -857,6 +875,10 @@ function exterior_exone_body_class( $classes ) {
 
 	if ( exterior_exone_is_column_page() ) {
 		$classes[] = 'is-column-page';
+	}
+
+	if ( exterior_exone_is_news_page() ) {
+		$classes[] = 'is-news-page';
 	}
 
 	if ( is_page( 'recruit' ) ) {
@@ -922,6 +944,18 @@ function exterior_exone_column_noscript_style() {
 	echo '<noscript><style>.is-column-page [data-reveal]{opacity:1;transform:none;transition:none}</style></noscript>' . "\n";
 }
 add_action( 'wp_head', 'exterior_exone_column_noscript_style' );
+
+/**
+ * お知らせ一覧で JS が動かないとき、[data-reveal] を最初から表示する。
+ * css/column-page.css の @media (scripting: none) に対応しないブラウザ向けの併用。
+ */
+function exterior_exone_news_noscript_style() {
+	if ( ! exterior_exone_is_news_page() ) {
+		return;
+	}
+	echo '<noscript><style>.is-news-page [data-reveal]{opacity:1;transform:none;transition:none}</style></noscript>' . "\n";
+}
+add_action( 'wp_head', 'exterior_exone_news_noscript_style' );
 
 /**
  * お問い合わせページで JS が動かないとき、[data-reveal] を最初から表示し、

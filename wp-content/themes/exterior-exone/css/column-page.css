@@ -45,8 +45,10 @@
 	--col-thumb-ratio: 3 / 2;
 }
 
-/* ページ地（オーバースクロール時・セクションの継ぎ目に別の色が出ないように） */
-.is-column-page {
+/* ページ地（オーバースクロール時・セクションの継ぎ目に別の色が出ないように）。
+   お知らせ一覧（.is-news-page。archive-news.php）もこのファイルを共有する */
+.is-column-page,
+.is-news-page {
 	background-color: var(--col-bg);
 }
 
@@ -220,7 +222,8 @@
 	background-color: var(--col-placeholder);
 }
 
-.p-colp__link:hover .p-colp__img {
+/* ホバーの変化はリンクのカードだけ（お知らせの押せないカードは .p-colp__link が div） */
+a.p-colp__link:hover .p-colp__img {
 	transform: scale(var(--col-thumb-zoom));
 }
 
@@ -277,7 +280,7 @@
 	transition: color var(--transition-base);
 }
 
-.p-colp__link:hover .p-colp__card-title {
+a.p-colp__link:hover .p-colp__card-title {
 	color: var(--col-accent);
 	text-decoration: underline;
 }
@@ -359,7 +362,8 @@ a.p-colp__page:hover {
 
 /* --- JS 無効時: [data-reveal] は JS が合図を出すまで透明なので、最初から最終状態にする --- */
 @media (scripting: none) {
-	.is-column-page [data-reveal] {
+	.is-column-page [data-reveal],
+	.is-news-page [data-reveal] {
 		opacity: 1;
 		transform: none;
 		transition: none;
