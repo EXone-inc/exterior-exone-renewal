@@ -3,7 +3,10 @@
  *
  * ・送信は CF7 の AJAX のまま（入力チェックもサーバー側の CF7。現サイトと同じ）。
  * ・送信中はもう一度押しても送らない（ボタンを押せなくし、Enter での送信も止める）。
- * ・完了 … フォームを隠し、CF7 の送信完了メッセージだけをフォームの位置に出して画面内へ送る。
+ * ・完了 … data-recruit-entry-thanks-url の /recruit/thanks/ へ遷移する（履歴に残る遷移）。
+ *   遷移先が無いとき（サンクスページが無い・非公開）は、フォームを隠し、CF7 の送信完了メッセージだけを
+ *   フォームの位置に出して画面内へ送る。
+ *   「戻る」で戻ったとき（bfcache の復元）は入力前の状態（フォーム・ボタンを押せる）に戻す。
  * ・入力エラー … CF7 が欄の下に出したエラーのうち最初の項目へ送る（帯は CSS で出さない）。
  * ・送信の失敗（mail_failed など）… CF7 の帯（.wpcf7-response-output。CSS で表示）へ送る。
  */
@@ -21,6 +24,8 @@
 	var reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
 	var submit = form.querySelector('.wpcf7-submit');
 	var sending = false;
+	var leaving = false;
+	var thanks = box.getAttribute('data-recruit-entry-thanks-url') || '';
 
 	// 画面上端に重なっている追従ヘッダーの高さ（js/contact-form.js と同じ）。
 	function headerOffset() {
@@ -66,7 +71,7 @@
 				return;
 			}
 
-			if (sending) {
+			if (sending || leaving) {
 				event.preventDefault();
 				event.stopImmediatePropagation();
 				return;
@@ -79,6 +84,14 @@
 
 	form.addEventListener('wpcf7mailsent', function (event) {
 		var response = event.detail && event.detail.apiResponse ? event.detail.apiResponse : {};
+
+		// サンクスページへ（送信中の表示のまま。2 回目は leaving で止める）。
+		if (thanks) {
+			leaving = true;
+			setBusy(true);
+			window.location.assign(thanks);
+			return;
+		}
 
 		form.hidden = true;
 		done.textContent = response.message || '';
@@ -126,8 +139,19 @@
 	form.addEventListener('wpcf7statuschanged', function (event) {
 		var status = event.detail ? event.detail.status : '';
 
-		if (sending && status !== 'submitting') {
+		if (sending && status !== 'submitting' && !leaving) {
 			setBusy(false);
 		}
+	});
+
+	// 遷移後に「戻る」で bfcache から復元されたら、入力前の状態に戻す（再送信はしない）。
+	window.addEventListener('pageshow', function (event) {
+		if (!event.persisted || !leaving) {
+			return;
+		}
+
+		leaving = false;
+		setBusy(false);
+		form.reset();
 	});
 })();

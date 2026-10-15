@@ -1,0 +1,504 @@
+/* ============================================================
+   サンクスページ（送信完了）/contact/thanks/（page-thanks.php）
+   カンプ: PC 964:47 / SP 964:78（ボード 853:582 の中）
+   設計メモ: docs/figma-contact-thanks-page.md
+   仕様書: docs/spec-20261015-thanks-page.md（決定事項 docs/spec-20261015-thanks-page-decisions.md）
+   プレフィックスは --thanks- / .p-thanks*。
+   ------------------------------------------------------------
+   FV は css/contact.css の .p-contactfv をそのまま使う（このファイルの前に読む）。
+   ここの :root には幅で変わらない値（色・影・行高・時間）だけを置き、
+   長さはファイル末尾の比例ブロックが決める。単位は contact.css と共用:
+   - PC（1025px 以上）… --contact-vu（カンプ 1920 の 1px の実寸）
+   - SP（1024px 以下）… --contact-su（カンプ 375 の 1px の実寸。上限 --sp-scale-max）
+   ============================================================ */
+:root {
+	/* --- 色 --- */
+	--thanks-bg: var(--color-white4); /* 上段の地 964:48 / 966:218 */
+	--thanks-bg-explore: var(--color-white2); /* 下段の地 966:160 / 964:82 */
+	--thanks-text: var(--color-black1); /* 一文・本文・英字小見出し・カードの文字 */
+	--thanks-heading: var(--color-black2); /* 和文見出し 966:120 / 966:156 */
+	--thanks-num: var(--color-gray2); /* 番号 966:127 */
+	--thanks-card-bg: var(--color-white1); /* 966:124 */
+	--thanks-link-text: var(--color-white2); /* Explore カードの文字 966:168 / 966:174 */
+	--thanks-card-scrim: rgba(0, 0, 0, 0.1); /* DX カードの暗幕 966:183 / 966:244 */
+	--thanks-check-circle: var(--color-black2); /* 丸チェックの円（カンプ #1D1D1F） */
+	--thanks-check-tick: var(--color-black0); /* 丸チェックの ✓（カンプ #000） */
+	--thanks-check-circle-w: 1px; /* 円の線（PC・SP とも 1） */
+
+	/* --- 行高 --- */
+	--thanks-lh: 1.5; /* 一文・本文・カードの題と説明・Explore 和文 */
+	--thanks-en-lh: 1.12; /* SF Pro の英字小見出し */
+	--thanks-ja-lh: 1.6; /* 和文見出し */
+
+	/* --- 動き --- */
+	--thanks-link-transition: var(--transition-base); /* Explore カードのホバー（TOP の PLANS カードと同じ） */
+	--thanks-check-gap: var(--diagram-draw-duration); /* 円を描き終えてから ✓ を描く（js/line-draw.js が読む） */
+	--thanks-text-delay: calc(var(--diagram-draw-start) + var(--thanks-check-gap)); /* 一文・本文のフェードイン開始 = ✓ の描き始め（決定事項 §4 Q8） */
+}
+
+/* ページ地（オーバースクロール時に白が出ないように） */
+.is-thanks-page {
+	background-color: var(--thanks-bg);
+}
+
+/* FV〜Next Step は #f3f3f4、Explore だけ #fefefe */
+.p-thanks {
+	background-color: var(--thanks-bg);
+}
+
+/* ============================================================
+   完了メッセージ（964:72 / 966:111 / 966:114、SP 964:102 / 966:190 / 966:194）
+   ============================================================ */
+.p-thanksmsg {
+	padding-top: var(--thanks-check-top);
+	color: var(--thanks-text);
+	text-align: center;
+}
+
+/* 丸チェック。線描画は style.css の svg[data-line-draw] と js/line-draw.js（支店ページの線画と同じ） */
+.p-thanksmsg__check {
+	--diagram-draw-gap: var(--thanks-check-gap);
+
+	display: block;
+	width: var(--thanks-check-size);
+	height: var(--thanks-check-size);
+	margin-inline: auto;
+}
+
+.p-thanksmsg__check .p-thanksmsg__circle {
+	stroke: var(--thanks-check-circle);
+	stroke-width: var(--thanks-check-circle-w);
+}
+
+.p-thanksmsg__check .p-thanksmsg__tick {
+	stroke: var(--thanks-check-tick);
+	stroke-width: var(--thanks-check-tick-w);
+	stroke-linecap: butt;
+}
+
+.p-thanksmsg__text {
+	margin-top: var(--thanks-lead-top);
+	animation: p-thanksmsg-in var(--reveal-duration) var(--reveal-ease) var(--thanks-text-delay) backwards;
+}
+
+/* 一文・本文はスクロールを待たず、開いた時点で ✓ に続けて下からフェードイン（[data-reveal] と同じ動き。決定事項 §4 Q8） */
+@keyframes p-thanksmsg-in {
+	from {
+		opacity: 0;
+		transform: translateY(var(--reveal-shift));
+	}
+}
+
+/* 966:111 / 966:190（色はカンプどおり black1） */
+.p-thanksmsg__lead {
+	font-size: var(--thanks-lead-size);
+	font-weight: var(--thanks-lead-fw);
+	line-height: var(--thanks-lh);
+	letter-spacing: var(--thanks-lead-ls);
+}
+
+/* 966:114 / 966:194。段落の間は 1 行分 */
+.p-thanksmsg__body {
+	max-width: var(--thanks-content-w);
+	margin-inline: auto;
+	font-size: var(--thanks-body-size);
+	font-weight: var(--fw-regular);
+	line-height: var(--thanks-lh);
+	letter-spacing: var(--thanks-body-ls);
+}
+
+.p-thanksmsg__lead + .p-thanksmsg__body {
+	margin-top: var(--thanks-body-top);
+}
+
+.p-thanksmsg__body + .p-thanksmsg__body {
+	margin-top: var(--thanks-para-gap);
+}
+
+.p-thanksmsg__body strong {
+	font-weight: var(--fw-bold);
+}
+
+/* ============================================================
+   見出し（英字小見出し + 和文見出し。Next Step と Explore EXone で共通）
+   966:121・966:120 / 966:157・966:156、SP 966:196・966:197 / 966:226・966:227
+   ============================================================ */
+.p-thankshead {
+	text-align: center;
+}
+
+.p-thankshead__en {
+	display: block;
+	font-family: var(--font-ui);
+	font-size: var(--thanks-en-size);
+	font-weight: var(--fw-medium);
+	line-height: var(--thanks-en-lh);
+	letter-spacing: var(--thanks-en-ls);
+	color: var(--thanks-text);
+}
+
+.p-thankshead__ja {
+	display: block;
+	margin-top: var(--thanks-ja-top);
+	font-size: var(--thanks-ja-size);
+	font-weight: var(--fw-bold);
+	line-height: var(--thanks-ja-lh);
+	letter-spacing: var(--thanks-ja-ls);
+	color: var(--thanks-heading);
+}
+
+/* ============================================================
+   Next Step（カード 966:124・966:130・966:132 / 966:199・966:205・966:219）
+   ============================================================ */
+.p-thankssteps {
+	padding-top: var(--thanks-steps-top);
+	padding-bottom: var(--thanks-section-end);
+}
+
+.p-thankssteps__list {
+	display: grid;
+	grid-template-columns: var(--thanks-cols);
+	gap: var(--thanks-steps-gap);
+	width: var(--thanks-list-w);
+	margin: var(--thanks-cards-top) auto 0;
+	padding: 0;
+	list-style: none;
+}
+
+.p-thankscard {
+	position: relative;
+	height: 100%;
+	min-height: var(--thanks-step-h);
+	border-radius: var(--thanks-card-radius);
+	background-color: var(--thanks-card-bg);
+	box-shadow: var(--thanks-card-shadow);
+	color: var(--thanks-text);
+}
+
+/* 番号はカードの白地より前面。上部がカードの外にはみ出す */
+.p-thankscard__num {
+	position: absolute;
+	top: calc(-1 * var(--thanks-num-over));
+	left: var(--thanks-num-left);
+	z-index: 1;
+	font-family: var(--font-display);
+	font-size: var(--thanks-num-size);
+	font-weight: var(--fw-semibold);
+	line-height: var(--contact-display-lh);
+	letter-spacing: var(--thanks-num-ls);
+	color: var(--thanks-num);
+}
+
+.p-thankscard__img {
+	display: block;
+	height: auto;
+	max-width: none;
+}
+
+.p-thankscard__img--mail {
+	width: var(--thanks-icon-mail-w);
+}
+
+.p-thankscard__img--operator {
+	width: var(--thanks-icon-operator-w);
+}
+
+.p-thankscard__img--house {
+	width: var(--thanks-icon-house-w);
+}
+
+.p-thankscard__title {
+	font-size: var(--thanks-card-title-size);
+	font-weight: var(--fw-bold);
+	line-height: var(--thanks-lh);
+	letter-spacing: var(--thanks-card-ls);
+}
+
+.p-thankscard__text {
+	margin-top: var(--thanks-card-text-top);
+	font-size: var(--thanks-card-text-size);
+	font-weight: var(--fw-regular);
+	line-height: var(--thanks-lh);
+	letter-spacing: var(--thanks-card-ls);
+}
+
+/* ============================================================
+   Explore EXone（966:164・966:177・966:172 / 966:229・966:233・966:243）
+   カード全体が 1 つのリンク。DX だけ 10% の暗幕
+   ============================================================ */
+.p-thanksexplore {
+	padding-top: var(--thanks-explore-top);
+	padding-bottom: var(--contact-end);
+	background-color: var(--thanks-bg-explore);
+}
+
+.p-thanksexplore__list {
+	display: grid;
+	grid-template-columns: var(--thanks-cols);
+	gap: var(--thanks-explore-gap);
+	width: var(--thanks-list-w);
+	margin: var(--thanks-explore-cards-top) auto 0;
+	padding: 0;
+	list-style: none;
+}
+
+.p-thankslink {
+	position: relative;
+	display: block;
+	aspect-ratio: 16 / 9;
+	overflow: hidden;
+	border-radius: var(--thanks-card-radius);
+	box-shadow: var(--thanks-card-shadow);
+	color: var(--thanks-link-text);
+	text-align: center;
+	text-decoration: none;
+	transition: transform var(--thanks-link-transition), box-shadow var(--thanks-link-transition);
+}
+
+.p-thankslink__img {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	max-width: none;
+	object-fit: cover;
+	object-position: 50% 50%;
+}
+
+.p-thankslink--scrim::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	background-color: var(--thanks-card-scrim);
+}
+
+.p-thankslink__en,
+.p-thankslink__ja {
+	position: relative;
+	z-index: 1;
+	display: block;
+}
+
+.p-thankslink__en {
+	padding-top: var(--thanks-link-en-top);
+	font-family: var(--font-display);
+	font-size: var(--thanks-link-en-size);
+	font-weight: var(--fw-semibold);
+	line-height: var(--contact-display-lh);
+	letter-spacing: var(--thanks-link-en-ls);
+	white-space: nowrap;
+}
+
+.p-thankslink__ja {
+	margin-top: var(--thanks-link-ja-top);
+	font-size: var(--thanks-link-ja-size);
+	font-weight: var(--fw-medium);
+	line-height: var(--thanks-lh);
+	letter-spacing: var(--thanks-link-ja-ls);
+}
+
+/* ホバーは TOP の PLANS カードと同じ（少し浮いて影が深くなる）。タッチ端末では変化させない */
+@media (hover: hover) {
+	.p-thankslink:hover {
+		transform: translateY(var(--plans-card-lift-hover));
+		box-shadow: var(--plans-card-shadow-hover);
+	}
+}
+
+/* --- JS 無効時: 出現前の状態で止まらないように最初から表示し、丸チェックは描き終えた状態 --- */
+@media (scripting: none) {
+	.is-thanks-page [data-reveal] {
+		opacity: 1;
+		transform: none;
+		transition: none;
+	}
+
+	.p-thanksmsg__text {
+		animation: none;
+	}
+
+	.is-thanks-page svg.p-thanksmsg__check[data-line-draw] :is(path, line, circle) {
+		stroke-dashoffset: 0;
+	}
+}
+
+/* --- 動きを減らす設定: ホバーの浮き上がりは即時、丸チェックは描かずに最初から完成状態
+   （出現は style.css 側で止まる。line-draw.js が付ける .is-drawing の animation もここで止める） --- */
+@media (prefers-reduced-motion: reduce) {
+	:root {
+		--thanks-link-transition: 0s;
+	}
+
+	svg.p-thanksmsg__check[data-line-draw] :is(path, line, circle),
+	svg.p-thanksmsg__check[data-line-draw].is-drawing :is(path, line, circle) {
+		stroke-dashoffset: 0;
+		animation: none;
+	}
+
+	.p-thanksmsg__text {
+		animation: none;
+	}
+}
+
+/* ============================================================
+   PC（1025px 以上）: 1920px カンプの縮小拡大コピー化（中間幅も 3 列のまま比例縮小。決定事項 §4 Q4）
+   値は設計メモ §0「PC の縦リズム」・§2
+   ============================================================ */
+@media (min-width: 1025px) {
+	:root {
+		--thanks-content-w: none; /* 本文は行割りどおり（中央揃え） */
+		--thanks-list-w: calc(1600 * var(--contact-vu)); /* x160〜1760（= --content-width） */
+		--thanks-cols: repeat(3, minmax(0, 1fr));
+		--thanks-card-radius: calc(10 * var(--contact-vu));
+		--thanks-card-shadow: 0 calc(12 * var(--contact-vu)) calc(32 * var(--contact-vu)) rgba(0, 0, 0, 0.12);
+
+		/* --- 完了メッセージ（送信完了の下端 648 → 丸チェック 737 → 一文 963 → 本文 1028） --- */
+		--thanks-check-top: calc(89 * var(--contact-vu));
+		--thanks-check-size: calc(146 * var(--contact-vu));
+		--thanks-check-tick-w: calc(3 * var(--contact-vu));
+		--thanks-lead-top: calc(80 * var(--contact-vu));
+		--thanks-lead-size: calc(24 * var(--contact-vu)); /* 966:111 Bold ls2 */
+		--thanks-lead-fw: var(--fw-bold);
+		--thanks-lead-ls: calc(2 * var(--contact-vu));
+		--thanks-body-top: calc(29 * var(--contact-vu));
+		--thanks-body-size: calc(18 * var(--contact-vu)); /* 966:114 Regular ls2 lh1.5 */
+		--thanks-body-ls: calc(2 * var(--contact-vu));
+		--thanks-para-gap: calc(27 * var(--contact-vu)); /* 空行 1 行分 */
+
+		/* --- 見出し（本文の下端 1163 → Next Step 1323） --- */
+		--thanks-steps-top: calc(160 * var(--contact-vu));
+		--thanks-en-size: calc(32 * var(--contact-vu)); /* SF Pro Medium ls1 lh1.12 */
+		--thanks-en-ls: calc(1 * var(--contact-vu));
+		--thanks-ja-top: calc(20 * var(--contact-vu)); /* 19.86 */
+		--thanks-ja-size: calc(36 * var(--contact-vu)); /* Bold ls2 lh1.6 */
+		--thanks-ja-ls: calc(2 * var(--contact-vu));
+		--thanks-cards-top: calc(129 * var(--contact-vu)); /* 和文見出し下端 → Next Step カード上端 */
+
+		/* --- Next Step カード（509x341・y1566。番号はカード上端の 73 上・左 +29） --- */
+		--thanks-steps-gap: calc(36.5 * var(--contact-vu));
+		--thanks-step-h: calc(341 * var(--contact-vu));
+		--thanks-num-over: calc(73 * var(--contact-vu));
+		--thanks-num-left: calc(29 * var(--contact-vu));
+		--thanks-num-size: calc(100 * var(--contact-vu));
+		--thanks-num-ls: calc(-3 * var(--contact-vu));
+		--thanks-icon-bottom: calc(166 * var(--contact-vu)); /* アイコンの下端 = カード上端 +166 */
+		--thanks-icon-mail-w: calc(137.5 * var(--contact-vu)); /* 966:152 の描画部分（枠 143x103） */
+		--thanks-icon-operator-w: calc(99 * var(--contact-vu)); /* 966:150（枠 100x119） */
+		--thanks-icon-house-w: calc(191 * var(--contact-vu)); /* 966:187（枠 194x101） */
+		--thanks-card-title-top: calc(30 * var(--contact-vu)); /* アイコン下端 1732 → 題 1762 */
+		--thanks-card-title-size: calc(22 * var(--contact-vu));
+		--thanks-card-text-top: calc(15 * var(--contact-vu));
+		--thanks-card-text-size: calc(16 * var(--contact-vu));
+		--thanks-card-ls: calc(2 * var(--contact-vu));
+		--thanks-section-end: calc(160 * var(--contact-vu)); /* カード下端 1907 → 地の切り替え 2067 */
+
+		/* --- Explore（地の切り替え 2067 → 2224。カード 509x286・y2418） --- */
+		--thanks-explore-top: calc(157 * var(--contact-vu));
+		--thanks-explore-cards-top: calc(80 * var(--contact-vu));
+		--thanks-explore-gap: calc(36.5 * var(--contact-vu));
+		--thanks-link-en-top: calc(137 * var(--contact-vu));
+		--thanks-link-en-size: calc(64 * var(--contact-vu)); /* Antonio SemiBold ls-3 */
+		--thanks-link-en-ls: calc(-3 * var(--contact-vu));
+		--thanks-link-ja-top: calc(5 * var(--contact-vu));
+		--thanks-link-ja-size: calc(18 * var(--contact-vu)); /* Medium ls2 */
+		--thanks-link-ja-ls: calc(2 * var(--contact-vu));
+	}
+
+	/* アイコンは各カードの横中央・下端揃え、題と説明は中央揃え */
+	.p-thankscard {
+		text-align: center;
+	}
+
+	.p-thankscard__icon {
+		display: flex;
+		align-items: flex-end;
+		justify-content: center;
+		height: var(--thanks-icon-bottom);
+	}
+
+	.p-thankscard__body {
+		padding-top: var(--thanks-card-title-top);
+	}
+}
+
+/* ============================================================
+   SP（1024px 以下）: 375px カンプの縮小拡大コピー化（左右余白 22）
+   値は設計メモ §0「SP の縦リズム」・§3
+   ============================================================ */
+@media (max-width: 1024px) {
+	:root {
+		--thanks-content-w: calc(331 * var(--contact-su));
+		--thanks-list-w: calc(331 * var(--contact-su)); /* 左右 22 */
+		--thanks-cols: minmax(0, 1fr);
+		--thanks-card-radius: calc(5 * var(--contact-su));
+		--thanks-card-shadow: 0 calc(6 * var(--contact-su)) calc(16 * var(--contact-su)) rgba(0, 0, 0, 0.12);
+
+		/* --- 完了メッセージ（送信完了の下端 399 → 丸チェック 444 → 一文 538 → 本文 574） --- */
+		--thanks-check-top: calc(45 * var(--contact-su));
+		--thanks-check-size: calc(54 * var(--contact-su));
+		--thanks-check-tick-w: calc(2 * var(--contact-su));
+		--thanks-lead-top: calc(40 * var(--contact-su));
+		--thanks-lead-size: calc(14 * var(--contact-su)); /* 966:190 Medium ls1 */
+		--thanks-lead-fw: var(--fw-medium);
+		--thanks-lead-ls: calc(1 * var(--contact-su));
+		--thanks-body-top: calc(15 * var(--contact-su));
+		--thanks-body-size: calc(11 * var(--contact-su)); /* 966:194 Regular ls1 lh1.5 */
+		--thanks-body-ls: calc(1 * var(--contact-su));
+		--thanks-para-gap: calc(16.5 * var(--contact-su));
+
+		/* --- 見出し（本文 7 行の下端 689.5 → Next Step 773。カンプの本文の枠 693 は行高の丸め） --- */
+		--thanks-steps-top: calc(83.5 * var(--contact-su));
+		--thanks-en-size: calc(14 * var(--contact-su));
+		--thanks-en-ls: calc(1 * var(--contact-su));
+		--thanks-ja-top: calc(8 * var(--contact-su));
+		--thanks-ja-size: calc(16 * var(--contact-su)); /* Bold ls1 lh1.6 */
+		--thanks-ja-ls: calc(1 * var(--contact-su));
+		--thanks-cards-top: calc(40 * var(--contact-su));
+
+		/* --- Next Step カード（331x94・段間 24。番号はカード上端の 24 上・左 +15） --- */
+		--thanks-steps-gap: calc(24 * var(--contact-su));
+		--thanks-step-h: calc(94 * var(--contact-su));
+		--thanks-num-over: calc(24 * var(--contact-su));
+		--thanks-num-left: calc(15 * var(--contact-su));
+		--thanks-num-size: calc(36 * var(--contact-su));
+		--thanks-num-ls: calc(-1 * var(--contact-su));
+		--thanks-icon-center: calc(50 * var(--contact-su)); /* アイコン中心 = カード左 +50 */
+		--thanks-icon-mail-w: calc(54 * var(--contact-su)); /* 966:203 の描画部分（枠 56x40） */
+		--thanks-icon-operator-w: calc(43.5 * var(--contact-su)); /* 966:210（枠 44x52） */
+		--thanks-icon-house-w: calc(67 * var(--contact-su)); /* 966:224（枠 68x35） */
+		--thanks-card-text-left: calc(97 * var(--contact-su)); /* 題と説明の左端 = カード左 +97 */
+		--thanks-card-text-right: calc(12 * var(--contact-su));
+		--thanks-card-pad-y: calc(10 * var(--contact-su));
+		--thanks-card-title-size: calc(13 * var(--contact-su));
+		--thanks-card-text-top: calc(1.5 * var(--contact-su));
+		--thanks-card-text-size: calc(11 * var(--contact-su));
+		--thanks-card-ls: calc(1 * var(--contact-su));
+		--thanks-section-end: calc(80 * var(--contact-su)); /* カード 03 下端 1193 → 地の切り替え 1273 */
+
+		/* --- Explore（地の切り替え 1273 → 1353。カード 331x186・段間 10） --- */
+		--thanks-explore-top: calc(80 * var(--contact-su));
+		--thanks-explore-cards-top: calc(40 * var(--contact-su));
+		--thanks-explore-gap: calc(10 * var(--contact-su));
+		--thanks-link-en-top: calc(93 * var(--contact-su));
+		--thanks-link-en-size: calc(40 * var(--contact-su)); /* Antonio SemiBold ls-2 */
+		--thanks-link-en-ls: calc(-2 * var(--contact-su));
+		--thanks-link-ja-top: calc(3 * var(--contact-su));
+		--thanks-link-ja-size: calc(12 * var(--contact-su)); /* Medium ls1 */
+		--thanks-link-ja-ls: calc(1 * var(--contact-su));
+	}
+
+	/* 左に番号 + アイコン、右に題 + 説明（左揃え）。題 + 説明のブロックはカードの上下中央 */
+	.p-thankscard {
+		display: flex;
+		align-items: center;
+		padding: var(--thanks-card-pad-y) var(--thanks-card-text-right) var(--thanks-card-pad-y) var(--thanks-card-text-left);
+		text-align: left;
+	}
+
+	.p-thankscard__icon {
+		position: absolute;
+		top: 50%;
+		left: var(--thanks-icon-center);
+		transform: translate(-50%, -50%);
+	}
+}

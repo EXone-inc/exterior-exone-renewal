@@ -4,7 +4,8 @@
  *
  * カンプ: 個人 864:294 / 法人 860:166 / 送信ボタン 869:602・869:601
  * 確認表示・完了表示はカンプに無い（決定 §2。フォームの書式を流用。仕様書 Q13）。
- * 入力チェック・確認表示・送信・完了の切り替えは js/contact-form.js。
+ * 入力チェック・確認表示・送信・完了の切り替えは js/contact-form.js。送信成功後は
+ * data-contact-thanks-url のサンクスページへ遷移する（無ければ完了表示）。
  * CF7 が無効・未登録のときは案内文だけを出す（仕様書 Q10）。
  *
  * $args: type（personal / corporate）
@@ -19,12 +20,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 $exterior_exone_cf_type  = isset( $args['type'] ) && in_array( $args['type'], array( 'personal', 'corporate' ), true ) ? $args['type'] : 'personal';
 $exterior_exone_cf_html  = function_exists( 'exterior_exone_contact_form_html' ) ? exterior_exone_contact_form_html( $exterior_exone_cf_type ) : '';
 $exterior_exone_cf_texts = exterior_exone_contact_form_texts();
+// 送信成功後の遷移先（支店モードは ?store= 付き。サンクスページが無ければ空 = 同ページ内の完了表示）。
+$exterior_exone_cf_thanks = function_exists( 'exterior_exone_thanks_url' ) ? exterior_exone_thanks_url( 'contact' ) : '';
 ?>
 <div
 	class="p-contactform"
 	data-contact-form="<?php echo esc_attr( $exterior_exone_cf_type ); ?>"
 	<?php if ( '' !== $exterior_exone_cf_html ) : ?>
 		data-contact-messages="<?php echo esc_attr( (string) wp_json_encode( exterior_exone_contact_form_messages( $exterior_exone_cf_type ) ) ); ?>"
+		<?php if ( '' !== $exterior_exone_cf_thanks ) : ?>
+			data-contact-thanks-url="<?php echo esc_url( $exterior_exone_cf_thanks ); ?>"
+		<?php endif; ?>
 		<?php if ( 'personal' === $exterior_exone_cf_type ) : ?>
 			data-contact-store-label="<?php echo esc_attr( $exterior_exone_cf_texts['store_label'] ); ?>"
 			data-contact-store-unselected="<?php echo esc_attr( $exterior_exone_cf_texts['unselected'] ); ?>"

@@ -8,7 +8,9 @@
  *   文言は data-contact-messages（CF7 のフォームのメッセージ）。直した欄のエラーは入力した時点で消す。
  * ・確認表示 … ラベルと入力値の一覧（値は文字列のまま。改行は CSS で保つ）。個人は先頭に「お問い合わせ先」。
  *   「修正する」で入力に戻り、「送信する」で CF7 の送信（AJAX）を呼ぶ。送信中は 2 つのボタンを押せない。
- * ・送信の結果 … 完了はフォームの位置に完了文面（CF7 の送信完了メッセージ）。
+ * ・送信の結果 … 完了は data-contact-thanks-url のサンクスページへ遷移する（履歴に残る遷移）。
+ *   遷移先が無いとき（サンクスページが無い・非公開）はフォームの位置に完了文面（CF7 の送信完了メッセージ）。
+ *   「戻る」で戻ったとき（bfcache の復元）は入力前の状態（入力表示・ボタンを押せる）に戻す。
  *   サーバー側の入力エラーは入力表示に戻して CF7 が欄の下に出したエラーへ送る。
  *   送信の失敗（mail_failed など）は入力表示に戻し、CF7 の文言をフォームの帯に出す（CSS）。
  * CF7 のクライアント側の入力チェックは使わない（フォームの novalidate クラス）。
@@ -80,6 +82,7 @@
 		var messages = {};
 		var sending = false;
 		var done = false;
+		var thanks = box.getAttribute('data-contact-thanks-url') || '';
 
 		Array.prototype.forEach.call(box.querySelectorAll('[data-contact-form-view]'), function (view) {
 			views[view.getAttribute('data-contact-form-view')] = view;
@@ -334,6 +337,14 @@
 			var response = event.detail && event.detail.apiResponse ? event.detail.apiResponse : {};
 
 			done = true;
+
+			// サンクスページへ（送信中の表示のまま。2 回目は done で止める）。
+			if (thanks) {
+				setBusy(true);
+				window.location.assign(thanks);
+				return;
+			}
+
 			views.done.textContent = response.message || '';
 			show('done');
 			scrollToTop(views.done);
@@ -369,9 +380,21 @@
 		form.addEventListener('wpcf7statuschanged', function (event) {
 			var status = event.detail ? event.detail.status : '';
 
-			if (sending && status !== 'submitting') {
+			if (sending && status !== 'submitting' && !(done && thanks)) {
 				setBusy(false);
 			}
+		});
+
+		// 遷移後に「戻る」で bfcache から復元されたら、入力前の状態に戻す（再送信はしない）。
+		window.addEventListener('pageshow', function (event) {
+			if (!event.persisted || !done || !thanks) {
+				return;
+			}
+
+			done = false;
+			setBusy(false);
+			form.reset();
+			show('input');
 		});
 	}
 

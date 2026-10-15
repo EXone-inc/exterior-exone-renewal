@@ -9,6 +9,7 @@
  * 階層では page-entry.php に当たるので、functions.php の exterior_exone_store_template() が
  * 「親が recruit の entry」だけをこのファイルに振り分ける。
  * 見出し → CF7「採用フォーム」（inc/recruit-form.php）。送信・完了・エラーの見せ方は js/recruit-entry.js。
+ * 送信成功後は data-recruit-entry-thanks-url の /recruit/thanks/ へ遷移する（無ければ完了表示）。
  * CF7 が無効・未登録のときは案内文だけを出す（仕様書 Q14）。
  *
  * @package exterior-exone
@@ -20,6 +21,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 $exterior_exone_rce_texts = exterior_exone_recruit_entry_texts();
 $exterior_exone_rce_html  = exterior_exone_recruit_form_html();
+// 送信成功後の遷移先（?store= は付けない。サンクスページが無ければ空 = 同ページ内の完了表示）。
+$exterior_exone_rce_thanks = function_exists( 'exterior_exone_thanks_url' ) ? exterior_exone_thanks_url( 'recruit' ) : '';
 
 get_header();
 ?>
@@ -31,7 +34,7 @@ get_header();
 			<span class="p-rce__title-ja"><?php echo esc_html( $exterior_exone_rce_texts['title_ja'] ); ?></span>
 		</h1>
 
-		<div class="p-rce__form" data-recruit-entry>
+		<div class="p-rce__form" data-recruit-entry<?php echo '' !== $exterior_exone_rce_thanks ? ' data-recruit-entry-thanks-url="' . esc_url( $exterior_exone_rce_thanks ) . '"' : ''; ?>>
 			<?php if ( '' === $exterior_exone_rce_html ) : ?>
 				<p class="p-rce__fallback"><?php echo esc_html( $exterior_exone_rce_texts['fallback'] ); ?></p>
 			<?php else : ?>

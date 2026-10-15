@@ -25,6 +25,7 @@ require_once get_theme_file_path( 'inc/column-page-data.php' );
 require_once get_theme_file_path( 'inc/news-page-data.php' );
 require_once get_theme_file_path( 'inc/contact-data.php' );
 require_once get_theme_file_path( 'inc/contact-forms.php' );
+require_once get_theme_file_path( 'inc/thanks-data.php' );
 require_once get_theme_file_path( 'inc/recruit-data.php' );
 require_once get_theme_file_path( 'inc/recruit-form.php' );
 
@@ -463,6 +464,24 @@ function exterior_exone_enqueue_assets() {
 		);
 	}
 
+	// サンクスページ（/contact/thanks/。page-thanks.php）。FV は CONTACT の .p-contactfv を流用するため
+	// css/contact.css も読む（フォームの JS は読まない）。css/thanks.css はその後に読む。
+	if ( exterior_exone_is_thanks_page() ) {
+		wp_enqueue_style(
+			'exterior-exone-contact',
+			get_theme_file_uri( 'css/contact.css' ),
+			array( 'exterior-exone-style' ),
+			exterior_exone_asset_version( 'css/contact.css' )
+		);
+
+		wp_enqueue_style(
+			'exterior-exone-thanks',
+			get_theme_file_uri( 'css/thanks.css' ),
+			array( 'exterior-exone-contact' ),
+			exterior_exone_asset_version( 'css/thanks.css' )
+		);
+	}
+
 	// 採用ページ（/recruit/。page-recruit.php）。CSS はテーマ本体の後に読む。
 	// 粒子は recruit.js、FV の写真の列は PLANS と同じ img list のエンドレスロール（plans-imglist.js）。
 	// 流す速さ（px/秒）は recruit-flow.js が先に入れるので、plans-imglist.js の依存にする。
@@ -835,7 +854,8 @@ function exterior_exone_has_fv_header() {
 	// 支店用ヘッダーに見えるため）。重ねたぶんの上余白は css/column-page.css 側で足す。
 	// 応募フォーム（白地）もコラムと同じ扱い。上余白は css/recruit-entry.css 側で足す。
 	// お知らせ一覧もコラムと同じ扱い（上余白は css/column-page.css の .p-colp を共有）。
-	return is_front_page() || is_page( 'company' ) || is_page( 'dx' ) || is_page( 'vr' ) || is_page( 'plans' ) || is_page( 'high-end' ) || exterior_exone_is_works_page() || is_page( 'contact' ) || is_page( 'recruit' ) || exterior_exone_is_recruit_entry_page() || exterior_exone_is_store_page() || ( function_exists( 'exterior_exone_is_column_page' ) && exterior_exone_is_column_page() ) || ( function_exists( 'exterior_exone_is_news_page' ) && exterior_exone_is_news_page() );
+	// サンクスページは CONTACT と同じ FV なので CONTACT と同じ扱い。
+	return exterior_exone_is_thanks_page() || is_front_page() || is_page( 'company' ) || is_page( 'dx' ) || is_page( 'vr' ) || is_page( 'plans' ) || is_page( 'high-end' ) || exterior_exone_is_works_page() || is_page( 'contact' ) || is_page( 'recruit' ) || exterior_exone_is_recruit_entry_page() || exterior_exone_is_store_page() || ( function_exists( 'exterior_exone_is_column_page' ) && exterior_exone_is_column_page() ) || ( function_exists( 'exterior_exone_is_news_page' ) && exterior_exone_is_news_page() );
 }
 
 /**
@@ -892,6 +912,10 @@ function exterior_exone_body_class( $classes ) {
 
 	if ( is_page( 'recruit' ) ) {
 		$classes[] = 'is-recruit-page';
+	}
+
+	if ( exterior_exone_is_thanks_page() ) {
+		$classes[] = 'is-thanks-page';
 	}
 
 	if ( exterior_exone_is_recruit_entry_page() ) {
@@ -985,6 +1009,21 @@ function exterior_exone_contact_noscript_style() {
 add_action( 'wp_head', 'exterior_exone_contact_noscript_style' );
 
 /**
+ * サンクスページで JS が動かないとき、[data-reveal] を最初から表示し、丸チェックを描き終えた状態にする。
+ * css/thanks.css の @media (scripting: none) に対応しないブラウザ向けの併用。
+ */
+function exterior_exone_thanks_noscript_style() {
+	if ( ! exterior_exone_is_thanks_page() ) {
+		return;
+	}
+	echo '<noscript><style>'
+		. '.is-thanks-page [data-reveal]{opacity:1;transform:none;transition:none}'
+		. '.is-thanks-page svg.p-thanksmsg__check[data-line-draw] :is(path,line,circle){stroke-dashoffset:0}'
+		. '</style></noscript>' . "\n";
+}
+add_action( 'wp_head', 'exterior_exone_thanks_noscript_style' );
+
+/**
  * 支店ページで JS が動かないとき、[data-reveal] を最初から表示し、見える安心の線画を
  * 描き終えた状態にし、FAQ の回答を開いた状態で出し、SP の DX の 3 ステップを縦に並べる。
  * css/store.css の @media (scripting: none) に対応しないブラウザ向けの併用。
@@ -1056,6 +1095,13 @@ function exterior_exone_store_template( $template ) {
 		$entry_template = locate_template( 'page-recruit-entry.php' );
 
 		return $entry_template ? $entry_template : $template;
+	}
+
+	// スラッグ thanks でも親が contact / recruit 以外なら、サンクスページにせず通常の固定ページ表示。
+	if ( is_page( 'thanks' ) && ! exterior_exone_is_thanks_page() ) {
+		$index_template = locate_template( 'index.php' );
+
+		return $index_template ? $index_template : $template;
 	}
 
 	return $template;
