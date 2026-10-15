@@ -448,6 +448,7 @@ Text Domain: exterior-exone
 	--news-title-lh: 1.833; /* SP 22/12。PC は 2.5（45/18）に上書き */
 	--news-btn-gap: clamp(0px, -15.842px + 4.2246vw, 65.27px); /* 0 → 65.27 */
 	--recruit-overlay: rgba(0, 0, 0, 0.5); /* 917:88 */
+	--recruit-bg-position: 50% 38%; /* 950:44 の切り抜き（3:2 写真の上から 23.47% 〜 85.4% を表示） */
 	--recruit-copy-gap: clamp(22.41px, 8.432px + 3.7275vw, 80px); /* 22.41 → 80 : 見出し下 80 ルール（カンプ実測 58.34 から変更） */
 	--recruit-copy-size: clamp(18px, 13.631px + 1.165vw, 36px); /* 18 → 36 */
 	--recruit-sub-gap: clamp(18.4px, 17.252px + 0.3061vw, 23.13px); /* 18.4 → 23.13 */
@@ -4056,6 +4057,7 @@ svg[data-line-draw].is-drawn .st1 {
 	width: 100%;
 	height: 100%;
 	object-fit: cover;
+	object-position: var(--recruit-bg-position);
 }
 
 /* 917:88 の暗幕 */
