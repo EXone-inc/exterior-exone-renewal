@@ -452,6 +452,15 @@ function exterior_exone_enqueue_assets() {
 			exterior_exone_asset_version( 'js/contact-form.js' ),
 			true
 		);
+
+		// 郵便番号 → 住所の自動入力（zipcloud API。個人・法人の両フォーム）。
+		wp_enqueue_script(
+			'exterior-exone-contact-zip',
+			get_theme_file_uri( 'js/contact-zip.js' ),
+			array(),
+			exterior_exone_asset_version( 'js/contact-zip.js' ),
+			true
+		);
 	}
 
 	// 採用ページ（/recruit/。page-recruit.php）。CSS はテーマ本体の後に読む。
