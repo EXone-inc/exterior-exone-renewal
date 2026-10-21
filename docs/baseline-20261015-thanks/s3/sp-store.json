@@ -1,0 +1,32 @@
+{
+ "header": {
+  "storeMode": true,
+  "store": "仙台支店",
+  "scrollW": 375
+ },
+ "open": {
+  "expanded": "true",
+  "drawerStore": "仙台支店",
+  "drawerLinks": [
+   "http://exterior-exone-renewal.local/store/sendai/",
+   "http://exterior-exone-renewal.local/store/sendai/",
+   "http://exterior-exone-renewal.local/store/sendai/",
+   "http://exterior-exone-renewal.local/dx/?store=sendai",
+   "http://exterior-exone-renewal.local/plans/?store=sendai",
+   "http://exterior-exone-renewal.local/works/?store=sendai",
+   "http://exterior-exone-renewal.local/news/?store=sendai",
+   "http://exterior-exone-renewal.local/column/?store=sendai",
+   "http://exterior-exone-renewal.local/",
+   "http://exterior-exone-renewal.local/store/sendai/",
+   "http://exterior-exone-renewal.local/store/totsuka/",
+   "http://exterior-exone-renewal.local/store/morioka/",
+   "http://exterior-exone-renewal.local/store/aomori/",
+   "http://exterior-exone-renewal.local/store/hachinohe/",
+   "http://exterior-exone-renewal.local/store/hirosaki/",
+   "http://exterior-exone-renewal.local/contact/?store=sendai"
+  ]
+ },
+ "afterLink": "http://exterior-exone-renewal.local/works/?store=sendai",
+ "afterCard": "http://exterior-exone-renewal.local/plans/?store=sendai",
+ "errors": []
+}

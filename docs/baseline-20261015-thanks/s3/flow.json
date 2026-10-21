@@ -1,0 +1,177 @@
+[
+ {
+  "label": "personal-1920",
+  "attr": "http://exterior-exone-renewal.local/contact/thanks/",
+  "confirmVisible": true,
+  "url": "http://exterior-exone-renewal.local/contact/thanks/",
+  "ms": 214,
+  "reached": true,
+  "doneSeenBeforeNav": false,
+  "h1": "THANK YOU",
+  "lead": "お問い合わせ、ありがとうございます。",
+  "storeMode": null,
+  "storeLink": null,
+  "explore": [
+   "http://exterior-exone-renewal.local/works/",
+   "http://exterior-exone-renewal.local/plans/",
+   "http://exterior-exone-renewal.local/dx/"
+  ],
+  "delta": 2,
+  "mails": [
+   {
+    "to": "eval@example.com",
+    "subject": "【EXone】お問い合わせを受け付けました"
+   },
+   {
+    "to": "morioka@exterior-exone.com",
+    "subject": "【お問い合わせ】個人（盛岡支店）"
+   }
+  ],
+  "back": {
+   "url": "http://exterior-exone-renewal.local/contact/",
+   "boxVisible": false,
+   "input": false,
+   "confirm": false,
+   "done": false,
+   "busy": null,
+   "sendDisabled": false,
+   "submitDisabled": false,
+   "name": "",
+   "delta": 0
+  },
+  "errors": []
+ },
+ {
+  "label": "corporate-375",
+  "attr": "http://exterior-exone-renewal.local/contact/thanks/",
+  "confirmVisible": true,
+  "url": "http://exterior-exone-renewal.local/contact/thanks/",
+  "ms": 224,
+  "reached": true,
+  "doneSeenBeforeNav": false,
+  "h1": "THANK YOU",
+  "lead": "お問い合わせ、ありがとうございます。",
+  "storeMode": null,
+  "storeLink": null,
+  "explore": [
+   "http://exterior-exone-renewal.local/works/",
+   "http://exterior-exone-renewal.local/plans/",
+   "http://exterior-exone-renewal.local/dx/"
+  ],
+  "delta": 2,
+  "mails": [
+   {
+    "to": "eval@example.com",
+    "subject": "【EXone】お問い合わせを受け付けました"
+   },
+   {
+    "to": "info@exterior-exone.com",
+    "subject": "【お問い合わせ】法人"
+   }
+  ],
+  "back": {
+   "url": "http://exterior-exone-renewal.local/contact/",
+   "boxVisible": false,
+   "input": false,
+   "confirm": false,
+   "done": false,
+   "busy": null,
+   "sendDisabled": false,
+   "submitDisabled": false,
+   "name": "",
+   "delta": 0
+  },
+  "errors": []
+ },
+ {
+  "label": "personal-sendai",
+  "attr": "http://exterior-exone-renewal.local/contact/thanks/?store=sendai",
+  "confirmVisible": true,
+  "url": "http://exterior-exone-renewal.local/contact/thanks/?store=sendai",
+  "ms": 228,
+  "reached": true,
+  "doneSeenBeforeNav": false,
+  "h1": "THANK YOU",
+  "lead": "お問い合わせ、ありがとうございます。",
+  "storeMode": "",
+  "storeLink": "仙台支店",
+  "explore": [
+   "http://exterior-exone-renewal.local/works/?store=sendai",
+   "http://exterior-exone-renewal.local/plans/?store=sendai",
+   "http://exterior-exone-renewal.local/dx/?store=sendai"
+  ],
+  "delta": 2,
+  "mails": [
+   {
+    "to": "eval@example.com",
+    "subject": "【EXone】お問い合わせを受け付けました"
+   },
+   {
+    "to": "sendai@exterior-exone.com",
+    "subject": "【お問い合わせ】個人（仙台支店）"
+   }
+  ],
+  "errors": []
+ },
+ {
+  "label": "recruit-1920",
+  "attr": "http://exterior-exone-renewal.local/recruit/thanks/",
+  "url": "http://exterior-exone-renewal.local/recruit/thanks/",
+  "ms": 1157,
+  "reached": true,
+  "lead": "ご応募、ありがとうございます。",
+  "storeMode": null,
+  "storeLink": false,
+  "delta": 1,
+  "mails": [
+   {
+    "to": "recruit@exone-exterior.jp",
+    "subject": "HPからのお問い合わせ\"S3 回帰 recruit-1920\""
+   }
+  ],
+  "back": {
+   "url": "http://exterior-exone-renewal.local/recruit/entry/",
+   "formHidden": false,
+   "busy": null,
+   "submitDisabled": false,
+   "name": "",
+   "status": "init",
+   "delta": 0
+  },
+  "errors": []
+ },
+ {
+  "label": "recruit-aomori-375",
+  "attr": "http://exterior-exone-renewal.local/recruit/thanks/",
+  "url": "http://exterior-exone-renewal.local/recruit/thanks/",
+  "ms": 616,
+  "reached": true,
+  "lead": "ご応募、ありがとうございます。",
+  "storeMode": null,
+  "storeLink": false,
+  "delta": 1,
+  "mails": [
+   {
+    "to": "recruit@exone-exterior.jp",
+    "subject": "HPからのお問い合わせ\"S3 回帰 recruit-aomori-375\""
+   }
+  ],
+  "errors": []
+ },
+ {
+  "label": "personal-empty",
+  "attr": "http://exterior-exone-renewal.local/contact/thanks/",
+  "url": "http://exterior-exone-renewal.local/contact/",
+  "tips": 5,
+  "delta": 0,
+  "errors": []
+ },
+ {
+  "label": "recruit-empty",
+  "attr": "http://exterior-exone-renewal.local/recruit/thanks/",
+  "url": "http://exterior-exone-renewal.local/recruit/entry/",
+  "tips": 10,
+  "delta": 0,
+  "errors": []
+ }
+]

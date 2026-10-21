@@ -1,0 +1,243 @@
+{
+ "375": {
+  "initial": {
+   "type": true,
+   "store": false,
+   "method": false,
+   "tel": false,
+   "form-personal": false,
+   "form-corporate": false
+  },
+  "personal": {
+   "steps": {
+    "type": true,
+    "store": true,
+    "method": false,
+    "tel": false,
+    "form-personal": false,
+    "form-corporate": false
+   },
+   "pressed": [
+    "personal"
+   ]
+  },
+  "store": {
+   "steps": {
+    "type": true,
+    "store": true,
+    "method": true,
+    "tel": false,
+    "form-personal": false,
+    "form-corporate": false
+   },
+   "pressed": [
+    "sendai"
+   ],
+   "storeInput": "sendai",
+   "lineHref": "https://lin.ee/Z9M31bf",
+   "telEl": {
+    "tag": "A",
+    "href": "tel:0223548993"
+   },
+   "telNumber": "022-354-8993"
+  },
+  "tel": {
+   "stepsBeforeClick": {
+    "type": true,
+    "store": true,
+    "method": true,
+    "tel": false,
+    "form-personal": false,
+    "form-corporate": false
+   },
+   "note": "SP は a[href^=tel:] のためクリックしない"
+  },
+  "mail": {
+   "steps": {
+    "type": true,
+    "store": true,
+    "method": true,
+    "tel": false,
+    "form-personal": true,
+    "form-corporate": false
+   },
+   "pressed": [
+    "mail"
+   ]
+  },
+  "emptyErrors": [
+   "入力してください。",
+   "入力してください。",
+   "入力してください。",
+   "入力してください。",
+   "入力してください。"
+  ],
+  "emptyStillInput": true,
+  "zipAddress": "宮城県仙台市青葉区中央",
+  "confirm": {
+   "input": false,
+   "confirm": true,
+   "list": "お問い合わせ先 仙台支店 お名前 回帰 太郎（S3） メールアドレス s3@example.com 郵便番号 9800021 ご住所 宮城県仙台市青葉区中央 お問い合わせ内容 S3 回帰確認（送信しない）"
+  },
+  "back": {
+   "input": true,
+   "confirm": false,
+   "nameKept": "回帰 太郎（S3）"
+  },
+  "corporate": {
+   "steps": {
+    "type": true,
+    "store": false,
+    "method": false,
+    "tel": false,
+    "form-personal": false,
+    "form-corporate": true
+   },
+   "pressed": [
+    "corporate"
+   ]
+  },
+  "corporateZip": "青森県青森市新町",
+  "backToPersonal": {
+   "steps": {
+    "type": true,
+    "store": true,
+    "method": true,
+    "tel": false,
+    "form-personal": true,
+    "form-corporate": false
+   },
+   "nameKept": "回帰 太郎（S3）",
+   "store": [
+    "sendai"
+   ],
+   "method": [
+    "mail"
+   ]
+  },
+  "url": "http://exterior-exone-renewal.local/contact/",
+  "errors": []
+ },
+ "1920": {
+  "initial": {
+   "type": true,
+   "store": false,
+   "method": false,
+   "tel": false,
+   "form-personal": false,
+   "form-corporate": false
+  },
+  "personal": {
+   "steps": {
+    "type": true,
+    "store": true,
+    "method": false,
+    "tel": false,
+    "form-personal": false,
+    "form-corporate": false
+   },
+   "pressed": [
+    "personal"
+   ]
+  },
+  "store": {
+   "steps": {
+    "type": true,
+    "store": true,
+    "method": true,
+    "tel": false,
+    "form-personal": false,
+    "form-corporate": false
+   },
+   "pressed": [
+    "sendai"
+   ],
+   "storeInput": "sendai",
+   "lineHref": "https://lin.ee/Z9M31bf",
+   "telEl": {
+    "tag": "BUTTON",
+    "href": null
+   },
+   "telNumber": "022-354-8993"
+  },
+  "tel": {
+   "steps": {
+    "type": true,
+    "store": true,
+    "method": true,
+    "tel": true,
+    "form-personal": false,
+    "form-corporate": false
+   },
+   "pressed": [
+    "tel"
+   ]
+  },
+  "mail": {
+   "steps": {
+    "type": true,
+    "store": true,
+    "method": true,
+    "tel": false,
+    "form-personal": true,
+    "form-corporate": false
+   },
+   "pressed": [
+    "mail"
+   ]
+  },
+  "emptyErrors": [
+   "入力してください。",
+   "入力してください。",
+   "入力してください。",
+   "入力してください。",
+   "入力してください。"
+  ],
+  "emptyStillInput": true,
+  "zipAddress": "宮城県仙台市青葉区中央",
+  "confirm": {
+   "input": false,
+   "confirm": true,
+   "list": "お問い合わせ先 仙台支店 お名前 回帰 太郎（S3） メールアドレス s3@example.com 郵便番号 9800021 ご住所 宮城県仙台市青葉区中央 お問い合わせ内容 S3 回帰確認（送信しない）"
+  },
+  "back": {
+   "input": true,
+   "confirm": false,
+   "nameKept": "回帰 太郎（S3）"
+  },
+  "corporate": {
+   "steps": {
+    "type": true,
+    "store": false,
+    "method": false,
+    "tel": false,
+    "form-personal": false,
+    "form-corporate": true
+   },
+   "pressed": [
+    "corporate"
+   ]
+  },
+  "corporateZip": "青森県青森市新町",
+  "backToPersonal": {
+   "steps": {
+    "type": true,
+    "store": true,
+    "method": true,
+    "tel": false,
+    "form-personal": true,
+    "form-corporate": false
+   },
+   "nameKept": "回帰 太郎（S3）",
+   "store": [
+    "sendai"
+   ],
+   "method": [
+    "mail"
+   ]
+  },
+  "url": "http://exterior-exone-renewal.local/contact/",
+  "errors": []
+ },
+ "mailpitDelta": 0
+}

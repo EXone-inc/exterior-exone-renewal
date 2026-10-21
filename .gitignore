@@ -26,6 +26,17 @@
 !CLAUDE.md
 !/docs/
 
+# docs はテキスト（仕様書・設計メモ・検証スクリプト・参照コード）だけ追跡する。
+# 検証で生成したスクリーンショット・HTML スナップショット、Figma から落とした素材、
+# 参照用にコピーした写真は再生成できるので追跡しない（2026-10-21）。
+/docs/**/*.png
+/docs/**/*.jpg
+/docs/**/*.jpeg
+/docs/**/*.webp
+/docs/**/*.svg
+/docs/baseline-*/**/*.html
+/docs/figma-*-assets/
+
 # -------------------------------------------------------------
 # 3) wp-content は themes / plugins / mu-plugins だけ有効化
 #    （uploads/ upgrade/ cache/ languages/ backup 系は無視のまま）

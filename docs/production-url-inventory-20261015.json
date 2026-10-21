@@ -1,0 +1,203 @@
+{
+  "observed_date": "2026-10-15",
+  "source": "Authenticated WordPress admin lists; read only; not a database backup",
+  "home": "https://exterior-exone.com",
+  "siteurl": "https://exterior-exone.com/retest",
+  "wordpress": "6.8.1",
+  "php": "7.4.33",
+  "theme": "AFFINGER Child",
+  "pages": [
+    {
+      "id": 3474,
+      "title": "コラム",
+      "url": "https://exterior-exone.com/column/"
+    },
+    {
+      "id": 3411,
+      "title": "Application",
+      "url": "https://exterior-exone.com/?page_id=3411&preview=true"
+    },
+    {
+      "id": 3240,
+      "title": "REVIEW",
+      "url": "https://exterior-exone.com/review/"
+    },
+    {
+      "id": 3231,
+      "title": "STORE",
+      "url": "https://exterior-exone.com/store/"
+    },
+    {
+      "id": 3436,
+      "title": "— EXone戸塚支店",
+      "url": "https://exterior-exone.com/store/store-totsuka/"
+    },
+    {
+      "id": 3337,
+      "title": "— EXone盛岡支店",
+      "url": "https://exterior-exone.com/store/store-morioka/"
+    },
+    {
+      "id": 3130,
+      "title": "— EXone八戸支店",
+      "url": "https://exterior-exone.com/store/store-hachinohe/"
+    },
+    {
+      "id": 3127,
+      "title": "— EXone弘前支店",
+      "url": "https://exterior-exone.com/store/store-hirosaki/"
+    },
+    {
+      "id": 3073,
+      "title": "— EXone青森支店",
+      "url": "https://exterior-exone.com/store/store-aomori/"
+    },
+    {
+      "id": 2994,
+      "title": "RECRUIT",
+      "url": "https://exterior-exone.com/recruit/"
+    },
+    {
+      "id": 3016,
+      "title": "— ENTRY",
+      "url": "https://exterior-exone.com/recruit/entry/"
+    },
+    {
+      "id": 2953,
+      "title": "WORKS",
+      "url": "https://exterior-exone.com/works/"
+    },
+    {
+      "id": 9,
+      "title": "基本文の見やすさチェック用ダミーページ（Gutenberg）",
+      "url": "https://exterior-exone.com/?page_id=9&preview=true"
+    },
+    {
+      "id": 2461,
+      "title": "ABOUT US",
+      "url": "https://exterior-exone.com/about-us/"
+    },
+    {
+      "id": 823,
+      "title": "CONTENTS",
+      "url": "https://exterior-exone.com/contents/"
+    },
+    {
+      "id": 821,
+      "title": "CONTACT",
+      "url": "https://exterior-exone.com/contact/"
+    },
+    {
+      "id": 819,
+      "title": "COMPANY",
+      "url": "https://exterior-exone.com/company/"
+    },
+    {
+      "id": 815,
+      "title": "PACKAGE",
+      "url": "https://exterior-exone.com/package/"
+    },
+    {
+      "id": 16,
+      "title": "HOME",
+      "url": "https://exterior-exone.com/"
+    },
+    {
+      "id": 3,
+      "title": "プライバシーポリシー",
+      "url": "https://exterior-exone.com/?page_id=3&preview=true"
+    }
+  ],
+  "columns": [
+    {
+      "id": 3863,
+      "title": "カーポート、車が入ればOK？後悔しないサイズ・柱位置・耐雪強度の決め方",
+      "url": "https://exterior-exone.com/column/carport-size-snow/"
+    },
+    {
+      "id": 3851,
+      "title": "物置、そこに置いて大丈夫？後悔しない設置場所・サイズ選びと転倒対策",
+      "url": "https://exterior-exone.com/column/storeroom-guide/"
+    },
+    {
+      "id": 3836,
+      "title": "ブロック塀のひび割れ・傾きは危険サイン？見分け方と撤去・つくり替え費用",
+      "url": "https://exterior-exone.com/column/blockwall-guide/"
+    },
+    {
+      "id": 3823,
+      "title": "外構の見積もり、金額だけで比べて大丈夫？取る前の準備と見積書のチェックポイント",
+      "url": "https://exterior-exone.com/column/gaikou-mitsumori/"
+    },
+    {
+      "id": 3787,
+      "title": "外構デザインは「センス」より順番が大事？おしゃれに見える決め方と失敗例",
+      "url": "https://exterior-exone.com/column/gaikou-design/"
+    },
+    {
+      "id": 3773,
+      "title": "駐車場の土間コンクリート費用、なぜこんなに差が出る？1台・2台の相場と見積もりの見方",
+      "url": "https://exterior-exone.com/column/doma-concrete-guide/"
+    },
+    {
+      "id": 3766,
+      "title": "カーポート修理、どこに頼む？費用相場と「修理か建て替えか」の判断基準",
+      "url": "https://exterior-exone.com/column/carport-repair-guide/"
+    },
+    {
+      "id": 3757,
+      "title": "高低差のある玄関アプローチ、階段とスロープどっちが正解？費用と安全な設計",
+      "url": "https://exterior-exone.com/column/genkan-approach-steps/"
+    },
+    {
+      "id": 3742,
+      "title": "シンボルツリー、人気だけで選ぶと後悔？失敗しない樹種選びと手入れのコツ",
+      "url": "https://exterior-exone.com/column/symbol-tree-guide/"
+    },
+    {
+      "id": 3715,
+      "title": "使わない裏庭、どうすれば活かせる？費用別のリフォーム・庭づくりアイデア",
+      "url": "https://exterior-exone.com/column/backyard-reform-guide/"
+    },
+    {
+      "id": 3680,
+      "title": "玄関アプローチで後悔する人の共通点｜費用・素材・滑りにくさまで徹底比較",
+      "url": "https://exterior-exone.com/column/genkan-approach-guide/"
+    },
+    {
+      "id": 3664,
+      "title": "【盛岡】外構工事はいくらかかる？費用相場と「凍上・積雪」で後悔しないポイント",
+      "url": "https://exterior-exone.com/column/morioka-gaikou-guide/"
+    },
+    {
+      "id": 3646,
+      "title": "外構フェンス、目隠しは何cmが正解？費用・高さ・種類を目的別に比較",
+      "url": "https://exterior-exone.com/column/exterior-fence-guide/"
+    },
+    {
+      "id": 3624,
+      "title": "【仙台】カーポート、何台用・耐積雪何cmが正解？費用と選び方を比較",
+      "url": "https://exterior-exone.com/column/sendai-carport-guide/"
+    },
+    {
+      "id": 3597,
+      "title": "【青森】門扉・門柱は交換前にここを確認｜費用と「凍上で傾く」を防ぐポイント",
+      "url": "https://exterior-exone.com/column/aomori-monmawari-guide/"
+    },
+    {
+      "id": 3549,
+      "title": "【仙台】人工芝、DIYで本当に大丈夫？費用差と失敗しやすい「下地」を解説",
+      "url": "https://exterior-exone.com/column/sendai-jinkoshiba/"
+    },
+    {
+      "id": 3523,
+      "title": "【仙台】外構工事、結局いくら必要？予算別の費用と失敗しない業者選び",
+      "url": "https://exterior-exone.com/column/sendai-exterior/"
+    },
+    {
+      "id": 3485,
+      "title": "ウッドデッキ、人工木を選べば正解？費用・寿命・天然木との違いを徹底比較",
+      "url": "https://exterior-exone.com/column/wood-deck-guide/"
+    }
+  ]
+}

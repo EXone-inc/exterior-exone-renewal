@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>パンフレット・ページアニメーション</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#161616;color:#eee;font-family:Arial,'Noto Sans JP',sans-serif;min-height:100svh;display:grid;place-items:center}main{width:min(100%,1100px);padding:64px 28px;text-align:center}.caption{font-size:11px;letter-spacing:.3em;color:#aaa;margin-bottom:38px}.book{width:min(82vw,820px);aspect-ratio:3/1;margin:0 auto;position:relative;perspective:1800px;isolation:isolate;filter:drop-shadow(0 28px 24px #0006)}.page{position:absolute;top:0;width:50%;height:100%;overflow:hidden;background:#eeece7;color:#252525;text-align:left;padding:7%;display:flex;flex-direction:column;justify-content:space-between}.left{left:0;background:#e4e1da}.right{right:0;background:#f5f3ee}.page:after{content:'';position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,#0002,transparent 12%,transparent 88%,#0001)}.eyebrow{font-size:clamp(7px,1vw,11px);letter-spacing:.2em}.title{font-weight:400;letter-spacing:-.055em;font-size:clamp(20px,5vw,58px);line-height:1.05;margin:0}.small{font-size:clamp(7px,1vw,11px);line-height:1.8;letter-spacing:.07em}.number{font-size:clamp(7px,1vw,10px);letter-spacing:.2em}.line-art{height:40%;position:relative;display:flex;gap:8%;align-items:flex-end}.line-art i{display:block;border:1px solid #857e70;width:40%;height:80%}.line-art i:last-child{height:55%;width:48%;background:#d7d3ca}.leaf{position:absolute;inset:0 50% 0 0;transform-origin:right center;transform-style:preserve-3d;z-index:5;cursor:pointer;transform:rotateY(var(--angle,0deg))}.face{width:100%;backface-visibility:hidden;-webkit-backface-visibility:hidden;padding:14%;}.front{background:#bbb4a6}.front .title{font-size:clamp(23px,6vw,68px)}.back{background:#eae6dd;transform:rotateY(180deg)}.back:after{background:linear-gradient(90deg,transparent 65%,#0002)}.crease{position:absolute;left:calc(50% - 1px);width:2px;top:0;bottom:0;background:#0002;z-index:7;pointer-events:none}.shadow{position:absolute;right:0;top:0;width:50%;height:100%;background:linear-gradient(90deg,#0005,transparent);opacity:var(--shade,0);pointer-events:none;z-index:3}.controls{display:flex;justify-content:center;gap:10px;margin-top:40px}button{background:transparent;border:1px solid #ffffff35;color:#ddd;border-radius:30px;padding:11px 21px;font-size:12px;cursor:pointer}button:hover{background:#ffffff10}button:focus-visible,.leaf:focus-visible{outline:2px solid #e4d5ba;outline-offset:5px}.hint{font-size:11px;color:#777;margin-top:17px}@media(max-width:500px){main{padding:40px 14px}.book{width:91vw}.controls{margin-top:30px}}
+
+/* Narrow connected paper sections form a continuous curved surface. */
+.book{perspective:1600px;filter:drop-shadow(0 34px 28px #0007)}
+.leaf{transform:none!important;overflow:visible;pointer-events:none}
+.leaf>.face{display:none}
+.paper-strip{position:absolute;top:0;height:100%;transform-origin:100% 50%;transform-style:preserve-3d;pointer-events:auto;will-change:transform}
+.strip-side{position:absolute;inset:0;overflow:hidden;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.strip-side.reverse{transform:rotateY(180deg)}
+.strip-side>.page{width:var(--paper-width);height:100%;padding:14%;padding:var(--paper-padding);transform:none;backface-visibility:visible}
+.strip-light{position:absolute;inset:0;pointer-events:none;background:#000;opacity:0}
+.paper-strip:after{content:none}
+.shadow{filter:blur(12px);transform-origin:left center}
+.book:before{content:'';position:absolute;inset:3px -2px -4px;background:#d1cdc4;box-shadow:0 2px 0 #89857d,0 4px 0 #d1cdc4;z-index:-1}
+.crease{background:linear-gradient(90deg,#0000,#0003,#fff2);width:8px;left:calc(50% - 4px);z-index:2}
+
+/* Each page is a landscape rectangle with a 3:2 aspect ratio. */
+.page{padding:4.25%}.title{font-size:clamp(17px,3.7vw,43px)}.front .title{font-size:clamp(20px,4.8vw,53px)}
+</style>
+</head>
+<body><main>
+<div class="caption">BROCHURE / PAGE TURN</div>
+<div class="book" id="book">
+<section class="page left"><span class="eyebrow">EXTERIOR DESIGN</span><h2 class="title">暮らしを、<br>ひらく。</h2><div class="small">住まいと庭をつなぐ、新しい風景。</div><span class="number">02 — CONCEPT</span></section>
+<section class="page right"><span class="eyebrow">SPACE & MATERIAL</span><div class="line-art"><i></i><i></i></div><div class="small">素材の表情。光と影。<br>日々の暮らしに、静かな豊かさを。</div><span class="number">03 — DESIGN</span></section>
+<div class="shadow" id="shadow"></div>
+<div class="leaf" id="leaf" role="button" tabindex="0" aria-label="左のページをめくる" aria-pressed="false">
+<section class="page face front"><span class="eyebrow">EXTERIOR / COLLECTION</span><h1 class="title">The<br>Quiet<br>Living.</h1><span class="number">01 — OPEN THE STORY</span></section>
+<section class="page face back"><span class="eyebrow">OUR PHILOSOPHY</span><h2 class="title">美しさを、<br>日常へ。</h2><div class="small">外と内が、自然につながる。<br>心地よい場所を、あなたと。</div><span class="number">04 — PHILOSOPHY</span></section>
+</div><div class="crease"></div></div>
+<div class="controls"><button id="turn">ページをめくる</button><button id="auto" aria-pressed="true">自動再生：ON</button></div><p class="hint">左のページをクリックしても操作できます</p>
+</main>
+<script>
+// The paper is integrated from its spine to its free edge, with varying tangent angles.
+const leaf=document.getElementById('leaf'),shadow=document.getElementById('shadow'),turn=document.getElementById('turn'),auto=document.getElementById('auto');
+let opened=false,running=false,autoplay=!matchMedia('(prefers-reduced-motion: reduce)').matches,timer,current=0;
+const duration=2100, count=48, strips=[];
+const front=leaf.querySelector('.front'),back=leaf.querySelector('.back');
+for(let i=0;i<count;i++){
+ const strip=document.createElement('div');strip.className='paper-strip';
+ for(const [template,reverse] of [[front,false],[back,true]]){
+  const side=document.createElement('div');side.className='strip-side'+(reverse?' reverse':'');
+  const content=template.cloneNode(true);content.removeAttribute('id');side.appendChild(content);
+  const light=document.createElement('div');light.className='strip-light';side.appendChild(light);strip.appendChild(side);
+ }
+ leaf.appendChild(strip);strips.push(strip);
+}
+function draw(progress){
+ current=progress;const w=leaf.clientWidth,sw=w/count,base=progress*Math.PI;
+ // The outer edge trails behind the spine; the bend relaxes smoothly at both ends.
+ const bend=.56*Math.sin(Math.PI*progress),lift=Math.sin(Math.PI*progress);
+ let x=0,z=0;
+ strips.forEach((strip,i)=>{
+  const u=(i+.5)/count,theta=base-bend*Math.pow(u,.85);
+  const overlap=1.25;strip.style.width=(sw+overlap)+'px';strip.style.left=(w+x-sw-overlap)+'px';
+  strip.style.transform='translateZ('+z+'px) rotateY('+theta+'rad)';
+  const sides=strip.querySelectorAll('.strip-side');
+  sides.forEach((side,k)=>{
+   const content=side.firstElementChild;
+   content.style.setProperty('--paper-width',w+'px');content.style.setProperty('--paper-padding',w*.085+'px');
+   content.style.left=-(k?i*sw:w-(i+1)*sw-overlap)+'px';
+   const darkness=k? .035+.19*lift*(1-u):.035+.28*lift*u;
+   side.lastElementChild.style.opacity=darkness;
+  });
+  x-=sw*Math.cos(theta);z+=sw*Math.sin(theta);
+ });
+ shadow.style.opacity=lift*.65;
+ shadow.style.transform='scaleX('+(0.3+.7*lift)+')';
+}
+function schedule(){clearTimeout(timer);if(autoplay&&!document.hidden)timer=setTimeout(flip,opened?2400:2800)}
+function flip(){if(running)return;clearTimeout(timer);running=true;const from=opened?1:0,to=opened?0:1,start=performance.now();
+ function frame(now){const p=Math.min((now-start)/duration,1),e=p*p*p*(p*(p*6-15)+10);draw(from+(to-from)*e);
+ if(p<1)requestAnimationFrame(frame);else{opened=!opened;running=false;leaf.setAttribute('aria-pressed',String(opened));leaf.setAttribute('aria-label',opened?'ページを戻す':'左のページをめくる');turn.textContent=opened?'ページを戻す':'ページをめくる';schedule()}}
+ requestAnimationFrame(frame)
+}
+new ResizeObserver(()=>draw(current)).observe(leaf);draw(0);
+function updateAuto(){auto.textContent='自動再生：'+(autoplay?'ON':'OFF');auto.setAttribute('aria-pressed',String(autoplay))}
+leaf.addEventListener('click',flip);leaf.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();flip()}});turn.addEventListener('click',flip);auto.addEventListener('click',()=>{autoplay=!autoplay;updateAuto();schedule()});document.addEventListener('visibilitychange',()=>{if(document.hidden)clearTimeout(timer);else schedule()});updateAuto();schedule();
+</script></body></html>

@@ -1,0 +1,314 @@
+#page_entry--form {
+    padding: 3rem ;
+	  background-color: #fff
+}
+
+.entry_form {
+    position: relative;
+    margin: 0 auto;
+    padding-bottom: 10rem;
+}
+
+.entry_form--title {
+    display: flex;
+    flex-direction: column;
+    letter-spacing: .02em;
+    line-height: 1.5;
+    color: #000;
+    text-align: center;
+    padding-top: 10rem;
+}
+
+.e_form-title--item {
+    font-size: clamp(2.8rem, 0.979rem + 6.78vw, 6.4rem);
+    font-weight: 700;
+}
+
+.e_form-title--item--bottom {
+    font-size: clamp(1.4rem, 1.198rem + 0.75vw, 1.8rem);
+    font-weight: 500;
+}
+
+
+.page_form-layout {
+	display: grid;
+	gap: 5rem;
+	justify-content: center;
+	margin-top: 5rem;
+	padding-top: 5rem;
+	/*border-bottom: 1px solid  #000*/ 
+}
+
+.page_form-item01 {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	font-size: 14px;
+	font-weight: 600;
+	gap: 2.4rem;
+}
+
+.p_form-labelarea {
+	margin-right: 10rem;
+	line-height: 1.75
+}
+
+.p_form {
+	display: flex;
+}
+
+.is_label {
+	font-size: clamp(1.4rem, 1.218rem + 0.73vw, 1.8rem);
+}
+
+.is_req {
+	background-color: #de3434;
+	font-size: 1.2rem;
+	color: #fff;
+	padding: .3rem .8rem;
+	border-radius: 5px;
+	margin-left: 1.5rem;
+	text-align: center;
+}
+
+
+.wpcf7-form-control-wrap[data-name=your-d-job] label{
+	display: flex;
+	margin: 0
+}
+
+.page_form-item01 input[type="checkbox"] {
+	width: auto;
+	margin-left: 0;
+	padding: 0!important;
+
+}
+
+.wpcf7-list-item.first {
+	margin: 0;
+	
+}
+
+.wpcf7-checkbox {
+	font-size: clamp(1.4rem, 1.218rem + 0.73vw, 1.8rem);
+	font-weight: 500;
+	/* チェックボックス群を flex で左揃え・等間隔に
+	   （CF7デフォルトの inline-block + 左マージンによる不揃いな折り返しを防ぐ） */
+	display: flex;
+	flex-wrap: wrap;
+	gap: 1.2rem 2.4rem; /* 行間 / 列間 */
+}
+
+/* 各選択肢：チェックボックスとラベルを横並び・中央揃え */
+.wpcf7-checkbox .wpcf7-list-item {
+	display: flex;
+	align-items: center;
+	gap: .6rem;
+	margin: 0; /* CF7デフォルトの margin-left:1em を打ち消す */
+}
+
+.wpcf7-checkbox .wpcf7-list-item-label {
+	line-height: 1.4;
+}
+
+/* 希望職種：選択肢が多く長いため、モバイルでは1項目=1行に縦積みして読みやすく */
+.wpcf7-form-control-wrap[data-name="your-job"] .wpcf7-checkbox {
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 1.2rem;
+}
+
+
+.p_form-namearea {
+	display: grid;
+	gap: 1.5rem;
+	width: 100%;
+}
+
+.p_form-nameblock {
+	display: flex;
+	align-items: center;
+	gap:1.2rem;
+		font-size: clamp(1.4rem, 1.218rem + 0.73vw, 1.8rem);
+}
+
+.wpcf7-form-control-wrap {
+	width: 100%;
+}
+
+.page_form-item01 input {
+	padding: 1.6rem;
+	border: none;
+	background-color: #e7e7e7;
+	border-radius: 1rem;
+	width: 100%;
+	box-sizing: border-box;
+	font-size: clamp(1.4rem, 1.218rem + 0.73vw, 1.8rem);
+}
+
+.page_form-item01 textarea {
+	width: 100%!important;
+	box-sizing: border-box;
+	padding: 1.6rem;
+	font-size: clamp(1.4rem, 1.218rem + 0.73vw, 1.8rem);
+	background-color: #e7e7e7;
+	border: none;
+	border-radius: 1rem;
+}
+
+.page_form-item01 input[type="text"]::placeholder,
+.page_form-item01 input[type="tel"]::placeholder,
+.page_form-item01 input[type="email"]::placeholder,
+.page_form-item01 textarea::placeholder {
+  color: #a5a5a5;
+}
+
+.page_form-submit {
+	margin: 0 auto;
+	align-items: center;
+	margin-top: 2rem;
+}
+
+.form-btn {
+  display: block;
+  width: 280px;
+  text-align: center;
+}
+
+
+.form-btn-flat {
+  display: block;
+  position: relative;
+  overflow: hidden;
+  border-radius: 45px;
+  background: #ffe622;
+  text-decoration: none;
+  box-shadow: 0 0 5px 0 black;
+}
+
+
+
+.form-btn-flat:before {
+  position: absolute;
+  top: -10px;
+  left: 0;
+  width: 150px;
+  height: 150px;
+  content: '';
+  transition: all .5s ease-in-out;
+  transform: translateX(-80%) translateY(-28px);
+  border-radius: 50%;
+  background: #000;
+}
+
+.form-btn-flat:hover:before {
+  width: 500px;
+  height: 500px;
+  transform: translateX(-10px) translateY(-180px);
+}
+
+
+.form-btn-border {
+  position: relative;
+  top: 0;
+  left: 0;
+  transform-style: preserve-3d;
+}
+
+.form-btn-border::after {
+  content: "\f061";
+  font: var(--fa-font-solid);
+  position: absolute;
+  top: 24px;
+  left: 198px;
+  width: 15px;
+  height: 100%;
+  transition: all .5s ease-in-out;
+  font-size: 1.8rem;
+	color: #000
+
+}
+
+.form-btn-border:hover::after {
+  content: "\f35a";
+  font: var(--fa-font-solid);
+  position: absolute;
+  font-weight: 700;
+  width: 30px;
+  height: 50px;
+  transform: translateX(25%) translateY(0);
+  color: #fff;
+  font-size: 1.8rem;
+}
+
+input[type="submit"] {
+	border: none;
+	background-color: transparent;
+	font-weight: 700;
+	cursor: pointer;
+	position: relative;
+	width: 100%;
+	padding: 2.5rem 2rem;
+	font-size: clamp(1.4rem, 1.218rem + 0.73vw, 1.8rem);
+	color: #000;
+}
+
+.form-btn-flat:hover input[type="submit"]  {
+	color: #fff;
+	transition-delay: 250ms;
+}
+
+
+.wpcf7-spinner {
+	display: none;
+}
+
+@media only screen and (min-width: 960px) {
+	.page_form-item01 {
+		flex-wrap: nowrap
+	}
+	
+	.p_form-labelarea {
+		margin-right: 5rem;
+	}
+	
+	.is_label {
+		width: 190px;
+	}
+	
+	.is_req {
+		width: 30px;
+		margin-left: auto;
+	}
+	
+	.p_form-namearea {
+		grid-template-columns: 1fr 1fr;
+	}
+
+	/* 希望職種：PCでは横並び（複数列で折り返し）に戻す */
+	.wpcf7-form-control-wrap[data-name="your-job"] .wpcf7-checkbox {
+		flex-direction: row;
+		flex-wrap: wrap;
+		gap: 1.2rem 2.4rem;
+	}
+
+	
+	.form-btn {
+  width: 320px;
+	margin-top: 3rem
+
+}
+	
+	.form-btn-border::after {
+  top: 28px;
+  left: 260px;
+  width: 15px;
+
+}
+	
+	input[type="submit"] {
+	padding: 2.4rem 2rem;
+
+}
+	
+}

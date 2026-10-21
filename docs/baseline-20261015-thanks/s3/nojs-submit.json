@@ -1,0 +1,32 @@
+[
+  {
+    "label": "contact-personal",
+    "url": "http://exterior-exone-renewal.local/contact/#wpcf7-f79-o1",
+    "responseOutput": [
+      "お問い合わせを受け付けました。内容を確認のうえ、担当者よりご連絡いたします。自動返信メールをお送りしましたので、届かない場合は迷惑メールフォルダをご確認ください。"
+    ],
+    "notValidTips": [],
+    "mailpitDelta": 2,
+    "note": ""
+  },
+  {
+    "label": "contact-corporate",
+    "url": "http://exterior-exone-renewal.local/contact/#wpcf7-f80-o2",
+    "responseOutput": [
+      "お問い合わせを受け付けました。内容を確認のうえ、担当者よりご連絡いたします。自動返信メールをお送りしましたので、届かない場合は迷惑メールフォルダをご確認ください。"
+    ],
+    "notValidTips": [],
+    "mailpitDelta": 2,
+    "note": ""
+  },
+  {
+    "label": "recruit-entry",
+    "url": "http://exterior-exone-renewal.local/recruit/entry/#wpcf7-f107-o1",
+    "responseOutput": [
+      "ありがとうございます。メッセージは送信されました。"
+    ],
+    "notValidTips": [],
+    "mailpitDelta": 1,
+    "note": ""
+  }
+]

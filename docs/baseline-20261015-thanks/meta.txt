@@ -1,0 +1,8 @@
+blog_public=0
+/ robots: <meta name='robots' content='noindex, nofollow' />
+/contact/ robots: <meta name='robots' content='noindex, nofollow' />
+/recruit/entry/ robots: <meta name='robots' content='noindex, nofollow' />
+--- wp-sitemap-posts-page-1.xml
+404
+(blog_public=0 のためサイトマップ無効。/wp-sitemap-posts-page-1.xml は 404。URL 一覧なし)
+mailpit total after baseline: 6

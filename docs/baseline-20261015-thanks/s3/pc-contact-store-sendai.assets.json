@@ -1,0 +1,25 @@
+{
+  "url": "http://exterior-exone-renewal.local/contact/?store=sendai",
+  "bodyClass": "wp-singular page-template-default page page-id-78 page-parent wp-theme-exterior-exone is-store-mode is-contact-page has-fv-header",
+  "robots": "noindex, nofollow",
+  "css": [
+    "exterior-exone-fonts-css",
+    "exterior-exone-style-css",
+    "exterior-exone-contact-css"
+  ],
+  "js": [
+    "http://exterior-exone-renewal.local/wp-includes/js/wp-emoji-release.min.js?ver=7.0.4",
+    "wp-hooks-js",
+    "wp-i18n-js",
+    "swv-js",
+    "contact-form-7-js",
+    "exterior-exone-contact-select-js",
+    "exterior-exone-contact-form-js",
+    "exterior-exone-contact-zip-js",
+    "exterior-exone-nav-toggle-js",
+    "exterior-exone-gnav-sub-js",
+    "exterior-exone-scroll-reveal-js",
+    "exterior-exone-line-draw-js"
+  ],
+  "consoleErrors": []
+}

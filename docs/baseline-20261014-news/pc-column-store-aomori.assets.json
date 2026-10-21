@@ -1,0 +1,15 @@
+{
+  "bodyClass": "archive post-type-archive post-type-archive-column wp-theme-exterior-exone is-store-mode is-column-page has-fv-header",
+  "css": [
+    "exterior-exone-fonts-css",
+    "exterior-exone-style-css",
+    "exterior-exone-column-page-css"
+  ],
+  "js": [
+    "http://exterior-exone-renewal.local/wp-includes/js/wp-emoji-release.min.js?ver=7.0.4",
+    "exterior-exone-nav-toggle-js",
+    "exterior-exone-gnav-sub-js",
+    "exterior-exone-scroll-reveal-js",
+    "exterior-exone-line-draw-js"
+  ]
+}

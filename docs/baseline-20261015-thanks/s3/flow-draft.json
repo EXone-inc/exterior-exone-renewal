@@ -1,0 +1,43 @@
+[
+ {
+  "label": "draft-personal",
+  "attr": null,
+  "confirmVisible": true,
+  "url": "http://exterior-exone-renewal.local/contact/",
+  "ms": 10004,
+  "reached": false,
+  "doneSeenBeforeNav": true,
+  "doneText": "お問い合わせを受け付けました。内容を確認のうえ、担当者よりご連絡いたします。自動返信メールをお送りしましたので、届かない場合は迷惑メールフォルダをご確認ください。",
+  "doneVisible": true,
+  "delta": 2,
+  "mails": [
+   {
+    "to": "eval@example.com",
+    "subject": "【EXone】お問い合わせを受け付けました"
+   },
+   {
+    "to": "morioka@exterior-exone.com",
+    "subject": "【お問い合わせ】個人（盛岡支店）"
+   }
+  ],
+  "errors": []
+ },
+ {
+  "label": "draft-recruit",
+  "attr": null,
+  "url": "http://exterior-exone-renewal.local/recruit/entry/",
+  "ms": 10001,
+  "reached": false,
+  "doneText": "ありがとうございます。メッセージは送信されました。",
+  "doneVisible": true,
+  "formHidden": true,
+  "delta": 1,
+  "mails": [
+   {
+    "to": "recruit@exone-exterior.jp",
+    "subject": "HPからのお問い合わせ\"S3 回帰 draft-recruit\""
+   }
+  ],
+  "errors": []
+ }
+]

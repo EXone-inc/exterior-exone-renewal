@@ -1,0 +1,530 @@
+<meta charset="UTF-8">
+<style>
+.exone-col{
+  --text:#e3e3e3; --strong:#ffffff; --muted:#9a9a9a;
+  --accent:#c79a5f; --accent-soft:#e8c98f; --head:#f0d9b3;
+  --panel:#17171a; --row1:#1c1c1f; --row2:#161618; --label-bg:#222226;
+  --border:#3a3a3a; --link:#8bb8e0; --th-text:#1a1410;
+  max-width:880px; margin:0 auto; background:transparent; color:var(--text);
+  font-size:16px; line-height:1.95; padding:8px 4px; -webkit-font-smoothing:antialiased;
+}
+.cd_body h2::before, .exone-col h2::before{display:none !important; content:none !important; border:0 !important; background:none !important;}
+.exone-col p, .exone-col li, .exone-col td{color:var(--text);}
+.exone-col p{margin:0 0 22px; line-height:2.0;}
+.exone-col h2 + p, .exone-col h3 + p{margin-top:4px;}
+.exone-col strong{color:var(--strong);}
+.exone-col h2{color:var(--strong); font-size:1.4em; font-weight:700; margin:44px 0 16px; padding:8px 0 10px 14px; border-left:6px solid var(--accent); border-bottom:1px solid var(--border);}
+.exone-col h3{color:var(--head); font-size:1.15em; font-weight:700; margin:30px 0 12px;}
+.exone-col .lead{font-size:1.05em; color:#f1f1f1; margin:0 0 18px;}
+.exone-col .mk{background:linear-gradient(transparent 60%, rgba(199,154,95,0.45) 60%); color:var(--strong); font-weight:700; padding:0 1px;}
+.exone-col .accent{color:var(--accent-soft); font-weight:700;}
+.exone-col .note{font-size:0.85em; color:var(--muted); margin:0 0 18px;}
+.exone-col ul{list-style:disc outside !important; padding-left:1.5em !important; margin:0 0 18px;}
+.exone-col ol{list-style:decimal outside !important; padding-left:1.5em !important; margin:0 0 18px;}
+.exone-col li{display:list-item !important; list-style:inherit !important; margin:0 0 6px;}
+.exone-col li::marker{color:currentColor !important;}
+.exone-col .toc li::marker{color:var(--link) !important;}
+.exone-col .toc a, .exone-col a{color:var(--link); text-decoration:none;}
+.exone-col .box{border:1px solid var(--border); border-radius:10px; padding:20px 24px; margin:28px 0; background:var(--panel);}
+.exone-col .box .box-ttl{margin:0 0 12px; font-weight:700; color:var(--strong); font-size:1.05em;}
+.exone-col .author{display:flex; flex-wrap:wrap; gap:20px; align-items:center; border:1px solid var(--border); border-left:5px solid var(--accent); border-radius:10px; padding:22px 24px; margin:28px 0; background:#161616;}
+.exone-col .author .logo{flex:0 0 auto; width:120px; text-align:center;}
+.exone-col .author .logo img{width:120px; height:auto; max-width:100%;}
+.exone-col .author .body{flex:1 1 260px; min-width:240px;}
+.exone-col .author .eyebrow{margin:0 0 4px; font-size:0.8em; letter-spacing:0.08em; color:var(--accent);}
+.exone-col .author .name{margin:0 0 10px; font-weight:700; font-size:1.1em; color:var(--strong);}
+.exone-col .author .desc{margin:0; font-size:0.92em; line-height:1.9; color:#cfcfcf;}
+.exone-col .summary{border:1px solid #3a2f1c; border-radius:12px; margin:28px 0; background:#1b1710; overflow:hidden;}
+.exone-col .summary .head{background:var(--accent); color:var(--th-text); font-weight:700; padding:13px 22px; font-size:1.06em;}
+.exone-col .check{list-style:none !important; margin:0; padding:20px 24px !important; line-height:1.7;}
+.exone-col .check li{position:relative; padding-left:1.9em !important; margin:0 0 10px; color:#e8e8e8; display:list-item !important; list-style:none !important;}
+.exone-col .check li::marker{content:"" !important;}
+.exone-col .check li::before{content:"\2713"; position:absolute; left:0; top:0; color:var(--accent); font-weight:700; font-size:1.05em;}
+.exone-col .tbl-wrap{overflow-x:auto;}
+.exone-col .tbl{border-collapse:collapse; width:100%; margin:16px 0; font-size:0.92em; background:#141416;}
+.exone-col .tbl th{border:1px solid var(--border); padding:11px; text-align:left; color:var(--th-text); background:var(--accent);}
+.exone-col .tbl td{border:1px solid var(--border); padding:11px; color:var(--text);}
+.exone-col .tbl tr, .exone-col .tbl tbody tr:nth-child(odd){background:var(--row1);}
+.exone-col .tbl tbody tr:nth-child(even){background:var(--row2);}
+.exone-col .tbl td.label{font-weight:700; color:var(--accent-soft); background:var(--label-bg);}
+.exone-col figure{margin:22px 0;}
+.exone-col figure img{margin:0 !important; display:block; width:100%; height:auto; border-radius:10px;}
+.exone-col figcaption{text-align:center; font-size:0.85em; color:var(--muted); margin-top:8px; line-height:1.5;}
+.exone-col img{max-width:100%; height:auto;}
+.exone-col .img-grid2, .exone-col .img-grid3{display:grid; gap:10px; margin:22px 0;}
+.exone-col .img-grid2{grid-template-columns:repeat(2,1fr);}
+.exone-col .img-grid3{grid-template-columns:repeat(3,1fr);}
+.exone-col .img-grid2 img, .exone-col .img-grid3 img{width:100%; height:auto; border-radius:10px; display:block; margin:0 !important;}
+.exone-col .img-left{float:left; width:44%; margin:6px 20px 10px 0;}
+.exone-col .img-left img{width:100%; height:auto; border-radius:10px; margin:0 !important;}
+.exone-col .clearfix::after{content:""; display:block; clear:both;}
+@media(max-width:600px){
+  .exone-col .img-grid2, .exone-col .img-grid3{grid-template-columns:1fr;}
+  .exone-col .img-left{float:none; width:100%; margin:16px 0;}
+}
+.exone-col .imgph{border:2px dashed #6e5a3c; border-radius:10px; padding:20px; margin:22px 0; text-align:center; background:#191510; color:#c4b291;}
+.exone-col .imgph strong{color:#e0c690;}
+.exone-col blockquote{border-left:5px solid var(--accent); margin:24px 0; padding:16px 22px; background:var(--panel); color:#d8d8d8; border-radius:0 8px 8px 0;}
+.exone-col blockquote p{margin:0; color:#d8d8d8;}
+.exone-col .todo{border:1px solid #5a2620; border-left:5px solid #c0392b; margin:24px 0; padding:16px 22px; background:#241312; color:#e8a89f; border-radius:0 8px 8px 0;}
+.exone-col .todo p{margin:0; color:#e8a89f;}
+.exone-col details{border:1px solid var(--border); border-radius:8px; margin:0 0 12px; background:var(--panel); overflow:hidden;}
+.exone-col summary{list-style:none; cursor:pointer; padding:16px 46px 16px 18px; font-weight:700; color:var(--head); position:relative; font-size:1.02em;}
+.exone-col summary::-webkit-details-marker{display:none;}
+.exone-col summary::after{content:"\002B"; position:absolute; right:18px; top:50%; transform:translateY(-50%); font-size:1.4em; color:var(--accent); line-height:1;}
+.exone-col details[open] summary::after{content:"\2212";}
+.exone-col details[open] summary{border-bottom:1px solid var(--border);}
+.exone-col .faq-a{padding:14px 18px 16px; color:var(--text); line-height:1.9;}
+.exone-col .faq-a p{margin:0; color:var(--text);}
+.exone-col .cta{border:1px solid var(--border); border-radius:14px; padding:32px 24px; margin:36px 0; background:linear-gradient(135deg,#1f1b14 0%,#26323d 100%); text-align:center;}
+.exone-col .cta .t{margin:0 0 8px; font-size:1.2em; font-weight:700; color:var(--strong);}
+.exone-col .cta .s{margin:0 0 22px; font-size:0.95em; color:#c9c9c9;}
+.exone-col .cta a{display:inline-block; text-decoration:none; font-weight:700; padding:15px 34px; border-radius:8px; margin:6px 8px; font-size:1.05em;}
+.exone-col .cta .btn-main{background:var(--accent); color:var(--th-text);}
+/* 画像タップで拡大（ライトボックス） */
+.exone-col figure img, .exone-col .img-grid2 img, .exone-col .img-grid3 img{cursor:zoom-in;}
+.exone-lightbox{position:fixed; top:0; right:0; bottom:0; left:0; z-index:99999; background:rgba(0,0,0,.92); display:none; align-items:center; justify-content:center; padding:16px; overscroll-behavior:contain;}
+.exone-lightbox.is-open{display:flex;}
+.exone-lightbox img{max-width:100%; max-height:88vh; width:auto; height:auto; object-fit:contain; border-radius:6px; margin:0;}
+.exone-lightbox .lb-close{position:absolute; top:10px; right:12px; width:44px; height:44px; padding:0; border:0; border-radius:50%; background:rgba(255,255,255,.16); color:#fff; font-size:28px; line-height:44px; text-align:center; cursor:pointer;}
+.exone-lightbox .lb-cap{position:absolute; left:0; right:0; bottom:10px; margin:0; padding:0 16px; text-align:center; color:#ddd; font-size:.85em; line-height:1.6;}
+</style>
+
+
+<div class="exone-col">
+
+<p class="lead"><span class="mk">カーポート</span>は「屋根があればいい」という設備ではありません。サイズ・柱の位置・屋根材・耐積雪強度のどれか一つを外すと、<span class="mk">停めにくい・雪で壊れる・隣とトラブルになる</span>のいずれかが起こります。この記事では、決める順番と判断の基準を、現場で実際に起きていることをもとに解説します。</p>
+
+<div class="author">
+  <div class="logo"><img loading="lazy" decoding="async" decoding="async" src="https://exterior-exone.com/retest/wp-content/uploads/2025/06/EXone__logo.svg" alt="株式会社EXone（エクスワン）ロゴ" /></div>
+  <div class="body">
+    <p class="eyebrow">この記事を書いた人</p>
+    <p class="name">株式会社EXone（エクスワン）</p>
+    <p class="desc">
+      青森・八戸・弘前・仙台・盛岡・戸塚（横浜市）の6拠点で展開する外構・エクステリア専門店です。<br>
+      累計提案実績8,000件以上。カーポート・フェンス・ウッドデッキ・庭づくりまで、設計から現場管理・引き渡しまで一貫対応。<br>
+      AIパースとDX管理（アーキLink）で「価格の見える化」を進めています。<br>
+      本記事は実際の現場で得た情報をもとに執筆しています。
+    </p>
+  </div>
+</div>
+
+<div class="summary">
+  <div class="head">この記事でわかること</div>
+  <ul class="check">
+    <li>1台用・2台用の実寸と、ドアを開けるために必要な余裕</li>
+    <li>柱の位置（片側支持・両側支持・後方支持）の使い分け</li>
+    <li>ポリカーボネートとスチール折板、どちらを選ぶべきか</li>
+    <li>耐積雪強度を「何cm対応」で選ぶ基準</li>
+    <li>費用の内訳と、見積もりで抜けやすい項目</li>
+  </ul>
+</div>
+
+<div class="box">
+  <p class="box-ttl">目次</p>
+  <ol class="toc">
+    <li><a href="#sec-1">つまずくのは本体選びではなく「敷地との関係」</a></li>
+    <li><a href="#sec-2">サイズは「今の車」だけで決めない</a></li>
+    <li><a href="#sec-3">柱の位置で使い勝手が決まる</a></li>
+    <li><a href="#sec-4">屋根材はポリカーボネートか、スチール折板か</a></li>
+    <li><a href="#sec-5">耐積雪強度は「何cm対応」で選ぶ</a></li>
+    <li><a href="#sec-diff">雪はどこへ落ちるか──雪国で最初に決めること</a></li>
+    <li><a href="#sec-6">費用の内訳と、見積もりで抜けやすい項目</a></li>
+    <li><a href="#sec-7">建ぺい率と確認申請、隣地との距離</a></li>
+    <li><a href="#sec-8">工事の流れと、車を停められるまでの期間</a></li>
+    <li><a href="#sec-faq">よくある質問（FAQ）</a></li>
+    <li><a href="#sec-matome">まとめ</a></li>
+  </ol>
+</div>
+
+<h2 id="sec-1">つまずくのは本体選びではなく「敷地との関係」</h2>
+<p class="lead">カーポートの後悔は、商品そのものより「どこに、どう建てたか」から生まれます。</p>
+
+<p>カタログを見比べて悩む方は多いのですが、実際に引き渡し後に出てくる不満は、<span class="mk">柱が邪魔で乗り降りしづらい</span>、<span class="mk">雪の捨て場がなくなった</span>、<span class="mk">屋根が2階の窓に干渉して開かない</span>といった、敷地との関係から生じるものがほとんどです。</p>
+
+<p>カーポートは、土地に定着して屋根と柱を持つ<span class="accent">建築基準法上の「建築物」</span>です。一度建てれば何十年も動かせません。だからこそ、決める順番が結果を左右します。</p>
+
+<figure>
+  <img decoding="async" src="https://exterior-exone.com/retest/wp-content/uploads/2026/09/carport-overview.webp" alt="住宅の駐車スペースに設置されたカーポート" loading="lazy" />
+  <figcaption>商品を選ぶより先に、敷地のどこに・どの向きで建てるかを決める</figcaption>
+</figure>
+
+<div class="box">
+  <p class="box-ttl">決める順番</p>
+  <ol>
+    <li><strong>台数とサイズ</strong>：将来の車種変更まで含めて決める</li>
+    <li><strong>柱の位置</strong>：敷地の形と、乗り降り・通行の動線から決める</li>
+    <li><strong>屋根材と耐積雪強度</strong>：地域の雪の量から決める</li>
+    <li><strong>落雪と雨水の行き先</strong>：隣地・玄関・駐輪スペースとの関係を確認</li>
+    <li><strong>色・オプション</strong>：ここでようやく見た目の話に入る</li>
+  </ol>
+</div>
+
+<p>色やデザインを最初に決めてしまうと、後から仕様を変えざるを得なくなったときに選び直しになります。<span class="mk">見た目は最後</span>で問題ありません。</p>
+
+<h2 id="sec-2">サイズは「今の車」だけで決めない</h2>
+<p class="lead">カーポートのサイズは規格の数字で表され、奥行きと幅の組み合わせで決まります。</p>
+
+<p>たとえば<span class="accent">55-30</span>は、奥行き5.5m×幅3.0mを意味します。1台用の標準的なサイズです。2台用は<span class="accent">55-48</span>（奥行き5.5m×幅4.8m）、3台用はこれに1台分を足した組み合わせになります。</p>
+
+<div class="tbl-wrap">
+<table class="tbl">
+  <thead>
+    <tr><th>台数</th><th>代表的な規格</th><th>おおよその寸法</th><th>向いているケース</th></tr>
+  </thead>
+  <tbody>
+    <tr><td class="label">1台用</td><td>55-30</td><td>奥行5.5m × 幅3.0m</td><td>普通車1台。間口が狭い敷地</td></tr>
+    <tr><td class="label">2台用（横並び）</td><td>55-48</td><td>奥行5.5m × 幅4.8m</td><td>間口に余裕がある敷地。2台とも出入りしやすい</td></tr>
+    <tr><td class="label">2台用（縦並び）</td><td>1台用の連棟</td><td>奥行11m前後 × 幅3.0m</td><td>間口が狭く奥行きがある敷地。奥の車は出にくい</td></tr>
+    <tr><td class="label">3台用</td><td>55-48-30</td><td>奥行5.5m × 幅7.8m前後</td><td>広い間口。来客用スペースを確保したい場合</td></tr>
+  </tbody>
+</table>
+</div>
+
+<p class="note">※実際の寸法はメーカー・シリーズにより異なります。上表は目安としてご覧ください。</p>
+
+<figure>
+  <img decoding="async" src="https://exterior-exone.com/retest/wp-content/uploads/2026/09/carport-size.webp" alt="カーポートの1台用と2台用のサイズとドア開閉に必要なスペースの図解" loading="lazy" />
+  <figcaption>車体が入るかではなく、ドアを開けて乗り降りできるかで判断する</figcaption>
+</figure>
+
+<h3>幅は「車幅＋ドアを開ける余裕」で考える</h3>
+
+<p>2台用の幅4.8mに車を2台入れると、単純計算で1台あたり2.4mです。普通車の車幅がおよそ1.7〜1.8mなので、左右に振り分けられる余裕は<span class="mk">1台あたり60〜70cm程度</span>しかありません。片側に寄せて停めればもう片方は広く使えますが、毎回それができるとは限りません。</p>
+
+<p>チャイルドシートに子どもを乗せる、荷物を抱えて乗り降りする、高齢のご家族が乗り降りするといった使い方があるなら、ドアを全開にできるかどうかを基準に考えてください。</p>
+
+<h3>高さは車種が変わることを前提に</h3>
+
+<p>標準的な高さは地面から梁下までおよそ2.2m前後で、SUVやミニバンを想定した<span class="accent">ロングタイプ（およそ2.4m前後）</span>も選べます。</p>
+
+<p>見落とされやすいのが<span class="mk">バックドアを跳ね上げたときの高さ</span>です。車体そのものは入っても、リアゲートを開けたら屋根にぶつかるという相談は少なくありません。今はコンパクトカーでも、家族が増えてミニバンに乗り換える可能性があるなら、その時点でロングタイプを選んでおくほうが結果的に安く済みます。</p>
+
+<blockquote>
+  <p>カーポートは建ててしまうと高さだけを後から上げることはできません。「今の車に合わせる」のではなく「この先10年で乗りそうな車に合わせる」のが基本です。</p>
+</blockquote>
+
+<h2 id="sec-3">柱の位置で使い勝手が決まる</h2>
+<p class="lead">柱をどこに立てるかは、見た目の問題ではなく毎日の動線の問題です。</p>
+
+<p>カーポートの支持方式には、片側支持・両側支持・後方支持があります。それぞれに向き不向きがあり、敷地の形と雪の量によって選択肢が絞られます。</p>
+
+<div class="tbl-wrap">
+<table class="tbl">
+  <thead>
+    <tr><th>支持方式</th><th>柱の位置</th><th>特徴</th><th>注意点</th></tr>
+  </thead>
+  <tbody>
+    <tr><td class="label">片側支持</td><td>片側だけに2本</td><td>最も一般的。反対側が完全に開くので乗り降りしやすい</td><td>両側支持より強度は劣る。積雪地では仕様の確認が必要</td></tr>
+    <tr><td class="label">両側支持</td><td>左右に計4本以上</td><td>強度が高く、積雪の多い地域や大型サイズで採用される</td><td>柱が両側に立つため、乗り降りの動線を事前に確認する</td></tr>
+    <tr><td class="label">後方支持</td><td>奥側に2本</td><td>前面と側面が開くので、車の出し入れが最もしやすい</td><td>構造上、対応できる積雪量やサイズに制限がある</td></tr>
+  </tbody>
+</table>
+</div>
+
+<figure>
+  <img decoding="async" src="https://exterior-exone.com/retest/wp-content/uploads/2026/09/carport-hashira.webp" alt="カーポートの片側支持・両側支持・後方支持の柱位置の違いを示す図解" loading="lazy" />
+  <figcaption>柱の位置は見た目ではなく、毎日の乗り降りと通行の動線から決める</figcaption>
+</figure>
+
+<p>現地調査では、図面だけでなく実際に立って確認することが欠かせません。柱を立てようとした場所に<span class="mk">給水・排水の配管が埋まっている</span>、<span class="mk">エアコンの室外機や配管がある</span>、<span class="mk">給湯器の排気が柱に直撃する位置にある</span>といったことは珍しくありません。給湯器の排気は、当たり続けると柱や屋根の変色・腐食の原因になります。</p>
+
+<p>上を見上げる確認も必要です。屋根の高さが2階の窓や1階の庇と干渉すると、窓が開かなくなったり、雨樋を切り欠く加工が必要になったりします。</p>
+
+<h2 id="sec-4">屋根材はポリカーボネートか、スチール折板か</h2>
+<p class="lead">屋根材の選択は見た目の好みではなく、雪が積もる地域かどうかで決まります。</p>
+
+<p>カーポートの屋根材は大きく2系統あります。透明または半透明の樹脂板であるポリカーボネートと、ガルバリウム鋼板を波型に折り曲げた<span class="accent">スチール折板（せっぱん）</span>です。</p>
+
+<div class="img-grid2">
+  <img decoding="async" src="https://exterior-exone.com/retest/wp-content/uploads/2026/09/carport-yane-poly.webp" alt="ポリカーボネート屋根のカーポート" loading="lazy" />
+  <img decoding="async" src="https://exterior-exone.com/retest/wp-content/uploads/2026/09/carport-yane-seppan.webp" alt="スチール折板屋根のカーポート" loading="lazy" />
+</div>
+<p class="note">※左＝光を通すポリカーボネート屋根、右＝雪に強いスチール折板屋根。</p>
+
+<div class="tbl-wrap">
+<table class="tbl">
+  <thead>
+    <tr><th>屋根材</th><th>明るさ</th><th>雪への強さ</th><th>向いている地域・使い方</th></tr>
+  </thead>
+  <tbody>
+    <tr><td class="label">ポリカーボネート</td><td>光を通すので屋根下が明るい</td><td>積雪量の少ない地域向け</td><td>雪がほとんど積もらない地域。庭や建物が暗くなるのを避けたい場合</td></tr>
+    <tr><td class="label">熱線遮断ポリカーボネート</td><td>明るさを保ちつつ暑さを抑える</td><td>同上</td><td>夏場の車内温度や、屋根下での作業のしやすさを重視する場合</td></tr>
+    <tr><td class="label">スチール折板</td><td>光は通さない</td><td>積雪地では実質必須</td><td>雪が積もる地域。強度と耐久性を優先する場合</td></tr>
+  </tbody>
+</table>
+</div>
+
+<p>雪が積もる地域では、折板以外の選択肢は実質的にありません。ポリカーボネートの屋根は雪の重みで割れるおそれがあり、割れた屋根材の下には車があります。</p>
+
+<p>折板の弱点である「屋根下が暗くなる」点は、オプションで補えます。屋根の一部を透過性のあるポリカーボネートに置き換える<span class="accent">明かり取り</span>を組み合わせれば、必要な範囲だけ明るさを確保できます。折板の断面を隠す<span class="accent">鼻隠し</span>を木調色にする、梁下に軒天パネルとダウンライトを入れるといった納め方もあります。</p>
+
+<div class="box">
+  <p class="box-ttl">見積もりでの注意</p>
+  <p>折板カーポートは<strong>「アルミの骨組み」と「屋根材」が別の手配</strong>になることが多く、骨組みだけ見積もられて屋根材が抜けているケースがあります。折板を選ぶ場合は、屋根材が見積もりに入っているかを必ず確認してください。</p>
+</div>
+
+<h2 id="sec-5">耐積雪強度は「何cm対応」で選ぶ</h2>
+<p class="lead">カーポートの雪への強さは、対応できる積雪量が何cmかという数字で示されます。</p>
+
+<p>同じ見た目のカーポートでも、<span class="mk">積雪20cm相当までの一般地仕様</span>と、<span class="mk">積雪200cm相当に耐える豪雪地仕様</span>では、柱の太さ、梁の断面、基礎の大きさがまったく違います。当然、価格も変わります。</p>
+
+<figure>
+  <img decoding="async" src="https://exterior-exone.com/retest/wp-content/uploads/2026/09/carport-taisetsu.webp" alt="カーポートの耐積雪強度20cm・100cm・200cmの違いを示す図解" loading="lazy" />
+  <figcaption>見た目が同じでも、柱の太さ・梁の断面・基礎の大きさが変わる</figcaption>
+</figure>
+
+<div class="tbl-wrap">
+<table class="tbl">
+  <thead>
+    <tr><th>区分</th><th>対応する積雪の目安</th><th>想定される地域</th></tr>
+  </thead>
+  <tbody>
+    <tr><td class="label">一般地仕様</td><td>積雪20cm相当まで</td><td>雪がほとんど積もらない地域</td></tr>
+    <tr><td class="label">積雪地仕様</td><td>積雪50〜100cm相当</td><td>年に数回まとまった雪が降る地域</td></tr>
+    <tr><td class="label">豪雪地仕様</td><td>積雪150〜300cm相当</td><td>冬の間ずっと雪が残る地域</td></tr>
+  </tbody>
+</table>
+</div>
+
+<p>EXoneが北東北で標準的にご提案しているのは、<span class="accent">耐積雪200cm・耐風圧46m/秒</span>クラスの仕様です。青森・盛岡のように冬の間ずっと雪が残る地域では、このあたりが基準になります。</p>
+
+<h3>「雪下ろしをすれば大丈夫」は成り立ちにくい</h3>
+
+<p>一般地仕様を選んで雪下ろしで対応する、という考え方はおすすめできません。まとまった雪は一晩で降ります。降っている最中に雪下ろしはできませんし、屋根の上の雪は日中に溶けて夜に凍ると、同じ体積でもはるかに重くなります。</p>
+
+<p>カーポートが潰れると、下にある車も一緒に壊れます。<span class="mk">仕様の差額は、車の修理代よりはるかに小さい</span>というのが判断の基準です。</p>
+
+<h2 id="sec-diff">雪はどこへ落ちるか──雪国で最初に決めること</h2>
+<p class="lead">雪に強いカーポートを建てても、屋根に積もった雪はいつか必ず落ちます。その落ちる先を決めておかないと、トラブルになります。</p>
+
+<p>折板カーポートは雪の重みに耐えますが、雪を消してくれるわけではありません。屋根の雪は、溶けながら滑って一気に落ちます。その落下地点に何があるかを、建てる前に決めておく必要があります。</p>
+
+<figure>
+  <img decoding="async" src="https://exterior-exone.com/retest/wp-content/uploads/2026/09/carport-rakusetsu.webp" alt="雪国でのカーポートの落雪方向と隣地・玄関との位置関係を示す敷地図" loading="lazy" />
+  <figcaption>屋根の雪がどこへ落ちるかを、建てる前に決めておく</figcaption>
+</figure>
+
+<h3>隣家の壁や窓の真横は避ける</h3>
+
+<p>屋根の端が境界線に近いほど、落ちた雪が隣の敷地に入ります。隣家の窓を割る、壁や室外機を傷つける、隣の方の駐車スペースを塞ぐ。いずれも損害賠償の話に発展しうるトラブルです。</p>
+
+<p>対策は3つあります。屋根の先端が境界線から内側に入る位置に建てること、屋根に<span class="accent">雪止め</span>を付けること、そして<span class="accent">雨樋</span>で水の行き先を作ることです。</p>
+
+<h3>除雪した雪の置き場を先に確保する</h3>
+
+<p>敷地いっぱいに車を停めてカーポートを建ててしまうと、除雪した雪を寄せる場所がなくなります。冬の間ずっと雪が残る地域では、これは毎日の生活に直結します。</p>
+
+<p>カーポートの下は雪が積もらないので、その分だけ除雪の手間は減ります。しかし<span class="mk">通路や玄関前に降った雪をどこへ寄せるか</span>は別問題です。「敷地のこの一角は雪捨て場として空けておく」と最初に決めてから、カーポートの位置とサイズを決める順序が現実的です。</p>
+
+<h3>玄関までの動線に落雪させない</h3>
+
+<p>カーポートから玄関までの間に落雪地点があると、毎朝そこを通ることになります。屋根の向きと動線が交差していないか、平面図の段階で確認してください。</p>
+
+<h2 id="sec-6">費用の内訳と、見積もりで抜けやすい項目</h2>
+<p class="lead">カーポートの見積もりは5つの要素で構成されます。どれが入っていてどれが別途かを揃えて比べます。</p>
+
+<div class="tbl-wrap">
+<table class="tbl">
+  <thead>
+    <tr><th>項目</th><th>内容</th></tr>
+  </thead>
+  <tbody>
+    <tr><td class="label">本体工事費</td><td>柱・梁・桁などアルミ部材のセット。サイズと耐積雪強度で品番が変わる</td></tr>
+    <tr><td class="label">屋根工事費</td><td>屋根材。折板の場合は骨組みと別手配になることが多い</td></tr>
+    <tr><td class="label">基礎工事費</td><td>柱を立てる穴を掘り、根巻コンクリートで固定する。メーカー指定の寸法がある</td></tr>
+    <tr><td class="label">施工費</td><td>組み立ての手間。重い部材を高所で扱うため、サイズが大きいほど上がる</td></tr>
+    <tr><td class="label">オプション・加工費</td><td>切り詰め・切り欠き、サイドパネル、明かり取り、鼻隠し、雪止め、雨樋など</td></tr>
+  </tbody>
+</table>
+</div>
+
+<figure>
+  <img decoding="async" src="https://exterior-exone.com/retest/wp-content/uploads/2026/09/carport-kiso.webp" alt="カーポートの柱を根巻コンクリートで固定する基礎工事" loading="lazy" />
+  <figcaption>既存の土間がある場合は、カッターとハツリの費用が別途かかる</figcaption>
+</figure>
+
+<h3>費用の目安</h3>
+
+<div class="tbl-wrap">
+<table class="tbl">
+  <thead>
+    <tr><th>仕様</th><th>費用の目安（工事費込み）</th></tr>
+  </thead>
+  <tbody>
+    <tr><td class="label">1台用・一般地仕様（ポリカ屋根）</td><td>約25万〜45万円</td></tr>
+    <tr><td class="label">1台用・積雪地仕様（折板屋根）</td><td>約45万〜80万円</td></tr>
+    <tr><td class="label">2台用・積雪地仕様（折板屋根）</td><td>約80万〜140万円</td></tr>
+    <tr><td class="label">3台用・積雪地仕様（折板屋根）</td><td>約120万〜200万円</td></tr>
+  </tbody>
+</table>
+</div>
+
+<p class="note">※本体・屋根・基礎・組立を含んだ目安です。下記の「別途になりやすい項目」や、敷地条件による加工費は含みません。実際の金額は現地調査のうえお見積もりします。</p>
+
+<h3>別途になりやすい項目</h3>
+
+<ul>
+  <li><strong>既存の土間コンクリートのカッター・ハツリ・処分費</strong>：すでに駐車場がコンクリートの場合、柱を立てる箇所を切って壊し、出たガラを処分する費用がかかります。更地なら不要です。</li>
+  <li><strong>切り詰め・切り欠き加工費</strong>：敷地に合わせて屋根の幅や奥行きを短くしたり、建物の雨樋や庇を避けて斜めにカットしたりする作業です。現場でのカットは手間がかかります。</li>
+  <li><strong>土間コンクリート工事</strong>：駐車スペース自体の舗装はカーポートとは別の工事です。</li>
+  <li><strong>残土処分・諸経費</strong>：基礎を掘って出た土の処分費用です。土地の形状や搬出経路によって変動します。</li>
+</ul>
+
+<p>相見積もりで金額に差がついたときは、値引きの差ではなく<span class="mk">どこまで含んでいるかの差</span>であることが多くあります。特に折板の屋根材とハツリ費用は、入っているかどうかで数十万円変わります。</p>
+
+<h2 id="sec-7">建ぺい率と確認申請、隣地との距離</h2>
+<p class="lead">カーポートは建築物なので、面積と位置に関するルールがあります。</p>
+
+<h3>建ぺい率の空きがあるか</h3>
+
+<p>敷地面積に対して建てられる建築面積の割合が、地域ごとに決まっています。すでに住宅が建ぺい率いっぱいに建っている場合、カーポートを足すと面積オーバーになることがあります。</p>
+
+<p>カーポートには緩和の規定もありますが、条件があります。<span class="mk">建てる前に、敷地の建ぺい率と現在の建築面積を確認する</span>ことが前提になります。</p>
+
+<h3>確認申請が必要になるケース</h3>
+
+<p>床面積10㎡以下で、防火地域・準防火地域以外であれば、確認申請が不要なケースが多くあります。ただし<span class="accent">2台用以上のカーポートは10㎡を超える</span>ため、申請が必要になる場合があります。</p>
+
+<p>申請が不要であることと、基準を守らなくてよいことは別です。判断に迷う場合は、着工前に自治体の建築担当窓口に確認してください。</p>
+
+<h3>隣地境界からの距離</h3>
+
+<p>建物を建てるときは境界線から一定の距離を取るという民法の規定があり、一般には50cmが目安とされます。カーポートの柱や屋根の端が境界に近くなる場合は、事前に隣家の方の了解を得ておくのが確実です。</p>
+
+<p>法律上の距離を満たしていても、落雪や雨だれが隣地に落ちる配置であればトラブルの原因になります。距離の数字だけでなく、水と雪の行き先で判断してください。</p>
+
+<h2 id="sec-8">工事の流れと、車を停められるまでの期間</h2>
+<p class="lead">カーポート単体なら短期間で終わりますが、土間コンクリートを同時に行う場合は養生期間が必要です。</p>
+
+<div class="tbl-wrap">
+<table class="tbl">
+  <thead>
+    <tr><th>工事内容</th><th>施工期間の目安</th><th>車を停められるまで</th></tr>
+  </thead>
+  <tbody>
+    <tr><td class="label">カーポートのみ</td><td>約2日</td><td>工事完了後すぐ</td></tr>
+    <tr><td class="label">カーポート＋土間コンクリート</td><td>約10日〜2週間</td><td>コンクリートの養生後。10日〜2週間程度</td></tr>
+  </tbody>
+</table>
+</div>
+
+<p class="note">※天候や工事内容により変動します。冬季は施工できる時期が限られるため、早めのご相談をおすすめします。</p>
+
+<p>カーポート工事の日は、作業のあいだ車を別の場所に移動していただく必要があります。土間コンクリートを打つ場合は、コンクリートが固まるまで車を乗せられません。<span class="mk">生活に支障が出ない時期を選んで工事する</span>ことが大切です。</p>
+
+<p>雪が降る地域では、11月以降は工事が天候に左右されます。冬に間に合わせたい場合は、<span class="mk">遅くとも秋のうちに相談しておく</span>と選択肢が広がります。</p>
+
+<h2 id="sec-faq">よくある質問（FAQ）</h2>
+<details><summary>カーポートは何台用を選べばいいですか？</summary><div class="faq-a"><p>今停めている台数だけでなく、将来の来客や車種変更まで含めて考えてください。2台用の幅は4.8m前後が標準で、車2台を入れると1台あたりの余裕は60〜70cm程度です。チャイルドシートの乗せ降ろしや、荷物を持っての乗り降りがあるなら、ドアを全開にできるかどうかを基準に判断すると失敗しにくくなります。敷地の間口が狭い場合は、1台用を縦に並べる方法もあります。</p></div></details>
+<details><summary>屋根材はポリカーボネートとスチール折板のどちらがいいですか？</summary><div class="faq-a"><p>雪が積もる地域ならスチール折板を選んでください。ポリカーボネートは光を通すので屋根下が明るくなりますが、雪の重みで割れるおそれがあり、その下には車があります。折板は光を通しませんが、屋根の一部を透過性のあるポリカーボネートに置き換える明かり取りのオプションで、必要な範囲だけ明るさを確保できます。雪がほとんど積もらない地域であれば、ポリカーボネートも選択肢になります。</p></div></details>
+<details><summary>耐積雪強度はどのくらいのものを選べばいいですか？</summary><div class="faq-a"><p>お住まいの地域の積雪量に合わせます。目安として、雪がほとんど積もらない地域は積雪20cm相当の一般地仕様、年に数回まとまった雪が降る地域は50〜100cm相当、冬の間ずっと雪が残る地域は150〜300cm相当です。一般地仕様を選んで雪下ろしで対応する考え方はおすすめできません。まとまった雪は一晩で降り、溶けて凍った雪は同じ体積でもはるかに重くなります。カーポートが潰れれば下の車も壊れます。</p></div></details>
+<details><summary>カーポートを建てるのに確認申請は必要ですか？</summary><div class="faq-a"><p>床面積10㎡以下で防火地域・準防火地域以外であれば、不要なケースが多くあります。ただし2台用以上のカーポートは10㎡を超えるため、申請が必要になる場合があります。また、申請が不要であっても建ぺい率の制限は適用されるため、住宅がすでに建ぺい率いっぱいに建っていると面積オーバーになることがあります。判断に迷う場合は着工前に自治体の建築担当窓口に確認してください。</p></div></details>
+<details><summary>カーポートの工事にはどのくらいの期間がかかりますか？</summary><div class="faq-a"><p>カーポート単体であれば約2日で施工できます。土間コンクリートを同時に行う場合は、コンクリートの養生期間が必要なため、車を乗せられるようになるまで10日から2週間程度が目安です。工事日は車を別の場所へ移動していただく必要があります。雪が降る地域では11月以降の工事は天候に左右されるため、冬に間に合わせたい場合は秋のうちにご相談ください。</p></div></details>
+
+<h2 id="sec-matome">まとめ｜カーポート選びで押さえる5点</h2>
+<p>カーポートを決めるときの要点を整理します。</p>
+<ul>
+  <li><strong>サイズは今の車で決めない</strong>：ドアを全開にできる幅と、バックドアを開けられる高さを基準にします。</li>
+  <li><strong>柱の位置は動線から決める</strong>：配管・室外機・給湯器の排気、2階の窓との干渉を現地で確認します。</li>
+  <li><strong>雪が積もる地域は折板一択</strong>：明るさは明かり取りのオプションで補えます。</li>
+  <li><strong>耐積雪強度は地域の雪量に合わせる</strong>：仕様の差額は、潰れたときの損害より小さく済みます。</li>
+  <li><strong>雪と雨の落ちる先を先に決める</strong>：隣地・玄関・雪捨て場との関係が、住み始めてからの快適さを左右します。</li>
+</ul>
+<p>カーポートは、車と家族を雨や雪から守るための建築物です。本体のカタログを見比べる前に、敷地のどこに、どの向きで建てるかを決めることが先決になります。EXoneでは、現地調査で配管の位置や建物との干渉、雪の寄せ方まで確認したうえで、AIパースで完成イメージを共有しながらご提案しています。</p>
+
+<div class="cta">
+  <p class="t">カーポートのご相談・お見積もりは無料です</p>
+  <p class="s">現地調査で敷地の条件と雪の落ち方を確認し、サイズ・柱位置・耐積雪強度までご提案します。青森・八戸・弘前・仙台・盛岡・戸塚（横浜市）の6拠点で対応します。</p>
+  <div>
+    <a class="btn-main" href="https://exterior-exone.com/contact/">お問い合わせはこちら</a>
+  </div>
+</div>
+
+</div>
+<script>
+/* 画像タップで拡大表示（外部ライブラリ不要） */
+(function(){
+  if (window.__exoneLightboxReady) return;
+  window.__exoneLightboxReady = true;
+  function init(){
+    var scopes = document.querySelectorAll('.exone-col');
+    if (!scopes.length) return;
+    var lb = document.createElement('div');
+    lb.className = 'exone-lightbox';
+    lb.setAttribute('role', 'dialog');
+    lb.setAttribute('aria-modal', 'true');
+    lb.innerHTML = '<button type="button" class="lb-close" aria-label="閉じる">&times;</button><img loading="lazy" decoding="async" alt=""><p class="lb-cap"></p>';
+    document.body.appendChild(lb);
+    var lbImg = lb.querySelector('img');
+    var lbCap = lb.querySelector('.lb-cap');
+    function openLb(src, alt, cap){
+      lbImg.src = src; lbImg.alt = alt || '';
+      lbCap.textContent = cap || '';
+      lb.classList.add('is-open');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeLb(){
+      lb.classList.remove('is-open');
+      lbImg.src = '';
+      document.body.style.overflow = '';
+    }
+    lb.addEventListener('click', function(e){
+      if (e.target === lb || e.target.className === 'lb-close') closeLb();
+    });
+    document.addEventListener('keydown', function(e){
+      if (e.key === 'Escape' || e.keyCode === 27) closeLb();
+    });
+    Array.prototype.forEach.call(scopes, function(scope){
+      var imgs = scope.querySelectorAll('figure img, .img-grid2 img, .img-grid3 img');
+      Array.prototype.forEach.call(imgs, function(img){
+        img.addEventListener('click', function(){
+          var fig = img.parentNode;
+          while (fig && fig.tagName !== 'FIGURE' && fig !== scope) fig = fig.parentNode;
+          var capEl = (fig && fig.tagName === 'FIGURE') ? fig.querySelector('figcaption') : null;
+          openLb(img.currentSrc || img.src, img.alt, capEl ? capEl.textContent : '');
+        });
+      });
+    });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+})();
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Article",
+      "headline": "カーポートは「屋根があればいい」わけじゃない？サイズ・屋根材・耐雪強度の決め方",
+      "description": "カーポートの選び方を外構専門店が解説。1台用・2台用の実寸とドア開閉に必要な余裕、片側支持・両側支持・後方支持の使い分け、ポリカーボネートとスチール折板の違い、耐積雪強度の目安、費用の内訳と見積もりで抜けやすい項目、建ぺい率と確認申請までまとめました。",
+      "author": { "@type": "Organization", "name": "株式会社EXone", "url": "https://exterior-exone.com/" },
+      "publisher": { "@type": "Organization", "name": "株式会社EXone", "logo": { "@type": "ImageObject", "url": "https://exterior-exone.com/retest/wp-content/uploads/2025/06/EXone__logo.svg" } },
+      "image": "https://exterior-exone.com/retest/wp-content/uploads/2026/09/carport-overview.webp",
+      "datePublished": "2026-09-17",
+      "dateModified": "2026-09-17",
+      "mainEntityOfPage": { "@type": "WebPage", "@id": "https://exterior-exone.com/column/carport-guide/" }
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        { "@type": "Question", "name": "カーポートは何台用を選べばいいですか？", "acceptedAnswer": { "@type": "Answer", "text": "今停めている台数だけでなく、将来の来客や車種変更まで含めて考えてください。2台用の幅は4.8m前後が標準で、車2台を入れると1台あたりの余裕は60〜70cm程度です。チャイルドシートの乗せ降ろしや、荷物を持っての乗り降りがあるなら、ドアを全開にできるかどうかを基準に判断すると失敗しにくくなります。敷地の間口が狭い場合は、1台用を縦に並べる方法もあります。" } },
+        { "@type": "Question", "name": "屋根材はポリカーボネートとスチール折板のどちらがいいですか？", "acceptedAnswer": { "@type": "Answer", "text": "雪が積もる地域ならスチール折板を選んでください。ポリカーボネートは光を通すので屋根下が明るくなりますが、雪の重みで割れるおそれがあり、その下には車があります。折板は光を通しませんが、屋根の一部を透過性のあるポリカーボネートに置き換える明かり取りのオプションで、必要な範囲だけ明るさを確保できます。雪がほとんど積もらない地域であれば、ポリカーボネートも選択肢になります。" } },
+        { "@type": "Question", "name": "耐積雪強度はどのくらいのものを選べばいいですか？", "acceptedAnswer": { "@type": "Answer", "text": "お住まいの地域の積雪量に合わせます。目安として、雪がほとんど積もらない地域は積雪20cm相当の一般地仕様、年に数回まとまった雪が降る地域は50〜100cm相当、冬の間ずっと雪が残る地域は150〜300cm相当です。一般地仕様を選んで雪下ろしで対応する考え方はおすすめできません。まとまった雪は一晩で降り、溶けて凍った雪は同じ体積でもはるかに重くなります。カーポートが潰れれば下の車も壊れます。" } },
+        { "@type": "Question", "name": "カーポートを建てるのに確認申請は必要ですか？", "acceptedAnswer": { "@type": "Answer", "text": "床面積10㎡以下で防火地域・準防火地域以外であれば、不要なケースが多くあります。ただし2台用以上のカーポートは10㎡を超えるため、申請が必要になる場合があります。また、申請が不要であっても建ぺい率の制限は適用されるため、住宅がすでに建ぺい率いっぱいに建っていると面積オーバーになることがあります。判断に迷う場合は着工前に自治体の建築担当窓口に確認してください。" } },
+        { "@type": "Question", "name": "カーポートの工事にはどのくらいの期間がかかりますか？", "acceptedAnswer": { "@type": "Answer", "text": "カーポート単体であれば約2日で施工できます。土間コンクリートを同時に行う場合は、コンクリートの養生期間が必要なため、車を乗せられるようになるまで10日から2週間程度が目安です。工事日は車を別の場所へ移動していただく必要があります。雪が降る地域では11月以降の工事は天候に左右されるため、冬に間に合わせたい場合は秋のうちにご相談ください。" } }
+      ]
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "ホーム", "item": "https://exterior-exone.com/" },
+        { "@type": "ListItem", "position": 2, "name": "コラム", "item": "https://exterior-exone.com/column/" },
+        { "@type": "ListItem", "position": 3, "name": "カーポートの選び方", "item": "https://exterior-exone.com/column/carport-guide/" }
+      ]
+    }
+  ]
+}
+</script>

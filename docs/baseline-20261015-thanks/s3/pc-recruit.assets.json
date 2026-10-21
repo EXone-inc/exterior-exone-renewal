@@ -1,0 +1,25 @@
+{
+  "url": "http://exterior-exone-renewal.local/recruit/",
+  "bodyClass": "wp-singular page-template-default page page-id-105 page-parent wp-theme-exterior-exone is-recruit-page has-fv-header",
+  "robots": "noindex, nofollow",
+  "css": [
+    "exterior-exone-fonts-css",
+    "exterior-exone-style-css",
+    "exterior-exone-recruit-css"
+  ],
+  "js": [
+    "http://exterior-exone-renewal.local/wp-includes/js/wp-emoji-release.min.js?ver=7.0.4",
+    "exterior-exone-recruit-js",
+    "exterior-exone-recruit-flow-js",
+    "exterior-exone-plans-imglist-js",
+    "exterior-exone-recruit-modal-js",
+    "exterior-exone-recruit-faq-js",
+    "exterior-exone-recruit-req-js",
+    "exterior-exone-recruit-apply-js",
+    "exterior-exone-nav-toggle-js",
+    "exterior-exone-gnav-sub-js",
+    "exterior-exone-scroll-reveal-js",
+    "exterior-exone-line-draw-js"
+  ],
+  "consoleErrors": []
+}
