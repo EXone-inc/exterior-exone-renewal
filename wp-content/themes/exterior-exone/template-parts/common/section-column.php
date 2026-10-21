@@ -40,7 +40,7 @@ if ( ! $exterior_exone_cards ) {
 }
 
 $exterior_exone_column_section = empty( $args['section'] ) ? 'column' : (string) $args['section'];
-$exterior_exone_archive        = exterior_exone_store_link( (string) get_post_type_archive_link( 'column' ) );
+$exterior_exone_archive        = exterior_exone_store_link( (string) exterior_exone_content_archive_url( 'column' ) );
 ?>
 <section class="p-scolumn" data-section="<?php echo esc_attr( $exterior_exone_column_section ); ?>">
 	<h2 class="c-store-title"><?php echo esc_html( $exterior_exone_column['title'] ); ?></h2>

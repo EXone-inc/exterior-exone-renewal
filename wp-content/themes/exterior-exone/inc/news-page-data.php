@@ -27,7 +27,8 @@ const EXTERIOR_EXONE_NEWS_PER_PAGE = 10;
  * @return bool
  */
 function exterior_exone_is_news_page() {
-	return is_post_type_archive( 'news' );
+	$route = exterior_exone_coexistence_route();
+	return exterior_exone_coexistence_enabled() && $route ? 'news-list' === $route['kind'] : is_post_type_archive( 'news' );
 }
 
 /**
@@ -94,7 +95,7 @@ function exterior_exone_news_current_ym() {
  * @return string
  */
 function exterior_exone_news_list_url( $page = 1, $ym = '' ) {
-	$url = (string) get_post_type_archive_link( 'news' );
+	$url = (string) exterior_exone_content_archive_url( 'news' );
 
 	if ( $page > 1 ) {
 		$url = trailingslashit( $url ) . user_trailingslashit( 'page/' . (int) $page, 'paged' );
@@ -137,6 +138,12 @@ function exterior_exone_news_months() {
 	static $months = null;
 
 	if ( null !== $months ) {
+		return $months;
+	}
+
+	if ( exterior_exone_coexistence_enabled() ) {
+		$posts = exterior_exone_content_posts( array( 'post_type' => 'news', 'posts_per_page' => -1, 'orderby' => 'date', 'order' => 'DESC' ) );
+		$months = array_values( array_unique( array_map( static function ( $post ) { return substr( $post->post_date, 0, 7 ); }, $posts ) ) );
 		return $months;
 	}
 

@@ -28,7 +28,7 @@ if ( ! $exterior_exone_works ) {
 	return;
 }
 
-$exterior_exone_works_archive = exterior_exone_store_link( (string) get_post_type_archive_link( 'works' ) );
+$exterior_exone_works_archive = exterior_exone_store_link( (string) exterior_exone_content_archive_url( 'works' ) );
 ?>
 <section class="p-works" data-section="works">
 	<div class="p-works__inner">

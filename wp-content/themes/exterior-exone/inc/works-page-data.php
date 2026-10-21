@@ -94,7 +94,7 @@ function exterior_exone_works_page_sort_tastes( $terms ) {
 function exterior_exone_works_page_tastes() {
 	$terms = get_terms(
 		array(
-			'taxonomy'   => 'works_package',
+			'taxonomy'   => exterior_exone_content_taxonomy( 'works_package' ),
 			'hide_empty' => false,
 		)
 	);
@@ -109,7 +109,7 @@ function exterior_exone_works_page_tastes() {
  * @return array<int, array{slug:string, name:string, eng:string}>
  */
 function exterior_exone_works_page_post_tastes( $post ) {
-	$terms = get_the_terms( $post, 'works_package' );
+	$terms = get_the_terms( $post, exterior_exone_content_taxonomy( 'works_package' ) );
 
 	return ( ! $terms || is_wp_error( $terms ) ) ? array() : exterior_exone_works_page_sort_tastes( $terms );
 }
@@ -138,7 +138,7 @@ function exterior_exone_works_page_card( $post ) {
  * @return array<int, array<string, mixed>>
  */
 function exterior_exone_works_page_cards() {
-	$posts = get_posts(
+	$posts = exterior_exone_content_posts(
 		array(
 			'post_type'        => 'works',
 			'post_status'      => 'publish',

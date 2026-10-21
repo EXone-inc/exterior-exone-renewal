@@ -96,7 +96,7 @@ function exterior_exone_drawer_menu_items() {
 		),
 		array(
 			'label' => 'お知らせ',
-			'url'   => (string) get_post_type_archive_link( 'news' ),
+			'url'   => (string) exterior_exone_content_archive_url( 'news' ),
 		),
 		array(
 			'label' => '企業情報',
@@ -108,7 +108,7 @@ function exterior_exone_drawer_menu_items() {
 		),
 		array(
 			'label' => 'コラム',
-			'url'   => (string) get_post_type_archive_link( 'column' ),
+			'url'   => (string) exterior_exone_content_archive_url( 'column' ),
 		),
 	);
 }
@@ -171,11 +171,11 @@ function exterior_exone_store_drawer_menu_items() {
 		),
 		array(
 			'label' => 'お知らせ',
-			'url'   => exterior_exone_store_link( (string) get_post_type_archive_link( 'news' ) ),
+			'url'   => exterior_exone_store_link( (string) exterior_exone_content_archive_url( 'news' ) ),
 		),
 		array(
 			'label' => 'コラム',
-			'url'   => exterior_exone_store_link( (string) get_post_type_archive_link( 'column' ) ),
+			'url'   => exterior_exone_store_link( (string) exterior_exone_content_archive_url( 'column' ) ),
 		),
 		// コーポレートへ戻る唯一の入口なので ?store= を付けない。
 		array(

@@ -236,6 +236,10 @@ function exterior_exone_contact_cf7_active() {
  * @return WPCF7_ContactForm|null
  */
 function exterior_exone_contact_get_form( $key, $refresh = false ) {
+	if ( exterior_exone_coexistence_enabled() ) {
+		return in_array( $key, array( 'personal', 'corporate' ), true ) ? exterior_exone_coexistence_form( $key ) : null;
+	}
+
 	static $cache = array();
 
 	if ( ! exterior_exone_contact_cf7_active() ) {
@@ -289,7 +293,7 @@ function exterior_exone_contact_form_key( $contact_form ) {
 		return '';
 	}
 
-	$key = get_post_meta( $contact_form->id(), EXTERIOR_EXONE_CONTACT_FORM_META, true );
+	$key = exterior_exone_coexistence_enabled() ? exterior_exone_coexistence_form_role( $contact_form->id() ) : get_post_meta( $contact_form->id(), EXTERIOR_EXONE_CONTACT_FORM_META, true );
 
 	return in_array( $key, array( 'personal', 'corporate' ), true ) ? $key : '';
 }
@@ -304,6 +308,10 @@ function exterior_exone_contact_form_key( $contact_form ) {
  * @return array<string, int>|string フォームの識別子 => ID。CF7 が無効なら理由の文字列。
  */
 function exterior_exone_contact_install_forms( $overwrite = false ) {
+	if ( exterior_exone_coexistence_enabled() ) {
+		return '共存モードではフォームを登録・更新しません。';
+	}
+
 	if ( ! exterior_exone_contact_cf7_active() ) {
 		return 'Contact Form 7 が有効ではないため、フォームを登録しませんでした。';
 	}
@@ -368,6 +376,9 @@ function exterior_exone_contact_form_html( $key ) {
 
 	if ( ! $form ) {
 		return '';
+	}
+	if ( exterior_exone_coexistence_enabled() ) {
+		return exterior_exone_coexistence_form_html( $form, 'p-contactform__form novalidate' );
 	}
 
 	return do_shortcode(

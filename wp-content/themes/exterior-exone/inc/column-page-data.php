@@ -121,7 +121,8 @@ add_action( 'pre_get_posts', 'exterior_exone_column_page_query' );
  * @return bool
  */
 function exterior_exone_is_column_page() {
-	return is_post_type_archive( 'column' ) || is_singular( 'column' );
+	return is_post_type_archive( 'column' ) || is_singular( 'column' )
+		|| ( function_exists( 'exterior_exone_coexistence_column_is_list' ) && exterior_exone_coexistence_column_is_list() );
 }
 
 /**
@@ -133,7 +134,9 @@ function exterior_exone_is_column_page() {
  * @return string
  */
 function exterior_exone_column_list_url( $page = 1, $slug = '' ) {
-	$url = (string) get_post_type_archive_link( 'column' );
+	$url = function_exists( 'exterior_exone_coexistence_column_enabled' ) && exterior_exone_coexistence_column_enabled()
+		? exterior_exone_coexistence_column_list_base_url()
+		: (string) get_post_type_archive_link( 'column' );
 
 	if ( $page > 1 ) {
 		$url = trailingslashit( $url ) . user_trailingslashit( 'page/' . (int) $page, 'paged' );

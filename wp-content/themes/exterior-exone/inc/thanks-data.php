@@ -124,6 +124,11 @@ function exterior_exone_thanks_page_id( $version ) {
 		return 0;
 	}
 
+	if ( exterior_exone_coexistence_enabled() ) {
+		$page = exterior_exone_coexistence_page( '/' . $version . '/thanks/' );
+		return $page ? (int) $page->ID : 0;
+	}
+
 	$page = get_page_by_path( $version . '/thanks', OBJECT, 'page' );
 
 	return $page instanceof WP_Post && 'publish' === $page->post_status ? (int) $page->ID : 0;

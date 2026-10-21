@@ -19,6 +19,10 @@ if ( ! defined( 'ABSPATH' ) ) {
  * 画像はアイキャッチ画像をそのまま使い、ラベルだけ「画像」に言い換える。
  */
 function exterior_exone_register_news_post_type() {
+	if ( exterior_exone_coexistence_enabled() ) {
+		return;
+	}
+
 	register_post_type(
 		'news',
 		array(
@@ -72,6 +76,10 @@ add_action( 'init', 'exterior_exone_register_news_post_type' );
  * thumbnail はサポートしない。TOP に出すのは 1 枚目。
  */
 function exterior_exone_register_works_post_type() {
+	if ( exterior_exone_coexistence_enabled() ) {
+		return;
+	}
+
 	register_post_type(
 		'works',
 		array(
@@ -118,6 +126,10 @@ add_action( 'init', 'exterior_exone_register_works_post_type' );
  * ハッシュタグは件数が増える前提なので、タグ形式（カンマ区切り入力）にする。
  */
 function exterior_exone_register_works_taxonomies() {
+	if ( exterior_exone_coexistence_enabled() ) {
+		return;
+	}
+
 	register_taxonomy(
 		'works_category',
 		'works',
@@ -204,6 +216,10 @@ add_action( 'init', 'exterior_exone_register_works_taxonomies' );
  * 一覧・詳細の表示は archive-column.php / single-column.php、データは inc/column-page-data.php。
  */
 function exterior_exone_register_column_post_type() {
+	if ( exterior_exone_coexistence_enabled() ) {
+		return;
+	}
+
 	register_post_type(
 		'column',
 		array(
@@ -242,6 +258,10 @@ add_action( 'init', 'exterior_exone_register_column_post_type' );
  * コラムカテゴリー（階層なし）。ブロックエディタのサイドバーで付け、一覧の列にも出す。
  */
 function exterior_exone_register_column_taxonomies() {
+	if ( exterior_exone_coexistence_enabled() ) {
+		return;
+	}
+
 	register_taxonomy(
 		'column_category',
 		'column',
@@ -297,6 +317,10 @@ add_filter( 'use_block_editor_for_post_type', 'exterior_exone_disable_block_edit
  * 開き直すか wp rewrite flush で反映する。
  */
 function exterior_exone_flush_rewrite_rules() {
+	if ( exterior_exone_coexistence_enabled() ) {
+		return;
+	}
+
 	exterior_exone_register_news_post_type();
 	exterior_exone_register_works_post_type();
 	exterior_exone_register_works_taxonomies();

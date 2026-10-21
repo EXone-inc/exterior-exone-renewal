@@ -124,7 +124,8 @@ function exterior_exone_stores() {
  * @return string
  */
 function exterior_exone_store_url( $slug ) {
-	return home_url( '/store/' . $slug . '/' );
+	$path = '/store/' . $slug . '/';
+	return home_url( exterior_exone_coexistence_enabled() ? exterior_exone_coexistence_public_path( $path ) : $path );
 }
 
 /**

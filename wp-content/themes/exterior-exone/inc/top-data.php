@@ -325,7 +325,7 @@ function exterior_exone_plan_cards() {
  * @return array<int, array{title:string, url:string, image_id:int}>
  */
 function exterior_exone_works_cards() {
-	$posts = get_posts(
+	$posts = exterior_exone_content_posts(
 		array(
 			'post_type'        => 'works',
 			'post_status'      => 'publish',
@@ -362,7 +362,7 @@ function exterior_exone_works_cards() {
  * @return array<int, array{title:string, url:string, image_id:int}>
  */
 function exterior_exone_news_cards() {
-	$posts = get_posts(
+	$posts = exterior_exone_content_posts(
 		array(
 			'post_type'        => 'news',
 			'post_status'      => 'publish',
@@ -378,7 +378,7 @@ function exterior_exone_news_cards() {
 			return array(
 				'title'    => get_the_title( $post ),
 				// 詳細ページは無いので一覧へ（個別 URL は一覧へ 301。inc/news-page-data.php）。
-				'url'      => exterior_exone_store_link( (string) get_post_type_archive_link( 'news' ) ),
+				'url'      => exterior_exone_store_link( (string) exterior_exone_content_archive_url( 'news' ) ),
 				// 0 なら画像未設定。カンプ 917:111 と同じグレーの塗りを出す。
 				'image_id' => (int) get_post_thumbnail_id( $post ),
 			);

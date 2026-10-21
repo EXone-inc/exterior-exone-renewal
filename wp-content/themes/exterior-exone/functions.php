@@ -9,6 +9,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+require_once get_theme_file_path( 'inc/coexistence.php' );
+require_once get_theme_file_path( 'inc/coexistence-admin.php' );
+require_once get_theme_file_path( 'inc/coexistence-column.php' );
 require_once get_theme_file_path( 'inc/menus.php' );
 require_once get_theme_file_path( 'inc/post-types.php' );
 require_once get_theme_file_path( 'inc/meta-boxes.php' );
@@ -115,7 +118,7 @@ function exterior_exone_enqueue_assets() {
 	// （Swiper の .swiper{padding:0} などがテーマ側の指定を打ち消すため）
 	$exterior_exone_style_deps = array( 'exterior-exone-fonts' );
 
-	if ( is_front_page() ) {
+	if ( exterior_exone_content_is_front_page() ) {
 		wp_enqueue_style( 'swiper' );
 		$exterior_exone_style_deps[] = 'swiper';
 	}
@@ -659,7 +662,7 @@ function exterior_exone_enqueue_assets() {
 	}
 
 	// TOP ページで使うスライダー類。
-	if ( is_front_page() ) {
+	if ( exterior_exone_content_is_front_page() ) {
 		wp_enqueue_script( 'swiper' );
 
 		foreach ( exterior_exone_front_page_scripts() as $handle => $relative_path ) {
@@ -855,7 +858,7 @@ function exterior_exone_has_fv_header() {
 	// 応募フォーム（白地）もコラムと同じ扱い。上余白は css/recruit-entry.css 側で足す。
 	// お知らせ一覧もコラムと同じ扱い（上余白は css/column-page.css の .p-colp を共有）。
 	// サンクスページは CONTACT と同じ FV なので CONTACT と同じ扱い。
-	return exterior_exone_is_thanks_page() || is_front_page() || is_page( 'company' ) || is_page( 'dx' ) || is_page( 'vr' ) || is_page( 'plans' ) || is_page( 'high-end' ) || exterior_exone_is_works_page() || is_page( 'contact' ) || is_page( 'recruit' ) || exterior_exone_is_recruit_entry_page() || exterior_exone_is_store_page() || ( function_exists( 'exterior_exone_is_column_page' ) && exterior_exone_is_column_page() ) || ( function_exists( 'exterior_exone_is_news_page' ) && exterior_exone_is_news_page() );
+	return exterior_exone_is_thanks_page() || exterior_exone_content_is_front_page() || is_page( 'company' ) || is_page( 'dx' ) || is_page( 'vr' ) || is_page( 'plans' ) || is_page( 'high-end' ) || exterior_exone_is_works_page() || is_page( 'contact' ) || is_page( 'recruit' ) || exterior_exone_is_recruit_entry_page() || exterior_exone_is_store_page() || ( function_exists( 'exterior_exone_is_column_page' ) && exterior_exone_is_column_page() ) || ( function_exists( 'exterior_exone_is_news_page' ) && exterior_exone_is_news_page() );
 }
 
 /**
@@ -865,7 +868,7 @@ function exterior_exone_has_fv_header() {
  * @return array
  */
 function exterior_exone_body_class( $classes ) {
-	if ( is_front_page() ) {
+	if ( exterior_exone_content_is_front_page() ) {
 		$classes[] = 'is-front-page';
 	}
 

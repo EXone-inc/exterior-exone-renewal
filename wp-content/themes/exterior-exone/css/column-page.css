@@ -827,6 +827,73 @@ a.p-colp__page:hover {
 	text-decoration: none;
 }
 
+/* Shared production articles use these older component names. The body class
+   is added only with EXR_COEXISTENCE; ordinary local styling stays unchanged. */
+.exr-column-compat .p-cold__body .exone-toc {
+	margin: var(--col-block-gap) 0;
+	padding: var(--col-panel-pad-y) var(--col-panel-pad-x);
+	border: var(--col-line-w) solid var(--col-line);
+	border-radius: var(--col-d-radius);
+	background: var(--col-panel);
+}
+
+.exr-column-compat .p-cold__body .exone-toc li::marker,
+.exr-column-compat .p-cold__body .check-list li::marker {
+	color: var(--col-accent);
+}
+
+.exr-column-compat .p-cold__body .exone-toc a {
+	text-decoration: none;
+}
+
+.exr-column-compat .p-cold__body .author-box {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 1.25em;
+	margin: var(--col-block-gap) 0;
+	padding: var(--col-panel-pad-y) var(--col-panel-pad-x);
+	border: var(--col-line-w) solid var(--col-line);
+	border-left: var(--col-d-bar) solid var(--col-accent);
+	border-radius: var(--col-d-radius);
+	background: var(--col-panel);
+}
+
+.exr-column-compat .p-cold__body .author-logo {
+	flex: 0 0 auto;
+	width: var(--col-author-logo);
+}
+
+.exr-column-compat .p-cold__body .author-logo img {
+	width: 100%;
+	border-radius: 0;
+}
+
+.exr-column-compat .p-cold__body .author-body {
+	flex: 1 1 var(--col-author-body);
+	min-width: min(var(--col-author-body), 100%);
+}
+
+.exr-column-compat .p-cold__body .case-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(min(100%, 18em), 1fr));
+	gap: var(--col-p-gap);
+	margin: var(--col-block-gap) 0;
+}
+
+.exr-column-compat .p-cold__body .case {
+	min-width: 0;
+	padding: var(--col-panel-pad-y) var(--col-panel-pad-x);
+	border: var(--col-line-w) solid var(--col-line);
+	border-radius: var(--col-d-radius);
+	background: var(--col-panel);
+}
+
+.exr-column-compat .p-cold__body .author-body > :last-child,
+.exr-column-compat .p-cold__body .case > :last-child {
+	margin-bottom: 0;
+}
+
 /* --- 要約（.summary / .head / .check） --- */
 .p-cold__body .summary {
 	margin: var(--col-block-gap) 0;

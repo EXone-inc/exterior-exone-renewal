@@ -20,8 +20,11 @@ get_header();
 
 $exterior_exone_colp_texts = exterior_exone_column_page_texts();
 $exterior_exone_colp_tabs  = exterior_exone_column_page_tabs();
-$exterior_exone_colp_cards = array_map( 'exterior_exone_column_page_card', $wp_query->posts );
-$exterior_exone_colp_pager = exterior_exone_column_page_pager( max( 1, (int) get_query_var( 'paged' ) ), (int) $wp_query->max_num_pages );
+$exterior_exone_colp_query = function_exists( 'exterior_exone_coexistence_column_is_list' ) && exterior_exone_coexistence_column_is_list()
+	? exterior_exone_coexistence_column_list_query()
+	: $wp_query;
+$exterior_exone_colp_cards = array_map( 'exterior_exone_column_page_card', $exterior_exone_colp_query->posts );
+$exterior_exone_colp_pager = exterior_exone_column_page_pager( max( 1, (int) get_query_var( 'paged' ) ), (int) $exterior_exone_colp_query->max_num_pages );
 ?>
 <div class="p-colp" data-section="column-list">
 	<div class="p-colp__inner">
