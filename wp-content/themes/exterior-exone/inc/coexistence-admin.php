@@ -5,13 +5,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 require_once __DIR__ . '/coexistence-slack.php';
 require_once __DIR__ . '/coexistence-news-admin.php';
+require_once __DIR__ . '/coexistence-proposal-admin.php';
 
 function exterior_exone_coexistence_admin_allowed() {
 	return defined( 'EXR_COEXISTENCE' ) && true === EXR_COEXISTENCE && current_user_can( 'manage_options' );
 }
 
 function exterior_exone_coexistence_admin_types() {
-	return array( 'exr_page' => '固定ページ', 'exr_works' => '施工事例', 'exr_news' => 'お知らせ', 'exr_form' => 'フォーム', 'attachment' => '画像' );
+	return array( 'exr_page' => '固定ページ', 'exr_works' => '提案事例', 'exr_news' => 'お知らせ', 'exr_form' => 'フォーム', 'attachment' => '画像' );
 }
 
 /** 管理一覧でも旧データ・別データ群・取り込み途中を混ぜない。 */
@@ -57,7 +58,7 @@ function exterior_exone_coexistence_admin_records() {
 function exterior_exone_coexistence_admin_status( $post ) {
 	$labels = array( 'trash' => 'ゴミ箱', 'publish' => '公開', 'draft' => '下書き', 'pending' => '確認待ち', 'private' => '非公開', 'future' => '公開予約', 'inherit' => '添付画像' );
 	$status = get_post_meta( $post->ID, '_exr_source_status', true );
-	return is_string( $status ) && isset( $labels[ $status ] ) ? $labels[ $status ] . ( 'exr_news' === $post->post_type ? '（現在）' : '' ) : '確認が必要';
+	return is_string( $status ) && isset( $labels[ $status ] ) ? $labels[ $status ] . ( in_array( $post->post_type, array( 'exr_news', 'exr_works' ), true ) ? '（現在）' : '' ) : '確認が必要';
 }
 
 function exterior_exone_coexistence_admin_link( $post ) {
@@ -67,6 +68,10 @@ function exterior_exone_coexistence_admin_link( $post ) {
 	if ( 'exr_news' === $post->post_type ) {
 		$args = 'trash' === get_post_meta( $post->ID, '_exr_source_status', true ) ? array( 'view' => 'trash' ) : array( 'edit' => (int) $post->ID );
 		return array( 'url' => exterior_exone_news_admin_url( $args ), 'label' => 'お知らせ管理で確認・編集' );
+	}
+	if ( 'exr_works' === $post->post_type ) {
+		$args = 'trash' === get_post_meta( $post->ID, '_exr_source_status', true ) ? array( 'view' => 'trash' ) : array( 'edit' => (int) $post->ID );
+		return array( 'url' => exterior_exone_proposal_url( $args ), 'label' => '提案事例管理で確認・編集' );
 	}
 	if ( 'attachment' === $post->post_type ) {
 		return current_user_can( 'read_post', $post->ID ) ? array( 'url' => admin_url( 'upload.php?item=' . (int) $post->ID ), 'label' => 'メディアライブラリで確認' ) : array();
@@ -105,7 +110,7 @@ function exterior_exone_coexistence_admin_render() {
 	$posts = exterior_exone_coexistence_admin_records();
 	echo '<div class="wrap"><h1>' . esc_html( '新テーマ用コンテンツ' ) . '</h1>';
 	echo '<p>' . esc_html( '新テーマ用に取り込んだ内容を確認する画面です。この画面では内容の編集・保存はできません。' ) . '</p>';
-	echo '<p>' . esc_html( '「元の公開状態」は取り込み元での状態です。お知らせのみ編集後の現在の状態を表示します。一般公開の準備が完了したことを示すものではありません。' ) . '</p>';
+	echo '<p>' . esc_html( '「元の公開状態」は取り込み元での状態です。お知らせ・提案事例は編集後の現在の状態を表示します。一般公開の準備が完了したことを示すものではありません。' ) . '</p>';
 	echo '<p>' . esc_html( sprintf( '取り込み済み：%d件', count( $posts ) ) ) . '</p>';
 	if ( ! $posts ) {
 		echo '<p>' . esc_html( '確認できる取り込み済みの内容はありません。' ) . '</p></div>';

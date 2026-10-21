@@ -324,7 +324,7 @@ function exterior_exone_coexistence_main_query( $query ) {
 	}
 	$args = exterior_exone_coexistence_query_args( $query->query_vars );
 	$args['posts_per_page'] = 'news-list' === $route['kind'] ? 10 : -1;
-	$args['orderby'] = 'date';
+	$args['orderby'] = 'works-list' === $route['kind'] ? exterior_exone_proposal_orderby() : 'date';
 	$args['order'] = 'DESC';
 	if ( in_array( $route['kind'], array( 'home', 'missing' ), true ) ) {
 		$args['post__in'] = array( 0 );

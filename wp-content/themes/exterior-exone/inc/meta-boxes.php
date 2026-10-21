@@ -161,6 +161,7 @@ add_action( 'save_post_news', 'exterior_exone_save_news_meta' );
  * カテゴリータイプ・ハッシュタグ・所在地の入力欄は出さない（タクソノミーの登録と保存済みの値は残す）。
  */
 function exterior_exone_add_works_meta_boxes() {
+	if ( exterior_exone_coexistence_enabled() ) { return; }
 	add_meta_box(
 		'exterior-exone-works-description',
 		'説明',
@@ -321,6 +322,7 @@ function exterior_exone_render_works_detail_box( $post ) {
  * @param int $post_id 投稿 ID。
  */
 function exterior_exone_save_works_meta( $post_id ) {
+	if ( exterior_exone_coexistence_enabled() ) { return; }
 	if ( ! exterior_exone_can_save_meta( $post_id, 'exterior_exone_works_nonce', 'exterior_exone_save_works' ) ) {
 		return;
 	}
@@ -495,6 +497,7 @@ function exterior_exone_enqueue_editor_assets( $hook ) {
 
 	// $typenow は新規追加でも編集でも WP が入れてくれる（$post より確実）。
 	global $typenow;
+	if ( 'works' === $typenow && exterior_exone_coexistence_enabled() ) { return; }
 
 	if ( ! in_array( $typenow, array( 'news', 'works' ), true ) ) {
 		return;

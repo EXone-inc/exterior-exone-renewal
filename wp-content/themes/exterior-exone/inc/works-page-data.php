@@ -16,9 +16,10 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
+require_once __DIR__ . '/proposal-order.php';
 
 /**
- * 一覧（works のアーカイブ）のメインクエリだけ、全件・日付の新しい順にする。
+ * 一覧（works のアーカイブ）のメインクエリだけ、全件・保存した表示順にする。
  *
  * ページ送りは付けない（決定 §3）。/works/page/2/ 以降は該当なしにして 404 にする。
  *
@@ -30,7 +31,7 @@ function exterior_exone_works_page_query( $query ) {
 	}
 
 	$query->set( 'posts_per_page', -1 );
-	$query->set( 'orderby', 'date' );
+	$query->set( 'orderby', exterior_exone_proposal_orderby() );
 	$query->set( 'order', 'DESC' );
 
 	if ( $query->is_paged() ) {
@@ -143,7 +144,7 @@ function exterior_exone_works_page_cards() {
 			'post_type'        => 'works',
 			'post_status'      => 'publish',
 			'posts_per_page'   => -1,
-			'orderby'          => 'date',
+			'orderby'          => exterior_exone_proposal_orderby(),
 			'order'            => 'DESC',
 			'suppress_filters' => false,
 		)
