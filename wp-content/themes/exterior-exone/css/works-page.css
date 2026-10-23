@@ -502,17 +502,17 @@
 		--wkp-canvas-w: calc(1920 * var(--wkp-vu));
 
 		/* --- FV 821:114（1920x1080） --- */
-		--wkp-fv-height: calc(1080 * var(--wkp-vu));
+		--wkp-fv-height: 100vh;
 		--wkp-fv-bg-top: 0px; /* ヘッダーは写真に重なる */
 		--wkp-fv-image-position: 50% 50%; /* 821:116 は上下中央の cover */
-		--wkp-fv-copy-top: calc(428 * var(--wkp-vu)); /* 821:118 y428 */
-		--wkp-fv-title: calc(120 * var(--wkp-vu));
-		--wkp-fv-title-ls: calc(-3 * var(--wkp-vu));
-		--wkp-fv-lead: calc(36 * var(--wkp-vu)); /* 821:117 Bold lh1.5 ls3 */
+		--wkp-fv-copy-top: 50%;
+		--wkp-fv-title: calc(120 * var(--wkp-fv-unit));
+		--wkp-fv-title-ls: calc(-3 * var(--wkp-fv-unit));
+		--wkp-fv-lead: calc(36 * var(--wkp-fv-unit)); /* 821:117 Bold lh1.5 ls3 */
 		--wkp-fv-lead-fw: var(--fw-bold);
 		--wkp-fv-lead-lh: 1.5;
-		--wkp-fv-lead-ls: calc(3 * var(--wkp-vu));
-		--wkp-fv-lead-gap: calc(11 * var(--wkp-vu)); /* 英字下端 583 → y594 */
+		--wkp-fv-lead-ls: calc(3 * var(--wkp-fv-unit));
+		--wkp-fv-lead-gap: calc(11 * var(--wkp-fv-unit)); /* 英字下端 583 → y594 */
 
 		/* --- 余白・見出し 821:127 --- */
 		--wkp-sec-gap: calc(160 * var(--wkp-vu)); /* FV → 見出し、グリッド → COLUMN */
@@ -655,4 +655,19 @@
 		--wkp-meta-top: var(--wkp-name-overlap); /* 名前〜本文のかたまりは名前の上端から */
 		--wkp-name-top: 0px;
 	}
+}
+
+/* PC FV fills the visible window; keep the copy clear of the overlay header. */
+@media (min-width: 1025px) {
+	:root {
+		--wkp-fv-unit: max(0.1px, min(1px, calc(100vw / 1920), calc((var(--wkp-fv-height) - 2 * var(--header-height) - 32px) / 220)));
+	}
+	:root[data-store-mode] {
+		--wkp-fv-height: calc(100vh - var(--header-height));
+	}
+	@supports (height: 100dvh) {
+		:root { --wkp-fv-height: 100dvh; }
+		:root[data-store-mode] { --wkp-fv-height: calc(100dvh - var(--header-height)); }
+	}
+	.p-wkpfv__copy { transform: translateY(-50%); }
 }

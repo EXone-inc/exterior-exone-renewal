@@ -1797,17 +1797,17 @@
 		--plp-tab-ls: calc(2 * var(--plp-vu));
 
 		/* --- FV 586:552（1920x1080） --- */
-		--plp-fv-height: calc(1080 * var(--plp-vu));
+		--plp-fv-height: 100vh;
 		--plp-fv-bg-top: 0px; /* ヘッダーは写真に重なる */
 		--plp-fv-image-position: 50% 50%; /* 枠と同比率（切り抜き指定なし） */
-		--plp-fv-copy-top: calc(428 * var(--plp-vu)); /* 586:422 y428 */
-		--plp-fv-title: calc(120 * var(--plp-vu)); /* 586:423 */
-		--plp-fv-title-ls: calc(-3 * var(--plp-vu));
-		--plp-fv-heading: calc(36 * var(--plp-vu)); /* 586:416 */
+		--plp-fv-copy-top: 50%;
+		--plp-fv-title: calc(120 * var(--plp-fv-unit)); /* 586:423 */
+		--plp-fv-title-ls: calc(-3 * var(--plp-fv-unit));
+		--plp-fv-heading: calc(36 * var(--plp-fv-unit)); /* 586:416 */
 		--plp-fv-heading-fw: var(--fw-bold);
 		--plp-fv-heading-lh: 1.5;
-		--plp-fv-heading-ls: calc(3 * var(--plp-vu));
-		--plp-fv-heading-gap: calc(11 * var(--plp-vu)); /* PLANS の下端 583 → y594 */
+		--plp-fv-heading-ls: calc(3 * var(--plp-fv-unit));
+		--plp-fv-heading-gap: calc(11 * var(--plp-fv-unit)); /* PLANS の下端 583 → y594 */
 
 		/* --- PLAN select（本文の色・行高・折り返し） --- */
 		--plp-select-hi-body-color: var(--color-gray1); /* 586:442 #dadada */
@@ -2374,4 +2374,19 @@
 		--plp-vu: min(1px, calc(100vw / 1920), calc((100vh - var(--header-height)) / 1080));
 		--plp-select-h: calc(100vh - var(--header-height));
 	}
+}
+
+/* PC FV fills the visible window; keep the copy clear of the overlay header. */
+@media (min-width: 1025px) {
+	:root {
+		--plp-fv-unit: max(0.1px, min(1px, calc(100vw / 1920), calc((var(--plp-fv-height) - 2 * var(--header-height) - 32px) / 220)));
+	}
+	:root[data-store-mode] {
+		--plp-fv-height: calc(100vh - var(--header-height));
+	}
+	@supports (height: 100dvh) {
+		:root { --plp-fv-height: 100dvh; }
+		:root[data-store-mode] { --plp-fv-height: calc(100dvh - var(--header-height)); }
+	}
+	.p-plpfv__copy { transform: translateY(-50%); }
 }
