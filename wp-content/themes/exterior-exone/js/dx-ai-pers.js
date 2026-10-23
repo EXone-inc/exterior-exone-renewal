@@ -2,12 +2,12 @@
  * DX EXPERIENCE ページ: ステップ 02（AI パース）のアニメーション。
  *
  * 支給 sample.html（AIパースアニメーション）の再現。
- * 暗い更地の写真 → 光る線画を line_01 → 02 → 03 の順に描く → 完成写真がぼかしから
+ * 暗い更地の写真 → 線画を line_01 → 02 → 03 の順に描く → 完成写真がフェードで
  * 浮かび、線画は消える → 2 秒見せて最初から、を 02 を表示している間だけ繰り返す。
  * 02 に切り替わるたびに最初から始め、他のステップや画面外では止める。
  * 動きを減らす設定では完成写真を出したまま動かさない（CSS の既定表示）。
  *
- * 見た目（光る線・写真のフェード）は css/dx.css の .p-dxai。
+ * 見た目（線画・写真のフェード）は css/dx.css の .p-dxai。
  */
 (function () {
 	'use strict';
@@ -134,11 +134,11 @@
 		}
 
 		running = false;
-		clear();
-		scene.classList.remove('is-playing', 'is-complete');
-		shapes(lines).forEach(function (el) {
-			el.style.strokeDashoffset = '';
-		});
+		// PC/SP とも退場中は線画を止め、完成写真のフェードを再発させない。
+		generation += 1;
+		timers.forEach(window.clearTimeout);
+		timers = [];
+		animations.forEach(function (animation) { animation.pause(); });
 	}
 
 	/**
@@ -148,7 +148,7 @@
 	function sync() {
 		var shown = !step || !step.hasAttribute('inert');
 
-		if (shown && visible && !reduced.matches) {
+		if (shown && visible && !document.hidden && !reduced.matches) {
 			start();
 		} else {
 			stop();
@@ -169,8 +169,14 @@
 	}
 
 	if (typeof reduced.addEventListener === 'function') {
-		reduced.addEventListener('change', sync);
+		reduced.addEventListener('change', function () {
+			stop();
+			clear();
+			scene.classList.remove('is-playing', 'is-complete');
+			sync();
+		});
 	}
+	document.addEventListener('visibilitychange', sync);
 
 	sync();
 })();

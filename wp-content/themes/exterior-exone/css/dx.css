@@ -723,6 +723,53 @@
 	visibility: hidden;
 }
 
+/* SP の 03 は描画済みの回転映像。PC の 3D と同じ広い枠で見せる。 */
+.p-dxstep__rotation-video,
+.p-dxstep__visual > .p-dxstep__rotation-poster {
+	position: absolute;
+	top: 0;
+	left: calc(-1 * var(--dxp-model-bleed));
+	width: calc(100% + var(--dxp-model-bleed) * 2);
+	max-width: none;
+	height: 100%;
+	object-fit: contain;
+	pointer-events: none;
+}
+
+.p-dxstep__visual.is-video-mode > img {
+	visibility: hidden;
+}
+
+.p-dxstep__visual.is-video-mode > .p-dxstep__rotation-poster {
+	visibility: visible;
+}
+
+.p-dxstep__visual.is-video-playing > .p-dxstep__rotation-poster {
+	visibility: hidden;
+}
+
+/* 写真は透明度だけで切り替え、64 本の線の個別フィルターを省く。 */
+.p-dxai__lines :is(path, line, polyline, polygon, rect) {
+	filter: none;
+}
+
+.p-dxai__after,
+.p-dxai.is-playing .p-dxai__after,
+.p-dxai.is-playing.is-complete .p-dxai__after {
+	filter: none;
+	transition: opacity 1.4s ease;
+}
+
+.p-dxai__before,
+.p-dxai.is-playing.is-complete .p-dxai__before {
+	filter: brightness(var(--dxp-ai-before-dim));
+	transition: none;
+}
+
+.p-dxai.is-instant .p-dxai__after {
+	transition: none;
+}
+
 /* PC は 03 の左に本文の列がある（間は約 88/1920）。回って左へ広がった建物が
    本文に重ならないよう、描画枠の左端だけ本文の手前でふわっと消す。
    % は描画枠（ビジュアルの幅 + 左右 15%）に対する位置:
@@ -1458,25 +1505,25 @@
 		--dxp-vu: min(1px, calc(100vw / 1920));
 
 		/* clamp（375→1920 の補間）だった FV のトークンを 1920 比例に置き換える */
-		--dxp-fv-height: calc(1080 * var(--dxp-vu));
-		--dxp-fv-dx: calc(230 * var(--dxp-vu));
-		--dxp-fv-en: calc(128 * var(--dxp-vu));
-		--dxp-fv-display-ls: calc(-3 * var(--dxp-vu));
-		--dxp-fv-heading: calc(36 * var(--dxp-vu));
-		--dxp-fv-heading-ls: calc(3 * var(--dxp-vu));
-		--dxp-fv-body: calc(20 * var(--dxp-vu));
-		--dxp-fv-body-ls: calc(2 * var(--dxp-vu));
+		--dxp-fv-height: 100vh;
+		--dxp-fv-dx: calc(230 * var(--dxp-fv-unit));
+		--dxp-fv-en: calc(128 * var(--dxp-fv-unit));
+		--dxp-fv-display-ls: calc(-3 * var(--dxp-fv-unit));
+		--dxp-fv-heading: calc(36 * var(--dxp-fv-unit));
+		--dxp-fv-heading-ls: calc(3 * var(--dxp-fv-unit));
+		--dxp-fv-body: calc(20 * var(--dxp-fv-unit));
+		--dxp-fv-body-ls: calc(2 * var(--dxp-fv-unit));
 		--dxp-fv-body-color: var(--color-gray1); /* 436:118 は #dadada */
 		--dxp-fv-copy-left: calc(131 * var(--dxp-vu));
-		--dxp-fv-copy-top: calc(251 * var(--dxp-vu));
-		--dxp-fv-title-height: calc(317.7 * var(--dxp-vu)); /* EXPERIENCE 下端 174.7 + 143 */
-		--dxp-fv-dx-width: calc(260 * var(--dxp-vu)); /* 436:114 のテキストボックス幅 */
-		--dxp-fv-en-width: calc(492 * var(--dxp-vu)); /* 436:117 のテキストボックス幅 */
-		--dxp-fv-en-x: calc(72.7 * var(--dxp-vu)); /* x203.7（中心 449.7 − 492/2）− x131 */
-		--dxp-fv-en-y: calc(174.7 * var(--dxp-vu)); /* y425.7 − y251 */
-		--dxp-fv-text-x: calc(47 * var(--dxp-vu)); /* x178 − x131 */
-		--dxp-fv-heading-gap: calc(37.8 * var(--dxp-vu)); /* y606.5 − (y425.7 + 143) */
-		--dxp-fv-lead-gap: calc(19.4 * var(--dxp-vu)); /* y679.9 − (y606.5 + 54) */
+		--dxp-fv-copy-top: 50%;
+		--dxp-fv-title-height: calc(317.7 * var(--dxp-fv-unit)); /* EXPERIENCE 下端 174.7 + 143 */
+		--dxp-fv-dx-width: calc(260 * var(--dxp-fv-unit)); /* 436:114 のテキストボックス幅 */
+		--dxp-fv-en-width: calc(492 * var(--dxp-fv-unit)); /* 436:117 のテキストボックス幅 */
+		--dxp-fv-en-x: calc(72.7 * var(--dxp-fv-unit)); /* x203.7（中心 449.7 − 492/2）− x131 */
+		--dxp-fv-en-y: calc(174.7 * var(--dxp-fv-unit)); /* y425.7 − y251 */
+		--dxp-fv-text-x: calc(47 * var(--dxp-fv-unit)); /* x178 − x131 */
+		--dxp-fv-heading-gap: calc(37.8 * var(--dxp-fv-unit)); /* y606.5 − (y425.7 + 143) */
+		--dxp-fv-lead-gap: calc(19.4 * var(--dxp-fv-unit)); /* y679.9 − (y606.5 + 54) */
 
 		/* --- why dx 436:384（y1080〜2154。以下の y はセクション上端から） --- */
 		--dxp-why-pad-top: calc(143 * var(--dxp-vu)); /* 飾り文字 y1223 */
@@ -2195,4 +2242,19 @@
 	.p-dxex__chapter {
 		transition: none;
 	}
+}
+
+/* PC FV fills the visible window; keep the copy clear of the overlay header. */
+@media (min-width: 1025px) {
+	:root {
+		--dxp-fv-unit: max(0.1px, min(1px, calc(100vw / 1920), calc((var(--dxp-fv-height) - 2 * var(--header-height) - 32px) / 590)));
+	}
+	:root[data-store-mode] {
+		--dxp-fv-height: calc(100vh - var(--header-height));
+	}
+	@supports (height: 100dvh) {
+		:root { --dxp-fv-height: 100dvh; }
+		:root[data-store-mode] { --dxp-fv-height: calc(100dvh - var(--header-height)); }
+	}
+	.p-dxfv__copy { transform: translateY(-50%); }
 }

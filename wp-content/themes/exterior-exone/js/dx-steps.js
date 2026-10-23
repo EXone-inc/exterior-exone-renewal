@@ -33,6 +33,22 @@
 	var total = steps.length;
 	var current = -1;
 	var ticking = false;
+	var motionTimers = [];
+
+	function finishMotion(index) {
+		window.clearTimeout(motionTimers[index]);
+		motionTimers[index] = 0;
+		steps[index].classList.remove('is-moving');
+	}
+
+	function watchMotion(step, index) {
+		// Fast scrolling or canceled transitions can omit transitionend.
+		var value = window.getComputedStyle(step).getPropertyValue('--dxp-steps-slide').trim();
+		var duration = parseFloat(value);
+		if (!isFinite(duration)) duration = 0.9;
+		var ms = value.indexOf('ms') !== -1 ? duration : duration * 1000;
+		motionTimers[index] = window.setTimeout(function () { finishMotion(index); }, ms + 100);
+	}
 
 	function setFlow(index) {
 		items.forEach(function (item, i) {
@@ -53,12 +69,14 @@
 	 */
 	function show(index, animate) {
 		var previous = current;
+		animate = animate && !reduced.matches;
 
 		current = index;
 
 		steps.forEach(function (step, i) {
 			var active = i === index;
 
+			finishMotion(i);
 			step.classList.toggle('is-moving', animate && (active || i === previous));
 			step.classList.toggle('is-active', active);
 			step.classList.toggle('is-before', i < index);
@@ -71,6 +89,7 @@
 				step.setAttribute('inert', '');
 				step.setAttribute('aria-hidden', 'true');
 			}
+			if (step.classList.contains('is-moving')) watchMotion(step, i);
 		});
 
 		setFlow(Number(steps[index].getAttribute('data-flow-active')));
@@ -112,6 +131,12 @@
 
 	if (typeof reduced.addEventListener === 'function') {
 		reduced.addEventListener('change', syncVideos);
+		reduced.addEventListener('change', function () {
+			// transition:none では transitionend が来ないため、待機状態を残さない。
+			if (reduced.matches) {
+				steps.forEach(function (step, index) { finishMotion(index); });
+			}
+		});
 	}
 
 	/**
@@ -150,10 +175,10 @@
 	}
 
 	// 流し終わったら transition を外す（次に飛ばされたときに見えたまま横切らないため）。
-	steps.forEach(function (step) {
+	steps.forEach(function (step, index) {
 		step.addEventListener('transitionend', function (event) {
 			if (event.target === step && event.propertyName === 'transform') {
-				step.classList.remove('is-moving');
+				finishMotion(index);
 			}
 		});
 	});

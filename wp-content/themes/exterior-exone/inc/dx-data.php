@@ -280,6 +280,9 @@ function exterior_exone_dx_page_steps() {
 					'fov'      => '42deg',
 					'target'   => '25m 11.3m 9.4m',
 					'rotation' => '6deg', // 1 秒あたり。1 周 60 秒
+					// SP は事前描画した映像を使い、端末での 3D 計算を省く。
+					'mobile_video' => 'videos/dx/bimx-rotation-sp.mp4',
+					'mobile_poster' => 'images/dx/bimx-rotation-sp-poster.jpg',
 				),
 				'device'      => $exterior_exone_phone,
 				'button'      => null,

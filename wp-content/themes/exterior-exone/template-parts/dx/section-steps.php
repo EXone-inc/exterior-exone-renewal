@@ -125,6 +125,8 @@ $exterior_exone_first    = $exterior_exone_dx_steps['items'][0]['flow_active'];
 									data-dx-model-fov="<?php echo esc_attr( $exterior_exone_model['fov'] ); ?>"
 									data-dx-model-target="<?php echo esc_attr( $exterior_exone_model['target'] ); ?>"
 									data-dx-model-rotation="<?php echo esc_attr( $exterior_exone_model['rotation'] ); ?>"
+									data-dx-model-mobile-video="<?php echo esc_url( exterior_exone_asset_url( $exterior_exone_model['mobile_video'] ) ); ?>"
+									data-dx-model-mobile-poster="<?php echo esc_url( exterior_exone_asset_url( $exterior_exone_model['mobile_poster'] ) ); ?>"
 								<?php endif; ?>
 							>
 								<?php if ( ! empty( $exterior_exone_step['visual']['ai_pers'] ) ) : ?>
