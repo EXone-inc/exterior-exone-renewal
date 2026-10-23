@@ -3157,6 +3157,9 @@ svg[data-line-draw].is-drawn .st1 {
 		--dx-step-gap: calc(48.5 * var(--dx-u));
 		--dx-step-height: calc(178 * var(--dx-u));
 		--dx-media-offset: calc(9 * var(--dx-u));
+		/* Figma 1:150: 説明欄と画像の間29.28px、画像の角丸10px。 */
+		--dx-body-gap: calc(29.28 * var(--dx-u));
+		--dx-visual-radius: calc(10 * var(--dx-u));
 		--dx-btn-offset: calc(8 * var(--dx-u));
 		--dx-num-size: calc(16 * var(--dx-u));
 		--dx-step-title-size: calc(22 * var(--dx-u));
@@ -3202,7 +3205,13 @@ svg[data-line-draw].is-drawn .st1 {
 		display: flex;
 		align-items: flex-start;
 		justify-content: space-between;
+		column-gap: var(--dx-body-gap);
 		margin-top: calc(var(--dx-steps-top) - var(--dx-title-size) * 1.29);
+	}
+
+	.p-dx__visual {
+		overflow: hidden;
+		border-radius: var(--dx-visual-radius);
 	}
 
 	.p-dx__media {
@@ -3289,6 +3298,7 @@ svg[data-line-draw].is-drawn .st1 {
 	.p-dx__steps {
 		order: 1;
 		flex: 1 1 auto;
+		min-width: 0;
 		margin-top: 0;
 		padding-left: calc(var(--dx-indicator-w) + var(--dx-indicator-gap));
 	}
