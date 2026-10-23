@@ -1489,6 +1489,38 @@
 	}
 }
 
+/* PC HIGH-END: the image and its bottom fade zoom as one visual. */
+@media (min-width: 1025px) {
+	.p-plpselect__half--high-end .p-plpselect__fade {
+		display: none;
+	}
+
+	.p-plpselect__half--high-end .p-plpselect__media {
+		transition: transform var(--plp-hover-duration) var(--plp-hover-ease);
+	}
+
+	.p-plpselect__half--high-end .p-plpselect__media::after {
+		content: "";
+		position: absolute;
+		top: calc(var(--plp-select-hi-fade-top) - var(--plp-select-media-top));
+		left: 0;
+		width: 100%;
+		height: var(--plp-select-fade-h);
+		background: linear-gradient(180deg, var(--plp-select-fade-from) 0%, var(--plp-select-fade-to) 100%);
+		pointer-events: none;
+	}
+}
+
+@media (min-width: 1025px) and (hover: hover) and (prefers-reduced-motion: no-preference) {
+	.p-plpselect__half--high-end:hover .p-plpselect__media {
+		transform: scale(var(--plp-hover-scale));
+	}
+
+	.p-plpselect__half--high-end:hover .p-plpselect__media img {
+		transform: none;
+	}
+}
+
 /* --- 選択の演出（.is-plp-selecting → 次のフレームで .is-plp-selecting-run） ---
    詳細は PLAN select と同じ上端から始まるので、PLAN select は流れの中の高さを消して
    詳細と重ねる。重なり順は 選んだ半分 → 詳細 → もう一方の半分 → 動くプラン名。
