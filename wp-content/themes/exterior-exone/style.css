@@ -2287,12 +2287,29 @@ svg[data-line-draw].is-drawn .st1 {
 }
 
 .p-stats__number {
-	/* カウントアップ中に数字の幅が揺れないようにする */
+	position: relative;
+	display: inline-block;
+	flex: 0 0 auto;
+	/* 到達値を不可視で置いて幅・高さを固定し、変化する数字だけを重ねる。 */
 	font-variant-numeric: tabular-nums;
 	font-size: var(--stats-sp-number);
 	font-weight: var(--fw-semibold);
 	line-height: normal;
 	letter-spacing: 1px; /* PC / SP とも 1px */
+}
+
+/* JS 無効時・動きを減らす設定でも、到達値の寸法をそのまま使う。 */
+.p-stats__number::after {
+	content: attr(data-countup-reserve);
+	visibility: hidden;
+	white-space: nowrap;
+}
+
+.p-stats__number [data-countup] {
+	position: absolute;
+	top: 0;
+	right: 0;
+	white-space: nowrap;
 }
 
 .p-stats__unit {

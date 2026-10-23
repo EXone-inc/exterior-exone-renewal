@@ -185,7 +185,7 @@ function exterior_exone_stats_items() {
 		array(
 			'label'  => '年間施工数',
 			'note'   => '',
-			'number' => '500',
+			'number' => '650',
 			'unit'   => '件/年',
 			'icon'   => 'vision-logo1.png',
 			'icon_w' => 211,
@@ -212,7 +212,7 @@ function exterior_exone_stats_items() {
 		array(
 			'label'  => '累計施工実績',
 			'note'   => '',
-			'number' => '3,500',
+			'number' => '8,000',
 			'unit'   => '件以上',
 			'icon'   => 'vision-logo4.png',
 			'icon_w' => 228,

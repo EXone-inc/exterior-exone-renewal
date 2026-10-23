@@ -33,7 +33,7 @@ $exterior_exone_stats = exterior_exone_stats_items();
 
 	<ul class="p-stats__list">
 		<?php foreach ( $exterior_exone_stats as $exterior_exone_index => $exterior_exone_stat ) : ?>
-			<li class="p-stats__item" data-reveal data-reveal-delay="<?php echo esc_attr( (string) ( $exterior_exone_index * 120 ) ); ?>">
+			<li class="p-stats__item">
 				<?php // 補足（(昨対比率)）は PC カンプのみ。SP では CSS で隠すので間の空白も出さない。 ?>
 				<p class="p-stats__label"><?php echo esc_html( $exterior_exone_stat['label'] ); ?><?php if ( '' !== $exterior_exone_stat['note'] ) : ?><span class="p-stats__note"><?php echo esc_html( $exterior_exone_stat['note'] ); ?></span><?php endif; ?></p>
 
@@ -48,7 +48,7 @@ $exterior_exone_stats = exterior_exone_stats_items();
 					>
 					<p class="p-stats__value">
 						<?php // JS が中身を読んで 0 からカウントアップする（無効時は実数値のまま）。 ?>
-						<span class="p-stats__number" data-countup><?php echo esc_html( $exterior_exone_stat['number'] ); ?></span>
+						<span class="p-stats__number" data-countup-reserve="<?php echo esc_attr( $exterior_exone_stat['number'] ); ?>"><span data-countup><?php echo esc_html( $exterior_exone_stat['number'] ); ?></span></span>
 						<span class="p-stats__unit"><?php echo esc_html( $exterior_exone_stat['unit'] ); ?></span>
 					</p>
 				</div>

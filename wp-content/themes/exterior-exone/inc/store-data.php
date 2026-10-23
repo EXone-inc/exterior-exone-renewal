@@ -282,7 +282,7 @@ function exterior_exone_store_strip_images( $variant = '' ) {
 function exterior_exone_store_stats() {
 	return array(
 		array(
-			'number' => '500',
+			'number' => '650',
 			'unit'   => '件/年',
 			'label'  => '年間施工数',
 			'image'  => 'stats-photo1-535-877.jpg',
@@ -300,9 +300,9 @@ function exterior_exone_store_stats() {
 			'image'  => 'stats-photo3-535-880.jpg',
 		),
 		array(
-			'number' => '3,500',
+			'number' => '8,000',
 			'unit'   => '件以上',
-			'label'  => '累計実績',
+			'label'  => '累計施工実績',
 			'image'  => 'stats-photo4-535-884.jpg',
 		),
 	);
