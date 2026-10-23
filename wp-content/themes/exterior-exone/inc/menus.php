@@ -242,8 +242,9 @@ const EXTERIOR_EXONE_LINE_URL = 'https://lin.ee/yhxQKWD';
  *
  * icon は images/top/ 配下のファイル名。
  * （footer-icon1=Instagram / 2=Facebook / 3=NOTE / 4=LINE を実データで確認済み）
- * LINE だけ支店モード（支店ページ・?store=）ではその支店の line_url（inc/store-data.php）、
- * それ以外はコーポレートの公式 LINE。すべて外部サイトなので新しいタブで開く。
+ * LINE は支店モード（支店ページ・?store=）だけに表示し、その支店の line_url を使う。
+ * コーポレートではフッター・SP ドロワーとも LINE を出さない。
+ * すべて外部サイトなので新しいタブで開く。
  *
  * @return array<int, array{label: string, url: string, icon: string}>
  */
@@ -251,7 +252,7 @@ function exterior_exone_sns_items() {
 	$store = function_exists( 'exterior_exone_store_mode' ) ? exterior_exone_store_mode() : null;
 	$line  = ( $store && ! empty( $store['line_url'] ) ) ? $store['line_url'] : EXTERIOR_EXONE_LINE_URL;
 
-	return array(
+	$items = array(
 		array(
 			'label' => 'NOTE',
 			'url'   => 'https://note.com/exterior_exone',
@@ -262,17 +263,23 @@ function exterior_exone_sns_items() {
 			'url'   => 'https://www.instagram.com/exone_recruit/',
 			'icon'  => 'footer-icon1.svg',
 		),
-		array(
+	);
+
+	if ( $store ) {
+		$items[] = array(
 			'label' => 'LINE',
 			'url'   => $line,
 			'icon'  => 'footer-icon4.svg',
-		),
-		array(
-			'label' => 'Facebook',
-			'url'   => 'https://www.facebook.com/EXone.inc/',
-			'icon'  => 'footer-icon2.svg',
-		),
+		);
+	}
+
+	$items[] = array(
+		'label' => 'Facebook',
+		'url'   => 'https://www.facebook.com/EXone.inc/',
+		'icon'  => 'footer-icon2.svg',
 	);
+
+	return $items;
 }
 
 /**

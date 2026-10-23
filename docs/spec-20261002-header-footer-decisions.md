@@ -143,3 +143,9 @@
 - **SNS リンクの実値（2026-10-10 ユーザー支給）**: フッターと SP ドロワーの NOTE `https://note.com/exterior_exone` / Instagram `https://www.instagram.com/exone_recruit/` / Facebook `https://www.facebook.com/EXone.inc/` / 公式 LINE `https://lin.ee/yhxQKWD`（`inc/menus.php` `exterior_exone_sns_items()`・定数 `EXTERIOR_EXONE_LINE_URL`）。LINE は支店モード（支店ページ・`?store=`）ではその支店の `line_url` に出し分け（ユーザー指示）。4 つとも外部サイトなので `target="_blank" rel="noopener"`
 - **残っている `#` リンク（2026-10-10 ユーザー回答）**: RECRUIT / 採用情報（ヘッダー・ドロワー・フッター・TOP の RECRUIT セクションの VIEW MORE）と、お知らせ・コラム（ドロワー・フッター）は**ページができるまで `#` のまま**。TOP の PLANS セクションのパッケージプランの VIEW MORE は `/plans/#package`（支店モードは `?store=` 付き）に接続済み
 - **中身が画面より短いページでフッターの下に黒い帯（2026-10-10、iPad Pro 13 縦 1032×1376 の `/store/`・`/contact/`）**: `body { display:flex; flex-direction:column; min-height:100vh }` + `.l-main { flex:1 0 auto }` でフッターを画面の下端まで下ろした（`style.css`）。追従ヘッダー・横スクロール・長いページの高さに影響なし
+
+## 2026-10-22 更新: コーポレートの公式LINEアイコン
+
+ユーザー指定により、コーポレートのヘッダーが表示される場合はフッター・SPハンバーガーメニューのLINEアイコンを非表示にする。ヘッダーと同じ `exterior_exone_store_mode()` 判定でSNS配列を出し分ける。支店ページおよび `?store=<slug>` の支店表示は従来どおり各支店のLINEリンクを表示。他のSNSとお問い合わせページ内のLINE導線は変更しない。
+
+同日追記: LINE非表示時の左右バランスを保つため、フッター・SPメニューのSNSは固定4列から表示件数に応じた均等列へ変更。コーポレート3件・支店4件とも全体を中央に配置する。

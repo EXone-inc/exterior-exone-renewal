@@ -1322,10 +1322,11 @@ body.is-drawer-open {
 	margin: var(--drawer-btn-gap) auto 0;
 }
 
-/* SNS: 4 等分のセル。2 件目以降の左境界が区切り線（1024:211-213）。 */
+/* SNS: 表示件数で等分し、3 件・4 件とも全体を中央に揃える。 */
 .p-drawer__sns {
 	display: grid;
-	grid-template-columns: repeat(4, 1fr);
+	grid-auto-flow: column;
+	grid-auto-columns: minmax(0, 1fr);
 	width: 100%;
 	margin-top: auto;
 	padding-top: var(--drawer-block-gap);
@@ -1385,10 +1386,11 @@ body.is-drawer-open {
 	height: auto;
 }
 
-/* SNS: 4 等分のセル。2 件目以降の左境界が区切り線。 */
+/* SNS: 表示件数で等分。2 件目以降の左境界が区切り線。 */
 .p-footer__sns {
 	display: grid;
-	grid-template-columns: repeat(4, 1fr);
+	grid-auto-flow: column;
+	grid-auto-columns: minmax(0, 1fr);
 	width: var(--sns-width);
 	max-width: 100%;
 	margin-top: var(--footer-logo-gap);
