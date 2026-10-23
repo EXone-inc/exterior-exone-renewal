@@ -546,8 +546,8 @@ Text Domain: exterior-exone
 		--works-card-w: 21.263vw; /* 306.18px @1440 */
 		--works-card-h: 25.767vw; /* 371.05px @1440（325.92:394.95 の縦横比） */
 		--works-list-h: 36.5vw; /* 端カードの下がり 10.64vw + カード高 25.77vw */
-		/* PC はカンプ 917:117 どおり説明文をカード群に重ねる */
-		--works-text-gap: clamp(-110.75px, 58.508px + -8.8155vw, -9.3px);
+		/* 中央カード下端から本文まで48px。PCの本文と同率で縮小し、広い画面でも維持。 */
+		--works-text-gap: calc(var(--works-card-h) - var(--works-list-h) + 48 * var(--vu));
 	}
 }
 
@@ -3762,7 +3762,8 @@ svg[data-line-draw].is-drawn .st1 {
 	}
 
 	.p-plans__text--highend {
-		flex: 0 0 663px;
+		/* 説明の1行目（35文字＋字間）が収まる幅。本文と同じ比率で縮小する。 */
+		flex: 0 0 calc(700 * var(--vu));
 		max-width: 50%;
 		/* 左余白基準。(100% - content-width)/2 だと 1600px 未満で負になり画面外へ出る */
 		margin-left: calc(var(--gutter) + var(--plans-highend-indent));
@@ -4147,7 +4148,7 @@ svg[data-line-draw].is-drawn .st1 {
 
 @media (min-width: 1025px) {
 	.p-works__desc {
-		--works-desc-lh: 2.5; /* 917:117 は 14px・行高 2.5 で 3 行 105px */
+		--works-desc-lh: 2.5;
 	}
 
 	.p-news__list {
@@ -4300,7 +4301,7 @@ svg[data-line-draw].is-drawn .st1 {
 		--plans-highend-indent: calc(52.85 * var(--vu));
 		--works-cards-gap: calc(80 * var(--vu));
 		--works-btn-gap: calc(65.61 * var(--vu));
-		--works-desc-size: calc(14 * var(--vu));
+		--works-desc-size: calc(18 * var(--vu));
 		--works-desc-w: calc(551.089 * var(--vu));
 		--news-cards-gap: calc(80 * var(--vu));
 		--news-card-w: calc(373 * var(--vu));
