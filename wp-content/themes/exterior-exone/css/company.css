@@ -88,7 +88,7 @@
 	--co-eco-float-ease: ease-in-out;
 
 	/* --- 会社概要の朝 → 夜 --- */
-	--co-profile-night-delay: 0.6s; /* 到達してから朝を見せている時間 */
+	--co-profile-night-delay: 0.3s; /* 到達してから朝を見せている時間 */
 	--co-profile-night-move: 1.2s; /* 夜へ切り替わる時間 */
 	/* 切り替わりが 7 割進んだあたりでリード文、その 0.15s 後にロゴ */
 	--co-profile-text-delay: calc(var(--co-profile-night-delay) + var(--co-profile-night-move) * 0.7);
@@ -379,6 +379,13 @@
 .p-cstory__media {
 	position: relative;
 	margin: 0;
+	border-radius: var(--co-card-radius);
+}
+
+/* SP の右側の写真は枠外に出るため、media をクリップせず写真ごとに丸める。 */
+.p-cstory__image,
+.p-cstory__office {
+	border-radius: inherit;
 }
 
 .p-cstory__image {
@@ -404,6 +411,7 @@
 	margin-top: var(--space-md);
 	padding: var(--space-lg) var(--space-md);
 	background: var(--color-white2);
+	border-radius: var(--co-card-radius);
 }
 
 /* 1 文字ずつ下からせり上がる。--char-index は PHP 側が振る通し番号 */
@@ -2406,6 +2414,7 @@
 		right: 0;
 		font-size: calc(24 * var(--co-su));
 		line-height: 1.6;
+		letter-spacing: calc(1 * var(--co-su));
 		text-align: center;
 		color: var(--color-gray2);
 	}
