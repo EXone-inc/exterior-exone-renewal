@@ -360,7 +360,7 @@ function exterior_exone_highend_gallery() {
 				'tab'  => 'アプローチ',
 				'eng'  => 'APPROACH DESIGN', // 仮
 				'copy' => '光に導かれ、玄関へと続く石の道', // 仮
-				'file' => 'gallery-02-approach-808-54.jpg', // 2026-10-07 差し替え（808:54。カンプの切り抜きは上 -9.22%・高さ 118.44% = 上下を少し切る）
+				'file' => 'gallery-cand-713-202.jpg', // Figma 713:202: アプローチ。
 				'img'  => array( 1536, 1024 ),
 			),
 			array(
@@ -368,7 +368,7 @@ function exterior_exone_highend_gallery() {
 				'tab'  => 'ガーデン',
 				'eng'  => 'GARDEN DESIGN', // 仮
 				'copy' => '室内から眺める、季節を映す庭', // 仮
-				'file' => 'gallery-cand-713-202.jpg', // 仮
+				'file' => 'gallery-02-approach-808-54.jpg', // Figma 808:54: ガーデン（ファイル名は旧割り当てのまま保持）。
 				'img'  => array( 1536, 1024 ),
 			),
 			array(
@@ -376,16 +376,16 @@ function exterior_exone_highend_gallery() {
 				'tab'  => 'ライティング',
 				'eng'  => 'LIGHTING DESIGN', // 仮
 				'copy' => '夜に浮かび上がる、もうひとつの表情', // 仮
-				'file' => 'gallery-cand-713-203.jpg', // 仮
-				'img'  => array( 1536, 1024 ),
+				'file' => 'pc-gallery-02-713-175.jpg', // Figma 713:201: ライティング。
+				'img'  => array( 1672, 941 ),
 			),
 			array(
 				'num'  => '05',
 				'tab'  => '素材・質感',
 				'eng'  => 'MATERIAL DESIGN', // 仮
 				'copy' => '石と緑が重なる、上質な佇まい', // 仮
-				'file' => 'pc-gallery-02-713-175.jpg', // 仮
-				'img'  => array( 1672, 941 ),
+				'file' => 'gallery-cand-713-203.jpg', // Figma 713:203: 素材・質感。
+				'img'  => array( 1536, 1024 ),
 			),
 		),
 	);
