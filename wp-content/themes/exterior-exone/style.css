@@ -1731,6 +1731,25 @@ body.is-drawer-open {
 	height: var(--fv-pin-height);
 }
 
+/* TOP / SP: 背景はバー収納時の最大高さで固定し、スクロール中の下端露出を防ぐ。
+   コピーとサムネイルはバー表示時の小さい高さに収める。両方ともバー出入りで伸縮しない。 */
+@media (max-width: 1024px) {
+	@supports (height: 100svh) and (height: 100lvh) {
+		.is-front-page .l-pin .p-fv {
+			--fv-pin-height: calc(100lvh - var(--header-height));
+			--fv-safe-height: calc(100svh - var(--header-height));
+		}
+
+		.is-front-page .l-pin .p-fv__copy {
+			height: var(--fv-safe-height);
+		}
+
+		.is-front-page .l-pin .p-fv__thumbs {
+			bottom: calc(var(--fv-thumbs-bottom) + var(--fv-pin-height) - var(--fv-safe-height));
+		}
+	}
+}
+
 /* --- スクロール連動の暗幕（js/fv-mask.js が --fv-mask-progress を 0→1 で書き込む） ---
    ピン留め区間の全面に 1 枚だけ貼る。どこを切り取っても濃さが同じなので、
    境界線の出ない均一な暗転になる。着地は --philo-overlay（#090908 / 70%）。 */
