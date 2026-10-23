@@ -445,7 +445,7 @@ Text Domain: exterior-exone
 	--news-card-gap: clamp(19.09px, 14.925px + 1.1107vw, 36.25px); /* 19.09 → 36.25 */
 	--news-title-gap: clamp(7px, 11.089px + -0.2129vw, 10.29px); /* 10.29 → 7 */
 	--news-title-size: clamp(12px, 10.544px + 0.3883vw, 18px); /* 12 → 18 */
-	--news-title-lh: 1.833; /* SP 22/12。PC は 2.5（45/18）に上書き */
+	--news-title-lh: 1.833; /* SP 22/12。PC は 1.6 に上書き */
 	--news-btn-gap: clamp(0px, -15.842px + 4.2246vw, 65.27px); /* 0 → 65.27 */
 	--recruit-overlay: rgba(0, 0, 0, 0.5); /* 917:88 */
 	--recruit-bg-position: 50% 38%; /* 950:44 の切り抜き（3:2 写真の上から 23.47% 〜 85.4% を表示） */
@@ -4159,9 +4159,9 @@ svg[data-line-draw].is-drawn .st1 {
 		display: flex;
 	}
 
-	/* PC のカンプは行高が広い（917:110 は 45/18、917:90 は 36/18） */
+	/* PC の記事タイトルは折り返し時の行間を詰める。 */
 	.p-news__card-title {
-		--news-title-lh: 2.5;
+		--news-title-lh: 1.6;
 	}
 
 	.p-recruit__sub {

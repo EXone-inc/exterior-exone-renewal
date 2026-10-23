@@ -163,6 +163,7 @@
 
 	.p-scolumn__card-title {
 		margin: calc(7 * var(--st-vu)) 0 0;
+		line-height: 1.6;
 	}
 
 	.p-scolumn__btn {
