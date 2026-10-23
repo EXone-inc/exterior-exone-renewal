@@ -1505,6 +1505,8 @@ svg.p-svisible__sketch[data-line-draw] :is(path, line, polyline, polygon, rect, 
 }
 
 .p-sreviews__card {
+	display: flex;
+	flex-direction: column;
 	overflow: hidden;
 	border-radius: var(--st-card-radius);
 	box-shadow: var(--st-shadow); /* 612:460（旧は枠線 #d9d9d9） */
@@ -1513,9 +1515,17 @@ svg.p-svisible__sketch[data-line-draw] :is(path, line, polyline, polygon, rect, 
 
 .p-sreviews__thumb {
 	display: block;
+	flex-shrink: 0;
 	width: 100%;
 	background: var(--color-gray2); /* 写真が無いときの灰色（カンプのプレースホルダ） */
 	object-fit: cover;
+}
+
+/* Let the review body fill the card so the location stays at the bottom. */
+.p-sreviews__body {
+	display: flex;
+	flex: 1;
+	flex-direction: column;
 }
 
 .p-sreviews__rating {
@@ -1539,6 +1549,7 @@ svg.p-svisible__sketch[data-line-draw] :is(path, line, polyline, polygon, rect, 
 }
 
 .p-sreviews__text {
+	flex: 1;
 	margin: 0;
 	font-size: var(--st-reviews-text);
 	font-weight: var(--fw-regular);
@@ -3060,7 +3071,7 @@ svg.p-svisible__sketch[data-line-draw] :is(path, line, polyline, polygon, rect, 
 		min-height: calc(571 * var(--st-vu));
 		margin-left: calc(110 * var(--st-vu));
 		padding: calc(131.6 * var(--st-vu)) 0 calc(60 * var(--st-vu)) calc(187 * var(--st-vu));
-		border-radius: 0 calc(10 * var(--st-vu)) calc(10 * var(--st-vu)) 0;
+		border-radius: var(--st-card-radius);
 	}
 
 	.p-sarea__local-heading {
@@ -3080,7 +3091,7 @@ svg.p-svisible__sketch[data-line-draw] :is(path, line, polyline, polygon, rect, 
 		z-index: 0;
 		width: calc(848 * var(--st-vu));
 		height: calc(578 * var(--st-vu));
-		border-radius: calc(10 * var(--st-vu)) 0 0 calc(10 * var(--st-vu));
+		border-radius: var(--st-card-radius);
 	}
 
 	/* --- カード 4 枚（y24914〜25420・400 幅・ピッチ 411.2） --- */
@@ -4267,6 +4278,7 @@ svg.p-svisible__sketch[data-line-draw] :is(path, line, polyline, polygon, rect, 
 	/* 641:1376〜641:1378 142x85・間隔 8・x9 から。パネル下端（+987）に 43 かぶる。
 	   中間幅も画面の左端から並べる（中央に寄せると左端の 1 枚が画面の中で入れ替わって見えるため） */
 	.p-sarea__arch {
+		--st-arch-loop-time: 38.4s; /* SP speed base; PC retains its 60s loop. */
 		position: relative;
 		z-index: 1;
 		height: calc(var(--st-arch-sp-height) * var(--st-su));

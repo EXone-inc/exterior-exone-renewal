@@ -941,7 +941,8 @@ function exterior_exone_store_flow() {
 				),
 			),
 			array(
-				'number' => '05',
+				'number'  => '05',
+				'sp_join' => true,
 				'label'  => '着工・施工管理',
 				'lines'  => array(
 					'カーポートの施工期間は2日、コンクリートの施工期間は1週間〜10日程度',
@@ -949,7 +950,8 @@ function exterior_exone_store_flow() {
 				),
 			),
 			array(
-				'number' => '06',
+				'number'  => '06',
+				'sp_join' => true,
 				'label'  => '完成・お引き渡し',
 				'lines'  => array(
 					'完成後、現地にてお客さまと施工箇所を確認し、問題がなければお引き渡し',
@@ -957,7 +959,8 @@ function exterior_exone_store_flow() {
 				),
 			),
 			array(
-				'number' => '07',
+				'number'  => '07',
+				'sp_join' => true,
 				'label'  => 'アフターサポート',
 				'lines'  => array(
 					'工事が終わってからも、安心して暮らしていただくためにEXoneでは、',
