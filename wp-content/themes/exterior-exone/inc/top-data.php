@@ -275,16 +275,16 @@ function exterior_exone_dx_steps() {
 }
 
 /**
- * PLANS のデザインテイスト 5 種。カンプ 917:143（PC）/ 917:722-724・917:857-858（SP）。
+ * PLANS のデザインテイスト 6 種。カンプ 917:143（PC）/ 917:722-724・917:857-858（SP）。
  *
- * image はカード内と PACKAGE PLAN の両方で使う商品画像（5 プランとも 1800x909）。
+ * image はカード内と PACKAGE PLAN の両方で使う商品画像。
  *
- * @return array<int, array<string, string>>
+ * @return array<int, array<string, mixed>>
  */
 function exterior_exone_plan_cards() {
 	// 商品画像は 5 プランとも 1800x909 の透過 PNG で書き出し済み。
 	// カード内も PACKAGE PLAN の大きい画像も同じファイルを使い、
-	// 表示サイズ・位置は CSS 側で 5 プラン共通に扱う（個別調整は持たない）。
+	// ラスティックは Figma 1071:40 / 1071:49 の 1500x1049 素材を追加。
 	return array(
 		array(
 			'name'  => 'シンプルモダン',
@@ -310,6 +310,13 @@ function exterior_exone_plan_cards() {
 			'name'  => 'スタイリッシュモダン',
 			'eng'   => 'STYLISH',
 			'image' => 'plans-card-5.png',
+		),
+		array(
+			'name'   => 'ラスティックモダン',
+			'eng'    => 'RUSTIC',
+			'image'  => 'plans-card-6.png',
+			'width'  => 1500,
+			'height' => 1049,
 		),
 	);
 }

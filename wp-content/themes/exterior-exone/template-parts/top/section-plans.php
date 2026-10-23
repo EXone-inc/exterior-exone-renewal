@@ -41,12 +41,12 @@ $exterior_exone_plan_cards = exterior_exone_plan_cards();
 					<span class="p-plans__card-name"><?php echo esc_html( $exterior_exone_card['name'] ); ?></span>
 					<span class="c-display p-plans__card-eng"><?php echo esc_html( $exterior_exone_card['eng'] ); ?></span>
 
-					<?php // 5 プランとも同じ 1800x909。カード下端に幅いっぱいで敷く。 ?>
+					<?php // 素材の寸法を指定し、カード内のトリミングは CSS で合わせる。 ?>
 					<img
 						class="p-plans__card-image"
 						src="<?php echo esc_url( exterior_exone_top_image( $exterior_exone_card['image'] ) ); ?>"
-						width="1800"
-						height="909"
+						width="<?php echo esc_attr( (string) ( isset( $exterior_exone_card['width'] ) ? $exterior_exone_card['width'] : 1800 ) ); ?>"
+						height="<?php echo esc_attr( (string) ( isset( $exterior_exone_card['height'] ) ? $exterior_exone_card['height'] : 909 ) ); ?>"
 						alt=""
 						loading="lazy"
 					>

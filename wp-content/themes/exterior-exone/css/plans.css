@@ -359,7 +359,7 @@
 }
 
 /* --- img list 586:409 / 586:1055 ---
-   5 枚の帯。幅はカンプ 1920 での枠寸法（--w / --h）に単位を掛ける。
+   6 枚の帯。幅はカンプ 1920 での枠寸法（--w / --h）に単位を掛ける。
    SP は同じ帯の縮小（3 枚目が右端で見切れる）。 */
 .p-plppkg__imglist {
 	position: relative;
@@ -395,8 +395,8 @@
 	height: auto;
 }
 
-/* 586:410 だけ下角が丸い（列を複製しても 5 枚ごとの 4 枚目に当たる） */
-.p-plppkg__imglist-item:nth-child(5n + 4) {
+/* 586:410 だけ下角が丸い（列を複製しても 6 枚ごとの 4 枚目に当たる） */
+.p-plppkg__imglist-item:nth-child(6n + 4) {
 	border-end-start-radius: var(--plp-imglist-radius);
 	border-end-end-radius: var(--plp-imglist-radius);
 }
@@ -613,7 +613,7 @@
 	pointer-events: none;
 }
 
-/* 番号 01〜05（Antonio Regular 400） */
+/* 番号 01〜06（Antonio Regular 400） */
 .p-plppkg__card-num {
 	position: absolute;
 	top: var(--plp-card-num-top);
@@ -637,6 +637,15 @@
 	max-width: none;
 	height: auto;
 	margin-inline: auto;
+}
+
+/* Figma 1071:47: 322x208。SP もカードに比例させる。 */
+[data-plp-style-name="ラスティックモダン"] .p-plppkg__card-image {
+	width: calc(var(--plp-card-image-w) * 322 / 354);
+	height: auto;
+	aspect-ratio: 322 / 208;
+	object-fit: cover;
+	object-position: top;
 }
 
 .p-plppkg__card-name {

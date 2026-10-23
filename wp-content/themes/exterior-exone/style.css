@@ -3529,6 +3529,13 @@ svg[data-line-draw].is-drawn .st1 {
 	height: auto;
 }
 
+/* Figma 1071:39: 342x221 の枠で原版の下端をトリミング。 */
+[data-plan-name="ラスティックモダン"] .p-plans__card-image {
+	height: calc(100% * 221 / 342);
+	object-fit: cover;
+	object-position: top;
+}
+
 /* --- パッケージプラン --- */
 .p-plans__body {
 	margin-top: var(--plans-package-gap);

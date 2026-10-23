@@ -9,7 +9,7 @@
  * カンプ上端の header 612:56 は既存の共通ヘッダー、タブ 611:16 は別スプリントで作るため
  * ここには置かない。プラン名はヘッダー 154 の下（上端 +270 / +294）。
  * img list は 1 本の列（js/plans-imglist.js が複製して自動スクロール）。style list のカードは
- * 5 件ぶんの英名・説明文・画像を data-plp-style-* に持ち、style view の
+ * 6 件ぶんの英名・説明文・画像を data-plp-style-* に持ち、style view の
  * data-plp-view の各要素を差し替える（TOP の data-plan-* とは別名）。
  *
  * @package exterior-exone
@@ -37,7 +37,7 @@ $exterior_exone_first_style   = $exterior_exone_plans_styles[0];
 					style="--w:<?php echo esc_attr( (string) $exterior_exone_item['w'] ); ?>;--h:<?php echo esc_attr( (string) $exterior_exone_item['h'] ); ?>;--crop-w:<?php echo esc_attr( $exterior_exone_item['crop'][0] ); ?>;--crop-x:<?php echo esc_attr( $exterior_exone_item['crop'][1] ); ?>;--crop-y:<?php echo esc_attr( $exterior_exone_item['crop'][2] ); ?>"
 				>
 					<img
-						src="<?php echo esc_url( exterior_exone_plans_image( $exterior_exone_item['file'] ) ); ?>"
+						src="<?php echo esc_url( isset( $exterior_exone_item['source'] ) && 'top' === $exterior_exone_item['source'] ? exterior_exone_top_image( $exterior_exone_item['file'] ) : exterior_exone_plans_image( $exterior_exone_item['file'] ) ); ?>"
 						width="<?php echo esc_attr( (string) $exterior_exone_item['img'][0] ); ?>"
 						height="<?php echo esc_attr( (string) $exterior_exone_item['img'][1] ); ?>"
 						alt=""
@@ -110,8 +110,8 @@ $exterior_exone_first_style   = $exterior_exone_plans_styles[0];
 					<img
 						class="p-plppkg__card-image"
 						src="<?php echo esc_url( exterior_exone_top_image( $exterior_exone_style['image'] ) ); ?>"
-						width="1800"
-						height="909"
+						width="<?php echo esc_attr( (string) $exterior_exone_style['width'] ); ?>"
+						height="<?php echo esc_attr( (string) $exterior_exone_style['height'] ); ?>"
 						alt=""
 						loading="lazy"
 					>

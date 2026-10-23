@@ -8,7 +8,7 @@
  *
  * 文言・画像の単一の出典。inc/dx-data.php / inc/store-data.php と同じ流儀で、
  * セクションごとの表示データはスプリントを進めるたびにここへ足していく。
- * テイスト 5 件の和名と画像は inc/top-data.php の exterior_exone_plan_cards() が
+ * テイスト 6 件の和名と画像は inc/top-data.php の exterior_exone_plan_cards() が
  * 出典（ここでは二重に持たない。英名・説明文だけをこちらで足す）。
  *
  * 画像はすべて差し替え前提の仮画像（AI 生成を含む）。
@@ -101,7 +101,7 @@ function exterior_exone_plans_package() {
 	return array(
 		'name'    => 'パッケージプラン', // 586:437 / 586:1034
 		'eng'     => 'PACKAGE PLAN', // 586:434 / 586:1033
-		// img list 586:409（SP 586:1055）。住宅パース 5 枚。
+		// img list 586:409（SP 586:1055）。住宅パース 6 枚（末尾はラスティックモダン）。
 		'imglist' => array(
 			array(
 				'file' => 'pc-imglist-01-586-412.png',
@@ -139,6 +139,15 @@ function exterior_exone_plans_package() {
 				'h'    => 209,
 				'crop' => array( '100.81%', '-1.43%', '-70.66%' ),
 			),
+			array(
+				// カードと同じ素材を再利用。原版の縦横比で他の画像と高さを揃える。
+				'file'   => 'plans-card-6.png',
+				'source' => 'top',
+				'img'    => array( 1500, 1049 ),
+				'w'      => 209 * 1500 / 1049,
+				'h'      => 209,
+				'crop'   => array( '100%', '0%', '0%' ),
+			),
 		),
 		'heading' => 'デザインから選ぶ、新しい外構', // 586:433 / 586:1063
 		// 586:435。PC の本文（3 行・中央揃え）。
@@ -167,7 +176,7 @@ function exterior_exone_plans_package() {
 }
 
 /**
- * PACKAGE PLAN のデザインテイスト 5 件（style view 586:560 / style list 586:559）。
+ * PACKAGE PLAN のデザインテイスト 6 件（style view 586:560 / style list 586:559）。
  *
  * 和名と画像は TOP の exterior_exone_plan_cards() が出典（決定 A）。
  * ここでは英名（「SIMPLE MODERN」の形）と説明文だけを足して合わせる。
@@ -217,6 +226,14 @@ function exterior_exone_plans_styles() {
 				'細部まで整えたデザインで、洗練された住まいを彩ります。',
 			),
 		),
+		array(
+			'eng'  => 'RUSTIC MODERN',
+			// 2026-10-21 ユーザー依頼による紹介文。
+			'desc' => array(
+				'落ち着いた色合いに、素朴な素材感と豊かな植栽を合わせたラスティックモダンプランです。',
+				'自然の温もりとすっきりとしたデザインが調和し、住まいをやさしく引き立てます。',
+			),
+		),
 	);
 
 	$styles = array();
@@ -231,6 +248,8 @@ function exterior_exone_plans_styles() {
 			'eng'   => $extra['eng'],
 			'desc'  => $extra['desc'],
 			'image' => $card['image'],
+			'width' => isset( $card['width'] ) ? $card['width'] : 1800,
+			'height' => isset( $card['height'] ) ? $card['height'] : 909,
 		);
 	}
 
