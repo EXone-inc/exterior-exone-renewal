@@ -398,6 +398,13 @@
 	will-change: transform;
 }
 
+/* SP: move the philosophy image strip one viewport in 25.6s. */
+@media (max-width: 1024px) {
+	.p-hepphilo__imglist-row {
+		--plp-imglist-screen-time: 25.6s;
+	}
+}
+
 /* ============================================================
    Design Details（713:208 / 733:322〜345）
    PC: 写真 800x453 とテキストエリア 744 幅の左右交互（奇数は写真左）。テキストは写真と上下中央。
