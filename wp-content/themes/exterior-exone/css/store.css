@@ -4401,9 +4401,9 @@ svg.p-svisible__sketch[data-line-draw] :is(path, line, polyline, polygon, rect, 
 		color: var(--st-on-dark);
 	}
 
-	/* 641:1432 337 幅・左揃え・3 段落 6 行（段落の改行を残す） */
+	/* SP の本文幅を CTA ボタンの 305 幅に揃える（段落の改行を残す）。 */
 	.p-scta__lead {
-		width: calc(337 * var(--st-su) + var(--ls-base));
+		width: calc(305 * var(--st-su));
 		margin: calc(25 * var(--st-su)) auto 0;
 		font-weight: var(--fw-regular);
 		text-align: left;
