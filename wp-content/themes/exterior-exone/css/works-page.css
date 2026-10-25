@@ -279,6 +279,40 @@
 	margin: var(--wkp-detail-book-top) 0 0 calc(var(--wkp-canvas-x) + var(--wkp-book-x));
 }
 
+/* メイン・外観・3Dパースは共通の cover。図面（4枚目）だけ全体を収める。 */
+.p-wkpdetail__book .c-flipbook__photo:nth-of-type(4) {
+	object-fit: contain;
+	background-color: var(--wkp-color-paper);
+}
+
+.p-wkpdetail__book .c-flipbook__leaf-img {
+	background-repeat: no-repeat;
+	background-color: var(--wkp-color-paper);
+}
+
+/* めくる表・裏それぞれの写真と同じ表示方法を使う（works-detail.js）。 */
+.p-wkpdetail__book .c-flipbook__leaf-front .c-flipbook__leaf-img {
+	background-size: var(--works-leaf-front-fit, cover);
+}
+
+.p-wkpdetail__book .c-flipbook__leaf-back .c-flipbook__leaf-img {
+	background-size: var(--works-leaf-back-fit, cover);
+}
+
+@media (max-width: 1024px) {
+	/* ハイエンド Gallery と同じ Safari 向け調整。
+	   短冊の直接の親で遠近投影し、めくれる紙の上下をクリップしない。 */
+	.p-wkpdetail__book {
+		perspective: none;
+	}
+
+	.p-wkpdetail__book .c-flipbook__leaf {
+		perspective: var(--flipbook-perspective);
+		perspective-origin: 100% 50%;
+		overflow: visible;
+	}
+}
+
 /* 写真が 0 枚の事例（決定 §3） */
 .p-wkpdetail__book.c-flipbook--empty .c-flipbook__page {
 	background-color: var(--wkp-color-placeholder);
@@ -376,6 +410,7 @@
 
 .p-wkpdetail__thumb-photo--plan .p-wkpdetail__thumb-img {
 	object-fit: contain;
+	background-color: var(--wkp-color-paper);
 }
 
 /* 821:223〜225。1 枚目（メイン）が回ってきたときは空欄で高さを保つ */

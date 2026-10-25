@@ -857,6 +857,20 @@
 	margin: var(--hep-gal-book-top) 0 0 calc(max(0px, (100% - var(--hep-canvas-w)) / 2) + var(--hep-gal-page-x));
 }
 
+@media (max-width: 1024px) {
+	/* Safari 向け: 遠近投影を短冊の直接の親へ移し、祖先をまたぐ 3D 合成を避ける。
+	   綴じ目（左ページの右端）と距離は従来と同じ。紙の上下はクリップしない。 */
+	.p-hepgal__book {
+		perspective: none;
+	}
+
+	.p-hepgal__book .c-flipbook__leaf {
+		perspective: var(--flipbook-perspective);
+		perspective-origin: 100% 50%;
+		overflow: visible;
+	}
+}
+
 /* 713:178 / 733:388。ページ上端より上に重ねる */
 .p-hepgal .c-flipbook__num {
 	position: absolute;

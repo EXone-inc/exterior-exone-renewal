@@ -64,7 +64,14 @@
 			});
 		}
 
-		book.addEventListener('flipbook:start', function () {
+		book.addEventListener('flipbook:start', function (event) {
+			// 共通 flipbook の表・裏と同じ写真を参照し、めくり中の切り取りも揃える。
+			var detail = event.detail;
+			var photos = book.querySelectorAll('.c-flipbook__page--left .c-flipbook__photo');
+			var front = detail.dir === 'next' ? detail.from : detail.to;
+			var back = ((detail.dir === 'next' ? detail.to : detail.from) + 1) % count;
+			book.style.setProperty('--works-leaf-front-fit', window.getComputedStyle(photos[front]).objectFit);
+			book.style.setProperty('--works-leaf-back-fit', window.getComputedStyle(photos[back]).objectFit);
 			fade(true);
 		});
 
