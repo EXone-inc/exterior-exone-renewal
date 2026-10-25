@@ -17,6 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 require_once __DIR__ . '/proposal-order.php';
+require_once __DIR__ . '/works-permalinks.php';
 
 /**
  * 一覧（works のアーカイブ）のメインクエリだけ、全件・保存した表示順にする。
