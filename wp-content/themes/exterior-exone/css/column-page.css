@@ -249,7 +249,7 @@ a.p-colp__link:hover .p-colp__img {
 }
 
 .p-colp__date {
-	color: var(--col-sub);
+	color: var(--col-text);
 }
 
 .p-colp__cats {
@@ -616,7 +616,7 @@ a.p-colp__page:hover {
 }
 
 .p-cold__date {
-	color: var(--col-sub);
+	color: var(--col-text);
 }
 
 .p-cold__title {
@@ -908,7 +908,7 @@ a.p-colp__page:hover {
 	background-color: var(--col-accent);
 	font-size: 1.06em;
 	font-weight: var(--fw-bold);
-	color: var(--col-heading);
+	color: var(--col-on-accent);
 }
 
 .p-cold__body .check {
@@ -964,7 +964,7 @@ a.p-colp__page:hover {
 .p-cold__body .tbl th {
 	background-color: var(--col-accent);
 	font-weight: var(--fw-bold);
-	color: var(--col-heading);
+	color: var(--col-on-accent);
 }
 
 .p-cold__body .tbl td {
@@ -1282,7 +1282,7 @@ a.p-colp__page:hover {
 	font-size: var(--col-meta-text);
 	line-height: var(--col-meta-lh);
 	letter-spacing: var(--col-ls);
-	color: var(--col-sub);
+	color: var(--col-text);
 }
 
 .p-cold__adjacent-title {
