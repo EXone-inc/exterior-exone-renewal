@@ -953,6 +953,75 @@ body.is-works-modal-open {
 	.p-cworks__sheet-close-icon::after {
 		transform: rotate(-45deg);
 	}
+	/* 文字サイズはWORKS本文と共通。写真・表の行ピッチ・CLOSEの余白は
+	   添付デザインの比率を使い、高さが足りない場合だけ間隔と写真を縮める。 */
+	.is-dx-page .p-cworks__sheet.is-open {
+		--cw-scrim: rgba(26, 26, 26, 0.9);
+		--dx-sheet-viewport: 100vh;
+		--dx-sheet-unit: min(var(--su), calc((var(--dx-sheet-viewport) - var(--header-height) - env(safe-area-inset-bottom)) / 640));
+		--dx-sheet-gap: max(12px, calc(20 * var(--dx-sheet-unit)), env(safe-area-inset-bottom));
+		--dx-sheet-top: calc(var(--header-height) + 20 * var(--dx-sheet-unit));
+		--dx-sheet-height: calc(var(--dx-sheet-viewport) - var(--dx-sheet-top) - var(--dx-sheet-gap));
+		--dx-sheet-image-width: min(100vw, calc(375 * var(--dx-sheet-unit)));
+	}
+
+	@supports (height: 100dvh) {
+		.is-dx-page .p-cworks__sheet.is-open {
+			--dx-sheet-viewport: 100dvh;
+		}
+	}
+
+	.is-dx-page .p-cworks__sheet.is-open .p-cworks__sheet-window {
+		padding-top: var(--dx-sheet-top);
+		padding-bottom: var(--dx-sheet-gap);
+	}
+
+	.is-dx-page .p-cworks__sheet.is-open .p-cworks__sheet-panel {
+		display: flex;
+		flex-direction: column;
+		max-height: var(--dx-sheet-height);
+	}
+
+	.is-dx-page .p-cworks__sheet.is-open .p-cworks__sheet-image {
+		flex: 0 1 auto;
+		width: var(--dx-sheet-image-width);
+		height: calc(203 * var(--dx-sheet-unit));
+		min-height: 0;
+		margin-inline: calc((100% - var(--dx-sheet-image-width)) / 2);
+	}
+
+	.is-dx-page .p-cworks__sheet.is-open .p-cworks__estimate {
+		flex: 0 0 auto;
+		margin-top: calc(-33 * var(--dx-sheet-unit));
+	}
+
+	.is-dx-page .p-cworks__sheet.is-open .p-cworks__table thead th {
+		height: calc(50 * var(--dx-sheet-unit));
+		vertical-align: middle;
+		font-size: var(--cw-box-head);
+		line-height: 1.6;
+	}
+
+	.is-dx-page .p-cworks__sheet.is-open .p-cworks__table tbody th,
+	.is-dx-page .p-cworks__sheet.is-open .p-cworks__table tbody td {
+		height: calc(35 * var(--dx-sheet-unit));
+		vertical-align: middle;
+		font-size: var(--cw-box-text);
+		line-height: 1.8;
+	}
+
+	.is-dx-page .p-cworks__sheet.is-open .p-cworks__total {
+		margin-top: calc(8 * var(--dx-sheet-unit));
+		font-size: var(--cw-box-head);
+	}
+
+	.is-dx-page .p-cworks__sheet.is-open .p-cworks__sheet-close {
+		flex: 0 0 auto;
+		min-height: 44px;
+		margin-top: calc(30 * var(--dx-sheet-unit));
+		font-size: var(--cw-box-text);
+	}
+
 }
 
 @keyframes cw-sheet-in {

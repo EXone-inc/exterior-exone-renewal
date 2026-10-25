@@ -3902,6 +3902,75 @@ svg.p-svisible__sketch[data-line-draw] :is(path, line, polyline, polygon, rect, 
 		margin-top: calc(54 * var(--st-su));
 	}
 
+	/* 文字サイズはWORKS本文と共通。写真・表の行ピッチ・CLOSEの余白は
+	   添付デザインの比率を使い、高さが足りない場合だけ間隔と写真を縮める。 */
+	.is-store-page .p-cworks__sheet.is-open {
+		--cw-scrim: rgba(26, 26, 26, 0.9);
+		--store-sheet-viewport: 100vh;
+		--store-sheet-unit: min(var(--su), calc((var(--store-sheet-viewport) - var(--header-height) - env(safe-area-inset-bottom)) / 640));
+		--store-sheet-gap: max(12px, calc(20 * var(--store-sheet-unit)), env(safe-area-inset-bottom));
+		--store-sheet-top: calc(var(--header-height) + 20 * var(--store-sheet-unit));
+		--store-sheet-height: calc(var(--store-sheet-viewport) - var(--store-sheet-top) - var(--store-sheet-gap));
+		--store-sheet-image-width: min(100vw, calc(375 * var(--store-sheet-unit)));
+	}
+
+	@supports (height: 100dvh) {
+		.is-store-page .p-cworks__sheet.is-open {
+			--store-sheet-viewport: 100dvh;
+		}
+	}
+
+	.is-store-page .p-cworks__sheet.is-open .p-cworks__sheet-window {
+		padding-top: var(--store-sheet-top);
+		padding-bottom: var(--store-sheet-gap);
+	}
+
+	.is-store-page .p-cworks__sheet.is-open .p-cworks__sheet-panel {
+		display: flex;
+		flex-direction: column;
+		max-height: var(--store-sheet-height);
+	}
+
+	.is-store-page .p-cworks__sheet.is-open .p-cworks__sheet-image {
+		flex: 0 1 auto;
+		width: var(--store-sheet-image-width);
+		height: calc(203 * var(--store-sheet-unit));
+		min-height: 0;
+		margin-inline: calc((100% - var(--store-sheet-image-width)) / 2);
+	}
+
+	.is-store-page .p-cworks__sheet.is-open .p-cworks__estimate {
+		flex: 0 0 auto;
+		margin-top: calc(-33 * var(--store-sheet-unit));
+	}
+
+	.is-store-page .p-cworks__sheet.is-open .p-cworks__table thead th {
+		height: calc(50 * var(--store-sheet-unit));
+		vertical-align: middle;
+		font-size: var(--cw-box-head);
+		line-height: 1.6;
+	}
+
+	.is-store-page .p-cworks__sheet.is-open .p-cworks__table tbody th,
+	.is-store-page .p-cworks__sheet.is-open .p-cworks__table tbody td {
+		height: calc(35 * var(--store-sheet-unit));
+		vertical-align: middle;
+		font-size: var(--cw-box-text);
+		line-height: 1.8;
+	}
+
+	.is-store-page .p-cworks__sheet.is-open .p-cworks__total {
+		margin-top: calc(8 * var(--store-sheet-unit));
+		font-size: var(--cw-box-head);
+	}
+
+	.is-store-page .p-cworks__sheet.is-open .p-cworks__sheet-close {
+		flex: 0 0 auto;
+		min-height: 44px;
+		margin-top: calc(30 * var(--store-sheet-unit));
+		font-size: var(--cw-box-text);
+	}
+
 	/* --- 見出し 3 点セット（REVIEWS 641:397-398 / FLOW 641:467-469 / FAQ 641:1265-1267）---
 	   英字 +80 → 和文 Medium 14 / 1.5 / 1px +139 → 本文 Regular 12 / 2 / 1px 左揃え 337 幅 +171 */
 	.p-sreviews,
