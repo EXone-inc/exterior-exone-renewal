@@ -9,9 +9,9 @@
  *         WORKS PC 821:148・821:184 / SP 836:95（guide 821:266「支店ページと同じもの」）
  *
  * TOP の NEWS（template-parts/top/section-news.php）と同じ作りで、コラム（CPT column）の
- * 最新 3 件を出す（exterior_exone_column_cards()。支店での絞り込みはしない）。1 件も無ければ出さない。
+ * 最新 5 件を出す（exterior_exone_column_cards()。支店での絞り込みはしない）。1 件も無ければ出さない。
  * コラム詳細では表示中の記事を除く（$args['exclude']）。VIEW MORE はコラム一覧 /column/ へ。
- * 件数はカンプの 5 枚ではなく 3 件（コラムページ決定事項 §3「共通」・仕様書 Q13）。
+ * 表示件数は最新 5 件（2026-10-24 更新）。
  * CSS は css/column.css。リンクは exterior_exone_store_link() 経由（支店モードなら ?store= が付く）。
  *
  * TOP との差分（設計メモ §17）: 和文見出し + 本文 3 行が付く / カードの影が薄い /

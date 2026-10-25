@@ -455,7 +455,7 @@ add_filter( 'the_content', 'exterior_exone_column_display_content', 20 );
    ============================================================ */
 
 /**
- * 共通 COLUMN（template-parts/common/section-column.php）のカード。コラムの最新 3 件。
+ * 共通 COLUMN（template-parts/common/section-column.php）のカード。コラムの最新 5 件。
  *
  * 見た目は exterior_exone_news_cards()（TOP の NEWS）と同じ形 {title, url, image_id} で返す。
  * コラム詳細では表示中の記事を除く（決定事項 §3「共通」）。0 件なら空配列 = セクションを出さない。
@@ -468,7 +468,7 @@ function exterior_exone_column_cards( $exclude = array() ) {
 		array(
 			'post_type'        => 'column',
 			'post_status'      => 'publish',
-			'posts_per_page'   => 3,
+			'posts_per_page'   => 5,
 			'orderby'          => 'date',
 			'order'            => 'DESC',
 			'post__not_in'     => array_filter( array_map( 'absint', (array) $exclude ) ),

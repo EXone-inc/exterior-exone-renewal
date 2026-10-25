@@ -1475,7 +1475,7 @@ function exterior_exone_store_cta( array $store ) {
 /**
  * COLUMN の見出し 3 点セット。639:418 / 687:997 / 687:996。
  *
- * カードはコラム（CPT column）の最新 3 件（exterior_exone_column_cards()。
+ * カードはコラム（CPT column）の最新 5 件（exterior_exone_column_cards()。
  * 支店での絞り込みはしない）。
  *
  * @param array<string, string> $store 支店データ。
