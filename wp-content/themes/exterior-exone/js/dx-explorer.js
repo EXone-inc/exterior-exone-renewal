@@ -73,6 +73,8 @@
 	// 映像はスクロール量に比例させず、章が変わったら次の章の位置まで自動で進める（戻るときは逆向きにコマ送り）。
 	// shownTime = いま映像に求めている時刻、travelRate = 進める速さ（映像の秒 / 実時間の秒）。
 	let shownTime = 0, travelFrame = 0, travelTick = 0, travelRate = 2;
+	let nativePlaying = false, nativeAttempt = 0, nativeBlocked = false;
+	let nativeLastTime = 0, nativeProgressAt = 0;
 	let frame = 0, generation = 0, loadTimer = 0, sourceKey = '', posterKey = '', queue = null, resizeAnchor = null;
 	let sourceCleanup = () => {};
 	const say = (text) => { if (status && status.textContent !== text) status.textContent = text; };
@@ -105,12 +107,41 @@
 		const value = parseFloat(window.getComputedStyle(root).getPropertyValue(name));
 		return Number.isFinite(value) && value > 0 ? value : fallback;
 	}
+	// SP の前進はデコーダーの連続再生に任せる。通常再生中はシークキューを止め、
+	// seeked / canplay が古い目的位置へ映像を引き戻さないようにする。
+	function stopNative(resumeQueue) {
+		if (!nativePlaying) return;
+		nativePlaying = false; nativeAttempt += 1;
+		shownTime = video.currentTime;
+		video.pause(); video.playbackRate = 1;
+		if (queue && resumeQueue) { queue.request(shownTime); queue.resume(); }
+	}
+	function fallbackFromNative() {
+		nativeBlocked = true;
+		stopNative(true);
+		startTravel();
+	}
 	// いまの章の位置へ映像を進める。1 章ぶんは --dxp-ex-travel-rate 倍速、何章も飛ばしたときは
 	// --dxp-ex-travel-max 秒で着くように速める。着いたら章の文字を出す。
 	function travel(now) {
 		travelFrame = 0;
 		if (!canTravel() || document.hidden || chapter < 0) return;
 		const target = timeForChapter(chapter);
+		if (nativePlaying) {
+			shownTime = video.currentTime;
+			if (shownTime >= target - 0.5 / fps) {
+				stopNative(false);
+				shownTime = target;
+				queue.request(target); queue.resume();
+				setLabel(chapter);
+				return;
+			}
+			if (shownTime !== nativeLastTime) { nativeLastTime = shownTime; nativeProgressAt = now; }
+			// ブラウザが再生を拒否／停止した場合は既存のコマ送りへ戻す。
+			if (now - nativeProgressAt > 5000) { fallbackFromNative(); return; }
+			travelFrame = requestAnimationFrame(travel);
+			return;
+		}
 		const step = Math.min(0.1, Math.max(0, (now - travelTick) / 1000)) * travelRate;
 		travelTick = now;
 		const remaining = target - shownTime;
@@ -126,19 +157,41 @@
 	}
 	function startTravel() {
 		if (!canTravel() || chapter < 0) return;
-		const gap = Math.abs(timeForChapter(chapter) - shownTime);
-		if (gap <= 0.5 / fps) { setLabel(chapter); return; }
+		cancelAnimationFrame(travelFrame); travelFrame = 0;
+		stopNative(false);
+		const target = timeForChapter(chapter);
+		const gap = Math.abs(target - shownTime);
+		if (gap <= 0.5 / fps) {
+			queue.request(target); queue.resume(); setLabel(chapter); return;
+		}
 		travelRate = Math.max(travelNumber('--dxp-ex-travel-rate', 2), gap / travelNumber('--dxp-ex-travel-max', 2.4));
 		setLabel(null);
 		travelTick = performance.now();
+		if (sourceKey === 'sp' && !nativeBlocked && target > video.currentTime + 0.5 / fps) {
+			queue.suspend();
+			nativePlaying = true;
+			nativeLastTime = video.currentTime; nativeProgressAt = travelTick;
+			const attempt = ++nativeAttempt, token = generation;
+			const rejected = () => {
+				if (nativePlaying && attempt === nativeAttempt && token === generation) fallbackFromNative();
+			};
+			try {
+				video.playbackRate = Math.min(4, travelRate);
+				const played = video.play();
+				if (played && played.catch) played.catch(rejected);
+			} catch (_) { rejected(); }
+		} else {
+			queue.request(shownTime); queue.resume();
+		}
 		if (!travelFrame) travelFrame = requestAnimationFrame(travel);
 	}
 	// 映像を今の章の位置へ直接合わせる（読み込み直後など。移動は見せない）。
 	function jumpToChapter() {
 		if (!canTravel() || chapter < 0) return;
 		cancelAnimationFrame(travelFrame); travelFrame = 0;
+		stopNative(false);
 		shownTime = timeForChapter(chapter);
-		queue.request(shownTime);
+		queue.request(shownTime); queue.resume();
 		setLabel(chapter);
 	}
 	function showChapter(value) {
@@ -191,6 +244,8 @@
 		posterKey = key;
 	}
 	function stopSource() {
+		cancelAnimationFrame(travelFrame); travelFrame = 0;
+		stopNative(false); nativeBlocked = false;
 		generation += 1;
 		clearTimeout(loadTimer); loadTimer = 0;
 		sourceCleanup(); sourceCleanup = () => {};
@@ -313,10 +368,12 @@
 	if (header && 'ResizeObserver' in window) new ResizeObserver(schedule).observe(header);
 	document.addEventListener('visibilitychange', () => {
 		if (document.hidden) {
+			cancelAnimationFrame(travelFrame); travelFrame = 0;
+			stopNative(false);
 			clearTimeout(loadTimer); loadTimer = 0;
 			if (queue) queue.suspend();
 		} else {
-			if (queue) queue.resume();
+			if (queue) { queue.request(shownTime); queue.resume(); }
 			watchLoad(); schedule(); startTravel();
 		}
 	});
