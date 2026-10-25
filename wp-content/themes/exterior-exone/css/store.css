@@ -4367,6 +4367,11 @@ svg.p-svisible__sketch[data-line-draw] :is(path, line, polyline, polygon, rect, 
 		display: inline;
 	}
 
+	/* SP のコラムタイトルは WORKS ページと同じ行間に揃える。 */
+	.is-store-page .p-scolumn__card-title {
+		line-height: 1.6;
+	}
+
 	/* --- お問い合わせ CTA（SP-14 641:1428 y14389〜14938・549 高） --- */
 	.p-scta {
 		--st-cta-image-position: 66.8% 100%; /* 641:1429 w285.35% l-123.83% / h146.56% t-46.56% */
