@@ -79,8 +79,9 @@ function exterior_exone_coexistence_is_public_record( $post ) {
 
 function exterior_exone_coexistence_register_storage() {
 	register_post_status( 'exr_stored', array( 'label' => '新テーマ専用', 'public' => false, 'internal' => true, 'protected' => true, 'exclude_from_search' => true, 'show_in_admin_all_list' => false, 'show_in_admin_status_list' => false ) );
+	$archive_labels = array( 'exr_news' => 'お知らせ' );
 	foreach ( array( 'exr_page', 'exr_works', 'exr_news', 'exr_form' ) as $type ) {
-		register_post_type( $type, array( 'label' => $type, 'public' => false, 'publicly_queryable' => false, 'exclude_from_search' => true, 'show_ui' => false, 'show_in_rest' => false, 'rewrite' => false, 'query_var' => false, 'has_archive' => false, 'supports' => array(), 'hierarchical' => 'exr_page' === $type ) );
+		register_post_type( $type, array( 'label' => isset( $archive_labels[ $type ] ) ? $archive_labels[ $type ] : $type, 'public' => false, 'publicly_queryable' => false, 'exclude_from_search' => true, 'show_ui' => false, 'show_in_rest' => false, 'rewrite' => false, 'query_var' => false, 'has_archive' => false, 'supports' => array(), 'hierarchical' => 'exr_page' === $type ) );
 	}
 	foreach ( array( 'exr_works_category', 'exr_works_package', 'exr_works_tag' ) as $taxonomy ) {
 		register_taxonomy( $taxonomy, 'exr_works', array( 'public' => false, 'publicly_queryable' => false, 'show_ui' => false, 'show_in_rest' => false, 'rewrite' => false, 'query_var' => false, 'hierarchical' => 'exr_works_tag' !== $taxonomy ) );
@@ -390,13 +391,24 @@ function exterior_exone_coexistence_display_posts( $posts, $query ) {
 					$query->queried_object->labels->name = $query->queried_object->label;
 				}
 			}
-			$query->set( 'post_type', $type );
+			// タイトル・RSS生成は query_vars から登録情報を参照するため、
+			// 未登録の news に置き換えず exr_news を維持する。
+			// works は既存の投稿タイプ判定との互換性を維持する。
+			if ( 'works' === $type ) {
+				$query->set( 'post_type', $type );
+			}
 		} elseif ( $posts && $query->is_singular ) {
 			$query->queried_object = $posts[0];
 			$query->queried_object_id = (int) $posts[0]->ID;
 		}
 	}
 	return $posts;
+}
+
+/** 非公開の保存用お知らせには公開RSSがないため、空のフィードURLを出さない。 */
+function exterior_exone_coexistence_archive_feed_visible( $show ) {
+	$route = exterior_exone_coexistence_route();
+	return $route && 'news-list' === $route['kind'] ? false : $show;
 }
 
 function exterior_exone_coexistence_handle_404( $handled, $query ) {
@@ -592,6 +604,7 @@ if ( exterior_exone_coexistence_enabled() ) {
 	add_action( 'pre_get_posts', 'exterior_exone_coexistence_main_query', 90 );
 	add_filter( 'posts_where', 'exterior_exone_coexistence_search_where', 10, 2 );
 	add_filter( 'the_posts', 'exterior_exone_coexistence_display_posts', 90, 2 );
+	add_filter( 'feed_links_extra_show_post_type_archive_feed', 'exterior_exone_coexistence_archive_feed_visible' );
 	add_filter( 'pre_handle_404', 'exterior_exone_coexistence_handle_404', 90, 2 );
 	add_filter( 'template_include', 'exterior_exone_coexistence_template', 90 );
 	add_filter( 'post_type_link', 'exterior_exone_coexistence_permalink', 10, 2 );
