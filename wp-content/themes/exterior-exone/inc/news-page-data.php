@@ -31,6 +31,14 @@ function exterior_exone_is_news_page() {
 	return exterior_exone_coexistence_enabled() && $route ? 'news-list' === $route['kind'] : is_post_type_archive( 'news' );
 }
 
+/** お知らせ一覧の本文開閉だけで使用する。 */
+function exterior_exone_news_page_scripts() {
+	if ( exterior_exone_is_news_page() ) {
+		wp_enqueue_script( 'exterior-exone-news-page', get_theme_file_uri( 'js/news-page.js' ), array(), exterior_exone_asset_version( 'js/news-page.js' ), true );
+	}
+}
+add_action( 'wp_enqueue_scripts', 'exterior_exone_news_page_scripts' );
+
 /**
  * 一覧のメインクエリだけ、10 件/ページ・公開日の新しい順にする。
  *
@@ -244,6 +252,30 @@ function exterior_exone_news_paragraphs_html( $paragraphs ) {
 	}
 
 	return $html;
+}
+
+/** 最初の200文字。段落・改行は維持し、改行自体は文字数に含めない。 */
+function exterior_exone_news_preview( $paragraphs ) {
+	$preview = array();
+	$total = 0;
+	$remaining = 200;
+	foreach ( $paragraphs as $lines ) {
+		$preview_lines = array();
+		foreach ( $lines as $line ) {
+			// 絵文字や結合文字を途中で分割しない。
+			preg_match_all( '/\X/u', $line, $characters );
+			$count = count( $characters[0] );
+			$total += $count;
+			if ( $remaining > 0 ) {
+				$preview_lines[] = implode( '', array_slice( $characters[0], 0, $remaining ) );
+				$remaining -= min( $remaining, $count );
+			}
+		}
+		if ( $preview_lines ) {
+			$preview[] = $preview_lines;
+		}
+	}
+	return array( 'paragraphs' => $preview, 'has_more' => $total > 200 );
 }
 
 /**

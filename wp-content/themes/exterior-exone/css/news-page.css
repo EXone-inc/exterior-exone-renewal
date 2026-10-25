@@ -19,3 +19,30 @@
 .p-newsp__desc > p + p {
 	margin-top: var(--news-para-gap);
 }
+
+.p-newsp [hidden] {
+	display: none !important;
+}
+
+.p-newsp__more {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 44px;
+	margin-top: 1em;
+	padding: 0;
+	border: 0;
+	border-radius: 0;
+	background: transparent;
+	color: var(--col-text);
+	font: inherit;
+	font-size: var(--col-excerpt);
+	text-decoration: underline;
+	text-underline-offset: 0.2em;
+	cursor: pointer;
+}
+
+.p-newsp__more:focus-visible {
+	outline: 2px solid currentColor;
+	outline-offset: 3px;
+}

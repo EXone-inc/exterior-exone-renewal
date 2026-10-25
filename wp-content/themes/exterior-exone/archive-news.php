@@ -74,8 +74,19 @@ $exterior_exone_newsp_pager = exterior_exone_news_page_pager( max( 1, (int) get_
 									</div>
 									<h2 class="p-colp__card-title"><?php echo esc_html( $exterior_exone_newsp_card['title'] ); ?></h2>
 									<?php if ( $exterior_exone_newsp_card['paragraphs'] ) : ?>
-										<div class="p-colp__excerpt p-newsp__desc">
-											<?php echo exterior_exone_news_paragraphs_html( $exterior_exone_newsp_card['paragraphs'] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- 行ごとに esc_html 済み。 ?>
+										<?php $exterior_exone_newsp_preview = exterior_exone_news_preview( $exterior_exone_newsp_card['paragraphs'] ); ?>
+										<div data-news-disclosure>
+											<?php if ( $exterior_exone_newsp_preview['has_more'] ) : ?>
+												<div class="p-colp__excerpt p-newsp__desc" data-news-preview hidden>
+													<?php echo exterior_exone_news_paragraphs_html( $exterior_exone_newsp_preview['paragraphs'] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- 行ごとに esc_html 済み。 ?>
+												</div>
+											<?php endif; ?>
+											<div class="p-colp__excerpt p-newsp__desc" id="news-body-<?php echo esc_attr( (string) $exterior_exone_newsp_card['id'] ); ?>" data-news-full>
+												<?php echo exterior_exone_news_paragraphs_html( $exterior_exone_newsp_card['paragraphs'] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- 行ごとに esc_html 済み。 ?>
+											</div>
+											<?php if ( $exterior_exone_newsp_preview['has_more'] ) : ?>
+												<button class="p-newsp__more" type="button" data-news-toggle aria-expanded="true" aria-controls="news-body-<?php echo esc_attr( (string) $exterior_exone_newsp_card['id'] ); ?>" hidden>もっと見る</button>
+											<?php endif; ?>
 										</div>
 									<?php endif; ?>
 								</div>
