@@ -478,6 +478,11 @@
 	margin-top: 0;
 }
 
+.p-cstory__text p.p-cstory__paragraph-break {
+	margin-top: 2em; /* lh 単位に非対応のブラウザ向け */
+	margin-top: 1lh; /* PC・SP とも、指定した文章の区切りだけに 1 行分の空白 */
+}
+
 /* VISION / MISSION（917:1445-1448）。PC カンプのみ */
 .p-cstory__mv {
 	display: none;
@@ -1338,6 +1343,7 @@
    ============================================================ */
 @media (min-width: 1025px) {
 	.c-company-eng {
+		--lh-base: 1.2;
 		font-weight: var(--fw-semibold);
 	}
 
