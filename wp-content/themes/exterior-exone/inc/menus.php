@@ -215,14 +215,20 @@ function exterior_exone_contact_item( $label = 'お問い合わせ' ) {
  * フッター STORE の項目。カンプ 669:836（支店ページ）/ 775:993（TOP）。
  *
  * ラベルと URL の二重管理をしないため、inc/store-data.php の 6 拠点から導出する。
- * 並び順もそちらが出典。
+ * ヘッダー・ドロワー・フッター共通で、青森から戸塚の順に表示する。
  *
  * @return array<int, array{label: string, url: string}>
  */
 function exterior_exone_store_menu_items() {
-	$items = array();
+	$items  = array();
+	$stores = exterior_exone_stores();
+	$order  = array( 'aomori', 'hirosaki', 'hachinohe', 'morioka', 'sendai', 'totsuka' );
 
-	foreach ( exterior_exone_stores() as $slug => $store ) {
+	foreach ( $order as $slug ) {
+		if ( ! isset( $stores[ $slug ] ) ) {
+			continue;
+		}
+		$store = $stores[ $slug ];
 		$items[] = array(
 			'label' => $store['name'],
 			'url'   => exterior_exone_store_url( $slug ),
