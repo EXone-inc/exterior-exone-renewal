@@ -446,9 +446,46 @@ function exterior_exone_column_display_content( $content ) {
 
 	$content = (string) preg_replace( '#<style\b[^>]*>.*?</style>#is', '', (string) $content );
 
-	return (string) preg_replace( '#(<img\b[^>]*?)\s+loading=(["\'])lazy\2#i', '$1', $content );
+	$content = (string) preg_replace( '#(<img\b[^>]*?)\s+loading=(["\'])lazy\2#i', '$1', $content );
+
+	return exterior_exone_column_contact_links( $content );
 }
 add_filter( 'the_content', 'exterior_exone_column_display_content', 20 );
+
+/**
+ * 本文内のお問い合わせリンクを、ヘッダーと同じ支店モードに揃える。
+ * 本番記事をローカルで表示する場合も現在のサイトへ向ける。記事データは変更しない。
+ */
+function exterior_exone_column_contact_links( $content ) {
+	$html  = new WP_HTML_Tag_Processor( $content );
+	$hosts = array( strtolower( (string) wp_parse_url( home_url( '/' ), PHP_URL_HOST ) ), 'exterior-exone.com' );
+	$paths = array( '/contact/', trailingslashit( (string) wp_parse_url( home_url( '/contact/' ), PHP_URL_PATH ) ) );
+
+	while ( $html->next_tag( 'A' ) ) {
+		$href = $html->get_attribute( 'href' );
+		if ( ! is_string( $href ) || '' === $href ) {
+			continue;
+		}
+		$parts = wp_parse_url( $href );
+		if ( false === $parts
+			|| ! in_array( trailingslashit( (string) ( $parts['path'] ?? '' ) ), $paths, true )
+			|| ( isset( $parts['scheme'] ) && ! in_array( strtolower( $parts['scheme'] ), array( 'http', 'https' ), true ) )
+			|| ( isset( $parts['host'] ) && ! in_array( strtolower( $parts['host'] ), $hosts, true ) ) ) {
+			continue;
+		}
+
+		$query = array();
+		wp_parse_str( $parts['query'] ?? '', $query );
+		unset( $query['store'] ); // 古い指定は捨て、現在のヘッダーの支店だけを使う。
+		$url = add_query_arg( $query, exterior_exone_contact_url() );
+		if ( isset( $parts['fragment'] ) ) {
+			$url .= '#' . $parts['fragment'];
+		}
+		$html->set_attribute( 'href', $url );
+	}
+
+	return $html->get_updated_html();
+}
 
 /* ============================================================
    共通 COLUMN セクションのカード（支店・WORKS・コラム詳細の末尾）
