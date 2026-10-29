@@ -682,6 +682,21 @@ function exterior_exone_enqueue_assets() {
 }
 add_action( 'wp_enqueue_scripts', 'exterior_exone_enqueue_assets' );
 
+/** タブレットの内容幅だけを調整。各ページのCSSの後に読み込む。 */
+function exterior_exone_enqueue_tablet_styles() {
+	$dependencies = array_values( array_filter( wp_styles()->queue, static function( $handle ) {
+		return 0 === strpos( $handle, 'exterior-exone-' );
+	} ) );
+	wp_enqueue_style(
+		'exterior-exone-tablet',
+		get_theme_file_uri( 'css/tablet.css' ),
+		$dependencies,
+		exterior_exone_asset_version( 'css/tablet.css' ),
+		'(min-width: 600px) and (max-width: 1024px)'
+	);
+}
+add_action( 'wp_enqueue_scripts', 'exterior_exone_enqueue_tablet_styles', 20 );
+
 /**
  * TOP ページで読み込む機能別 JS の一覧。
  *

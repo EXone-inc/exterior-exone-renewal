@@ -1,0 +1,131 @@
+/**
+ * Tablet: SPの文字・ボタンの縮尺を保ち、通常コンテンツの横幅だけを広げる。
+ * 600px未満 / 1024px超には一切適用しない。
+ * 全幅画像、横スクロール、円形の図解、画面高に収めるDX演出は元の構成を維持。
+ */
+@media (min-width: 600px) and (max-width: 1024px) {
+	:root {
+		--gutter: 44px;
+		--tablet-content: calc(100vw - 88px);
+
+		--wkp-content-w: var(--tablet-content);
+		--wkp-canvas-w: 100vw;
+		--wkp-book-x: 44px;
+		--wkp-book-page-w: var(--tablet-content);
+		--wkp-book-page-h: calc(var(--tablet-content) * 177.73 / 314.54);
+		--wkp-book-fold-left: calc(var(--tablet-content) * 22.76 / 314.54);
+		--wkp-book-fold-right: calc(var(--tablet-content) * 12.42 / 314.54);
+		--wkp-book-perspective: calc(var(--tablet-content) * 1218 / 314.54);
+		--wkp-name-x: 44px;
+		--wkp-thumb-x: 44px;
+		--wkp-line-x: 44px;
+		--wkp-body-x: 44px;
+		--wkp-body-w: var(--tablet-content);
+
+		--col-content-w: var(--tablet-content);
+		--col-inner-w: var(--tablet-content);
+		--contact-content-w: var(--tablet-content);
+		--contact-method-h: calc(299 * var(--contact-su) / 3);
+		--thanks-content-w: var(--tablet-content);
+		--thanks-list-w: var(--tablet-content);
+		--rc-sec-pad-x: 44px;
+		--rc-bg-pad-x: 44px;
+
+		--plp-pkg-copy-pad-x: 44px;
+		--plp-view-text-pad-x: 44px;
+		--plp-view-media-w: var(--tablet-content);
+		--plp-view-media-h: calc(var(--tablet-content) * 160 / 325);
+		--plp-he-sub-w: var(--tablet-content);
+		--plp-he-copy-pad-x: 44px;
+		--plp-he-plans-pad-x: 44px;
+		--plp-by-body-pad-x: 44px;
+		--plp-by-points-pad-x: 44px;
+
+		--hep-canvas-w: 100vw;
+		--hep-philo-text-x: 44px;
+		--hep-philo-text-w: var(--tablet-content);
+		--hep-dt-inset: 44px;
+		--hep-dt-text-w: 100%;
+		--hep-plan-lead-x: 44px;
+		--hep-dx-box-x: 44px;
+		--hep-dx-body-w: var(--tablet-content);
+		--hep-gal-body-x: 44px;
+		--hep-gal-body-w: var(--tablet-content);
+		--hep-gal-page-x: 44px;
+		--hep-gal-page-w: var(--tablet-content);
+		--hep-gal-page-h: calc(var(--tablet-content) * 177.02 / 314.54);
+		--hep-gal-fold-left: calc(var(--tablet-content) * 22.76 / 314.54);
+		--hep-gal-fold-right: calc(var(--tablet-content) * 12.42 / 314.54);
+		--hep-gal-perspective: calc(var(--tablet-content) * 1230 / 314.54);
+		--hep-gal-tabs-x: 44px;
+		--hep-gal-cap-x: 44px;
+		--hep-gal-line-x: 44px;
+		--hep-cta-body-x: 44px;
+		--hep-cta-body-w: var(--tablet-content);
+	}
+
+	.p-works__desc,
+	.p-footer__menus {
+		width: calc(100% - 88px);
+		margin-inline: auto;
+	}
+	.p-footer__block { width: 100%; }
+
+	.p-scolumn .c-store-lead { width: calc(100% - 88px); }
+	.p-scolumn__list { padding-inline: 44px; }
+	.p-plpbeyond__inner { max-width: none; }
+	.p-hepphilo__visual {
+		width: min(100%, 600px);
+		margin-inline: auto;
+	}
+	.p-dxwhy__closing,
+	.p-dxsum__body {
+		width: calc(100% - 88px);
+		max-width: none;
+		margin-inline: auto;
+	}
+	.p-rce { padding-inline: 44px; }
+
+	/* 支店: 既存の列数はそのまま、固定幅の各枠を左右44pxに揃える。 */
+	.p-sintro,
+	.p-sconcern__body { padding-inline: 44px; }
+
+	.p-sreasons__copy,
+	.p-svisible__cards,
+	.p-svisible__lead,
+	.p-sservice__cards,
+	.p-sservice__panel,
+	.p-splans__block--package .p-splans__media,
+	.p-splans__block--highend .p-splans__media,
+	.p-splans__block--highend .p-splans__copy,
+	:is(.p-sreviews, .p-sflow, .p-sfaq) .c-store-lead,
+	.p-sflow__rows,
+	.p-squality__lead,
+	.p-sfaq__list,
+	.p-sarea__panel,
+	.p-sarea__expertise,
+	.is-store-page .p-cworks--dx .p-cworks__lead {
+		width: calc(100% - 88px);
+		margin-inline: auto;
+	}
+	.p-sservice__cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+	/* 600pxでも「土間コンクリート」が末尾1文字だけ折り返さない内側幅。 */
+	.p-sservice__panel { padding-inline: 32px; }
+	.p-sservice__photos { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+	.p-sservice__card-media img { height: auto; aspect-ratio: 170 / 114; }
+	.p-sservice__photo img { height: auto; aspect-ratio: 92 / 55; }
+	.p-svisible__card,
+	.p-svisible__card:nth-child(even) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+	.p-svisible__media img { height: auto; aspect-ratio: 162 / 85; }
+	.p-sflow__row { padding-right: calc(29 * var(--st-su)); }
+	.p-sflow__row-desc { width: auto; }
+	.p-sreviews__list { padding-inline: 44px; }
+	.p-sarea__photo { height: auto; aspect-ratio: 289 / 192; }
+	.p-sarea__local-photo {
+		width: 100%;
+		height: auto;
+		aspect-ratio: 267 / 182;
+		margin-left: 0;
+	}
+	.p-sarea__local-lead { width: auto; }
+}
