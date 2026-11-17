@@ -1738,10 +1738,15 @@ body.is-drawer-open {
 @media (max-width: 1024px) {
 	/* WebView の高さだけが変わっても、FV・DX とその下のセクション位置を保つ。
 	   js/front-viewport.js が幅変更・画面回転時だけ値を取り直す。 */
+	:root.has-stable-front-viewport {
+		/* DX の文字サイズ・余白も :root で --dx-su から計算されるため、
+		   同じスコープで固定する。body だけの上書きでは派生値が伸縮してしまう。 */
+		--dx-su: min(100vw / 375, (var(--front-viewport-svh) - var(--header-height)) / 655, var(--sp-scale-max));
+	}
+
 	.has-stable-front-viewport .is-front-page {
 		--fv-pin-height: calc(var(--front-viewport-dvh) - var(--header-height));
 		--dx-pin-height: calc(var(--front-viewport-dvh) - var(--header-height));
-		--dx-su: min(100vw / 375, (var(--front-viewport-svh) - var(--header-height)) / 655, var(--sp-scale-max));
 	}
 
 	.has-stable-front-viewport .is-front-page .p-dx {
