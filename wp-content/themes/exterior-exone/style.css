@@ -1736,10 +1736,22 @@ body.is-drawer-open {
 /* TOP / SP: 背景はバー収納時の最大高さで固定し、スクロール中の下端露出を防ぐ。
    コピーとサムネイルはバー表示時の小さい高さに収める。両方ともバー出入りで伸縮しない。 */
 @media (max-width: 1024px) {
+	/* WebView の高さだけが変わっても、FV・DX とその下のセクション位置を保つ。
+	   js/front-viewport.js が幅変更・画面回転時だけ値を取り直す。 */
+	.has-stable-front-viewport .is-front-page {
+		--fv-pin-height: calc(var(--front-viewport-dvh) - var(--header-height));
+		--dx-pin-height: calc(var(--front-viewport-dvh) - var(--header-height));
+		--dx-su: min(100vw / 375, (var(--front-viewport-svh) - var(--header-height)) / 655, var(--sp-scale-max));
+	}
+
+	.has-stable-front-viewport .is-front-page .p-dx {
+		height: calc(var(--front-viewport-vh) * var(--dx-scroll-screens));
+	}
+
 	@supports (height: 100svh) and (height: 100lvh) {
 		.is-front-page .l-pin .p-fv {
-			--fv-pin-height: calc(100lvh - var(--header-height));
-			--fv-safe-height: calc(100svh - var(--header-height));
+			--fv-pin-height: calc(var(--front-viewport-lvh, 100lvh) - var(--header-height));
+			--fv-safe-height: calc(var(--front-viewport-svh, 100svh) - var(--header-height));
 		}
 
 		.is-front-page .l-pin .p-fv__copy {

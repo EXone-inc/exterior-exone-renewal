@@ -158,7 +158,7 @@
 			return;
 		}
 
-		var runway = section.offsetHeight - window.innerHeight;
+		var runway = section.offsetHeight - viewportHeight();
 
 		if (runway <= 0) {
 			return;
@@ -185,13 +185,17 @@
 	 * ステップを押したとき、そのステップが出る位置までスクロールする。
 	 */
 	function scrollToStep(index) {
-		var runway = section.offsetHeight - window.innerHeight;
+		var runway = section.offsetHeight - viewportHeight();
 		var top = window.scrollY + section.getBoundingClientRect().top + runway * (index / total) + 4;
 
 		// 慣性で戻される前に見た目を合わせ、スクロールが落ち着くまで読み取りを止める。
 		setActive(index);
 		lockUntil = Date.now() + 650;
 		window.scrollTo({ top: top, behavior: 'smooth' });
+	}
+
+	function viewportHeight() {
+		return window.exoneFrontViewportHeight ? window.exoneFrontViewportHeight() : window.innerHeight;
 	}
 
 	function sync() {
@@ -220,6 +224,7 @@
 
 	window.addEventListener('scroll', request, { passive: true });
 	window.addEventListener('resize', sync);
+	window.addEventListener('exone:front-viewport-change', sync);
 
 	setActive(0);
 	sync();

@@ -664,6 +664,13 @@ function exterior_exone_enqueue_assets() {
 	// TOP ページで使うスライダー類。
 	if ( exterior_exone_content_is_front_page() ) {
 		wp_enqueue_script( 'swiper' );
+		wp_enqueue_script(
+			'exterior-exone-front-viewport',
+			get_theme_file_uri( 'js/front-viewport.js' ),
+			array(),
+			exterior_exone_asset_version( 'js/front-viewport.js' ),
+			true
+		);
 
 		foreach ( exterior_exone_front_page_scripts() as $handle => $relative_path ) {
 			if ( ! file_exists( get_theme_file_path( $relative_path ) ) ) {
@@ -673,7 +680,7 @@ function exterior_exone_enqueue_assets() {
 			wp_enqueue_script(
 				$handle,
 				get_theme_file_uri( $relative_path ),
-				array( 'swiper' ),
+				array( 'swiper', 'exterior-exone-front-viewport' ),
 				exterior_exone_asset_version( $relative_path ),
 				true
 			);

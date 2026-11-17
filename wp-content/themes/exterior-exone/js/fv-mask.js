@@ -54,7 +54,7 @@
 			return measureSpan();
 		}
 
-		var span = window.innerHeight;
+		var span = window.exoneFrontViewportHeight ? window.exoneFrontViewportHeight() : window.innerHeight;
 
 		if (span <= 0) {
 			return 1;
@@ -123,6 +123,7 @@
 
 	window.addEventListener('scroll', request, { passive: true });
 	window.addEventListener('resize', sync);
+	window.addEventListener('exone:front-viewport-change', sync);
 
 	// 画像の読み込み完了でセクション位置が動くことがあるため、そこでも取り直す。
 	window.addEventListener('load', request);
